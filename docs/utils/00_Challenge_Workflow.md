@@ -6,7 +6,7 @@
 2. Add dates to the calendar
 2. Download rules of the challenge
 3. Bookmark challenge folder on file explorer
-4. Create a Google keep label for tasks and ideas of the challenge
+4. Create a [Google keep label](https://keep.google.com/u/0/#label/ARC) for tasks and ideas of the challenge
 5. Download the challenge data
 6. Create a conda environment for the challenge and add it to jupyter
 
