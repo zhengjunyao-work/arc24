@@ -2,7 +2,7 @@
 
 ## Collect initial data
 
-https://github.com/fchollet/ARC-AGI
+<https://github.com/fchollet/ARC-AGI>
 
 There are 400 training tasks and 400 evaluation tasks. The evaluation tasks are said to be more difficult
 than the training tasks.
@@ -18,7 +18,9 @@ it and if people have already posted it on the forum describe it. --->
 
 There are some variations of the ARC dataset:
 
-- [ConceptARC](https://github.com/victorvikram/ConceptARC) is a new, publicly available benchmark in the ARC domain that systematically assesses abstraction and generalization abilities on many basic spatial and semantic concepts. It differs from the original ARC dataset in that it is specifically organized around "concept groups" -- sets of problems that focus on specific concepts and that vary in complexity and level of abstraction.
+- [ConceptARC](https://github.com/victorvikram/ConceptARC) is a new, publicly available benchmark in the ARC domain that systematically assesses abstraction and generalization abilities on many basic spatial and semantic concepts. It differs from the original ARC dataset in that it is specifically organized around "concept groups" -- sets of problems that focus on specific concepts and that vary in complexity and level of abstraction. It seems to be **easier** than the original ARC benchmark.
+
+TODO: add more external datasets
 
 ## Describe data
 
