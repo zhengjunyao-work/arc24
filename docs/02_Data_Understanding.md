@@ -19,8 +19,9 @@ it and if people have already posted it on the forum describe it. --->
 There are some variations of the ARC dataset:
 
 - [ConceptARC](https://github.com/victorvikram/ConceptARC) is a new, publicly available benchmark in the ARC domain that systematically assesses abstraction and generalization abilities on many basic spatial and semantic concepts. It differs from the original ARC dataset in that it is specifically organized around "concept groups" -- sets of problems that focus on specific concepts and that vary in complexity and level of abstraction. It seems to be **easier** than the original ARC benchmark.
-
-TODO: add more external datasets
+- [Mini-ARC](https://github.com/ksb21ST/Mini-ARC) a 5 × 5 compact version of the ARC, was generated manually to maintain the original’s level of difficulty.
+- [Sort-of-ARC](https://openreview.net/forum?id=rCzfIruU5x5) shares ARC’s input space but presents simpler problems
+with 20×20 images containing three distinct 3×3 objects. I only could find the paper, not the dataset.
 
 ## Describe data
 
