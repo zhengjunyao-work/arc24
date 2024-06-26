@@ -137,6 +137,8 @@ This seems to be one of the initial evaluations of ARC using LLMs. The results a
 
 ### [Do Large Language Models Solve ARC Visual Analogies Like People Do?](https://arxiv.org/abs/2403.09734)
 
+### [Communicating Natural Programs to Humans and Machines](https://arxiv.org/abs/2106.07824)
+
 ## Repos
 
 - [arc-dsl](https://github.com/michaelhodel/arc-dsl) Domain Specific Language for the Abstraction and Reasoning Corpus by Michael Hodel, member of MindsAI team

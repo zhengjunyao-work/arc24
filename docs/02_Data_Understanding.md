@@ -22,6 +22,8 @@ There are some variations of the ARC dataset:
 - [Mini-ARC](https://github.com/ksb21ST/Mini-ARC) a 5 × 5 compact version of the ARC, was generated manually to maintain the original’s level of difficulty.
 - [Sort-of-ARC](https://openreview.net/forum?id=rCzfIruU5x5) shares ARC’s input space but presents simpler problems
 with 20×20 images containing three distinct 3×3 objects. I only could find the paper, not the dataset.
+- [https://github.com/michaelhodel/re-arc](https://github.com/michaelhodel/re-arc) RE-ARC: Reverse-Engineering the Abstraction and Reasoning Corpus by Michael Hodel, member of MindsAI team
+- [MC-LARC](https://github.com/MC-LARC/MC-LARC.github.io) Text descriptions for the ARC training set.
 
 ## Describe data
 
