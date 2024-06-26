@@ -4,6 +4,11 @@
 
 ## Papers
 
+These are the sources of papers used:
+
+- [Citations to the "On the measure of intelligence" paper on Google Scholar](https://scholar.google.com/scholar?start=10&hl=en&scisbd=1&as_sdt=2005&sciodt=0,5&cites=645844335140263496&scipsc=)
+- TODO: [Papers on Arxiv with `abstraction reasoning corpus` in the title](https://arxiv.org/search/advanced?advanced=&terms-0-operator=AND&terms-0-term=abstraction+reasoning+corpus&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-filter_by=all_dates&date-year=&date-from_date=&date-to_date=&date-date_type=submitted_date&abstracts=show&size=50&order=-announced_date_first)
+
 ### ⭐ [Neural networks for abstraction and reasoning: Towards broad generalization in machines](https://arxiv.org/abs/2402.03507)
 
 Nicely written paper that tries to solve the ARC challenge with two methods:
@@ -122,19 +127,68 @@ This seems to be one of the initial evaluations of ARC using LLMs. The results a
 
 > Observation: token mapping invariance. The hypothesis that LLMs can serve as general pattern machines stems from the observation that they can still solve a non-trivial number of ARC problems using alphabets A sampled randomly from the LLM’s token vocabulary.
 
-### []()
+### [Teaching Large Language Models to Reason with Reinforcement Learning](https://arxiv.org/abs/2403.04642)
+
+### [Reasoning Abilities of Large Language Models: In-Depth Analysis on the Abstraction and Reasoning Corpus](https://arxiv.org/abs/2403.11793)
+
+### [Can Large Language Models Learn Independent Causal Mechanisms?](https://arxiv.org/abs/2402.02636)
+
+### [Learn Abstraction in an Abstract Way: The Long Journey Ahead](https://openreview.net/forum?id=wHanWNJN0r)
+
+### [Do Large Language Models Solve ARC Visual Analogies Like People Do?](https://arxiv.org/abs/2403.09734)
 
 ## Repos
 
 - [arc-dsl](https://github.com/michaelhodel/arc-dsl) Domain Specific Language for the Abstraction and Reasoning Corpus by Michael Hodel, member of MindsAI team
 - [https://github.com/michaelhodel/re-arc](https://github.com/michaelhodel/re-arc) RE-ARC: Reverse-Engineering the Abstraction and Reasoning Corpus by Michael Hodel, member of MindsAI team
 
-
 ## Videos
 
-### [Dwarkesh Patel | Francois Chollet - LLMs won’t lead to AGI - $1,000,000 Prize to find true solution](https://www.youtube.com/watch?v=UakqL6Pj9xo)
+I could use [downsub](https://downsub.com/) to get subtitles from a Youtube video.
 
-### [Machine Learning Street Talk | Chollet's ARC Challenge + Current Winners](https://youtu.be/jSAT_RuJ_Cg?si=-s_XpeeDA2BQYlVy)
+### ⭐ [Dwarkesh Patel | Francois Chollet - LLMs won’t lead to AGI - $1,000,000 Prize to find true solution](https://www.youtube.com/watch?v=UakqL6Pj9xo)
+
+### ⭐ [Machine Learning Street Talk | Chollet's ARC Challenge + Current Winners](https://youtu.be/jSAT_RuJ_Cg?si=-s_XpeeDA2BQYlVy)
+
+> Basically that we use so many training examples.
+> It's it's not to necessarily teach it so many concepts.
+> It's to teach it a space around the concepts and to also prevent it
+> from kind of using the shortcuts that the models are prone to.
+
+<!--- --->
+
+> Ideally we would train a model on internet data and generalize to the ARC dataset, that's what Chollet would love to see.
+
+<!--- --->
+
+> So I just figured, okay, how well could we do?
+> Uh, even just something very simple, like learning a task in isolation.
+> If we had an unlimited number of examples for a given task.
+
+<!--- --->
+
+> Probably 20 different kind of many experiments in formatting the data in various ways.
+
+<!--- --->
+
+> If you train a model on the re-arc dataset you will get like 1% on the test set. But if you apply their
+> techniques of active inference the score will increase to 23%
+
+<!--- --->
+
+> There are some scaling laws that suggest that the bigger the model the less test data needs to learn
+
+<!--- --->
+
+> The DSL has 160 functions, but the author believes it could rewrite it to be just 30
+
+Their method is:
+
+1. Fine-tune an LLM on augmented ARC tasks. Probably on the re-arc dataset, maybe a bigger version of it.
+2. On inference they augment the test samples (I don't know how) and fine-tune the LLM again on those tasks
+3. Make predictions with the LLM
+
+### [LLMs as a system to solve the Abstraction and Reasoning Corpus (ARC) Challenge!](https://www.youtube.com/watch?v=plVRxP8hQHY)
 
 ## Conclusions
 
@@ -150,10 +204,17 @@ This seems to be one of the initial evaluations of ARC using LLMs. The results a
 
 > Abstraction and reasoning - developing computer systems that can learn new concepts from a small number of examples, something that humans find relatively easy
 
+> Reasoning is a knowledge acquisition efficiency
+
 ## TODO
 
+- [ ] Jack Cole approach
+- [ ] Buck approach
+- [ ] Icecube approach
 - [ ] What is the best way to encode 2d information for an LLM like Llama3?
-- [ ] How can we learn from few examples? Do we need a good representation of the data? Why ML methods need huge datasets?
+- [ ] How can we learn from few examples? Do we need a good representation of the data? Why ML methods need huge datasets? That is where the priors kick in, those priors influence the representation of the data.
 - [ ] Search more relevant papers
   - [ ] https://arxiv.org/search/advanced?advanced=&terms-0-operator=AND&terms-0-term=abstraction+reasoning+corpus&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-filter_by=all_dates&date-year=&date-from_date=&date-to_date=&date-date_type=submitted_date&abstracts=show&size=50&order=-announced_date_first
-  - [ ] Contrastive learning. Can a model predict if two input/output pairs belong to the same task?
+  - [ ] 
+  - [ ] Read Kaggle's forum to see if more relevant papers were added
+- [ ] Contrastive learning. Can a model predict if two input/output pairs belong to the same task?
