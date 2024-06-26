@@ -87,6 +87,37 @@ It is curious that so many (22) primitive function calls are needed on median.
 
 My rough estimation of primitive functions in [arc-dsl](https://github.com/michaelhodel/arc-dsl) is 160 (count the number of occurrences of `def `). We know that this set of primitives is complete for the train set, but is it for the evaluation and test set?
 
+### ⭐ [Communicating Natural Programs to Humans and Machines](https://arxiv.org/abs/2106.07824)
+
+This paper is very interesting, they supplement the ARC dataset with text descriptions.
+
+They argue that those natural descriptions are equivalent to the input/output examples, it's just another way of expressing the same message.
+
+> We present LARC, the Language-complete ARC: a collection of natural language descriptions by a group of human participants who instruct each other on how to solve ARC tasks using language alone, which contains successful instructions for 88% of the ARC tasks. We analyze the collected instructions as ‘natural programs’, finding that while they resemble computer programs, they are distinct in two ways: First, they contain a wide range of primitives; Second, they frequently leverage communicative strategies beyond directly executable codes. We demonstrate that these two distinctions prevent current program synthesis techniques from leveraging LARC to its full potential, and give concrete suggestions on how to build the next-generation program synthesizers.
+
+![three kinds of programs](res/2024-06-26-18-06-01.png)
+
+> In this work, we adopt the Wizard-of-Oz approach by using a human as an interpreter of natural language instructions (Fig 3 top-left). We define a natural program as instructions constructed by a person that can be interpreted by another person to produce a specific output. This program is natural–it can be understood by speakers of the language4 without a prior consensus–but behaves as a program, in that it produces a definitive output, which can be unambiguously checked for correctness. For instance, **the original ARC tasks are natural programs: Given a program consisting of input-output examples, a fellow human can readily interpret this program to produce an output on a new input, which can be checked for correctness**. By starting with (linguistic) natural programs, one can directly observe the set of concepts and strategies necessary to master a domain (such as ARC), without committing to a specific interpreter.
+
+This is really interesting: it implies that a program defined with natural language is equivalent to a program
+defined with input-output samples in the ARC dataset.
+Thus translating an ARC task to a text description would not be necessary, although it would be helpful
+to verify that the task has been understood.
+
+However results do not show a big benefit from using the text descriptions.
+
+### [Reasoning Abilities of Large Language Models: In-Depth Analysis on the Abstraction and Reasoning Corpus](https://arxiv.org/abs/2403.11793)
+
+This papers studies if LLMs are good at the three elements of Language of Thought Hypothesis:
+
+1. Logical Coherence: Using prompting techniques, LLMs are set to solve ARC tasks. By analyzing the types of ARC tasks it can solve and the process of solving them, we aim to determine whether LLMs are capable of logical reasoning and whether its logic is consistent.
+2. Compositionality: ARC tasks are known to be solvable through the application of step-by-step functions. With such functions provided, we aim to ascertain whether LLMs can identify the combinations of functions that are needed to solve a task. This process can be broken down into two parts: understanding how LLMs manipulate the problem input and determining whether they can achieve the desired results through multiple steps of manipulation.
+3. Productivity: We tested if LLMs can create new input-output pairs for ARC tasks. We selected tasks with multiple inputs leading to the same output, devised prompts for inverse transformation, and assessed LLMs’ ability to generate varied inputs based on these prompts.
+
+![Three concepts of the Language of Thought Hypothesis](res/2024-06-26-18-02-42.png)
+
+It finds that current LLMs are weak at all the three elements.
+
 ### [Large Language Models Are Not Strong Abstract Reasoners](https://arxiv.org/abs/2305.19555)
 
 Results on ARC challenge are very weak, but they don't add task descriptions that I believe would have helped the models (in addition to few-shot prompting)
@@ -127,17 +158,27 @@ This seems to be one of the initial evaluations of ARC using LLMs. The results a
 
 > Observation: token mapping invariance. The hypothesis that LLMs can serve as general pattern machines stems from the observation that they can still solve a non-trivial number of ARC problems using alphabets A sampled randomly from the LLM’s token vocabulary.
 
+### [Do Large Language Models Solve ARC Visual Analogies Like People Do?](https://arxiv.org/abs/2403.09734)
+
+They create  a very simple version of ARC challenge for kids. They compare the results between kids and LLMs.
+
+Not very useful for our task, we need to solve the real and difficult one.
+
 ### [Teaching Large Language Models to Reason with Reinforcement Learning](https://arxiv.org/abs/2403.04642)
 
-### [Reasoning Abilities of Large Language Models: In-Depth Analysis on the Abstraction and Reasoning Corpus](https://arxiv.org/abs/2403.11793)
+This paper applies different RL methods to Llama 2 to improve reasoning at math problems. All RL methods have a similar result.
+
+They don't use ARC data at all.
 
 ### [Can Large Language Models Learn Independent Causal Mechanisms?](https://arxiv.org/abs/2402.02636)
 
+A new architecture is proposed to enhance reasoning, but the results are similar to Llama 2.
+
+I don't believe this is relevant to solve the ARC challenge.
+
 ### [Learn Abstraction in an Abstract Way: The Long Journey Ahead](https://openreview.net/forum?id=wHanWNJN0r)
 
-### [Do Large Language Models Solve ARC Visual Analogies Like People Do?](https://arxiv.org/abs/2403.09734)
-
-### [Communicating Natural Programs to Humans and Machines](https://arxiv.org/abs/2106.07824)
+This paper is not relevant for the task.
 
 ## Repos
 
