@@ -4,7 +4,7 @@
 
 ## Papers
 
-### [Neural networks for abstraction and reasoning: Towards broad generalization in machines](https://arxiv.org/abs/2402.03507)
+### ⭐ [Neural networks for abstraction and reasoning: Towards broad generalization in machines](https://arxiv.org/abs/2402.03507)
 
 Nicely written paper that tries to solve the ARC challenge with two methods:
 
@@ -41,7 +41,7 @@ Results are weak and do not surpass the state of the art.
 training tasks to a ‘program’ (generally in natural language in one’s head, for example “rotate by 90
 degrees”); human intuition is the search procedure.
 
-### [LLMs and the Abstraction and Reasoning Corpus: Successes, Failures, and the Importance of Object-based Representations](https://arxiv.org/abs/2305.18354v2)
+### ⭐ [LLMs and the Abstraction and Reasoning Corpus: Successes, Failures, and the Importance of Object-based Representations](https://arxiv.org/abs/2305.18354v2)
 
 This paper highlights the fact that LLMs have difficulties understanding the 2d nature of the ARC dataset.
 
@@ -65,6 +65,22 @@ I could fine-tune a model to do row, col, diagonal addition or presence detectio
 <!--- --->
 
 > Our exploration started with a straightforward, grid-based textual encoding approach, which revealed that GPT struggles due to the non-sequential representation of complex objects in text. We then introduced the 1D-ARC, a simplified, single-dimensional version of the ARC. By reducing the task complexity and dimensionality, we aimed to make ARC tasks more approachable for LLMs. Our evaluations on the 1D-ARC indicated improvements in performance but also highlighted that simplification alone could not bridge all the gaps in GPT’s reasoning processes. In the third phase of our exploration, we adopted an object-based approach, integrating an external tool, the ARGA framework, to assist in object abstraction. This led to significant improvements in GPT’s problem-solving abilities, reaffirming the importance of structured, object-based representations in complex reasoning tasks.
+
+### ⭐ [Addressing the Abstraction and Reasoning Corpus via Procedural Example Generation](https://arxiv.org/abs/2404.07353)
+
+This paper presents the re-arc repo, which allows to generate at least 10k new samples for each task in the ARC training dataset.
+
+Could I modify it to output text descriptions of the synthetic inputs? That could allow the model to learn a good representation of the grids and also to learn what the transformation is.
+
+> The sample-efficiency of learning algorithms might be im- proved by building a curriculum that increases example difficulty over the course of training - as opposed to training on instances of the full range of difficulties throughout the entire training
+
+<!--- --->
+
+> Each generator is a standalone Python function merely making use of the DSL and functions from the random module from the standard library. The median generator consists of 40 lines of code and uses 22 DSL primitive calls and 10 calls to the random module
+
+It is curious that so many (22) primitive function calls are needed on median.
+
+My rough estimation of primitive functions in [arc-dsl](https://github.com/michaelhodel/arc-dsl) is 160 (count the number of occurrences of `def `). We know that this set of primitives is complete for the train set, but is it for the evaluation and test set?
 
 ### [Large Language Models Are Not Strong Abstract Reasoners](https://arxiv.org/abs/2305.19555)
 
@@ -110,6 +126,10 @@ This seems to be one of the initial evaluations of ARC using LLMs. The results a
 
 ## Repos
 
+- [arc-dsl](https://github.com/michaelhodel/arc-dsl) Domain Specific Language for the Abstraction and Reasoning Corpus by Michael Hodel, member of MindsAI team
+- [https://github.com/michaelhodel/re-arc](https://github.com/michaelhodel/re-arc) RE-ARC: Reverse-Engineering the Abstraction and Reasoning Corpus by Michael Hodel, member of MindsAI team
+
+
 ## Videos
 
 ### [Dwarkesh Patel | Francois Chollet - LLMs won’t lead to AGI - $1,000,000 Prize to find true solution](https://www.youtube.com/watch?v=UakqL6Pj9xo)
@@ -134,3 +154,6 @@ This seems to be one of the initial evaluations of ARC using LLMs. The results a
 
 - [ ] What is the best way to encode 2d information for an LLM like Llama3?
 - [ ] How can we learn from few examples? Do we need a good representation of the data? Why ML methods need huge datasets?
+- [ ] Search more relevant papers
+  - [ ] https://arxiv.org/search/advanced?advanced=&terms-0-operator=AND&terms-0-term=abstraction+reasoning+corpus&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-filter_by=all_dates&date-year=&date-from_date=&date-to_date=&date-date_type=submitted_date&abstracts=show&size=50&order=-announced_date_first
+  - [ ] Contrastive learning. Can a model predict if two input/output pairs belong to the same task?
