@@ -9,6 +9,86 @@ These are the sources of papers used:
 - [Citations to the "On the measure of intelligence" paper on Google Scholar](https://scholar.google.com/scholar?start=10&hl=en&scisbd=1&as_sdt=2005&sciodt=0,5&cites=645844335140263496&scipsc=)
 - TODO: [Papers on Arxiv with `abstraction reasoning corpus` in the title](https://arxiv.org/search/advanced?advanced=&terms-0-operator=AND&terms-0-term=abstraction+reasoning+corpus&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-filter_by=all_dates&date-year=&date-from_date=&date-to_date=&date-date_type=submitted_date&abstracts=show&size=50&order=-announced_date_first)
 
+### ⭐⭐ [Getting 50% (SoTA) on ARC-AGI with GPT-4o by Ryan Greenblatt](https://redwoodresearch.substack.com/p/getting-50-sota-on-arc-agi-with-gpt)
+
+> I recently got to 50% accuracy on the public test set for ARC-AGI by having GPT-4o generate a huge number of Python implementations of the transformation rule (around 8,000 per problem) and then selecting among these implementations based on correctness of the Python programs on the examples (if this is confusing, go to the next section). I use a variety of additional approaches and tweaks which overall substantially improve the performance of my method relative to just sampling 8,000 programs.
+
+As Chollet says in the section below, this would not be SOTA but is a great result.
+
+> The additional approaches and tweaks are:
+>
+> - I use **few-shot prompts** which perform meticulous **step-by-step reasoning**.
+> - I have GPT-4o try to **revise** some of the implementations after seeing what they actually output on the provided examples.
+> - I do some feature engineering, providing the model with considerably **better grid representations** than the naive approach of just providing images. (See below for details on what a “grid” in ARC-AGI is.)
+> - I used specialized few-shot prompts for the two main buckets of ARC-AGI problems (cases where the grid size changes vs doesn’t).
+
+<!--- --->
+
+> The main idea behind my solution is very simple: get GPT-4o to generate around 8,000 python programs which attempt to implement the transformation, select a program which is right on all the examples (usually there are 3 examples), and then submit the output this function produces when applied to the additional test input(s). I show GPT-4o the problem as images and in various ascii representations.
+
+<!--- --->
+
+> My approach is similar in spirit to the approach applied in AlphaCode in which a model generates millions of completions attempting to solve a programming problem and then aggregates over them to determine what to submit.
+
+<!--- --->
+
+> Actually getting to 50% with this main idea took me about 6 days of work. This work includes constructing few-shot prompts, building better text representations of these grids, iterating against the train set, and implementing various other tweaks to improve performance
+
+- [Github ARC Draw more samples](https://github.com/rgreenblatt/arc_draw_more_samples_pub)
+  - [Few shot prompts with reasoning and python code](https://github.com/rgreenblatt/arc_draw_more_samples_pub/blob/dc4b6080574183b690429a176d5f18437ecf7036/arc_solve/reasoning_and_labels.py)
+
+#### High level method
+
+- Provide the ARC-AGI problem to GPT-4o, with both an image representation and with various text representations for each grid in the problem. The text representations include showing which cells are occupied by different connected components of colors and showing diffs between the input and output (in cases where the grid shapes are the same).
+- Instruct GPT-4o to reason about what the transformation is, reason how to implement the transformation as code, and then finally actually implement the transformation in code.
+- Use a few-shot prompt with several carefully handwritten examples of step-by-step reasoning to actually get GPT-4o to do this reasoning somewhat effectively. The resulting prompt is usually around 30k tokens long including images.
+  - We actually have a pair of few-shot prompts: one prompt for when the grid size changes (in any of the examples) and one for when it doesn’t.
+  - We also ensemble over multiple pairs of few-shot prompts. This doesn’t help much, but I already had the samples in the cache.
+- Sample vast, vast numbers of completions (~5,000 per problem) from GPT-4o.
+- Take the most promising 12 completions for each problem, and then try to fix each by showing GPT-4o what this program actually outputs on the examples, and then asking GPT-4o to revise the code to make it correct. We sample ~3,000 completions that attempt to fix per problem in total across these 12 starting implementations.
+  - We use a few-shot prompt for revisions with step-by-step reasoning.
+  - We also have a text representation which shows the diff between the actual output and the expected output.
+- Then, we select 3 submissions to make based on a majority vote over programs which get the examples correct. (In the case where we don’t have 3 distinct submissions from programs which get the examples right, we apply some heuristics to pick a submission, but this doesn’t matter much.).
+
+In addition to iterating on the training set, I also did a small amount of iteration on a 100 problem subset of the public test set. All the results I presented here were computed on a different subset of the public test set that does not overlap.  The train and test set are not IID, and the test set is both much harder and somewhat qualitatively different (I think), so using a subset of the test set for iteration was useful for quickly getting a better sense of how things change with difficulty. It's unfortunate that these sets aren’t IID: it makes iteration harder and more confusing.
+
+#### What are the returns to more sampling?
+
+![returns to more sampling](res/2024-06-27-08-32-25.png)
+
+> There appears to be a relatively clean scaling law. The fit is in terms of log base 2. So, it indicates an additional 3% correct per doubling of k
+
+#### Tricks in the solution
+
+- Using a better representation is crucial, allows to sample 10 times more efficiently
+- Also revision of the proposed solutions is crucial, allows to sample 10 times more efficiently
+- So without revision and good representation it would have needed close to 1M samples instead of 8k
+
+#### [Chollet reaction](https://x.com/fchollet/status/1803174151680569570)
+
+> SotA on the public evaluation set of ARC-AGI is ~60% for a heterogenous ensemble, 54% for a single approach. But what really matters is the private leaderboard on Kaggle (33% there so far vs 85% needed to beat the challenge)
+
+<!--- --->
+
+> In general, we see 10-20 pts worse performance on the private test set compared to the public eval set. 
+> This is likely in part due to information leak from the public tasks into the model (which can happen in a number of ways, including LLM pretraining, and tuning of an approach's knobs based on eval set performance, aka overfitting).
+> This is *also* likely in part due to the fact that the eval set contains more "easy" tasks. The eval set and test set were not calibrated for difficulty. So while all tasks across the board are feasible for humans, the tasks in the test set may be harder on average. This was not intentional, and is likely either a fluke (there are only 100 tasks in the test set) or due to the test set having been created last.
+
+#### Implications of this work
+
+The fact that they have to generate thousands of responses seems the typical tradeoff between train and inference compute. It is very likely that future and bigger models will need far less generations to achieve
+the same level of accuracy (see f.e. AlphaCode2 where they replaced PaLM by Gemini with great improvements. They could reach the performance of AlphaCode1 with 100 samples instead of 1e6 samples.)
+
+The fact that an LLM without fine-tuning can achieve such high score on the ARC dataset is a contradiction
+with the postulates of Chollet that say that LLM cannot do in-context learning.
+
+I believe this result is more impressive that MindsAI team because GPT4o was not fine-tuned for this task. The MindsAI team fine-tune a model on ARC like tasks and do test time fine-tuning on the test tasks.
+Thus considering the priors and experience of both models GPT4o is clearly more intelligent than MindsAI team model.
+
+There might be some risk of data contamination because the data is publicly available on Github. However the approach
+is not directly solving the task, but writing python code to solve the task. And that kind of data is not
+available to the best of my knowledge.
+
 ### ⭐ [Neural networks for abstraction and reasoning: Towards broad generalization in machines](https://arxiv.org/abs/2402.03507)
 
 Nicely written paper that tries to solve the ARC challenge with two methods:
@@ -184,6 +264,7 @@ This paper is not relevant for the task.
 
 - [arc-dsl](https://github.com/michaelhodel/arc-dsl) Domain Specific Language for the Abstraction and Reasoning Corpus by Michael Hodel, member of MindsAI team
 - [https://github.com/michaelhodel/re-arc](https://github.com/michaelhodel/re-arc) RE-ARC: Reverse-Engineering the Abstraction and Reasoning Corpus by Michael Hodel, member of MindsAI team
+- [ARC Draw more samples](https://github.com/rgreenblatt/arc_draw_more_samples_pub) is the repo for the article "Getting 50% (SoTA) on ARC-AGI with GPT-4o by Ryan Greenblatt"
 
 ## Videos
 
@@ -231,9 +312,17 @@ Their method is:
 2. On inference they augment the test samples (I don't know how) and fine-tune the LLM again on those tasks
 3. Make predictions with the LLM
 
+[Test-Time Augmentation to solve ARC, interview with Jack Cole](https://lab42.global/community-interview-jack-cole/) Almost no details about the approach.
+
 ### [LLMs as a system to solve the Abstraction and Reasoning Corpus (ARC) Challenge!](https://www.youtube.com/watch?v=plVRxP8hQHY)
 
+TODO:
+
 ## Conclusions
+
+- Problem representation is very relevant. Ryan Greenblatt and Jack Cole mention they have worked to create
+  a good problem representation.
+- 
 
 ### Definitions of abstraction and reasoning
 
@@ -251,8 +340,8 @@ Their method is:
 
 ## TODO
 
-- [ ] Jack Cole approach
-- [ ] Buck approach
+- [x] Jack Cole approach
+- [x] Buck approach
 - [ ] Icecube approach
 - [ ] What is the best way to encode 2d information for an LLM like Llama3?
 - [ ] How can we learn from few examples? Do we need a good representation of the data? Why ML methods need huge datasets? That is where the priors kick in, those priors influence the representation of the data.
