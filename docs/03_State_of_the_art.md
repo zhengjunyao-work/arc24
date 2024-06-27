@@ -9,30 +9,6 @@ These are the sources of papers used:
 - [Citations to the "On the measure of intelligence" paper on Google Scholar](https://scholar.google.com/scholar?start=10&hl=en&scisbd=1&as_sdt=2005&sciodt=0,5&cites=645844335140263496&scipsc=)
 - [Papers on Arxiv with `abstraction reasoning corpus` in the title](https://arxiv.org/search/advanced?advanced=&terms-0-operator=AND&terms-0-term=abstraction+reasoning+corpus&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-filter_by=all_dates&date-year=&date-from_date=&date-to_date=&date-date_type=submitted_date&abstracts=show&size=50&order=-announced_date_first)
 
-### [Icecuber 1st place solution on ARC2020](https://www.kaggle.com/competitions/abstraction-and-reasoning-challenge/discussion/154597)
-
-> Unfortunately, I don't feel like my solution itself brings us closer to AGI. The main component is a DSL which applies up to 4 of 142 unary transformations (42 different functions, some have different variants). This DSL is solved by enumeration (exploiting duplicates) + a greedy stacking combiner. Everything is implemented efficiently in C++ (with no dependencies) and running in parallel.
-
-- [Icecuber solution repo](https://github.com/top-quarks/ARC-solution)
-- [Icecuber solution documentation](https://github.com/top-quarks/ARC-solution/blob/master/ARC-solution_documentation.pdf)
-
-> I then noticed that **distribution of training, evaluation and LB were quite different, so I decided the evaluation dataset was better used as training data**. I hand-coded 100 evaluation tasks, which I used to add more transformations, and improve my DSL. I noticed that functions taking more than 1 argument were growing my search space super-exponentially, and that they usually just took either the input or output image size as second argument. This led me to only keep unary functions. I also added lists of images as a type, to solve tasks that required looping. I also started representing my DSL in a DAG to exploit duplicates (multiple transformations giving same output). This required me to rewrite most of my code, but gave me 14 tasks on LB.
-
-<!--- --->
-
-> I double the sample inputs by adding the same tasks flipped along a diagonal. This makes for 3 full runs (depth 3 for performance reasons): one normal, and one for each diagonal. This simple addition moved me from 17 to 21 tasks solved on the LB (and hence helped more than all the optimizations needed for doing depth 4 search instead of depth 3).
-
-#### Implications of this work
-
-This work shows that at least 20% of the test set tasks can be solved using just 3 transformations (because the search was limited to a depth of 3).
-
-The ARC set can be solved given enough compute and a complete DSL. This will be a brute-force approach
-to the problem that won't be intelligent. The intelligence lies in the developer that produced the
-complete DSL and the search algorithm. This system won't generalize to new problems.
-
-The world is too complex to have a DSL, that's why we write new python code for each application.
-The way we solve the ARC is important, we have to design the more general solution possible.
-
 ### ⭐⭐ [Getting 50% (SoTA) on ARC-AGI with GPT-4o by Ryan Greenblatt](https://redwoodresearch.substack.com/p/getting-50-sota-on-arc-agi-with-gpt)
 
 > I recently got to 50% accuracy on the public test set for ARC-AGI by having GPT-4o generate a huge number of Python implementations of the transformation rule (around 8,000 per problem) and then selecting among these implementations based on correctness of the Python programs on the examples (if this is confusing, go to the next section). I use a variety of additional approaches and tweaks which overall substantially improve the performance of my method relative to just sampling 8,000 programs.
@@ -149,6 +125,30 @@ Results are weak and do not surpass the state of the art.
 > when a person attempts an ARC task, we see a similar process: one tries to abstract the
 training tasks to a ‘program’ (generally in natural language in one’s head, for example “rotate by 90
 degrees”); human intuition is the search procedure.
+
+### ⭐ [Icecuber 1st place solution on ARC2020](https://www.kaggle.com/competitions/abstraction-and-reasoning-challenge/discussion/154597)
+
+> Unfortunately, I don't feel like my solution itself brings us closer to AGI. The main component is a DSL which applies up to 4 of 142 unary transformations (42 different functions, some have different variants). This DSL is solved by enumeration (exploiting duplicates) + a greedy stacking combiner. Everything is implemented efficiently in C++ (with no dependencies) and running in parallel.
+
+- [Icecuber solution repo](https://github.com/top-quarks/ARC-solution)
+- [Icecuber solution documentation](https://github.com/top-quarks/ARC-solution/blob/master/ARC-solution_documentation.pdf)
+
+> I then noticed that **distribution of training, evaluation and LB were quite different, so I decided the evaluation dataset was better used as training data**. I hand-coded 100 evaluation tasks, which I used to add more transformations, and improve my DSL. I noticed that functions taking more than 1 argument were growing my search space super-exponentially, and that they usually just took either the input or output image size as second argument. This led me to only keep unary functions. I also added lists of images as a type, to solve tasks that required looping. I also started representing my DSL in a DAG to exploit duplicates (multiple transformations giving same output). This required me to rewrite most of my code, but gave me 14 tasks on LB.
+
+<!--- --->
+
+> I double the sample inputs by adding the same tasks flipped along a diagonal. This makes for 3 full runs (depth 3 for performance reasons): one normal, and one for each diagonal. This simple addition moved me from 17 to 21 tasks solved on the LB (and hence helped more than all the optimizations needed for doing depth 4 search instead of depth 3).
+
+#### Implications of this work
+
+This work shows that at least 20% of the test set tasks can be solved using just 3 transformations (because the search was limited to a depth of 3).
+
+The ARC set can be solved given enough compute and a complete DSL. This will be a brute-force approach
+to the problem that won't be intelligent. The intelligence lies in the developer that produced the
+complete DSL and the search algorithm. This system won't generalize to new problems.
+
+The world is too complex to have a DSL, that's why we write new python code for each application.
+The way we solve the ARC is important, we have to design the more general solution possible.
 
 ### ⭐ [LLMs and the Abstraction and Reasoning Corpus: Successes, Failures, and the Importance of Object-based Representations](https://arxiv.org/abs/2305.18354v2)
 
@@ -268,6 +268,43 @@ They create  a very simple version of ARC challenge for kids. They compare the r
 
 Not very useful for our task, we need to solve the real and difficult one.
 
+### [Large Language Model as a System of Multiple Expert Agents: An Approach to solve the Abstraction and Reasoning Corpus Challenge](https://arxiv.org/abs/2310.05146)
+
+They use GPT4 to write python code to solve the tasks. Is similar to the Ryan's approach but with less computation.
+
+It's a bit weird that they make some proposals but do not implement all of them.
+
+Input tokens is a limitation because at the time of the publication GPT4 could only receive 8k tokens. In Kaggle we could have a similar limitation due to GPU RAM memory.
+
+> While GPT-4 has proven to be a general purpose solver, being (currently) a text-based model, GPT-4 lacks some of the innate human priors necessary to solve the ARC challenge. For example, GPT-4 is not able to identify objects accurately from text alone.
+
+<!--- --->
+
+> For our method, we use only three views - Grid View, Object View, Pixel View - and that has already achieved quite good results. In brief, Grid View provides the entire grid repre- sentation, except we change the pixel numbers to characters so that we do not bias GPT-4 to treat it as an arithmetic problem to perform arithmetic on the pixel values. This also has the added benefit of ensuring that GPT-4 has not seen the ARC tasks before as it is now of a different form. The Object View groups pixels that are contiguous together, so that they can be manipulated as a group. Pixel View gives the coordinates for each pixel, which can help with more fine-grained movement tasks or relational tasks between pixels.
+
+### [Generalized Planning for the Abstraction and Reasoning Corpus](https://arxiv.org/abs/2401.07426)
+
+Another paper that uses the DSL approach, but from the perspective of planning. It achieves slightly better results than icecuber and ARGA.
+
+### [Tackling the Abstraction and Reasoning Corpus (ARC) with Object-centric Models and the MDL Principle](https://arxiv.org/abs/2311.00545)
+
+This paper proposes to search a representation of the grids using the Minimun Description Length (MDL) principle. Then it searches a program to transform the input into the output.
+So it does not only use a DSL but also a representation. Patterns + Functions.
+
+It scores very poorly on private test set (2%)
+
+### [A Neurodiversity-Inspired Solver for the Abstraction and Reasoning Corpus Using Visual Imagery and Program Synthesis](https://arxiv.org/abs/2302.09425)
+
+I haven't read the whole paper but it's just another DSL with some inspiration on Neurodiversity.
+
+It only achieves 2% on the private test set, which is omitted in the paper and only said that they got the 4th-place.
+
+### [Graphs, Constraints, and Search for the Abstraction and Reasoning Corpus](https://arxiv.org/abs/2210.09880)
+
+This paper proposes to use an object centric representation of the grids based on graphs. Using that representation and a small Domain Specific Language (DSL) it is able to solve a comparable number of tasks to icecuber solution (but using only tasks about objects).
+
+This representation was later used on other papers as the input to GPT.
+
 ### [Teaching Large Language Models to Reason with Reinforcement Learning](https://arxiv.org/abs/2403.04642)
 
 This paper applies different RL methods to Llama 2 to improve reasoning at math problems. All RL methods have a similar result.
@@ -283,16 +320,6 @@ I don't believe this is relevant to solve the ARC challenge.
 ### [Learn Abstraction in an Abstract Way: The Long Journey Ahead](https://openreview.net/forum?id=wHanWNJN0r)
 
 This paper is not relevant for the task.
-
-### [Generalized Planning for the Abstraction and Reasoning Corpus](https://arxiv.org/abs/2401.07426)
-
-### [Tackling the Abstraction and Reasoning Corpus (ARC) with Object-centric Models and the MDL Principle](https://arxiv.org/abs/2311.00545)
-
-### [Large Language Model as a System of Multiple Expert Agents: An Approach to solve the Abstraction and Reasoning Corpus Challenge](https://arxiv.org/abs/2310.05146)
-
-### [A Neurodiversity-Inspired Solver for the Abstraction and Reasoning Corpus Using Visual Imagery and Program Synthesis](https://arxiv.org/abs/2302.09425)
-
-### [Graphs, Constraints, and Search for the Abstraction and Reasoning Corpus](https://arxiv.org/abs/2210.09880)
 
 ## Repos
 
