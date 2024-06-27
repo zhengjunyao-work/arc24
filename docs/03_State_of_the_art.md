@@ -7,7 +7,31 @@
 These are the sources of papers used:
 
 - [Citations to the "On the measure of intelligence" paper on Google Scholar](https://scholar.google.com/scholar?start=10&hl=en&scisbd=1&as_sdt=2005&sciodt=0,5&cites=645844335140263496&scipsc=)
-- TODO: [Papers on Arxiv with `abstraction reasoning corpus` in the title](https://arxiv.org/search/advanced?advanced=&terms-0-operator=AND&terms-0-term=abstraction+reasoning+corpus&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-filter_by=all_dates&date-year=&date-from_date=&date-to_date=&date-date_type=submitted_date&abstracts=show&size=50&order=-announced_date_first)
+- [Papers on Arxiv with `abstraction reasoning corpus` in the title](https://arxiv.org/search/advanced?advanced=&terms-0-operator=AND&terms-0-term=abstraction+reasoning+corpus&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-filter_by=all_dates&date-year=&date-from_date=&date-to_date=&date-date_type=submitted_date&abstracts=show&size=50&order=-announced_date_first)
+
+### [Icecuber 1st place solution on ARC2020](https://www.kaggle.com/competitions/abstraction-and-reasoning-challenge/discussion/154597)
+
+> Unfortunately, I don't feel like my solution itself brings us closer to AGI. The main component is a DSL which applies up to 4 of 142 unary transformations (42 different functions, some have different variants). This DSL is solved by enumeration (exploiting duplicates) + a greedy stacking combiner. Everything is implemented efficiently in C++ (with no dependencies) and running in parallel.
+
+- [Icecuber solution repo](https://github.com/top-quarks/ARC-solution)
+- [Icecuber solution documentation](https://github.com/top-quarks/ARC-solution/blob/master/ARC-solution_documentation.pdf)
+
+> I then noticed that **distribution of training, evaluation and LB were quite different, so I decided the evaluation dataset was better used as training data**. I hand-coded 100 evaluation tasks, which I used to add more transformations, and improve my DSL. I noticed that functions taking more than 1 argument were growing my search space super-exponentially, and that they usually just took either the input or output image size as second argument. This led me to only keep unary functions. I also added lists of images as a type, to solve tasks that required looping. I also started representing my DSL in a DAG to exploit duplicates (multiple transformations giving same output). This required me to rewrite most of my code, but gave me 14 tasks on LB.
+
+<!--- --->
+
+> I double the sample inputs by adding the same tasks flipped along a diagonal. This makes for 3 full runs (depth 3 for performance reasons): one normal, and one for each diagonal. This simple addition moved me from 17 to 21 tasks solved on the LB (and hence helped more than all the optimizations needed for doing depth 4 search instead of depth 3).
+
+#### Implications of this work
+
+This work shows that at least 20% of the test set tasks can be solved using just 3 transformations (because the search was limited to a depth of 3).
+
+The ARC set can be solved given enough compute and a complete DSL. This will be a brute-force approach
+to the problem that won't be intelligent. The intelligence lies in the developer that produced the
+complete DSL and the search algorithm. This system won't generalize to new problems.
+
+The world is too complex to have a DSL, that's why we write new python code for each application.
+The way we solve the ARC is important, we have to design the more general solution possible.
 
 ### ⭐⭐ [Getting 50% (SoTA) on ARC-AGI with GPT-4o by Ryan Greenblatt](https://redwoodresearch.substack.com/p/getting-50-sota-on-arc-agi-with-gpt)
 
@@ -260,11 +284,23 @@ I don't believe this is relevant to solve the ARC challenge.
 
 This paper is not relevant for the task.
 
+### [Generalized Planning for the Abstraction and Reasoning Corpus](https://arxiv.org/abs/2401.07426)
+
+### [Tackling the Abstraction and Reasoning Corpus (ARC) with Object-centric Models and the MDL Principle](https://arxiv.org/abs/2311.00545)
+
+### [Large Language Model as a System of Multiple Expert Agents: An Approach to solve the Abstraction and Reasoning Corpus Challenge](https://arxiv.org/abs/2310.05146)
+
+### [A Neurodiversity-Inspired Solver for the Abstraction and Reasoning Corpus Using Visual Imagery and Program Synthesis](https://arxiv.org/abs/2302.09425)
+
+### [Graphs, Constraints, and Search for the Abstraction and Reasoning Corpus](https://arxiv.org/abs/2210.09880)
+
 ## Repos
 
 - [arc-dsl](https://github.com/michaelhodel/arc-dsl) Domain Specific Language for the Abstraction and Reasoning Corpus by Michael Hodel, member of MindsAI team
 - [https://github.com/michaelhodel/re-arc](https://github.com/michaelhodel/re-arc) RE-ARC: Reverse-Engineering the Abstraction and Reasoning Corpus by Michael Hodel, member of MindsAI team
 - [ARC Draw more samples](https://github.com/rgreenblatt/arc_draw_more_samples_pub) is the repo for the article "Getting 50% (SoTA) on ARC-AGI with GPT-4o by Ryan Greenblatt"
+- [Generalized-Planning-for-the-Abstraction-and-Reasoning-Corpus](https://github.com/you68681/GPAR)
+- [Icecuber solution repo](https://github.com/top-quarks/ARC-solution)
 
 ## Videos
 
@@ -340,13 +376,14 @@ TODO:
 
 ## TODO
 
-- [x] Jack Cole approach
-- [x] Buck approach
-- [ ] Icecube approach
+- [x] Jack Cole approach (active inference)
+- [x] Buck approach (write python programs with GPT4o)
+- [ ] Icecuber approach (DSL): https://www.kaggle.com/competitions/abstraction-and-reasoning-challenge/discussion/154597
 - [ ] What is the best way to encode 2d information for an LLM like Llama3?
 - [ ] How can we learn from few examples? Do we need a good representation of the data? Why ML methods need huge datasets? That is where the priors kick in, those priors influence the representation of the data.
 - [ ] Search more relevant papers
-  - [ ] https://arxiv.org/search/advanced?advanced=&terms-0-operator=AND&terms-0-term=abstraction+reasoning+corpus&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-filter_by=all_dates&date-year=&date-from_date=&date-to_date=&date-date_type=submitted_date&abstracts=show&size=50&order=-announced_date_first
-  - [ ] 
+  - [x] Citations from 2024
+  - [x] Papers with Abstraction and Reasoning Corpus in the title
   - [ ] Read Kaggle's forum to see if more relevant papers were added
+  - [ ] Links from https://arcprize.org/guide
 - [ ] Contrastive learning. Can a model predict if two input/output pairs belong to the same task?
