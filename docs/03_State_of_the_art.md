@@ -14,7 +14,7 @@ These are the sources of papers used:
 
 > I recently got to 50% accuracy on the public test set for ARC-AGI by having GPT-4o generate a huge number of Python implementations of the transformation rule (around 8,000 per problem) and then selecting among these implementations based on correctness of the Python programs on the examples (if this is confusing, go to the next section). I use a variety of additional approaches and tweaks which overall substantially improve the performance of my method relative to just sampling 8,000 programs.
 
-As Chollet says in the section below, this would not be SOTA but is a great result.
+As Chollet says in the section below, this would not be SOTA but it is a great result.
 
 > The additional approaches and tweaks are:
 >
@@ -95,7 +95,7 @@ available to the best of my knowledge.
 Nicely written paper that tries to solve the ARC challenge with two methods:
 
 1. Dreamcoder. Is a method to create programs given a set of primitive functions
-2. LLMs. They show that using transpose and rot90 augmentations can double the accuracy of the models. This highlights the sequential and non-2d nature of the typical LLM data.
+2. LLMs. They show that using `transpose` and `rot90` augmentations can double the accuracy of the models. This highlights the sequential and non-2d nature of the typical LLM data.
 
 Results are weak and do not surpass the state of the art.
 
@@ -142,7 +142,7 @@ degrees”); human intuition is the search procedure.
 
 #### Implications of this work
 
-This work shows that at least 20% of the test set tasks can be solved using just 3 transformations (because the search was limited to a depth of 3).
+This work shows that at least 20% of the test set tasks can be solved using just 3-4 transformations (because the search was limited to a depth of 3-4).
 
 The ARC set can be solved given enough compute and a complete DSL. This will be a brute-force approach
 to the problem that won't be intelligent. The intelligence lies in the developer that produced the
@@ -178,11 +178,11 @@ I could fine-tune a model to do row, col, diagonal addition or presence detectio
 
 ### ⭐ [Addressing the Abstraction and Reasoning Corpus via Procedural Example Generation](https://arxiv.org/abs/2404.07353)
 
-This paper presents the re-arc repo, which allows to generate at least 10k new samples for each task in the ARC training dataset.
+This paper presents the [re-arc repo](https://github.com/michaelhodel/re-arc), which allows to generate at least 10k new samples for each task in the ARC training dataset.
 
 Could I modify it to output text descriptions of the synthetic inputs? That could allow the model to learn a good representation of the grids and also to learn what the transformation is.
 
-> The sample-efficiency of learning algorithms might be im- proved by building a curriculum that increases example difficulty over the course of training - as opposed to training on instances of the full range of difficulties throughout the entire training
+> The sample-efficiency of learning algorithms might be improved by building a curriculum that increases example difficulty over the course of training - as opposed to training on instances of the full range of difficulties throughout the entire training
 
 <!--- --->
 
@@ -336,6 +336,16 @@ I could use [downsub](https://downsub.com/) to get subtitles from a Youtube vide
 
 ### ⭐ [Dwarkesh Patel | Francois Chollet - LLMs won’t lead to AGI - $1,000,000 Prize to find true solution](https://www.youtube.com/watch?v=UakqL6Pj9xo)
 
+> Each task in the ARC is novel. You cannot memorize the solution programs in advance. You have to synthesize a new program for each task.
+
+<!--- --->
+
+> There are two definitions of reasoning:
+>
+> 1. I have a set of program templates. When faced a new problem I fetch the right template and input the values to solve the problem. This is what GPT does. It needs some intelligence to fetch the correct template.
+> 2. When faced with a new puzzle there isn't a template available you have to synthesize on the fly
+> a new program based on bits and pieces of existing programs that you have.
+
 ### ⭐ [Machine Learning Street Talk | Chollet's ARC Challenge + Current Winners](https://youtu.be/jSAT_RuJ_Cg?si=-s_XpeeDA2BQYlVy)
 
 > Basically that we use so many training examples.
@@ -386,7 +396,8 @@ TODO:
 
 - Problem representation is very relevant. Ryan Greenblatt and Jack Cole mention they have worked to create
   a good problem representation.
-- 
+- It is likely that the MindsAI team is expanding re-arc to the evaluation dataset, or maybe to synthesize
+  new tasks.
 
 ### Definitions of abstraction and reasoning
 
@@ -408,7 +419,7 @@ TODO:
 
 - [x] Jack Cole approach (active inference)
 - [x] Buck approach (write python programs with GPT4o)
-- [ ] Icecuber approach (DSL): https://www.kaggle.com/competitions/abstraction-and-reasoning-challenge/discussion/154597
+- [x] Icecuber approach (DSL): https://www.kaggle.com/competitions/abstraction-and-reasoning-challenge/discussion/154597
 - [ ] What is the best way to encode 2d information for an LLM like Llama3?
 - [ ] How can we learn from few examples? Do we need a good representation of the data? Why ML methods need huge datasets? That is where the priors kick in, those priors influence the representation of the data.
 - [x] Search more relevant papers
