@@ -8,6 +8,7 @@ These are the sources of papers used:
 
 - [Citations to the "On the measure of intelligence" paper on Google Scholar](https://scholar.google.com/scholar?start=10&hl=en&scisbd=1&as_sdt=2005&sciodt=0,5&cites=645844335140263496&scipsc=)
 - [Papers on Arxiv with `abstraction reasoning corpus` in the title](https://arxiv.org/search/advanced?advanced=&terms-0-operator=AND&terms-0-term=abstraction+reasoning+corpus&terms-0-field=title&classification-physics_archives=all&classification-include_cross_list=include&date-filter_by=all_dates&date-year=&date-from_date=&date-to_date=&date-date_type=submitted_date&abstracts=show&size=50&order=-announced_date_first)
+- [ARC prize resources](https://arcprize.org/guide#arc-agi-resources)
 
 ### ⭐⭐ [Getting 50% (SoTA) on ARC-AGI with GPT-4o by Ryan Greenblatt](https://redwoodresearch.substack.com/p/getting-50-sota-on-arc-agi-with-gpt)
 
@@ -399,6 +400,8 @@ TODO:
 
 > Abstraction and reasoning - developing computer systems that can learn new concepts from a small number of examples, something that humans find relatively easy
 
+<!--- --->
+
 > Reasoning is a knowledge acquisition efficiency
 
 ## TODO
@@ -408,9 +411,9 @@ TODO:
 - [ ] Icecuber approach (DSL): https://www.kaggle.com/competitions/abstraction-and-reasoning-challenge/discussion/154597
 - [ ] What is the best way to encode 2d information for an LLM like Llama3?
 - [ ] How can we learn from few examples? Do we need a good representation of the data? Why ML methods need huge datasets? That is where the priors kick in, those priors influence the representation of the data.
-- [ ] Search more relevant papers
+- [x] Search more relevant papers
   - [x] Citations from 2024
   - [x] Papers with Abstraction and Reasoning Corpus in the title
-  - [ ] Read Kaggle's forum to see if more relevant papers were added
-  - [ ] Links from https://arcprize.org/guide
+  - [x] Read Kaggle's forum to see if more relevant papers were added
+  - [x] Links from https://arcprize.org/guide
 - [ ] Contrastive learning. Can a model predict if two input/output pairs belong to the same task?
