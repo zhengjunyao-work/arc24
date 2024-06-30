@@ -110,6 +110,13 @@ python solutions. Maybe an iterative approach could work:
 - Fine-tune on those solutions
 - Repeat...
 
+### DSL + Intuition
+
+This requires a complete DSL which is not trivial to build.
+
+The intuition module will give importance to each of the DSL functions given the examples
+
+To work well the intuition needs to build a good representation of the examples. Abstraction is all about learning a good representation.
 
 ## Select modeling technique
 
