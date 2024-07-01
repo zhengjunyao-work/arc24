@@ -15,8 +15,38 @@ the priors needed to solve the ARC challenge
 
 ### Priors to learn
 
-TODO: which are the priors we can learn from a single grid?
-How objects are defined in the ARC challenge
+#### Core Knowledge priors from Chollet's paper
+
+Which are the priors we can learn from a single grid? I have copied the priors from Chollet's paper
+excluding the priors that need two grids to be learned.
+
+> **Object cohesion**: Ability to parse grids into “objects” based on continuity criteria including color continuity or spatial contiguity (figure 5), ability to parse grids into zones, partitions.
+
+![](res/2024-07-01-09-13-14.png)
+
+I believe there is some ambiguity regarding the diagonals, f.e. the blue object in the right image is a single object or 2 objects?
+TODO: visualize examples to see if that ambiguity is real or not.
+
+> **Numbers and Counting priors** : Many ARC tasks involve counting or sorting objects (e.g. sorting by size), comparing numbers (e.g. which shape or symbol appears the most (e.g. figure 10)? The least? The same number of times? Which is the largest object? The smallest? Which objects are the same size?). All quantities featured in ARC are smaller than approximately 10.
+
+<!--- --->
+
+> **Basic Geometry and Topology priors**: ARC tasks feature a range of elementary geometry and topology concepts, in particular:
+>
+> - Lines, rectangular shapes (regular shapes are more likely to appear than complex shapes).
+> - Symmetries
+> - Containing / being contained / being inside or outside of a perimeter.
+
+#### Summary of priors to learn
+
+- Parse grids into objects based on continuity criteria (color continuity or spatial contiguity)
+- Parse grids into zones or partitions
+- Count
+- Sort objects by size
+- Comparing numbers (e.g. which shape or symbol appears the most (e.g. figure 10)? The least? The same number of times? Which is the largest object?)
+- Recognize lines, rectangular shapes
+- Symmetries
+- Containing / being contained / being inside or outside of a perimeter.
 
 ## Results
 
