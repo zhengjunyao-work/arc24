@@ -13,6 +13,11 @@ the priors needed to solve the ARC challenge
 
 ## Development
 
+### Priors to learn
+
+TODO: which are the priors we can learn from a single grid?
+How objects are defined in the ARC challenge
+
 ## Results
 
 ## Conclusion
