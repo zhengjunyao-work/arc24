@@ -25,7 +25,9 @@ excluding the priors that need two grids to be learned.
 ![](res/2024-07-01-09-13-14.png)
 
 I believe there is some ambiguity regarding the diagonals, f.e. the blue object in the right image is a single object or 2 objects?
-TODO: visualize examples to see if that ambiguity is real or not.
+
+I have been visualizing many train examples and could not find an example where the diagonal continuity was
+harmful. What I have find is that we might have to look at the images from the color and spatial perspectives, because they both are useful.
 
 > **Numbers and Counting priors** : Many ARC tasks involve counting or sorting objects (e.g. sorting by size), comparing numbers (e.g. which shape or symbol appears the most (e.g. figure 10)? The least? The same number of times? Which is the largest object? The smallest? Which objects are the same size?). All quantities featured in ARC are smaller than approximately 10.
 
@@ -47,6 +49,8 @@ TODO: visualize examples to see if that ambiguity is real or not.
 - Recognize lines, rectangular shapes
 - Symmetries
 - Containing / being contained / being inside or outside of a perimeter.
+
+#### Questions to ask the model
 
 ## Results
 
