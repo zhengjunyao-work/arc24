@@ -52,6 +52,15 @@ harmful. What I have find is that we might have to look at the images from the c
 
 #### Questions to ask the model
 
+- General description, name all the objects, color, size, type of the object (square, rectangular, line...)
+- Color of the background
+- Number of objects
+- Area/count for some color
+- Is there some simmetry?
+- Questions about different grids, do not just give one grid as input but give many and ask about certain grid. This will ensure that it is able to create individual representations for the grids.
+
+The grid creator should return some metadata that will be used later to create the questions and answers.
+
 ## Results
 
 ## Conclusion
