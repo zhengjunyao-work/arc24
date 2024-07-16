@@ -13,6 +13,8 @@ and write it here with your own words. Use images if they improve the explanatio
 
 > The objective of this competition is to create an algorithm that is capable of solving abstract reasoning tasks. Critically, these are novel tasks: tasks that the algorithm has never seen before. Hence, simply memorizing a set of reasoning templates will not suffice.
 
+![sample problem](res/2024-07-15-15-51-27.png)
+
 ## Evaluation
 
 <!--- Understand the metric used on the challenge, write it here and study
@@ -31,7 +33,7 @@ the data analysis goal and project plan
 * other projects. May I have other more interesting projects in the horizon?
  --->
 
-I will devoting at least the 2 following months (July and August) to better understand intelligence.
+I will devote at least the 2 following months (July and August) to better understand intelligence.
 This challenge is a good applied exercise of that.
 
 It is a code competition and runtime should be less than 12 hours.
