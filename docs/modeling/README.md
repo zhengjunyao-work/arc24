@@ -128,6 +128,17 @@ reasoning of the tasks would be helpful.
 This approach would require a big context window because tokenizing the examples can require a considerable
 window size.
 
+### Summary
+
+| solution                    | pros                                                                                                                                            | cons                                                                                                                                                                                                                       |
+|-----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| DSL                         |                                                                                                                                                 | - Search space grows exponentially with the number of primitives<br>- The intelligence lies on the developer<br>- Does not generalize to different problems<br>- I believe it's very difficult to implement a complete DSL |
+| DSL + intuition             | - The search space is reduced using intuition                                                                                                   | - A DSL needs to be implemented<br>- The DSL needs to be complete to solve the test set                                                                                                                                    |
+| LLM + test time fine-tuning | - So far is the state of the art                                                                                                                | - I believe this is very dependent on the data augmentation trick<br>- Probably does not generalize to other domains where data augmentation is not possible<br>- Needs millions of examples to train                      |
+| LLM to generate python code | - Having a program as the output makes the method very general                                                                                  | - I believe this is harder than creating the output by hand<br>- Maybe a big LLM is needed to use this approach                                                                                                            |
+| Fine-tuned LLM              | - The approach of using synthetic data could be scaled to other domains<br>- It would be nice to be able to talk with the model about the tasks | - Would the LLM be able to generalize to unseen tasks?<br>- The creation of useful synthetic tasks is not trivial<br>- How much compute would be needed to fine-tune a good model?                                         |
+| Few-shot LLM                | - Very simple and elegant approach<br>- Would allow to test which grid representations are better for LLMs                                      | - Unlikely to work with current LLMs                                                                                                                                                                                       |
+
 ## Select modeling technique
 
 <!---Document the actual modeling technique that is to be used. If multiple
@@ -135,6 +146,13 @@ techniques are applied, perform this task separately for each technique.
 Many modeling techniques make specific assumptions about the data—for example,
 that all attributes have uniform distributions, no missing values allowed,
 class attribute must be symbolic, etc. Record any such assumptions made. --->
+
+I don't want to implement a DSL, so my plan is going to be:
+
+1. Few experiments with Few-Shot LLM. A quick iteration where I try with different models and problem encodings.
+2. Fine-tune an LLM to create a good representation of the grids by many tasks such as question answering. It will
+   also learn how to do transformations on the data.
+3. If the second step does not work as expected, I could try to generate python code.
 
 ## Generate experimentation design
 
