@@ -11,11 +11,12 @@ To solve the ARC challenge we need to do two things:
    - Python code. The grids are not as complex as real images, so we could build python code to extract
      representations from the grids.
 2. Implement the transformation. This could be done:
-   - Using python code
-     - With primitive functions
-     - Without primitive functions
-   - With a Domain Specific Language (DSL)
-   - Using an LLM
+   - With code
+     - Using python code
+       - With primitive functions
+       - Without primitive functions
+     - With a Domain Specific Language (DSL)
+   - Using a model (very likely an LLM)
 
 ### Icecuber approach: DSL
 
@@ -117,6 +118,15 @@ This requires a complete DSL which is not trivial to build.
 The intuition module will give importance to each of the DSL functions given the examples
 
 To work well the intuition needs to build a good representation of the examples. Abstraction is all about learning a good representation.
+
+### Few-shot prompting
+
+A really intelligent LLM could solve the ARC challenge using few-shot prompting. The prior knowledge
+would be injected in those few-shot samples. It is very likely that given text descriptions and step-by-step
+reasoning of the tasks would be helpful.
+
+This approach would require a big context window because tokenizing the examples can require a considerable
+window size.
 
 ## Select modeling technique
 
