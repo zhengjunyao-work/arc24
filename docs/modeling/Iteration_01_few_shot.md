@@ -72,19 +72,29 @@ the few-shot experiment but adding the reasoning before creating the grid.
 
 The model does not understand the puzzles. The examples and reasoning are not useful
 
-### Different models
+### Different models, zero-shot
 
 Since the best results were obtained for the 0-shot setup, I could try using different models.
 I can make submissions without using compute time, so I could see if some of the models is able
 to solve some task from the test set.
 
-TODO:
+| model      | test |
+|------------|------|
+| Phi-3      | 0    |
+| Mistral 7b | 0    |
+| Llama 3 8b | 1    |
+
+Llama 3 is able to solve one of the tasks from the test set. To better compare the models I should
+evaluate them on the public data, but I don't have Kaggle compute available.
 
 ## Conclusion
+
+Few-shot or zero-shot inference with current LLMs is not the way to solve the ARC challenge.
+The performance is very poor.
 
 ## Next steps
 
 ## TODO
 
-- [ ] What is the best way to encode the grids?
-- [ ] Does using reasoning and description of the grids helps?
+- [x] What is the best way to encode the grids?
+- [x] Does using reasoning and description of the grids helps?
