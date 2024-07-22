@@ -1,6 +1,6 @@
-# Iteration 1. Representation of Grids
+# Iteration 2. Representation of Grids
 
-_30-06-2024_
+_22-07-2024_
 
 ## Goal
 
@@ -9,7 +9,15 @@ Can we teach a model to learn a representation of the grids?
 ## Motivation
 
 A good representation is crucial for abstraction. We need to teach the model
-the priors needed to solve the ARC challenge
+the priors needed to solve the ARC challenge.
+
+This could be a paper titled: `Learning priors via Visual Question Answering to solve the ARC challenge.`
+To solve the challenge the model needs to build a representation with the core knowledge priors.
+This iteration will show if an LLM is able to learn a representation of a single grid. If it works
+I could move on to learn other concepts that need two grids.
+
+Recent winners from [AIMO challenge](https://www.kaggle.com/competitions/ai-mathematical-olympiad-prize/discussion/519303) have created a huge dataset to solve the challenge. Data is really
+important. If I'm able to create a good grid synthesizer that would be an advantage.
 
 ## Development
 
