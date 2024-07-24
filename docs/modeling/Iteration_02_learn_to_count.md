@@ -1,10 +1,10 @@
-# Iteration 2. Representation of Grids
+# Iteration 2. Learn to count
 
 _22-07-2024_
 
 ## Goal
 
-Can we teach a model to learn a representation of the grids?
+Can we teach a model to learn a to count objects in a grid?
 
 ## Motivation
 
@@ -64,10 +64,20 @@ harmful. What I have find is that we might have to look at the images from the c
 - Color of the background
 - Number of objects
 - Area/count for some color
-- Is there some simmetry?
+- Is there some symmetry?
 - Questions about different grids, do not just give one grid as input but give many and ask about certain grid. This will ensure that it is able to create individual representations for the grids.
 
 The grid creator should return some metadata that will be used later to create the questions and answers.
+
+### Learn to count
+
+In this iteration we are going to focus in generating data to teach a model to count. Learning to count
+will imply that the model has builtin the prior of objectness and also to count.
+
+The idea is to create a random grid generator that also generates questions and answers about the objects
+in the grid. The generator should generate objects of arbitrary sizes, colors and shapes. The background color should
+be predominantly black, but less frequently the other colors should be allowed. To make it a little bit
+more complex it should ask for the number of objects of certain color, and maybe for the area of a certain object.
 
 ## Results
 
