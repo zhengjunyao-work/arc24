@@ -79,6 +79,32 @@ in the grid. The generator should generate objects of arbitrary sizes, colors an
 be predominantly black, but less frequently the other colors should be allowed. To make it a little bit
 more complex it should ask for the number of objects of certain color, and maybe for the area of a certain object.
 
+I have prepared a [Kaggle notebook](https://www.kaggle.com/code/ironbar/learn-to-count) to generate the grids and the question-answer pairs.
+
+These are some random samples from the generated grids:
+
+![random generated grids](res/2024-07-24-12-00-23.png)
+
+And this is a sample grid along with questions and answers.
+
+![sample_grid](res/2024-07-24-12-01-11.png)
+
+```markdown
+- How many objects are there in the grid? 4
+- Please list the area of all the objects in the grid, in ascending order and separated by commas 1, 1, 7, 7
+- What is the area of the biggest object in the grid? 7
+- What is the area of the smallest object in the grid? 1
+- How many objects with color 2 are there in the grid? 1
+- How many objects with color 3 are there in the grid? 2
+- How many objects with color 4 are there in the grid? 1
+```
+
+I estimate that I can generate around 1M grids in less than one hour. That is probably enough to train a good model.
+
+### Fine-tuning
+
+### Evaluation
+
 ## Results
 
 ## Conclusion
@@ -90,5 +116,4 @@ more complex it should ask for the number of objects of certain color, and maybe
 ## TODO
 
 - [ ] How to evaluate the representation of the models? Phi-3, Llama3, Gemma2
-- [ ] Start with basic square world
 - [ ] Curriculum learning might be helpful to do cause attribution
