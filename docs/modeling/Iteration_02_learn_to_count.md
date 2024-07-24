@@ -101,7 +101,23 @@ And this is a sample grid along with questions and answers.
 
 I estimate that I can generate around 1M grids in less than one hour. That is probably enough to train a good model.
 
+I have generated the grids following a kind of curriculum learning approach: there are more small grids (easier) than big grids (more difficult).
+
 ### Fine-tuning
+
+On a first step I could try doing some parameter efficient fine-tuning such as LoRA or DoRA.
+But I believe I should also try with a full fine-tuning which was done by Numina team
+on the AIMO competition.
+
+The training data should be masked so that the model only has to learn the answers to the responses. I believe
+the best way to do it is to frame all the questions-answers as a chat with different turns.
+
+Resources:
+
+- [LoRA conceptual guide](https://huggingface.co/docs/peft/main/en/conceptual_guides/lora)
+- [Tutorial for full fine-tuning](https://huggingface.co/docs/transformers/en/training)
+- [PEFT lora methods](https://huggingface.co/docs/peft/en/task_guides/lora_based_methods)
+- [DoRA is supported now on PEFT](https://huggingface.co/docs/peft/en/developer_guides/lora#weight-decomposed-low-rank-adaptation-dora)
 
 ### Evaluation
 
