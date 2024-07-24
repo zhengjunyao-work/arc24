@@ -118,6 +118,9 @@ Resources:
 - [Tutorial for full fine-tuning](https://huggingface.co/docs/transformers/en/training)
 - [PEFT lora methods](https://huggingface.co/docs/peft/en/task_guides/lora_based_methods)
 - [DoRA is supported now on PEFT](https://huggingface.co/docs/peft/en/developer_guides/lora#weight-decomposed-low-rank-adaptation-dora)
+- [Fine-tuning Llama 3, wandb](https://wandb.ai/byyoung3/mlnews2/reports/Fine-Tuning-Llama-3-with-LoRA-TorchTune-vs-HuggingFace--Vmlldzo3NjE3NzAz#fine-tuning-llama-3:-torchtune-vs-hugginface)
+- [My notebook where I fine-tune Llama with QLoRa for prompt recovery](https://github.com/ironbar/prompt_recovery/blob/main/notebooks/012_fine-tune_llama.ipynb)
+- [Train on completions only](https://huggingface.co/docs/trl/en/sft_trainer#train-on-completions-only)
 
 ### Evaluation
 
