@@ -124,6 +124,8 @@ Resources:
 
 #### First trainings
 
+[Wandb plots](https://wandb.ai/guillermobarbadillo/20240724_first_trainings?nw=nwuserguillermobarbadillo)
+
 I have been able to train a Phi-3 model using LoRA with 1e5 train samples for 2 epochs. It has taken around 8 hours.
 The train and validation loss look very good, there is no sign of overfitting and the validation loss decreases steadily.
 
@@ -134,6 +136,10 @@ verify that it works correctly.
 
 I did some smaller experiments with the learning rate and seems that the sweet spot is around 4e-4 for Phi-3.
 There might be room for improvement in train speed if using cosine schedule with restarts.
+
+I have also done a quick fine-tuning with Llama 3 8b that took 65 minutes compared to same experiment with Phi-3
+that took 25 minutes. However Llama achieved a better train and validation loss. (Maybe with the same
+LoRA parameters it has more capacity)
 
 ### Evaluation
 
