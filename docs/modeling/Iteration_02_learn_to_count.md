@@ -143,6 +143,10 @@ LoRA parameters it has more capacity)
 
 ### Evaluation
 
+I have been doing first manual evaluation of the model, I have randomly used some of the validation grids
+and see how the model answers. It turns out that the model is not perfect, but it counts the true
+number of objects almost all the times.
+
 ## Results
 
 ## Conclusion
