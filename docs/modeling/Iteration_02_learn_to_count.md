@@ -122,6 +122,19 @@ Resources:
 - [My notebook where I fine-tune Llama with QLoRa for prompt recovery](https://github.com/ironbar/prompt_recovery/blob/main/notebooks/012_fine-tune_llama.ipynb)
 - [Train on completions only](https://huggingface.co/docs/trl/en/sft_trainer#train-on-completions-only)
 
+#### First trainings
+
+I have been able to train a Phi-3 model using LoRA with 1e5 train samples for 2 epochs. It has taken around 8 hours.
+The train and validation loss look very good, there is no sign of overfitting and the validation loss decreases steadily.
+
+![first training metrics](res/2024-07-26-09-51-50.png)
+
+Looking at the training metrics it seems that the model is learning to count. I have to evaluate it to
+verify that it works correctly.
+
+I did some smaller experiments with the learning rate and seems that the sweet spot is around 4e-4 for Phi-3.
+There might be room for improvement in train speed if using cosine schedule with restarts.
+
 ### Evaluation
 
 ## Results
@@ -136,3 +149,7 @@ Resources:
 
 - [ ] How to evaluate the representation of the models? Phi-3, Llama3, Gemma2
 - [ ] Curriculum learning might be helpful to do cause attribution
+- [ ] Does DoRA get better results?
+- [ ] ARC tasks fine-tuning, maybe using Michael Hodel augmentations. That would be a good way to see if
+      learning to count is useful or not. If I find that is useful then I should create other tasks.
+- [ ] Can I measure the effect of r in LoRA? Probably I need a big r because the task is pretty new for this LLMs
