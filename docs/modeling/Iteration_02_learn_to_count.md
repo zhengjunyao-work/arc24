@@ -121,6 +121,7 @@ Resources:
 - [Fine-tuning Llama 3, wandb](https://wandb.ai/byyoung3/mlnews2/reports/Fine-Tuning-Llama-3-with-LoRA-TorchTune-vs-HuggingFace--Vmlldzo3NjE3NzAz#fine-tuning-llama-3:-torchtune-vs-hugginface)
 - [My notebook where I fine-tune Llama with QLoRa for prompt recovery](https://github.com/ironbar/prompt_recovery/blob/main/notebooks/012_fine-tune_llama.ipynb)
 - [Train on completions only](https://huggingface.co/docs/trl/en/sft_trainer#train-on-completions-only)
+- [Alejandro Vaca discussing LoRA parameters](https://www.youtube.com/live/458UWBlBdtI?si=Us2YQmdacm5rEO1L&t=2283)
 
 #### First trainings
 
@@ -141,6 +142,9 @@ I have also done a quick fine-tuning with Llama 3 8b that took 65 minutes compar
 that took 25 minutes. However Llama achieved a better train and validation loss. (Maybe with the same
 LoRA parameters it has more capacity)
 
+27/07/2024. I have continued the training of Phi-3 for an additional 400k samples. It takes around 16 hours.
+I want to run a new training with `rslora` and higher `r` to see if having more capacity is useful.
+
 ### Evaluation
 
 I have been doing first manual evaluation of the model, I have randomly used some of the validation grids
@@ -159,7 +163,13 @@ number of objects almost all the times.
 
 - [ ] How to evaluate the representation of the models? Phi-3, Llama3, Gemma2
 - [ ] Curriculum learning might be helpful to do cause attribution
-- [ ] Does DoRA get better results?
+- [ ] LoRA parameters
+  - [ ] Read the full huggingface documentation
+  - [ ] Does DoRA get better results?
+  - [ ] Can I measure the effect of r in LoRA? Probably I need a big r because the task is pretty new for this LLMs
+  - [ ] `use_rslora` is said to work better in the documentation, maybe needed for larger r values.
+  - [ ] See Vaca video.
 - [ ] ARC tasks fine-tuning, maybe using Michael Hodel augmentations. That would be a good way to see if
       learning to count is useful or not. If I find that is useful then I should create other tasks.
-- [ ] Can I measure the effect of r in LoRA? Probably I need a big r because the task is pretty new for this LLMs
+- [ ] Llama vs Phi
+- [ ] Does learning to count improve the solving of ARC tasks?
