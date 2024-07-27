@@ -164,12 +164,13 @@ number of objects almost all the times.
 - [ ] How to evaluate the representation of the models? Phi-3, Llama3, Gemma2
 - [ ] Curriculum learning might be helpful to do cause attribution
 - [ ] LoRA parameters
-  - [ ] Read the full huggingface documentation
+  - [x] Read the full huggingface documentation
   - [ ] Does DoRA get better results?
   - [ ] Can I measure the effect of r in LoRA? Probably I need a big r because the task is pretty new for this LLMs
   - [ ] `use_rslora` is said to work better in the documentation, maybe needed for larger r values.
-  - [ ] See Vaca video.
+  - [x] See Vaca video.
 - [ ] ARC tasks fine-tuning, maybe using Michael Hodel augmentations. That would be a good way to see if
       learning to count is useful or not. If I find that is useful then I should create other tasks.
 - [ ] Llama vs Phi
 - [ ] Does learning to count improve the solving of ARC tasks?
+- [ ] Does the loss change if the order of the questions is randomized? I feel that from the evaluation results.
