@@ -153,6 +153,28 @@ number of objects almost all the times.
 
 ## Results
 
+### Does an LLM learn to count?
+
+Yes, it is possible to train an LLM to count really well (almost perfectly) by training on synthetic data.
+I haven't done any special with the input grids format.
+
+### DoRA and rslora
+
+I have tried adding DoRA and rslora to the training. I haven't seen a clear improvement because I didn't
+have an exact same experiment without them. Maybe the only thing I can say is that they don't hurt.
+
+### The order of the questions matter
+
+The answers of the questions can be used as hints or shortcuts for the following questions. Thus
+the order of the questions matter. If I want to achieve a better representation I should randomize
+the order of the questions to force the model to be able to answer without hints or shortcuts.
+
+This explains why I see weird results on evaluation, I was changing the order by only showing one question.
+
+### Does learning to count improve accuracy at ARC tasks?
+
+First quick evaluation shows terrible results, predicting only black grids.
+
 ## Conclusion
 
 ## Next steps
@@ -165,13 +187,14 @@ number of objects almost all the times.
 - [ ] Curriculum learning might be helpful to do cause attribution
 - [ ] LoRA parameters
   - [x] Read the full huggingface documentation
-  - [ ] Does DoRA get better results?
+  - [x] Does DoRA get better results?
   - [ ] Can I measure the effect of r in LoRA? Probably I need a big r because the task is pretty new for this LLMs
-  - [ ] `use_rslora` is said to work better in the documentation, maybe needed for larger r values.
+  - [x] `use_rslora` is said to work better in the documentation, maybe needed for larger r values.
   - [x] See Vaca video.
 - [ ] ARC tasks fine-tuning, maybe using Michael Hodel augmentations. That would be a good way to see if
       learning to count is useful or not. If I find that is useful then I should create other tasks.
 - [ ] Llama vs Phi
 - [ ] Does learning to count improve the solving of ARC tasks?
-- [ ] Does the loss change if the order of the questions is randomized? I feel that from the evaluation results.
+- [x] Does the loss change if the order of the questions is randomized? I feel that from the evaluation results.
 - [ ] Packing. If I can bundle smaller samples into a single sample along with longer samples I could speedup training. https://huggingface.co/docs/trl/v0.4.2/en/sft_trainer#packing-dataset-constantlengthdataset
+  ValueError: You passed a `DataCollatorForCompletionOnlyLM` to the SFTTrainer. This is not compatible with the `packing` argument.
