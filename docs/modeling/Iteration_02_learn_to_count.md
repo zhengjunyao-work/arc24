@@ -174,3 +174,4 @@ number of objects almost all the times.
 - [ ] Llama vs Phi
 - [ ] Does learning to count improve the solving of ARC tasks?
 - [ ] Does the loss change if the order of the questions is randomized? I feel that from the evaluation results.
+- [ ] Packing. If I can bundle smaller samples into a single sample along with longer samples I could speedup training. https://huggingface.co/docs/trl/v0.4.2/en/sft_trainer#packing-dataset-constantlengthdataset
