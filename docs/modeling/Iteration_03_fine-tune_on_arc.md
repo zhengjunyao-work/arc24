@@ -31,6 +31,9 @@ the priors and second learn to solve the training tasks.
 
 ## Next steps
 
+- Could I frame the problem as a 2 player game where the first player needs to describe in text the
+  transformation and the second player needs to implement it given the text description and the input?
+
 ## TODO
 
 - [ ]
