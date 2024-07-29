@@ -25,6 +25,18 @@ the priors and second learn to solve the training tasks.
 
 ## Development
 
+### Train script
+
+I'm going to copy and adapt the script that was used to teach the models to count. It's a little bit
+dirty but that will allow to start training quickly. Later I could think about refactoring a single
+training script.
+
+I'm going to apply rotations and flips to augment the train samples by x8. I also believe I could
+swap some of the train samples by the test sample to increase the dataset by an additionally x4 (estimated)
+Thus in the best case I will take the 400 train samples and get 12800.
+
+I have concerns about the memory usage. When training to learn to count the number of tokens was below 1k, but here it might grow to 8k.
+
 ## Results
 
 ## Conclusion
