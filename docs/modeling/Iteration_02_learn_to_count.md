@@ -106,7 +106,7 @@ I have generated the grids following a kind of curriculum learning approach: the
 ### Fine-tuning
 
 On a first step I could try doing some parameter efficient fine-tuning such as LoRA or DoRA.
-But I believe I should also try with a full fine-tuning which was done by Numina team
+But I believe I should also try with a full fine-tuning which was done by [Numina team]((https://www.kaggle.com/competitions/ai-mathematical-olympiad-prize/discussion/519303))
 on the AIMO competition.
 
 The training data should be masked so that the model only has to learn the answers to the responses. I believe
@@ -173,18 +173,33 @@ This explains why I see weird results on evaluation, I was changing the order by
 
 ### Does learning to count improve accuracy at ARC tasks?
 
-First quick evaluation shows terrible results, predicting only black grids.
+First quick evaluation with Phi-3 shows terrible results, predicting only black grids.
+I see a similar behaviour with Llama 3.1, the inference results after being fine-tuned do not have too much sense.
+
+### Llama vs Phi
+
+Training Llama is around 4 times slower than training Phi on my computer.
+This implies that in the same time I could train Phi on 4e5 samples or Llama on 1e5 samples.
+I might need to go to a more powerful hardware than 2x3090 gpus
+
+It might be possible that Llama could get better results than Phi, but I don't have a direct comparison
+due to the slow training of Llama. For the comparison to be fair I should tune the parameters of the
+training such as learning rate, and lora configuration (since they have different size using the same lora parameters leads to different lora capacity).
 
 ## Conclusion
+
+By using synthetic data we have taught LLMs to count objects on a grid. However this fine-tuned models
+do not make better predictions for ARC tasks, in fact they make worse predictions than the base model.
 
 ## Next steps
 
 - Once the grid representation is learned, we need to teach the model to learn transformation between grids. Some priors are change-related and cannot be learned from a single grid
+- I might have to go to a more powerful hardware, with more GPU memory.
 
 ## TODO
 
 - [ ] How to evaluate the representation of the models? Phi-3, Llama3, Gemma2
-- [ ] Curriculum learning might be helpful to do cause attribution
+- [x] Curriculum learning might be helpful to do cause attribution
 - [ ] LoRA parameters
   - [x] Read the full huggingface documentation
   - [x] Does DoRA get better results?
@@ -193,8 +208,8 @@ First quick evaluation shows terrible results, predicting only black grids.
   - [x] See Vaca video.
 - [ ] ARC tasks fine-tuning, maybe using Michael Hodel augmentations. That would be a good way to see if
       learning to count is useful or not. If I find that is useful then I should create other tasks.
-- [ ] Llama vs Phi
-- [ ] Does learning to count improve the solving of ARC tasks?
+- [x] Llama vs Phi
+- [x] Does learning to count improve the solving of ARC tasks?
 - [x] Does the loss change if the order of the questions is randomized? I feel that from the evaluation results.
 - [ ] Packing. If I can bundle smaller samples into a single sample along with longer samples I could speedup training. https://huggingface.co/docs/trl/v0.4.2/en/sft_trainer#packing-dataset-constantlengthdataset
   ValueError: You passed a `DataCollatorForCompletionOnlyLM` to the SFTTrainer. This is not compatible with the `packing` argument.
