@@ -39,6 +39,13 @@ I have concerns about the memory usage. When training to learn to count the numb
 
 ## Results
 
+- Starting from the model that was taught to count is not helpful, starting loss is higher and also final.
+  This follows the bad results observed when trying to solve arc tasks with that model.
+- By training on the train dataset the validation loss is decreased
+- Data augmentation is helpful to decrease the validation loss
+- With 24GB of gpu memory I can only fit one sample of 4096 tokens
+- First evaluations show improvement on the train set, but it only solves 1/10 tasks. More training is needed.
+
 ## Conclusion
 
 ## Next steps
