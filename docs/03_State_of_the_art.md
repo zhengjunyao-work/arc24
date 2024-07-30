@@ -211,6 +211,16 @@ to verify that the task has been understood.
 
 However results do not show a big benefit from using the text descriptions.
 
+### ⭐ [On the Paradox of Learning to Reason from Data](https://arxiv.org/abs/2205.11502)
+
+> Logical reasoning is needed in a wide range of NLP tasks. Can a BERT model be trained end-to-end to solve logical reasoning problems presented in natural language? We attempt to answer this question in a confined problem space where there exists a set of parameters that perfectly simulates logical reasoning. We make observations that seem to contradict each other: BERT attains near-perfect accuracy on in-distribution test examples while failing to generalize to other data distributions over the exact same problem space. Our study provides an explanation for this paradox: instead of learning to emulate the correct reasoning function, BERT has in fact learned statistical features that inherently exist in logical reasoning problems. We also show that it is infeasible to jointly remove statistical features from data, illustrating the difficulty of learning to reason in general. Our result naturally extends to other neural models and unveils the fundamental difference between learning to reason and learning to achieve high performance on NLP benchmarks using statistical features.
+
+This paper shows that an LLM is able to achieve high performance on a NLP reasoning benchmark without learning to reason. Instead it uses statistical features and when faced with a different data distribution it does not generalize well.
+
+This is a very interesting result, but I have one big criticism:
+
+Would the results be the same if instead of just giving the solution the model would have been given the reasoning traces? I believe that to teach to reason we have to go "step by step".
+
 ### [Reasoning Abilities of Large Language Models: In-Depth Analysis on the Abstraction and Reasoning Corpus](https://arxiv.org/abs/2403.11793)
 
 This papers studies if LLMs are good at the three elements of Language of Thought Hypothesis:
