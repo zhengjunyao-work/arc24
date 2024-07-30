@@ -52,6 +52,7 @@ I have concerns about the memory usage. When training to learn to count the numb
 
 - Could I frame the problem as a 2 player game where the first player needs to describe in text the
   transformation and the second player needs to implement it given the text description and the input?
+- I need more computing power
 
 ## TODO
 
