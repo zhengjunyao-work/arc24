@@ -44,6 +44,10 @@ I have concerns about the memory usage. When training to learn to count the numb
 
 TODO: color swap (does it have sense?) or to remap the colors on each task
 
+### GPU memory requirements
+
+With 2x24GB of gpu memory I can only fit one sample of 4096 tokens
+
 ### Going to the cloud
 
 #### AWS
@@ -75,13 +79,52 @@ I have published a [notebook](https://www.kaggle.com/code/ironbar/generate-train
 
 ## Results
 
-- Starting from the model that was taught to count is not helpful, starting loss is higher and also final.
-  This follows the bad results observed when trying to solve arc tasks with that model.
-- By training on the train dataset the validation loss is decreased
-- Data augmentation is helpful to decrease the validation loss
-- With 24GB of gpu memory I can only fit one sample of 4096 tokens
-- First evaluations show improvement on the train set, but it only solves 1/10 tasks. More training is needed.
-- Overfitting to the train data is not easy, 36 epochs with careful learning rate
+### Can we overfit to the train set?
+
+| experiment                          | accuracy |
+|-------------------------------------|----------|
+| Phi-3 baseline                      | 1.6%     |
+| Phi-3 baseline dialog               | 6.4%     |
+| Fine-tune with data augmentation    | 39.3%    |
+| Fine-tune without data augmentation | 60.20%   |
+
+We can improve the accuracy of the train set if we fine-tune on the train set. However the accuracy
+is not as high as expected, the model makes mistakes in the inference.
+
+To achieve the 60% accuracy I had to train for 36 epochs (3x12 epochs), lowering the learning rate on
+each training.
+
+The training with data augmentation was trained for around 250 epochs (6250 steps = 2800+1150+2300)
+and notice that the accuracy on the train dataset is smaller than the current best accuracy on the
+private test set (43%)
+
+**Thus overfit is possible but it is not easy, at least with Phi-3**
+
+TODO: there might be some discrepancy between train and test?
+
+### Can we improve eval accuracy if we fine-tune on the train set?
+
+| experiment                       | accuracy |
+|----------------------------------|----------|
+| Phi-3 baseline                   | 0.0%     |
+| Phi-3 baseline dialog            | 2.5%     |
+| Fine-tune with data augmentation | 6.2%     |
+
+The table shows a clear improvement after fine-tuning the model on the train data. Thus we can
+see that there is some generalization.
+
+By training on the train dataset the validation loss is decreased. Data augmentation is helpful to decrease the validation loss
+
+Could I try with test time fine-tuning to improve the accuracy?
+
+### Does it help to start from a model that learned to count?
+
+Starting from the model that was taught to count is not helpful, starting loss is higher and also final.
+This follows the bad results observed when trying to solve arc tasks with that model. Thus it seems
+that doing a previous fine-tuning in count tasks is not helpful. Maybe a single stage fine-tuning
+could be better.
+
+![train metrics](res/2024-08-01-13-11-22.png)
 
 ## Conclusion
 
@@ -95,6 +138,8 @@ I have published a [notebook](https://www.kaggle.com/code/ironbar/generate-train
 
 ## TODO
 
-- [ ] Evaluate fine-tuned model on arc tasks
+- [ ] Verify that training and evaluation is the same
+- [x] Evaluate fine-tuned model on arc tasks
 - [ ] Does predicting the grid shape helps?
-- [ ] Prepare hodel data
+- [x] Prepare hodel data
+- [ ] Try again with the iterable dataset: https://huggingface.co/docs/trl/en/sft_trainer#trl.trainer.ConstantLengthDataset
