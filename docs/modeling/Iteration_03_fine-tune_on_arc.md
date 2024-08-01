@@ -42,6 +42,8 @@ Thus in the best case I will take the 400 train samples and get 12800.
 
 I have concerns about the memory usage. When training to learn to count the number of tokens was below 1k, but here it might grow to 8k.
 
+TODO: color swap (does it have sense?) or to remap the colors on each task
+
 ### Going to the cloud
 
 #### AWS
@@ -67,6 +69,10 @@ After a quick comparison the prices on Lambdalabs seem to be much better than Go
 
 #### Veridas cluster
 
+### RE-ARC
+
+I have published a [notebook](https://www.kaggle.com/code/ironbar/generate-training-samples-using-re-arc) to generate training data in the same format as ARC tasks.
+
 ## Results
 
 - Starting from the model that was taught to count is not helpful, starting loss is higher and also final.
@@ -75,6 +81,7 @@ After a quick comparison the prices on Lambdalabs seem to be much better than Go
 - Data augmentation is helpful to decrease the validation loss
 - With 24GB of gpu memory I can only fit one sample of 4096 tokens
 - First evaluations show improvement on the train set, but it only solves 1/10 tasks. More training is needed.
+- Overfitting to the train data is not easy, 36 epochs with careful learning rate
 
 ## Conclusion
 
@@ -84,8 +91,10 @@ After a quick comparison the prices on Lambdalabs seem to be much better than Go
   transformation and the second player needs to implement it given the text description and the input?
 - I need more computing power
 - I could study different active inference techniques on the eval dataset. F.e. n-1 train. Eval loss should be a good proxy to see if the different techniques are useful
+- [smollm](https://huggingface.co/blog/smollm)
 
 ## TODO
 
 - [ ] Evaluate fine-tuned model on arc tasks
 - [ ] Does predicting the grid shape helps?
+- [ ] Prepare hodel data
