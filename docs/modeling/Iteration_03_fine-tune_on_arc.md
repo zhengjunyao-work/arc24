@@ -126,6 +126,32 @@ could be better.
 
 ![train metrics](res/2024-08-01-13-11-22.png)
 
+### Dimensions of the data
+
+Training with re-arc allows me to learn how the different dimensions help to generalize:
+
+- number of tasks
+- different examples per task
+
+The plot below shows the train and validation loss for different experiments. The validation dataset
+is fixed, but the train dataset is different and data augmentation is also changed.
+
+![dimensions of the data](res/2024-08-02-07-50-04.png)
+
+This plots suggest that the number of different tasks is more important than having different examples
+per task. When using the re-arc dataset that has 100 different variations of the same task (`07_phi-3`)
+we can see that the training has a similar dynamic to using the train dataset without data augmentation:
+the model does not generalize to the eval dataset and the train loss decreases fast.
+The effect of having x100 more data is seen in the fact that it is harder to decrease the train loss
+and the divergence in the eval dataset is slower, but the dynamic is the same.
+
+In the other hand if we apply data augmentation to the re-arc dataset we see that the eval loss improves (`08_phi-3`)
+and decreasing the train loss is more difficult. When we apply data augmentations such as geometric transformations
+or color swaps we can transform the task (sometimes the task won't be changed, it depends on symmetries).
+This is a very strong evidence that the number of different tasks is much more important than the number of
+variations of the same task. Thus if I could create a task generator it would be valuable, or if I get other arc-like datasets. This has sense because the model is evaluated on new tasks, so ideally it would be trained
+in all different tasks.
+
 ## Conclusion
 
 ## Next steps
@@ -135,6 +161,11 @@ could be better.
 - I need more computing power
 - I could study different active inference techniques on the eval dataset. F.e. n-1 train. Eval loss should be a good proxy to see if the different techniques are useful
 - [smollm](https://huggingface.co/blog/smollm)
+- The number of different tasks is the more important factor during training. Thus downloading ARC like datasets
+  or creating a task synthesizer would be valuable. Maybe the MindsAI team knows this and is simply
+  working to implement new tasks, train a model on them and use test time inference. This hypothesis
+  seems very plausible to me: they would have the advantage of using more data and the new test inference
+  technique.
 
 ## TODO
 
@@ -143,3 +174,4 @@ could be better.
 - [ ] Does predicting the grid shape helps?
 - [x] Prepare hodel data
 - [ ] Try again with the iterable dataset: https://huggingface.co/docs/trl/en/sft_trainer#trl.trainer.ConstantLengthDataset
+- [ ] What if I first fine-tune with augmentation and then without augmentation
