@@ -100,7 +100,11 @@ private test set (43%)
 
 **Thus overfit is possible but it is not easy, at least with Phi-3**
 
-TODO: there might be some discrepancy between train and test?
+TODO: there might be some discrepancy between train and evaluation?
+
+#### Trying to overfit with different training stages
+
+TODO:
 
 ### Can we improve eval accuracy if we fine-tune on the train set?
 
@@ -204,3 +208,4 @@ It is 70% slower (145 vs 247 min for the same number of steps).
   - [ ] Better configuration
   - [ ] Verify that training and evaluation is the same
   - [ ] Should I refactor the way to create train and validation samples?
+- [ ] Is there a relation between train loss and accuracy?
