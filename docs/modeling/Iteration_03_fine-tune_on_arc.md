@@ -157,6 +157,8 @@ in all different tasks.
 I don't know exactly why, but training with re-arc dataset is slower than training with arc dataset. My guess is that each batch is padded to the element with the max length. I'm using a batch size of just 1, so I guess the difference in speed is simply due to the re-arc dataset
 having a mean prompt length higher than arc.
 
+It is 70% slower (145 vs 247 min for the same number of steps).
+
 ## Conclusion
 
 ## Next steps
