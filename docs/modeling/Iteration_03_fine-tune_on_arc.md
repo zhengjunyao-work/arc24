@@ -156,6 +156,17 @@ Training on the arc dataset reaches a lower validation loss than on the re-arc d
 the distribution of the samples is more similar to the evaluation. The re-arc dataset has different colors
 and sizes distribution.
 
+#### Do not preserve the original colors of the tasks
+
+![](res/2024-08-02-12-54-51.png)
+
+The plots above show the exactly same experiment with just one variation: the orange line uses color
+swap data augmentation in addition to using the original task colors, the green line does not preserve
+the original colors, applies augmentation to all the tasks.
+
+The difference in validation loss is dramatic. This is another strong evidence in favour of having
+as many different tasks as possible in training.
+
 ### Training with re-arc is slower
 
 I don't know exactly why, but training with re-arc dataset is slower than training with arc dataset. My guess is that each batch is padded to the element with the max length. I'm using a batch size of just 1, so I guess the difference in speed is simply due to the re-arc dataset
