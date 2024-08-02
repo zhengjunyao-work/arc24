@@ -152,6 +152,10 @@ This is a very strong evidence that the number of different tasks is much more i
 variations of the same task. Thus if I could create a task generator it would be valuable, or if I get other arc-like datasets. This has sense because the model is evaluated on new tasks, so ideally it would be trained
 in all different tasks.
 
+Training on the arc dataset reaches a lower validation loss than on the re-arc dataset. My guess is that
+the distribution of the samples is more similar to the evaluation. The re-arc dataset has different colors
+and sizes distribution.
+
 ### Training with re-arc is slower
 
 I don't know exactly why, but training with re-arc dataset is slower than training with arc dataset. My guess is that each batch is padded to the element with the max length. I'm using a batch size of just 1, so I guess the difference in speed is simply due to the re-arc dataset
@@ -173,13 +177,19 @@ It is 70% slower (145 vs 247 min for the same number of steps).
   working to implement new tasks, train a model on them and use test time inference. This hypothesis
   seems very plausible to me: they would have the advantage of using more data and the new test inference
   technique.
+- I would like to make submissions with the fine-tuned models
+- Does predicting the grid shape helps? Previosly to predict the grid print the shape. Maybe also on the input and output pairs. I have the intuition that this will help. Previously to do this I should refactor the code
+ to enable easy experimentation with different prompts.
 
 ## TODO
 
-- [ ] Verify that training and evaluation is the same
 - [x] Evaluate fine-tuned model on arc tasks
-- [ ] Does predicting the grid shape helps?
 - [x] Prepare hodel data
 - [ ] Try again with the iterable dataset: https://huggingface.co/docs/trl/en/sft_trainer#trl.trainer.ConstantLengthDataset
 - [ ] What if I first fine-tune with augmentation and then without augmentation
 - [ ] Maybe not preserving the original color space creates a more challenging train dataset that results on better generalization.
+- [ ] Improve evaluation notebook
+  - [ ] Free gpu memory after run
+  - [ ] Better configuration
+  - [ ] Verify that training and evaluation is the same
+  - [ ] Should I refactor the way to create train and validation samples?
