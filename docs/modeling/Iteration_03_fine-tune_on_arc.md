@@ -152,6 +152,11 @@ This is a very strong evidence that the number of different tasks is much more i
 variations of the same task. Thus if I could create a task generator it would be valuable, or if I get other arc-like datasets. This has sense because the model is evaluated on new tasks, so ideally it would be trained
 in all different tasks.
 
+### Training with re-arc is slower
+
+I don't know exactly why, but training with re-arc dataset is slower than training with arc dataset. My guess is that each batch is padded to the element with the max length. I'm using a batch size of just 1, so I guess the difference in speed is simply due to the re-arc dataset
+having a mean prompt length higher than arc.
+
 ## Conclusion
 
 ## Next steps
@@ -175,3 +180,4 @@ in all different tasks.
 - [x] Prepare hodel data
 - [ ] Try again with the iterable dataset: https://huggingface.co/docs/trl/en/sft_trainer#trl.trainer.ConstantLengthDataset
 - [ ] What if I first fine-tune with augmentation and then without augmentation
+- [ ] Maybe not preserving the original color space creates a more challenging train dataset that results on better generalization.
