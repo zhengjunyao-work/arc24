@@ -79,6 +79,8 @@ I have published a [notebook](https://www.kaggle.com/code/ironbar/generate-train
 
 ## Results
 
+[Training metrics on wandb](https://wandb.ai/guillermobarbadillo/20240729_arc_fine_tuning/workspace?nw=nwuserguillermobarbadillo)
+
 ### Can we overfit to the train set?
 
 | experiment                          | accuracy |
@@ -178,6 +180,20 @@ having a mean prompt length higher than arc.
 
 It is 70% slower (145 vs 247 min for the same number of steps).
 
+### KV cache quantization is harmful!
+
+I have found the reason for not being able to overfit and get good accuracies on the train set: KV cache quantization
+
+| model    | accuracy quantized | accuracy not quantized |
+|----------|--------------------|------------------------|
+| 02_phi-3 | 60.20%             | 94.30%                 |
+| 11_phi-3 | 43.20%             | 78.60%                 |
+
+The table above shows train accuracy for models that have been trained to overfit on the train dataset.
+It can be shown a huge improvement when not quantizing the kv cache.
+
+TODO: what about regular not overfitted models?
+
 ## Conclusion
 
 ## Next steps
@@ -195,6 +211,7 @@ It is 70% slower (145 vs 247 min for the same number of steps).
 - I would like to make submissions with the fine-tuned models
 - Does predicting the grid shape helps? Previosly to predict the grid print the shape. Maybe also on the input and output pairs. I have the intuition that this will help. Previously to do this I should refactor the code
  to enable easy experimentation with different prompts.
+- What if I add new symbols to the tokenizer to represent the grids: <0>, <1>...
 
 ## TODO
 
@@ -204,8 +221,11 @@ It is 70% slower (145 vs 247 min for the same number of steps).
 - [ ] What if I first fine-tune with augmentation and then without augmentation
 - [ ] Maybe not preserving the original color space creates a more challenging train dataset that results on better generalization.
 - [ ] Improve evaluation notebook
-  - [ ] Free gpu memory after run
+  - [x] Free gpu memory after run
+  - [x] Wait for free gpu
   - [ ] Better configuration
-  - [ ] Verify that training and evaluation is the same
+  - [x] Verify that training and evaluation is the same. They are the exact same prompt.
   - [ ] Should I refactor the way to create train and validation samples?
 - [ ] Is there a relation between train loss and accuracy?
+- [ ] Make a submission with a fine-tuned model, to do this I should create a new notebook.
+  - [ ] How to handle code and data in Kaggle

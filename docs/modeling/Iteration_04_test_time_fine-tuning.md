@@ -31,6 +31,13 @@ see if I can improve the validation loss.
 
 ## Results
 
+[Training metrics in wandb](https://wandb.ai/guillermobarbadillo/20240802_test_time_fine-tuning?nw=nwuserguillermobarbadillo)
+
+### Ongoing
+
+- Baseline val loss in 0.1445
+- First experiment gets 0.1398, probing that test time fine-tuning works
+
 ## Conclusion
 
 ## Next steps
