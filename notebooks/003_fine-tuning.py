@@ -1,28 +1,3 @@
-# %% [markdown]
-# # LLM fine-tuning
-
-# %% [markdown]
-# ## Goal
-
-# %% [markdown]
-# Fine-tune an LLM to learn to count objects in a grid, or to solve ARC tasks.
-
-# %% [markdown]
-# I might do 2 steps of fine-tuning:
-# 
-# 1. Learning priors, f.e. learning to count
-# 2. Solve ARC tasks
-
-# %% [markdown]
-# ## References
-
-# %% [markdown]
-# - https://github.com/ironbar/prompt_recovery/blob/main/notebooks/012_fine-tune_llama.ipynb
-# - https://github.com/ironbar/prompt_recovery/blob/main/notebooks/020_fine-tune_final_ensemble.ipynb
-# - https://www.kaggle.com/code/ironbar/few-shot-prompting-for-arc24
-
-# %% [markdown]
-# ## Imports
 
 # %%
 import os
@@ -113,12 +88,12 @@ class cfg:
 class cfg:
     model_path = "/home/gbarbadillo/data/Phi-3-mini-128k-instruct"
     adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240729_arc_fine_tuning/10_phi-3_1rearc100_2train_lr5e-5_color-swap-no-preserve_continue/checkpoint-1000'
-    train_dataset = '/mnt/hdd0/Kaggle/arc24/data/test_time_fine-tuning/evaluation_n-1.json'
+    train_dataset = '/mnt/hdd0/Kaggle/arc24/data/test_time_fine-tuning/evaluation_n-2.json'
     val_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
-    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240802_test_time_fine-tuning/02_data_augmentation_lr5e-5_3e3steps'
+    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240802_test_time_fine-tuning/05_n-2-dataset_lr5e-5_5e3steps'
     max_seq_len = 4096
     epochs = 0
-    max_steps : Optional[int] =  3000 # If given it will override epochs
+    max_steps : Optional[int] =  5000 # If given it will override epochs
     eval_steps = 50
     warmup_ratio = 0.1
     learning_rate = 5e-5
@@ -129,7 +104,7 @@ class cfg:
     # data augmentation
     use_data_augmentation = True
     max_train_permutations = 2 # tipically 2
-    color_swaps = 0
+    color_swaps = 1
     preserve_original_colors = False
     geometric_transforms = 8 # 0-8
     swap_train_and_test = False
@@ -677,117 +652,5 @@ trainer = SFTTrainer(
 
 trainer.train()
 w.finish()
-
-# %% [markdown]
-# - Data augmentation clearly helps.
-# - Training from a model that has learned to count has a bigger loss at the beginning, remember that evaluations with those models give very bad predictions.
-
-# %%
-raise
-
-# %% [markdown]
-# ## Evaluation
-
-# %% [markdown]
-# - https://huggingface.co/docs/transformers/en/peft
-# - https://huggingface.co/docs/peft/main/en/package_reference/lora#peft.LoraModel.merge_and_unload
-
-# %% [markdown]
-# ### Code
-
-# %%
-with open(cfg.val_dataset, 'r') as f:
-    data = json.load(f)
-val_samples_ids = list(data.keys())
-
-def ask_question_to_model(sample_idx, pipe, question_idx=0, arbitrary_question=None):
-    sample_id = val_samples_ids[sample_idx]
-    sample = data[sample_id]
-
-    sample_with_one_question = sample.copy()
-    if arbitrary_question is None:
-        sample_with_one_question['questions'] = {question:answer for idx, (question, answer) in enumerate(sample['questions'].items()) if idx == question_idx}
-    else:
-        sample_with_one_question['questions'] = {arbitrary_question:''}
-
-    messages = create_messages_from_sample(sample_with_one_question, grid_encoder)
-    prompt = tokenizer.apply_chat_template(messages[:2],
-                                            tokenize=False,
-                                            add_generation_prompt=True)
-    plot_grid(sample['grid']); plt.show()
-    # pretty_print_prompt(prompt)
-
-    generation_args = {
-        "max_new_tokens": 50,
-        "return_full_text": False,
-        "do_sample": False,
-    }
-
-    output = pipe(prompt, **generation_args)
-    print(list(sample_with_one_question['questions'].keys())[0])
-    print(f">{output[0]['generated_text']} ({list(sample_with_one_question['questions'].values())[0]})")
-
-def plot_grid(grid):
-    grid = np.array(grid)
-    cmap = colors.ListedColormap(
-        ['#000000', '#0074D9','#FF4136','#2ECC40','#FFDC00',
-         '#AAAAAA', '#F012BE', '#FF851B', '#7FDBFF', '#870C25'])
-    norm = colors.Normalize(vmin=0, vmax=9)
-    plt.imshow(grid, cmap=cmap, norm=norm)
-    plt.grid(True,which='both',color='lightgrey', linewidth=0.5)
-    plt.xticks(np.arange(-0.5, grid.shape[1]), [])
-    plt.yticks(np.arange(-0.5, grid.shape[0]), [])
-    plt.xlim(-0.5, grid.shape[1]-0.5)
-
-    for i in range(grid.shape[0]):
-        for j in range(grid.shape[1]):
-            plt.text(j, i, grid[i, j], ha='center', va='center')
-
-# %% [markdown]
-# ### Experiments
-
-# %%
-adapter_path = '/mnt/hdd0/Kaggle/arc24/models/20240724_first_trainings/11_lr_4e-4_1e5dataset_r32/checkpoint-12400'
-adapter_path = '/mnt/hdd0/Kaggle/arc24/models/20240724_first_trainings/09_lr_1e-3_1e4dataset_r32/checkpoint-600/'
-adapter_path = '/mnt/hdd0/Kaggle/arc24/models/20240724_first_trainings/14_llama31/checkpoint-333'
-adapter_path = '/mnt/hdd0/Kaggle/arc24/models/20240724_first_trainings/15_continue_training_phi3_4e5/checkpoint-22800'
-adapter_path = '/mnt/hdd0/Kaggle/arc24/models/20240724_first_trainings/22_random_question_lr1e-4_1e5dataset/checkpoint-6228'
-adapter_path = '/mnt/hdd0/Kaggle/arc24/models/20240724_first_trainings/22_llama31_lr1e-4_1e5dataset_r32/checkpoint-6553'
-model.load_adapter(adapter_path, adapter_path)
-model.eval();
-
-# %%
-pipe = pipeline(
-    "text-generation",
-    model=model,
-    tokenizer=tokenizer,
-)
-
-# %% [markdown]
-# I want to visualize the grid and ask some random question, see how well it does.
-# 
-# Compare the responses with and without the adapter.
-
-# %%
-ask_question_to_model(sample_idx=750, question_idx=1, pipe=pipe)
-
-# %%
-# ask_question_to_model(sample_idx=300, arbitrary_question='Please describe the grid, saying how many objects are there, their color and area.', pipe=pipe)
-# ask_question_to_model(sample_idx=300, arbitrary_question='What is the shape of the grid? (nxn)', pipe=pipe)
-ask_question_to_model(sample_idx=550, arbitrary_question='Describe the objects in the grid', pipe=pipe)
-
-# %% [markdown]
-# 
-
-# %% [markdown]
-# ## TODO
-
-# %% [markdown]
-# - [x] Measure the effect of using data augmentation
-# - [x] Color swapping data augmentation, map the colors into a random new space.
-# - [ ] IterableDataset. https://huggingface.co/docs/datasets/en/about_mapstyle_vs_iterable#creating-map-style-datasets-and-iterable-datasets
-# - [ ] What if I predict the shape of the grid before writing it?
-# - [ ] Shuffle the data after each epoch?
-# - [x] Maybe I could speedup training by loading the model on the 2 gpus at the same time? Using a single GPU does not have enough memory.
 
 
