@@ -194,6 +194,15 @@ It can be shown a huge improvement when not quantizing the kv cache.
 
 TODO: what about regular not overfitted models?
 
+### Submission
+
+| model                                                                            | train  | eval  | test |
+|----------------------------------------------------------------------------------|--------|-------|------|
+| 10_phi-3_1rearc100_2train_lr5e-5_color-swap-no-preserve_continue/checkpoint-1000 | 24.50% | 6.13% | 3%   |
+
+We have improved the test score from 1 (with Llama 3) to 3 by submitting a fine-tuned version of Phi-3.
+Train accuracy is low, so I believe we should be able to improve it by increasing the model capacity or the train duration.
+
 ## Conclusion
 
 ## Next steps
@@ -227,5 +236,5 @@ TODO: what about regular not overfitted models?
   - [x] Verify that training and evaluation is the same. They are the exact same prompt.
   - [ ] Should I refactor the way to create train and validation samples?
 - [ ] Is there a relation between train loss and accuracy?
-- [ ] Make a submission with a fine-tuned model, to do this I should create a new notebook.
+- [x] Make a submission with a fine-tuned model, to do this I should create a new notebook.
   - [ ] How to handle code and data in Kaggle
