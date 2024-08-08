@@ -46,7 +46,7 @@ TODO: color swap (does it have sense?) or to remap the colors on each task
 
 ### GPU memory requirements
 
-With 2x24GB of gpu memory I can only fit one sample of 4096 tokens
+With 2x24GB of gpu memory I can only fit one sample of 4096 tokens when fine-tuning Phi-3. I cannot fine-tune Llama 3, at least without quantization.
 
 ### Going to the cloud
 
@@ -87,26 +87,10 @@ I have published a [notebook](https://www.kaggle.com/code/ironbar/generate-train
 |-------------------------------------|----------|
 | Phi-3 baseline                      | 1.6%     |
 | Phi-3 baseline dialog               | 6.4%     |
-| Fine-tune with data augmentation    | 39.3%    |
-| Fine-tune without data augmentation | 60.20%   |
+| Fine-tune without data augmentation | 94.3%    |
 
-We can improve the accuracy of the train set if we fine-tune on the train set. However the accuracy
-is not as high as expected, the model makes mistakes in the inference.
-
-To achieve the 60% accuracy I had to train for 36 epochs (3x12 epochs), lowering the learning rate on
-each training.
-
-The training with data augmentation was trained for around 250 epochs (6250 steps = 2800+1150+2300)
-and notice that the accuracy on the train dataset is smaller than the current best accuracy on the
-private test set (43%)
-
-**Thus overfit is possible but it is not easy, at least with Phi-3**
-
-TODO: there might be some discrepancy between train and evaluation?
-
-#### Trying to overfit with different training stages
-
-TODO:
+We can improve the accuracy of the train set if we fine-tune on the train set.
+I had to disable KV cache quantization to achieve that accuracy, check section below.
 
 ### Can we improve eval accuracy if we fine-tune on the train set?
 
@@ -180,6 +164,8 @@ having a mean prompt length higher than arc.
 
 It is 70% slower (145 vs 247 min for the same number of steps).
 
+The re-arc dataset has different distribution than the ARC dataset: different sizes and colors.
+
 ### KV cache quantization is harmful!
 
 I have found the reason for not being able to overfit and get good accuracies on the train set: KV cache quantization
@@ -205,6 +191,17 @@ Train accuracy is low, so I believe we should be able to improve it by increasin
 
 ## Conclusion
 
+On this iteration I have probed with Phi-3 that:
+
+- I can overfit to the train set
+- Fine-tuning on train set improves accuracy on the eval dataset
+- Starting from a model that learned to count was not helpful
+- The most important feature of the train set is to have different tasks. We have to train on the biggest number possible of different tasks.
+  Using data augmentations that change the meaning of the task, such as geometric transformations or color swaps are very helpful.
+- The re-arc dataset has different distribution than the ARC dataset: different sizes and colors. Its utility is limited because of this difference
+
+We have improved the leaderboard score from 1 to 3.
+
 ## Next steps
 
 - Could I frame the problem as a 2 player game where the first player needs to describe in text the
@@ -227,7 +224,7 @@ Train accuracy is low, so I believe we should be able to improve it by increasin
 - [x] Evaluate fine-tuned model on arc tasks
 - [x] Prepare hodel data
 - [ ] Try again with the iterable dataset: https://huggingface.co/docs/trl/en/sft_trainer#trl.trainer.ConstantLengthDataset
-- [ ] What if I first fine-tune with augmentation and then without augmentation
+- [x] What if I first fine-tune with augmentation and then without augmentation
 - [ ] Maybe not preserving the original color space creates a more challenging train dataset that results on better generalization.
 - [ ] Improve evaluation notebook
   - [x] Free gpu memory after run
