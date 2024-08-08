@@ -37,6 +37,7 @@ see if I can improve the validation loss.
 
 - Baseline val loss in 0.1445
 - First experiment gets 0.1398, probing that test time fine-tuning works
+- Best trainings are taking in the order of 20h in my PC, which is better than Kaggle hardware. This should be at least 4 times faster to be able to use it at submission.
 
 ## Conclusion
 
