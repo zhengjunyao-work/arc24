@@ -138,6 +138,34 @@ class cfg:
     swap_train_and_test = False
     repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
 
+# Smaller models config
+class cfg:
+    model_path = "HuggingFaceTB/SmolLM-135M-Instruct"
+    adapter_path: Optional[str] = None
+    train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
+    # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/rearc/re_arc_100.json'
+    val_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
+    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240809_smaller_models/01_SmolLM-135M-Instruct_baseline_lr2e-4'
+    max_seq_len = 4096
+    epochs = 0
+    max_steps : Optional[int] =  1000 # If given it will override epochs
+    eval_steps = 100
+    warmup_ratio = 0.1
+    batch_size = 16
+    learning_rate = 2e-4
+    # LoRA
+    use_rslora = True,
+    use_dora = True,
+    lora_r = 32
+    # data augmentation
+    use_data_augmentation = True
+    max_train_permutations = 2 # tipically 2
+    color_swaps = 1
+    preserve_original_colors = False
+    geometric_transforms = 8 # 0-8
+    swap_train_and_test = True
+    repeat_prompts = False # if bigger than 0 it will repeat the prompts that many times
+
 # %%
 os.makedirs(cfg.output_dir, exist_ok=True)
 with open(os.path.join(cfg.output_dir, 'cfg.json'), 'w') as f:
@@ -649,12 +677,21 @@ training_arguments = TrainingArguments(
 
 # %%
 if 'llama' in cfg.model_path:
+    print('Using llama template for collator')
     data_collator = DataCollatorForCompletionOnlyLM(
         tokenizer=tokenizer,
         instruction_template='<|start_header_id|>user<|end_header_id|>',
         response_template='<|start_header_id|>assistant<|end_header_id|>',
     )
+elif 'SmolLM' in cfg.model_path or cfg.model_path == 'Qwen/Qwen2-0.5B-Instruct':
+    print('Using SmolLM template for collator')
+    data_collator = DataCollatorForCompletionOnlyLM(
+        tokenizer=tokenizer,
+        instruction_template='<|im_start|>user',
+        response_template='<|im_start|>assistant',
+    )
 else:
+    print('Using Phi-3 template for collator')
     data_collator = DataCollatorForCompletionOnlyLM(
         tokenizer=tokenizer,
         instruction_template='<|user|>',
