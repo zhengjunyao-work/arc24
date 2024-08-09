@@ -110,6 +110,34 @@ class cfg:
     swap_train_and_test = False
     repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
 
+# fast test time fine-tuning conf
+batch_size = 32
+class cfg:
+    model_path = "/home/gbarbadillo/data/Phi-3-mini-128k-instruct"
+    adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240729_arc_fine_tuning/10_phi-3_1rearc100_2train_lr5e-5_color-swap-no-preserve_continue/checkpoint-1000'
+    train_dataset = '/mnt/hdd0/Kaggle/arc24/data/test_time_fine-tuning/evaluation_n-1.json'
+    val_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
+    output_dir = f'/mnt/hdd0/Kaggle/arc24/models/20240802_test_time_fine-tuning/07_fast_bs{batch_size}_lr1e-3_1e3steps'
+    max_seq_len = 4096
+    epochs = 0
+    batch_size = batch_size
+    max_steps : Optional[int] =  int(1000*16/batch_size) # If given it will override epochs
+    eval_steps = int(50*16/batch_size)
+    warmup_ratio = 0.2
+    learning_rate = 1e-3
+    # LoRA
+    use_rslora = True,
+    use_dora = True,
+    lora_r = 32
+    # data augmentation
+    use_data_augmentation = True
+    max_train_permutations = 2 # tipically 2
+    color_swaps = 1
+    preserve_original_colors = False
+    geometric_transforms = 8 # 0-8
+    swap_train_and_test = False
+    repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
+
 # %%
 os.makedirs(cfg.output_dir, exist_ok=True)
 with open(os.path.join(cfg.output_dir, 'cfg.json'), 'w') as f:
@@ -596,7 +624,7 @@ if 'llama' in cfg.model_path:
 else:
     batch_size_kwargs = dict(
         per_device_train_batch_size=1, # 4-16 should be fine for lora.
-        gradient_accumulation_steps=16,
+        gradient_accumulation_steps=cfg.batch_size,
         per_device_eval_batch_size=2,
     )
 

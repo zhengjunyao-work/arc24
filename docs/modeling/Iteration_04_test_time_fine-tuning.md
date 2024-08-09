@@ -29,15 +29,27 @@ see if I can improve the validation loss.
 
 ## Development
 
+
+
 ## Results
 
 [Training metrics in wandb](https://wandb.ai/guillermobarbadillo/20240802_test_time_fine-tuning?nw=nwuserguillermobarbadillo)
 
-### Ongoing
+### First results
 
-- Baseline val loss in 0.1445
-- First experiment gets 0.1398, probing that test time fine-tuning works
-- Best trainings are taking in the order of 20h in my PC, which is better than Kaggle hardware. This should be at least 4 times faster to be able to use it at submission.
+| experiment                                    | val loss | val accuracy |
+|-----------------------------------------------|----------|--------------|
+| baseline                                      | 0.1445   | 6.50%        |
+| train with n-1 samples                        | 0.1398   | 7.20%        |
+| add geometric augmentations                   | 0.1107   | TODO         |
+| add color swap                                | 0.099    | 16.80%       |
+| preserve original color when using color swap | -        | -            |
+| train with n-2 samples                        | -        | -            |
+
+- Test-time fine-tuning has clearly improved the validation loss and accuracy of the baseline model.
+- One surprising finding is that using geometric and color augmentations is helpful. I would have said that training with the exact same data would have been better. F.e. preserving the original color when using color swap did not brought improvements.
+- Training with n-2 samples did not improve over training with n-1 samples. This matched my intuition because we are not increasing the number of tasks, we are just removing input information.
+- Best trainings are taking in the order of 20h in my PC, which is better than Kaggle hardware. This should be at least 4 times faster to be able to use it at submission. Maybe I can try to increase the learning rate to see if the training is faster.
 
 ## Conclusion
 
@@ -45,4 +57,6 @@ see if I can improve the validation loss.
 
 ## TODO
 
-- [ ]
+- [ ] Can I think of additional augmentations?
+- [ ] Can I speedup training?
+- [ ] Can I do test-time fine-tuning on Kaggle with Phi-3? I have doubts about memory requirements. Create a notebook to validate the idea.
