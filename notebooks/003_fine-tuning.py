@@ -145,20 +145,22 @@ class cfg:
     train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
     # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/rearc/re_arc_100.json'
     val_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
-    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240809_smaller_models/01_SmolLM-135M-Instruct_baseline_lr2e-4'
+    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240809_smaller_models/02_SmolLM-135M-Instruct_baseline_lr2e-4_r32'
     max_seq_len = 4096
     epochs = 0
-    max_steps : Optional[int] =  1000 # If given it will override epochs
-    eval_steps = 100
+    max_steps : Optional[int] =  1000 #1000 # If given it will override epochs
+    eval_steps = 100 #100
     warmup_ratio = 0.1
     batch_size = 16
+    per_device_train_batch_size = 4
+    per_device_eval_batch_size = 4
     learning_rate = 2e-4
     # LoRA
     use_rslora = True,
     use_dora = True,
     lora_r = 32
     # data augmentation
-    use_data_augmentation = True
+    use_data_augmentation = True #True
     max_train_permutations = 2 # tipically 2
     color_swaps = 1
     preserve_original_colors = False
@@ -238,7 +240,11 @@ if 'llama' in cfg.model_path:
     tokenizer.add_special_tokens({'pad_token': '<|pad|>'})
     model.resize_token_embeddings(len(tokenizer))
     tokenizer.padding_side = 'right'
-tokenizer.special_tokens_map
+print(tokenizer.special_tokens_map)
+print('Verification of number tokens')
+for number in '0123456789':
+        print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
+
 
 # %%
 def print_gpu_memory():
@@ -344,43 +350,7 @@ test_translator(GridCodeBlockEncoder(GridWithSeparationEncoder('|')))
 # ### Plot
 
 # %%
-def plot_grid(grid):
-    grid = np.array(grid)
-    cmap = colors.ListedColormap(
-        ['#000000', '#0074D9','#FF4136','#2ECC40','#FFDC00',
-         '#AAAAAA', '#F012BE', '#FF851B', '#7FDBFF', '#870C25'])
-    norm = colors.Normalize(vmin=0, vmax=9)
-    plt.imshow(grid, cmap=cmap, norm=norm)
-    plt.grid(True,which='both',color='lightgrey', linewidth=0.5)
-    plt.xticks(np.arange(-0.5, grid.shape[1]), [])
-    plt.yticks(np.arange(-0.5, grid.shape[0]), [])
-    plt.xlim(-0.5, grid.shape[1]-0.5)
 
-    for i in range(grid.shape[0]):
-        for j in range(grid.shape[1]):
-            plt.text(j, i, grid[i, j], ha='center', va='center')
-
-# %%
-def plot_task(task):
-    all_samples = task['train'] + task['test']
-    for plot_idx, sample in enumerate(all_samples):
-        plt.subplot(1, len(all_samples), plot_idx+1)
-        plot_grid(sample['input'])
-        if plot_idx < len(task['train']):
-            plt.title(f'train {plot_idx}')
-        else:
-            plt.title(f'test {plot_idx-len(task["train"])}')
-    plt.suptitle('Inputs for task')
-    plt.show()
-    for plot_idx, sample in enumerate(all_samples):
-        plt.subplot(1, len(all_samples), plot_idx+1)
-        plot_grid(sample['output'])
-        if plot_idx < len(task['train']):
-            plt.title(f'train {plot_idx}')
-        else:
-            plt.title(f'test {plot_idx-len(task["train"])}')
-    plt.suptitle('Outputs for task')
-    plt.show()
 
 # %% [markdown]
 # ### Data augmentation
@@ -425,8 +395,6 @@ for flip in [True, False]:
         data_augmentation = DataAugmentation(flip, n_rot90)
         assert sample_grid == data_augmentation.revert_augmentation(data_augmentation.augment_grid(sample_grid))
 
-# %%
-plot_task(sample_task)
 
 # %%
 def swap_one_train_and_test_sample(task):
@@ -439,7 +407,6 @@ def swap_one_train_and_test_sample(task):
             augmented_tasks.append(augmented_task)
     return augmented_tasks
 
-plot_task(swap_one_train_and_test_sample(sample_task)[-1])
 
 # %%
 def swap_task_colors(task, change_background_probability=0.1):
@@ -460,7 +427,6 @@ def swap_task_colors(task, change_background_probability=0.1):
         new_task[key] = [{name:vectorized_mapping(grid) for name, grid in sample.items()} for sample in task[key]]
     return new_task
 
-plot_task(swap_task_colors(sample_task))
 
 # %%
 def permute_train_samples(task, max_permutations=6):
@@ -474,7 +440,6 @@ def permute_train_samples(task, max_permutations=6):
         augmented_tasks.append(augmented_task)
     return augmented_tasks
 
-plot_task(permute_train_samples(sample_task)[-1])
 
 # %%
 def apply_geometric_augmentations(task, n_augmentations=8):
@@ -643,18 +608,12 @@ else:
     model = PeftModel.from_pretrained(model, cfg.adapter_path, is_trainable=True)
 
 # %%
-if 'llama' in cfg.model_path:
-    batch_size_kwargs = dict(
-        per_device_train_batch_size=3, # 4-16 should be fine for lora.
-        gradient_accumulation_steps=5,
-        per_device_eval_batch_size=4,
-    )
-else:
-    batch_size_kwargs = dict(
-        per_device_train_batch_size=1, # 4-16 should be fine for lora.
-        gradient_accumulation_steps=cfg.batch_size,
-        per_device_eval_batch_size=2,
-    )
+batch_size_kwargs = dict(
+    # 4-16 batch size should be fine for lora.
+    per_device_train_batch_size=cfg.per_device_train_batch_size, 
+    gradient_accumulation_steps=cfg.batch_size//cfg.per_device_train_batch_size,
+    per_device_eval_batch_size=cfg.per_device_eval_batch_size,
+)
 
 training_arguments = TrainingArguments(
         output_dir=cfg.output_dir,
