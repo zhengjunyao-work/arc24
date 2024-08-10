@@ -74,6 +74,6 @@ By using test time fine-tuning I have been able to improve eval accuracy from 6.
 
 ## TODO
 
-- [ ] Can I think of additional augmentations?
+- [x] Can I think of additional augmentations? So far I cannot think of other general augmentations such as geometric transforms or color swap.
 - [x] Can I speedup training?
 - [x] Can I do test-time fine-tuning on Kaggle with Phi-3? I have doubts about memory requirements. Create a notebook to validate the idea.
