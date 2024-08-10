@@ -29,8 +29,6 @@ see if I can improve the validation loss.
 
 ## Development
 
-
-
 ## Results
 
 [Training metrics in wandb](https://wandb.ai/guillermobarbadillo/20240802_test_time_fine-tuning?nw=nwuserguillermobarbadillo)
@@ -51,12 +49,31 @@ see if I can improve the validation loss.
 - Training with n-2 samples did not improve over training with n-1 samples. This matched my intuition because we are not increasing the number of tasks, we are just removing input information.
 - Best trainings are taking in the order of 20h in my PC, which is better than Kaggle hardware. This should be at least 4 times faster to be able to use it at submission. Maybe I can try to increase the learning rate to see if the training is faster.
 
+### Trying to speedup fine-tuning
+
+I have tried lowering the batch size and increasing the learning rate to see if I could fine-tune in less steps. I haven't been succesfull, but it seems
+that lowering the batch size worsens the validation loss.
+
+### Test time fine-tuning on Kaggle
+
+| Model                        | parameters (M) | max context length (k) | seq_len | 10 steps time (min) | 1000 steps time (hours) |
+|------------------------------|----------------|------------------------|---------|---------------------|-------------------------|
+| Phi-3 (3.8B)                 | 3800           | 128                    | 1024    | 16                  | 26.7                    |
+| Phi-3 int4 (3.8B)            | 3800           | 128                    | 4096    | 34                  | 56.7                    |
+
+I had to quantize Phi-3 to int4 to be able to fine-tune with a context length of 4096. However the hardware is slow and it would
+require 56 hours to fine-tune for 1k steps. Thus I cannot do test time fine-tuning with Phi-3 on Kaggle, I should find another model.
+
 ## Conclusion
 
+By using test time fine-tuning I have been able to improve eval accuracy from 6.5% to 16.8%. However I have found that I cannot do test time fine-tuning on Kaggle with Phi-3, it would take 56 hours and I only have 12.
+
 ## Next steps
+
+- Find another smaller model that can do test time fine-tuning on Kaggle.
 
 ## TODO
 
 - [ ] Can I think of additional augmentations?
-- [ ] Can I speedup training?
-- [ ] Can I do test-time fine-tuning on Kaggle with Phi-3? I have doubts about memory requirements. Create a notebook to validate the idea.
+- [x] Can I speedup training?
+- [x] Can I do test-time fine-tuning on Kaggle with Phi-3? I have doubts about memory requirements. Create a notebook to validate the idea.
