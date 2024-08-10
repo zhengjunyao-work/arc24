@@ -1,27 +1,65 @@
+from typing import Optional
 
 class cfg:
     # Model
-    #model_path = '/kaggle/input/phi-3/transformers/phi-3-mini-128k-instruct/1/Phi-3-mini-128k-instruct'
-    #model_path = '/kaggle/input/mistral/pytorch/7b-instruct-v0.1-hf/1'
-    #model_path = '/kaggle/input/llama-3/transformers/8b-chat-hf/1'
-    # model_path = "/home/gbarbadillo/data/Phi-3-mini-128k-instruct"
-    # model_path = "/home/gbarbadillo/data/Phi-3-count"
-    # model_path = '/home/gbarbadillo/data/llama-3.1-transformers-8b-instruct-v1'
-    # model_path = '/home/gbarbadillo/data/llama-3.1-count'
-    model_path = "/home/gbarbadillo/data/Phi-3-arc"
     model_path = "/home/gbarbadillo/data/Qwen2-0.5B-arc"
+    lora_path = None
+    #lora_path : Optional[str] = '/kaggle/input/loras/transformers/phi-3_128k/1'
+    merged_model_path : Optional[str] = None
     max_model_len = 8192 #61000 for phi-3
     # Dataset
     dataset_path = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
     #dataset_path = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
-    #dataset_path = '/kaggle/input/arc-prize-2024/arc-agi_evaluation_challenges.json'
     n_tasks = None # Optional parameter to limit the number of task in the inference, set it to None to use all the tasks
-    # Few-shot
-    few_shot_dataset_path = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
-    n_shots = 0
     # Inference params
     max_predictions_per_task = 2 # 
     sampling_params = dict(temperature=0.0, max_tokens=1000) # https://docs.vllm.ai/en/latest/dev/sampling_params.html
+
+# %%
+from jinja2 import Template
+
+system_prompt = """You are a helpful AI assistant. Your job is to solve tasks from the Abstraction and Reasoning Challenge (ARC). 
+The user will present you with sample input and output grids for each task. 
+Your job will be to understand the transformation between the input and the output and apply it to the last input grid given by the user. 
+The puzzle-like inputs and outputs present a grid where each square can be one of ten colors. A grid can be any height or width between 1x1 and 30x30.
+The background of the grid is typically colored with 0.
+The tasks from ARC are based on the following priors:
+
+- Objectness: Objects persist and cannot appear or disappear without reason. Objects can interact or not depending on the circumstances.
+- Goal-directed: Objects can be animate or inanimate. Some objects are "agents" - they have intentions and they pursue goals.
+- Numbers & counting: Objects can be counted or sorted by their shape, appearance, or movement using basic mathematics like addition, subtraction, and comparison.
+- Basic geometry & topology: Objects can be shapes like rectangles, triangles, and circles which can be mirrored, rotated, translated, deformed, combined, repeated, etc. Differences in distances can be detected.
+
+The transformations between input and output should be based on these priors.
+"""
+
+prompt_template = Template("""Let's see if you can solve this simple ARC task. These are some input-output grid examples that define the task.
+{% for sample in train_samples %}
+## Example {{ loop.index }}
+
+### Input
+
+{{ sample.input }}
+
+### Output
+
+{{ sample.output }}
+{% endfor %}
+## Test case
+
+### Input
+
+{{ test_input }}
+""")
+
+answer_template = Template("""### Output
+
+{{ test_output }}""")
+
+train_samples = [dict(input=[0], output=[1]), dict(input=[2], output=[3])]
+prompt = prompt_template.render(train_samples=train_samples, test_input=[4])
+print(prompt)
+print(answer_template.render(test_output=[5]))
 
 # %%
 import os
@@ -33,10 +71,11 @@ if is_dry_run:
 # ## Install
 
 # %%
-import vllm
-from vllm import LLM, SamplingParams
-from vllm.lora.request import LoRARequest
-from transformers import AutoTokenizer
+if not is_dry_run:
+    # model imports
+    from vllm import LLM, SamplingParams
+    from vllm.lora.request import LoRARequest
+    from transformers import AutoTokenizer
 
 # %% [markdown]
 # ## Imports
@@ -51,40 +90,19 @@ from itertools import islice, product
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from termcolor import colored
+import shutil
+
+# %%
+import logging
+
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.info('Started logging')
 
 # %% [markdown]
 # ## Code
-
-# %% [markdown]
-# ### Wait for gpu available
-
-# %%
-# import torch
-# import time
-
-# import logging
-
-# for handler in logging.root.handlers[:]:
-#     logging.root.removeHandler(handler)
-# logging.basicConfig(level=logging.INFO,
-#                     format='%(asctime)s - %(levelname)s - %(message)s')
-
-# def is_gpu_memory_available(required_memory=14):
-#     for device in range(torch.cuda.device_count()):
-#         available_memory = torch.cuda.mem_get_info(device)[0]/1024**3
-#         logging.info(f'Available memory on GPU {device} is {available_memory:.1f} GB')
-#         if available_memory < required_memory:
-#             return False
-#     return True
-
-# def wait_for_gpu_memory(wait_time=60, required_memory=14):
-#     while not is_gpu_memory_available(required_memory):
-#         logging.info(f'Waiting for GPU memory to be available...')
-#         time.sleep(wait_time)
-#     logging.info(f'GPU memory is available. Let\'s go training!')
-#     time.sleep(1) # wait a bit more to ensure the server is ready
-
-# wait_for_gpu_memory(wait_time=360)
 
 # %% [markdown]
 # ### Grid encoding
@@ -180,139 +198,53 @@ class PromptCreator(ABC):
 
 # %%
 class SimplePromptCreator(PromptCreator):
-
-    def create_task_prompts(self, task):
-        if cfg.model_path == '/kaggle/input/mistral/pytorch/7b-instruct-v0.1-hf/1':
-            # Mistral does not have system prompt
-            messages = []
-        else:
-            messages = [ 
-                {"role": "system", "content": "You are a helpful AI assistant. Your task is to answer to the user using always the same transformation of the user input."}, 
-            ] 
-        for sample in task['train']:
-            messages.append({"role": "user", "content": f"Input:\n{self.grid_encoder.to_text(sample['input'])}"})
-            messages.append({"role": "assistant", "content": f"Output:\n{self.grid_encoder.to_text(sample['output'])}"})
-
-        prompts = []
-        for test_sample in task['test']:
-            final_message = {"role": "user", "content": f"Input:\n{self.grid_encoder.to_text(test_sample['input'])}"}
-            prompt = tokenizer.apply_chat_template(messages + [final_message],
-                                                   tokenize=False,
-                                                   add_generation_prompt=True)
-            prompts.append(prompt)
-        return prompts
-    
-    def parse_response(self, text):
-        grid_text = text.split('Output:\n')[1]
-        return self.grid_encoder.to_grid(grid_text)
-
-# %%
-puzzle_explanations = {
-    '00576224': """The pattern of the input is repeated to generate the output.
-
-1. The first two rows are obtained by simply repeating the 2x2 pattern 3 times along the cols axis.
-2. The following two rows are obtained by flipping the pattern horizontally and repeating it 3 times
-3. The final two rows are identical to the first ones, simply repeat the 2x2 pattern 3 times.
-
-Thus the output is 3 times bigger than the input (6x6 vs 2x2) because the pattern is repeated 3 times in the row and col axis.""",
-    '009d5c81': """To create the output we have to copy the input with two modifications:
-
-1. The object with color 1 is removed and replaced with the background color 0
-2. The color of the other object (there are only two objects in the grid) is modified.
-  The new color of this object depends on the shape of the object of color 1. There is a mapping
-  between shapes and colors. Just look at the train examples for an object of the same shape
-  and see the color that is applied on the output.""",
-    '00dbd492': """The input shows a square with color 2 that is empty except from a point in the center.
-The output is created by colorizing the inside of the square. The color is chosen depending on the size of the squares.
-The larger square is painted with 3, the medium with 4 and the small with 8.""",
-    '03560426': """The input shows objects of different colors at the bottom of the grid.
-The output is created by moving the objects to the top left corner. The objects are moved from left to right order.
-The first object is placed at the top left corner, the second object is placed at the lower right corner of the first object,
-the third object is placed at the lower right corner of the second object and so on. There is oclusion between the objects,
-in those oclusions we see the rightmost object.""",
-    '0607ce86': """This is a denoising task. The input shows the same object repeated many times, but there are noisy pixels in the grid.
-The output is created by removing all the noise in the grid. The background should be completely 0.
-The real object without noise can be guessed because there are many repetitions of the object, so we simply have to
-look at the majority pixel on each location.""",
-    '0692e18c': """The ouptut is created following this steps.
-
-1. The input is upscaled x3. So if the input is 3x3 the output should be an upscaled version of the input 9x9
-2. We apply an AND function in a sliding window fashion over the output using the inverted input pattern (take the input and swicth the background color 0 with the other color and viceversa)
-    """,
-    '070dd51e': """The output is created by simply drawing horizontal and vertical lines between cells with the same color.
-If there is an intersection between lines the vertical line will be shown.""",
-    '08573cc6': """The output is created by drawing an spiral that starts at the cell with color 1.
-The colors of the spiral are taken from the first two cells of the grid, which will be removed in the output.""",
-    '0a2355a6': """The output is created by copying the input and changing the color of the objects.
-The new color will be chosen depending on the number of holes of the object. There is a mapping between number of holes and color that can be observed from the input examples.""",
-}
-
-# %%
-class FewShotPromptCreator(PromptCreator):
-    task_description = """You are a helpful AI assistant. Your job is to solve tasks from the Abstraction and Reasoning Challenge (ARC). 
-The user will present you with sample input and output grids for each task. 
-Your job will be to understand the transformation between the input and the output and apply it to the last input grid given by the user. 
-The puzzle-like inputs and outputs present a grid where each square can be one of ten colors. A grid can be any height or width between 1x1 and 30x30.
-The background of the grid is typically colored with 0.
-The tasks from ARC are based on the following priors:
-
-- Objectness: Objects persist and cannot appear or disappear without reason. Objects can interact or not depending on the circumstances.
-- Goal-directed: Objects can be animate or inanimate. Some objects are "agents" - they have intentions and they pursue goals.
-- Numbers & counting: Objects can be counted or sorted by their shape, appearance, or movement using basic mathematics like addition, subtraction, and comparison.
-- Basic geometry & topology: Objects can be shapes like rectangles, triangles, and circles which can be mirrored, rotated, translated, deformed, combined, repeated, etc. Differences in distances can be detected.
-
-The transformations between input and output should be based on these priors.
-"""
     def __init__(self, grid_encoder):
         super().__init__(grid_encoder)
-        with open(cfg.few_shot_dataset_path, 'r') as f:
-            self.few_shot_tasks = json.load(f)
-        with open(cfg.few_shot_dataset_path.replace('challenges.json', 'solutions.json'), 'r') as f:
-            self.few_shot_solutions = json.load(f)
-        self.few_shot_tasks = {task_id: self.few_shot_tasks[task_id] for task_id in puzzle_explanations}
-        self.few_shot_solutions = {task_id: self.few_shot_solutions[task_id] for task_id in puzzle_explanations}
-        self.few_shot_task_ids = list(self.few_shot_tasks.keys())
-        self.n_shots = cfg.n_shots
     
-    def create_task_prompts(self, task):
-        messages = [{"role": "system", "content": self.task_description}]
-        
-        for task_id in np.random.choice(self.few_shot_task_ids, self.n_shots):
-            few_shot_task = self.few_shot_tasks[task_id]
-            user_message = self.create_user_message_for_train_examples(few_shot_task)
-            for test_idx, test_sample in enumerate(few_shot_task['test']):
-                user_message += self.create_input_message('Test case', test_sample)
-                messages.append({"role": "user", "content": user_message})
-                user_message = ''
-                assistant_message = f'{puzzle_explanations[task_id]}\n\n' + self.create_output_message(self.few_shot_solutions[task_id][test_idx])
-                messages.append({"role": "assistant", "content": assistant_message})
-
-        user_message = self.create_user_message_for_train_examples(task)        
+    def create_task_prompts(self, task):        
+        train_samples = [{key: self.grid_encoder.to_text(grid) for key, grid in sample.items()} for sample in task['train']]     
         prompts = []
         for test_sample in task['test']:
-            user_message += self.create_input_message('Test case', test_sample)
-            messages.append({"role": "user", "content": user_message})
+            user_message = prompt_template.render(train_samples=train_samples, 
+                                                  test_input=self.grid_encoder.to_text(test_sample['input']))
+            messages = [{"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message},
+                        {"role": "assistant", "content": """### Output\n```grid\n"""}]
+            # TODO: add start of assistant reply
             prompt = tokenizer.apply_chat_template(messages,
                                                    tokenize=False,
-                                                   add_generation_prompt=True)
-            prompts.append(prompt)
+                                                   add_generation_prompt=False)
+            prompts.append(remove_assistant_ending(prompt))
         return prompts
     
-    def create_user_message_for_train_examples(self, task):
-        user_message = "Let's see if you can solve this simple ARC task. These are some input-output grid examples that define the task.\n"
-        for example_idx, sample in enumerate(task['train']):
-            user_message += self.create_input_message(f'Example {example_idx}', sample)
-            user_message += '\n' + self.create_output_message(sample['output'])
-        return user_message
-
-    def create_input_message(self, title, sample):
-        return f"\n## {title}\n\n### Input\n\n{self.grid_encoder.to_text(sample['input'])}\n"
-    
-    def create_output_message(self, grid):
-        return f"### Output\n\n{self.grid_encoder.to_text(grid)}\n"
-    
     def parse_response(self, text):
-        return self.grid_encoder.to_grid(text)
+        return self.grid_encoder.to_grid('```grid\n' + text)
+    
+    
+def remove_assistant_ending(text):
+    """
+phi-3
+
+<|assistant|>
+### Output
+```grid
+<|end|>
+<|endoftext|>
+
+llama 3.1
+
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+### Output
+```grid<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+    """
+    if 'llama' in cfg.model_path:
+        split_text = '<|eot_id|>'
+    elif 'Qwen' in cfg.model_path:
+        split_text = '<|im_end|>'
+    else:
+        split_text = '<|end|>'
+    return split_text.join(text.split(split_text)[:-1])
 
 # %%
 def print_sample_prompt(data, prompt_creator):
@@ -320,7 +252,7 @@ def print_sample_prompt(data, prompt_creator):
     prompts = sorted(prompts, key=lambda x: len(x))
     pretty_print_prompt(prompts[0])
     
-def pretty_print_prompt(text, default_color='white'):
+def pretty_print_prompt(text, default_color='black'):
     color = default_color
     attrs = None
     for line in text.splitlines():
@@ -350,17 +282,50 @@ def plot_input_token_length_distribution(data, prompt_creator):
 # ### Model
 
 # %%
+script_text = f"""
+import os
+import glob
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import PeftModel
+import shutil
+
+base_model_path = '{cfg.model_path}'
+lora_path = '{cfg.lora_path}'
+output_path = '{cfg.merged_model_path}'
+
+base_model = AutoModelForCausalLM.from_pretrained(base_model_path, torch_dtype=torch.float16)
+tokenizer = AutoTokenizer.from_pretrained(base_model_path, trust_remote_code=True)
+if 'llama' in '{cfg.model_path}':
+    tokenizer.add_special_tokens(dict(pad_token='<|pad|>'))
+    base_model.resize_token_embeddings(len(tokenizer))
+
+model = PeftModel.from_pretrained(base_model, lora_path)
+merged_model = model.merge_and_unload()
+print('Saving the merged model to the output path')
+merged_model.save_pretrained(output_path)
+
+for filepath in glob.glob(os.path.join(base_model_path, '*')):
+    dst = os.path.join(output_path, os.path.basename(filepath))
+    if not os.path.exists(dst):
+        print('Copying', filepath)
+        shutil.copy(filepath, dst)
+
+print('Done!')
+"""
+
+# %%
 if not is_dry_run:
-    llm = LLM(model=cfg.model_path,
+    model_path = cfg.merged_model_path or cfg.model_path
+    print(f'Loading {model_path}')
+    llm = LLM(model=model_path,
               trust_remote_code=True, 
               dtype='half', 
               tensor_parallel_size=2, # to use 2 gpus
               max_model_len=cfg.max_model_len,
-            #   kv_cache_dtype='fp8_e5m2',
+              #kv_cache_dtype='fp8_e5m2', I have disabled kv cache quantization because it is hurtful
               enforce_eager=True, # without this 13.9GB of memory is used on each GPU, with this is 13.3GB,
               disable_log_stats=True,
-            #   enable_lora=True,
-            #   max_lora_rank=32,
              )
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_path)
     for number in '0123456789':
@@ -461,21 +426,24 @@ def evaluate(ground_truth, solutions):
     - Correct size
     """
     metrics = []
-    accuracy, correct_pixels, correct_size = [], [], []
     for task_id, task_ground_truth in ground_truth.items():
         task_metrics = []
+        #plot_task(data[task_id]); plt.suptitle(f'{task_id}'); plt.show()
         for idx, correct_grid in enumerate(task_ground_truth):
             predicted_grids = list(solutions[task_id][idx].values())
             predicted_grids = [grid for grid in predicted_grids if grid]
             
             task_metrics.append(evaluate_grid(correct_grid, predicted_grids))
             print_metrics(task_metrics[-1], f'{task_id}_{idx}')
+            #plot_grids([correct_grid] + predicted_grids)
+            plt.suptitle(f'{task_id}_{idx}')
+            plt.show()
         metrics.append(average_metrics(task_metrics))
     print('\n'*3 + '# Aggregated metrics:')
     print_metrics(average_metrics(metrics))
     save_metrics(metrics, solutions)
+    #plot_metrics_distribution(metrics)
     print_metrics(average_metrics(metrics))
-    return metrics
     
 def plot_metrics_distribution(metrics):
     for key in metrics[0]:
@@ -526,10 +494,6 @@ def evaluate_grid(correct_grid, predicted_grids):
 # One way to solve this would be to use data augmentation. By applying rotations and flips we could generate up to 8 variations of each task. So we could try with different data augmentations until we have 2 predictions for each task. Another alternative would be to make inference with the 8 variations and use majority voting.
 
 # %%
-# TODO: lora
-# lora_request = LoRARequest("learn-to-count", 1, '/mnt/hdd0/Kaggle/arc24/models/20240724_first_trainings/15_continue_training_phi3_4e5/checkpoint-22800')
-
-
 def solve_task(task_id, task, prompt_creator, sampling_params):
     data_augmentation_params = product([False, True], [0, 1, 2, 3])
     solution = {task_id:[{"attempt_1": [], "attempt_2": []} for _ in task['test']]}
@@ -538,7 +502,7 @@ def solve_task(task_id, task, prompt_creator, sampling_params):
         data_augmentation = DataAugmentation(flip, n_rot90)
         augmented_task = data_augmentation.augment_task(task)
         prompts = prompt_creator.create_task_prompts(augmented_task)
-        outputs = llm.generate(prompts, sampling_params) #TODO:, lora_request=lora_request)
+        outputs = llm.generate(prompts, sampling_params, use_tqdm=False)
         responses = [output.outputs[0].text for output in outputs]
         for idx, response in enumerate(responses):
             try:
@@ -568,7 +532,8 @@ def is_solution_done(solution):
 # %%
 def inference(data, prompt_creator, sampling_params):
     solutions, texts = dict(), dict()
-    for task_id, task in tqdm(data.items(), total=len(data), smoothing=0):
+    for idx, (task_id, task) in tqdm(enumerate(data.items()), total=len(data), desc='Solving tasks'):
+        logging.info(f'Solving {task_id}, {idx+1}/{len(data)}')
         task_solution, task_texts = solve_task(task_id, task, prompt_creator, sampling_params)
         solutions.update(task_solution)
         texts.update(task_texts)
@@ -583,21 +548,19 @@ print(f'There are {len(data)} tasks to solve.')
 
 # %%
 if not is_dry_run:
-    prompt_creator = FewShotPromptCreator(GridCodeBlockEncoder(MinimalGridEncoder()))
-    # prompt_creator = SimplePromptCreator(GridCodeBlockEncoder(MinimalGridEncoder()))
-    # prompt_creator = SimplePromptCreator(GridCodeBlockEncoder(GridWithSeparationEncoder('|')))
+    prompt_creator = SimplePromptCreator(GridCodeBlockEncoder(MinimalGridEncoder()))
     print_sample_prompt(data, prompt_creator)
-    plot_input_token_length_distribution(data, prompt_creator)
+    #plot_input_token_length_distribution(data, prompt_creator)
 
 # %%
 if is_dry_run:
     with open('submission.json', 'w') as f:
         json.dump(dict(dry_run=True), f)
 else:
-    sampling_params = SamplingParams(**cfg.sampling_params)
+    sampling_params = SamplingParams(n=1, **cfg.sampling_params)
     solutions, texts = inference(data, prompt_creator, sampling_params)
     with open('submission.json', 'w') as f:
-        json.dump(solutions, f)
+        json.dump(solutions, f)    
 
 # %%
 if not is_dry_run:
@@ -607,16 +570,13 @@ if not is_dry_run:
 # %% [markdown]
 # ## Evaluation
 
-# %% [markdown]
-# ### Visualization
-
 # %%
 ground_truth_path = cfg.dataset_path.replace('challenges.json', 'solutions.json')
 if os.path.exists(ground_truth_path):
     with open(ground_truth_path, 'r') as f:
         ground_truth = json.load(f)
     ground_truth = {key: ground_truth[key] for key in solutions}
-    metrics = evaluate(ground_truth, solutions)
+    evaluate(ground_truth, solutions)
     
     with open('texts.json', 'w') as f:
         json.dump(texts, f)
@@ -624,13 +584,7 @@ if os.path.exists(ground_truth_path):
         json.dump(number_of_predictions_per_task, f)
 
 # %% [markdown]
-# ### Just metrics
-
-# %%
-print_metrics(average_metrics(metrics))
-
-# %% [markdown]
-# ## Close
+# ## Clean
 
 # %%
 def clear_vllm_gpu_memory():
@@ -646,4 +600,8 @@ def clear_vllm_gpu_memory():
     gc.collect()
     torch.cuda.empty_cache()
 
-clear_vllm_gpu_memory()
+if not is_dry_run:
+    clear_vllm_gpu_memory()
+    if cfg.merged_model_path is not None:
+        shutil.rmtree(cfg.merged_model_path)
+
