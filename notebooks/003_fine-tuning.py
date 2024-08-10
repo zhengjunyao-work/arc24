@@ -140,29 +140,31 @@ class cfg:
 
 # Smaller models config
 class cfg:
-    model_path = "HuggingFaceTB/SmolLM-135M-Instruct"
+    #model_path = "HuggingFaceTB/SmolLM-135M-Instruct"
+    model_path = 'Qwen/Qwen2-0.5B-Instruct'
     adapter_path: Optional[str] = None
     train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
     # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/rearc/re_arc_100.json'
     val_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
-    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240809_smaller_models/02_SmolLM-135M-Instruct_baseline_lr2e-4_r32'
+    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240809_smaller_models/04_Qwen2-0.5B-Instruct_lr1e-4_r128_8e3steps'
     max_seq_len = 4096
     epochs = 0
-    max_steps : Optional[int] =  1000 #1000 # If given it will override epochs
+    max_steps : Optional[int] =  8000 #1000 # If given it will override epochs
     eval_steps = 100 #100
     warmup_ratio = 0.1
     batch_size = 16
-    per_device_train_batch_size = 4
-    per_device_eval_batch_size = 4
-    learning_rate = 2e-4
+    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
+    per_device_train_batch_size = 1
+    per_device_eval_batch_size = 2
+    learning_rate = 1e-4
     # LoRA
     use_rslora = True,
     use_dora = True,
-    lora_r = 32
+    lora_r = 128
     # data augmentation
     use_data_augmentation = True #True
     max_train_permutations = 2 # tipically 2
-    color_swaps = 1
+    color_swaps = 4
     preserve_original_colors = False
     geometric_transforms = 8 # 0-8
     swap_train_and_test = True

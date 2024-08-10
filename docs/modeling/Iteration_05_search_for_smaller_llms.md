@@ -27,6 +27,8 @@ to use int4 quantization and second the fine-tuning would take 56 hours for 1k s
 - I have also read recently about [smollm](https://huggingface.co/blog/smollm)
 - [MobileLLM](https://github.com/facebookresearch/MobileLLM) is cited by smollm, seems to be developed by Facebook but the models do not seem to be available.
 
+However Smollm models have only 2k context length.
+
 ## Results
 
 ## Conclusion
@@ -36,3 +38,4 @@ to use int4 quantization and second the fine-tuning would take 56 hours for 1k s
 ## TODO
 
 - [ ] Can I run Smollm models with VLLM? The architecture is supported... https://docs.vllm.ai/en/latest/models/supported_models.html
+- [ ] Long context fine-tuning https://huggingface.co/blog/wenbopan/long-context-fine-tuning
