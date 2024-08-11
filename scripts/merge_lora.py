@@ -12,6 +12,7 @@ def main(args=None):
     if args is None:
         args = sys.argv[1:]
     args = parse_args(args)
+    merge_lora(args.base_model_path, args.lora_path, args.output_path)
 
 
 def parse_args(args):
