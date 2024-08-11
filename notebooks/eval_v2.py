@@ -8,8 +8,8 @@ class cfg:
     merged_model_path : Optional[str] = None
     max_model_len = 8192 #61000 for phi-3
     # Dataset
-    dataset_path = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
-    #dataset_path = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
+    #dataset_path = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
+    dataset_path = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
     n_tasks = None # Optional parameter to limit the number of task in the inference, set it to None to use all the tasks
     # Inference params
     max_predictions_per_task = 2 # 
