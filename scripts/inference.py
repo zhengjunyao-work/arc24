@@ -251,9 +251,9 @@ llama 3.1
 ### Output
 ```grid<|eot_id|><|start_header_id|>assistant<|end_header_id|>
     """
-    if 'llama' in cfg.model_path:
+    if 'llama' in cfg.model_path.lower():
         split_text = '<|eot_id|>'
-    elif 'Qwen' in cfg.model_path:
+    elif 'qwen' in cfg.model_path.lower():
         split_text = '<|im_end|>'
     else:
         split_text = '<|end|>'
