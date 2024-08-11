@@ -18,7 +18,9 @@ def parse_args(args):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         epilog=epilog)
     parser.add_argument('config_path', help='Path to yaml file with training configuration')
-    return parser.parse_args(args)
+    args = parser.parse_args(args)
+    print(args)
+    return args
 
 
 if __name__ == '__main__':
