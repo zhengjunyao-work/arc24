@@ -1,6 +1,6 @@
 from typing import Optional
 import argparse
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 
 @dataclass
 class CFG:
@@ -13,7 +13,7 @@ class CFG:
     n_tasks: Optional[int] = None # Optional parameter to limit the number of task in the inference, set it to None to use all the tasks
     # Inference params
     max_predictions_per_task: int = 2 # 
-    sampling_params: dict = dict(temperature=0.0, max_tokens=1000) # https://docs.vllm.ai/en/latest/dev/sampling_params.html
+    sampling_params: dict = field(default_factory=lambda: dict(temperature=0.0, max_tokens=1000)) # https://docs.vllm.ai/en/latest/dev/sampling_params.html
 
 # %%
 from jinja2 import Template
