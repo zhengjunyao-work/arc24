@@ -64,5 +64,6 @@ However Smollm models have only 2k context length.
 - [ ] What is the effect of changing the train data? Keep the same train configuration and just change the data.
     - [ ] How the test accuracy changes if I train in the eval set?
     - [ ] How the test accuracy changes if I train in both the train and eval set?
+    - [ ] What if I use the train dataset and n-1 eval dataset?
 - [ ] Read about previous editions of the ARC challenges to see if any other data augmentation is used.
 - [ ] Make a submission with test fine-tuning
