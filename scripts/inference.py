@@ -519,7 +519,7 @@ def inference(data, prompt_creator, sampling_params):
 # %%
 with open(cfg.dataset_path) as f:
     data = json.load(f)
-if cfg.n_tasks is not None:
+if cfg.n_tasks is not None and cfg.n_tasks > 0:
     data = dict(islice(data.items(), cfg.n_tasks))
 print(f'There are {len(data)} tasks to solve.')
 
