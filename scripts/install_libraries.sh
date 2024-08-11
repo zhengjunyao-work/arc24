@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Check if vllm is installed
-if ! python -c "import vllm" &> /dev/null; then
+if ! pip show vllm &> /dev/null; then
     # Uninstall torch if vllm is not installed
     pip uninstall -q -y torch
     # Install the necessary packages from the provided directory
