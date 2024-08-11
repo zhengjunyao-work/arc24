@@ -39,10 +39,13 @@ class CFG:
     output_dir: str = f'/mnt/hdd0/Kaggle/arc24/models/20240802_test_time_fine-tuning/07_fast_lr1e-3_1e3steps'
     max_seq_len = 4096
     epochs = 0
-    batch_size = 16
     max_steps : Optional[int] =  1000
     eval_steps = 2000
     warmup_ratio = 0.1
+    batch_size = 16
+    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
+    per_device_train_batch_size = 1
+    per_device_eval_batch_size = 2
     learning_rate = 2e-4
     # LoRA
     use_rslora = True,
