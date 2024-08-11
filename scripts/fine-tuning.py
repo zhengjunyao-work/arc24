@@ -61,6 +61,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Experiment Configuration")
     parser.add_argument('--model_path', type=str, help="Path to the model")
     parser.add_argument('--adapter_path', type=str, help="Path to the LoRA adapter for initialization")
+    parser.add_argument('--output_dir', type=str, help="Path to the output LoRA")
     parser.add_argument('--train_dataset', type=str, help="Path to the dataset for training")
     parser.add_argument('--val_dataset', type=str, help="Path to the dataset for validation")
     parser.add_argument('--max_steps', type=int, help="Max steps to fine-tune")
