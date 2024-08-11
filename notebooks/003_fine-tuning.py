@@ -146,7 +146,7 @@ class cfg:
     train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
     # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/rearc/re_arc_100.json'
     val_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
-    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240809_smaller_models/04_Qwen2-0.5B-Instruct_lr1e-4_r16_8e3steps'
+    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240809_smaller_models/04_Qwen2-0.5B-Instruct_lr1e-4_r4_8e3steps'
     max_seq_len = 4096
     epochs = 0
     max_steps : Optional[int] =  8000 #1000 # If given it will override epochs
@@ -160,7 +160,7 @@ class cfg:
     # LoRA
     use_rslora = True,
     use_dora = True,
-    lora_r = 16
+    lora_r = 4
     # data augmentation
     use_data_augmentation = True #True
     max_train_permutations = 2 # tipically 2
