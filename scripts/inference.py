@@ -251,6 +251,7 @@ llama 3.1
 ### Output
 ```grid<|eot_id|><|start_header_id|>assistant<|end_header_id|>
     """
+    # TODO: better way to solve this, model_path could be not informative
     if 'llama' in cfg.model_path.lower():
         split_text = '<|eot_id|>'
     elif 'qwen' in cfg.model_path.lower():
@@ -578,6 +579,3 @@ def clear_vllm_gpu_memory():
 
 if not is_dry_run:
     clear_vllm_gpu_memory()
-    if cfg.merged_model_path is not None:
-        shutil.rmtree(cfg.merged_model_path)
-
