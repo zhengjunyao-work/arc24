@@ -5,15 +5,15 @@ from dataclasses import dataclass, asdict
 @dataclass
 class CFG:
     # Model
-    model_path = "/home/gbarbadillo/data/Qwen2-0.5B-arc"
-    max_model_len = 8192 #61000 for phi-3
+    model_path: str = "/home/gbarbadillo/data/Qwen2-0.5B-arc"
+    max_model_len: int = 8192 #61000 for phi-3
     # Dataset
     #dataset_path = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
-    dataset_path = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
-    n_tasks = None # Optional parameter to limit the number of task in the inference, set it to None to use all the tasks
+    dataset_path: str = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
+    n_tasks: Optional[int] = None # Optional parameter to limit the number of task in the inference, set it to None to use all the tasks
     # Inference params
-    max_predictions_per_task = 2 # 
-    sampling_params = dict(temperature=0.0, max_tokens=1000) # https://docs.vllm.ai/en/latest/dev/sampling_params.html
+    max_predictions_per_task: int = 2 # 
+    sampling_params: dict = dict(temperature=0.0, max_tokens=1000) # https://docs.vllm.ai/en/latest/dev/sampling_params.html
 
 # %%
 from jinja2 import Template
