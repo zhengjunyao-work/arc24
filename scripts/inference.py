@@ -509,7 +509,7 @@ def is_solution_done(solution):
 # %%
 def inference(data, prompt_creator, sampling_params):
     solutions, texts = dict(), dict()
-    for idx, (task_id, task) in tqdm(enumerate(data.items()), total=len(data), desc='Solving tasks'):
+    for idx, (task_id, task) in tqdm(enumerate(data.items()), total=len(data), desc='Solving tasks', smoothing=0):
         logging.info(f'Solving {task_id}, {idx+1}/{len(data)}')
         task_solution, task_texts = solve_task(task_id, task, prompt_creator, sampling_params)
         solutions.update(task_solution)
