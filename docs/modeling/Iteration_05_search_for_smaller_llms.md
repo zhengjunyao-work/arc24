@@ -33,6 +33,23 @@ However Smollm models have only 2k context length.
 
 ### Test time fine-tuning on Kaggle
 
+| Model                    | parameters (M) | max context length (k) | seq_len | 10 steps time (min) | 1000 steps time (hours) |
+|--------------------------|----------------|------------------------|---------|---------------------|-------------------------|
+| Phi-3 (3.8B)             | 3800           | 128                    | 1024    | 3                   | 5.0                     |
+| Phi-3 int4 (3.8B)        | 3800           | 128                    | 4096    | 30                  | 50.0                    |
+| Qwen/Qwen2-1.5B-Instruct | 1500           | 32                     | 3584    | 2                   | 3.3                     |
+| Qwen/Qwen2-0.5B-Instruct | 500            | 32                     | 4096    | 1                   | 1.7                     |
+
+So far Phi-3 and Qwen2 are the only small LLMs that I have found that have enough context lenght to deal with ARC tasks. However
+Phi-3 requires too much memory for fine-tuning and if I use int4 quantization it is very slow.
+
+The option of using Qwen2 seems to be the best one given the current hardware limitations.
+
+This inference times are measured when using `float16` type, I have found that it is 4 times faster than `bfloat16` on the T4 GPU. The next section shows
+the same measurements with more models and `bfloat16` for reference.
+
+#### Slower previous results with `bfloat16`
+
 | Model                        | parameters (M) | max context length (k) | seq_len | 10 steps time (min) | 1000 steps time (hours) |
 |------------------------------|----------------|------------------------|---------|---------------------|-------------------------|
 | Phi-3 (3.8B)                 | 3800           | 128                    | 1024    | 16                  | 26.7                    |
@@ -56,6 +73,11 @@ However Smollm models have only 2k context length.
 
 I have made experiments with different values for the rank of LoRA. It has a clear effect on the train loss: when we use a higher rank we get a lower train loss. However the effect on the validation loss is not clear, it seems that using a very small rank such as 4 is harmful but other than that the differences do not seem to be significative.
 
+### Kaggle runtimes for reference
+
+- `qwen2-0.5b-instruct` Eval set evaluation: 1h15
+- `qwen2-0.5b-instruct` 1k steps fine-tuning: 2h19
+
 ## Conclusion
 
 ## Next steps
@@ -78,4 +100,4 @@ I have made experiments with different values for the rank of LoRA. It has a cle
 - [ ] Bfloat vs float
 - [ ] Qwen/Qwen2-1.5B-Instruct
 - [ ] What is the number of steps in the test-time fine-tuning where overfitting starts to happen? On previous experiments it seemed to be above 5k steps
-- [ ] Document Kaggle training and inference speeds.
+- [x] Document Kaggle training and inference speeds.
