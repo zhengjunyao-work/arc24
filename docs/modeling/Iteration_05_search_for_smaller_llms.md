@@ -86,6 +86,16 @@ However I have tried with a wide range of learning rates for fine-tuning and no 
 
 ![2-stage-fine-tuning](res/2-stage-fine-tuning.png)
 
+### float16 vs bfloat16
+
+I have already seen that in Kaggle fine-tuning with float16 is 4 times faster than with bfloat16.
+Let's see if that is the case for my computer (2x3090):
+
+- `bfloat16` 50 steps fine-tuning: 2m45, 2m48
+- `float16` 50 steps fine-tuning: 2m43, 2m46
+
+Memory use is the same and speed is the same. Maybe it is using `bfloat16` internally all the time, I remember listening something like that long ago.
+
 ## Conclusion
 
 ## Next steps
@@ -104,8 +114,8 @@ However I have tried with a wide range of learning rates for fine-tuning and no 
 - [ ] Read about previous editions of the ARC challenges to see if any other data augmentation is used.
 - [ ] Make a submission with test fine-tuning
 - [ ] Remember that the test is 4 times smaller than the eval set
-- [ ] 2 stage test-time fine-tuning
-- [ ] Bfloat vs float
+- [x] 2 stage test-time fine-tuning
+- [x] Bfloat vs float
 - [ ] Qwen/Qwen2-1.5B-Instruct
 - [ ] What is the number of steps in the test-time fine-tuning where overfitting starts to happen? On previous experiments it seemed to be above 5k steps
 - [x] Document Kaggle training and inference speeds.
