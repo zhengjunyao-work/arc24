@@ -96,6 +96,8 @@ Let's see if that is the case for my computer (2x3090):
 
 Memory use is the same and speed is the same. Maybe it is using `bfloat16` internally all the time, I remember listening something like that long ago.
 
+I have also run a quick experiment with 2 samples per GPU but there was no speedup.
+
 ## Conclusion
 
 ## Next steps
@@ -105,6 +107,7 @@ Memory use is the same and speed is the same. Maybe it is using `bfloat16` inter
     - [ ] How the test accuracy changes if I train in the eval set?
     - [ ] How the test accuracy changes if I train in both the train and eval set?
     - [ ] What if I use the train dataset and n-1 eval dataset?
+- [ ] Could I speedup Qwen2 training by using a single gpu?
 
 ## TODO
 
@@ -119,3 +122,4 @@ Memory use is the same and speed is the same. Maybe it is using `bfloat16` inter
 - [ ] Qwen/Qwen2-1.5B-Instruct
 - [ ] What is the number of steps in the test-time fine-tuning where overfitting starts to happen? On previous experiments it seemed to be above 5k steps
 - [x] Document Kaggle training and inference speeds.
+- [ ] Why experiments on Kaggle are getting worse training losses?
