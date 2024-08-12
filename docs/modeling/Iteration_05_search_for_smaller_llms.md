@@ -76,3 +76,6 @@ I have made experiments with different values for the rank of LoRA. It has a cle
 - [ ] Remember that the test is 4 times smaller than the eval set
 - [ ] 2 stage test-time fine-tuning
 - [ ] Bfloat vs float
+- [ ] Qwen/Qwen2-1.5B-Instruct
+- [ ] What is the number of steps in the test-time fine-tuning where overfitting starts to happen? On previous experiments it seemed to be above 5k steps
+- [ ] Document Kaggle training and inference speeds.
