@@ -50,20 +50,26 @@ However Smollm models have only 2k context length.
 - `SmolLM` models only have a context length of 2k tokens, that is not enough for the ARC challenge
 - `Qwen2-0.5B-Instruct` is a good candidate because it has a context length of 32 and I should be able to train in 7h which is enough to make a submission.
 
+### Role of the rank of LoRA
+
+![role of r](res/role-of-r.png.png)
+
+I have made experiments with different values for the rank of LoRA. It has a clear effect on the train loss: when we use a higher rank we get a lower train loss. However the effect on the validation loss is not clear, it seems that using a very small rank such as 4 is harmful but other than that the differences do not seem to be significative.
+
 ## Conclusion
 
 ## Next steps
 
 - Decomposing the task into step by step could be helpful. That is, creating multiple grids until creating the final output.
+- [ ] What is the effect of changing the train data? Keep the same train configuration and just change the data.
+    - [ ] How the test accuracy changes if I train in the eval set?
+    - [ ] How the test accuracy changes if I train in both the train and eval set?
+    - [ ] What if I use the train dataset and n-1 eval dataset?
 
 ## TODO
 
 - [x] Can I run Smollm models with VLLM? The architecture is supported... https://docs.vllm.ai/en/latest/models/supported_models.html
 - [ ] Long context fine-tuning https://huggingface.co/blog/wenbopan/long-context-fine-tuning
-- [ ] What is the role of LoRA `r`?
-- [ ] What is the effect of changing the train data? Keep the same train configuration and just change the data.
-    - [ ] How the test accuracy changes if I train in the eval set?
-    - [ ] How the test accuracy changes if I train in both the train and eval set?
-    - [ ] What if I use the train dataset and n-1 eval dataset?
+- [x] What is the role of LoRA `r`?
 - [ ] Read about previous editions of the ARC challenges to see if any other data augmentation is used.
 - [ ] Make a submission with test fine-tuning
