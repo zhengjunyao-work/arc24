@@ -37,22 +37,22 @@ class CFG:
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/test_time_fine-tuning/evaluation_n-1.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
     output_dir: str = f'/mnt/hdd0/Kaggle/arc24/models/20240802_test_time_fine-tuning/07_fast_lr1e-3_1e3steps'
-    max_seq_len = 4096
+    max_seq_len: int = 4096
     epochs = 0
     max_steps : Optional[int] =  1000
-    eval_steps = 2000
+    eval_steps: int = 200000
     warmup_ratio = 0.1
     batch_size = 16
     # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
     per_device_train_batch_size = 1
     per_device_eval_batch_size = 2
-    learning_rate = 2e-4
+    learning_rate: float = 2e-4
     # LoRA
     use_rslora = True,
     use_dora = True,
     lora_r = 32
     # data augmentation
-    use_data_augmentation = True
+    use_data_augmentation: bool = True
     max_train_permutations = 2 # tipically 2
     color_swaps = 1
     preserve_original_colors = False
@@ -68,6 +68,10 @@ def parse_args():
     parser.add_argument('--train_dataset', type=str, help="Path to the dataset for training")
     parser.add_argument('--val_dataset', type=str, help="Path to the dataset for validation")
     parser.add_argument('--max_steps', type=int, help="Max steps to fine-tune")
+    parser.add_argument('--max_seq_len', type=int, help="Max sequence length in tokens")
+    parser.add_argument('--eval_steps', type=int, help="Number of steps between evaluations")
+    parser.add_argument('--learning_rate', type=float, help='Learning rate for fine-tuning')
+    parser.add_argument('--use_data_augmentation', type=bool, help='Wether to use data augmentation')
     return parser.parse_args()
 
 
@@ -469,6 +473,7 @@ def create_dataset(filepath, grid_encoder, use_data_augmentation=True, repeat_pr
     pretty_print_prompt(prompts[0])
 
     prompt_lengths = [len(tokenizer.encode(prompt)) for prompt in tqdm(prompts, desc='Calculating prompt lengths')]
+    print_prompt_length_percentiles(prompt_lengths)
     plt.hist(prompt_lengths, bins=100);
     plt.title('Prompt length distribution')
     plt.xlabel('Number of tokens');
