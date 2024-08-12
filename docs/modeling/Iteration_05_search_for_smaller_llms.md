@@ -78,6 +78,14 @@ I have made experiments with different values for the rank of LoRA. It has a cle
 - `qwen2-0.5b-instruct` Eval set evaluation: 1h15
 - `qwen2-0.5b-instruct` 1k steps fine-tuning: 2h19
 
+### 2 stage test-time fine-tuning
+
+I had the intuition that maybe doing the fine-tuning in two stages could improve the validation loss: a first one with data augmentation and a second one without data augmentation.
+
+However I have tried with a wide range of learning rates for fine-tuning and no consistent improvement was seen.
+
+![2-stage-fine-tuning](res/2-stage-fine-tuning.png)
+
 ## Conclusion
 
 ## Next steps

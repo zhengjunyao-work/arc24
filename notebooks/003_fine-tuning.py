@@ -206,7 +206,7 @@ class cfg:
     adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240812_smaller_models_test-time_fine-tuning/01_Qwen2-0.5B-Instruct_lr1e-4_r128_2e3steps/checkpoint-2000'
     train_dataset = '/mnt/hdd0/Kaggle/arc24/data/test_time_fine-tuning/evaluation_n-1.json'
     val_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
-    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240812_smaller_models_test-time_fine-tuning/02_Qwen2-0.5B-Instruct_2stage_lr2e-5_r128_1e3steps'
+    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240812_smaller_models_test-time_fine-tuning/02_Qwen2-0.5B-Instruct_2stage_lr1e-6_r128_1e3steps'
     max_seq_len = 4096
     epochs = 0
     max_steps : Optional[int] =  1000 #1000 # If given it will override epochs
@@ -216,7 +216,7 @@ class cfg:
     # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
     per_device_train_batch_size = 1
     per_device_eval_batch_size = 2
-    learning_rate = 2e-5
+    learning_rate = 1e-6
     # # LoRA
     # use_rslora = True,
     # use_dora = True,
