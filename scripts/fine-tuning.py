@@ -488,6 +488,12 @@ def create_dataset(filepath, grid_encoder, use_data_augmentation=True, repeat_pr
     dataset = Dataset.from_dict({'text': prompts})
     return dataset
 
+
+def print_prompt_length_percentiles(prompt_lengths):
+    for percentile in [50, 75, 90, 95, 97]:
+        print(f'Prompt lenght percentile {percentile}: {np.percentile(prompt_lengths, percentile)}')
+
+
 def pretty_print_prompt(text, default_color='white'):
     color = default_color
     attrs = None
