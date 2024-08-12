@@ -73,3 +73,6 @@ I have made experiments with different values for the rank of LoRA. It has a cle
 - [x] What is the role of LoRA `r`?
 - [ ] Read about previous editions of the ARC challenges to see if any other data augmentation is used.
 - [ ] Make a submission with test fine-tuning
+- [ ] Remember that the test is 4 times smaller than the eval set
+- [ ] 2 stage test-time fine-tuning
+- [ ] Bfloat vs float
