@@ -98,6 +98,10 @@ Memory use is the same and speed is the same. Maybe it is using `bfloat16` inter
 
 I have also run a quick experiment with 2 samples per GPU but there was no speedup.
 
+### Qwen2-0.5B-Instruct vs Qwen2-1.5B-Instruct
+
+TODO: make a comparison with the same LoRA capacity.
+
 ## Conclusion
 
 ## Next steps
