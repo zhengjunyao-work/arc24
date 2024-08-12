@@ -167,7 +167,7 @@ model = AutoModelForCausalLM.from_pretrained(
     device_map=device_map,
     # max_memory={0: '9GB', 1: '8GB'},
     trust_remote_code=True,
-    torch_dtype=torch.bfloat16,
+    torch_dtype=torch.float16, #bfloat16 is 4 times slower on Kaggle than float16, TODO: what about my computer?
     # attn_implementation="flash_attention_2",
     )
 
