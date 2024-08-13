@@ -2,7 +2,7 @@ from typing import Optional
 
 class cfg:
     # Model
-    model_path = "/home/gbarbadillo/data/Qwen2-0.5B-arc"
+    model_path = "/home/gbarbadillo/data/Qwen2-1.5B-arc"
     lora_path = None
     #lora_path : Optional[str] = '/kaggle/input/loras/transformers/phi-3_128k/1'
     merged_model_path : Optional[str] = None
@@ -240,7 +240,7 @@ llama 3.1
     """
     if 'llama' in cfg.model_path:
         split_text = '<|eot_id|>'
-    elif 'Qwen' in cfg.model_path:
+    elif 'qwen' in cfg.model_path.lower():
         split_text = '<|im_end|>'
     else:
         split_text = '<|end|>'
@@ -532,7 +532,7 @@ def is_solution_done(solution):
 # %%
 def inference(data, prompt_creator, sampling_params):
     solutions, texts = dict(), dict()
-    for idx, (task_id, task) in tqdm(enumerate(data.items()), total=len(data), desc='Solving tasks'):
+    for idx, (task_id, task) in tqdm(enumerate(data.items()), total=len(data), desc='Solving tasks', smoothing=0):
         logging.info(f'Solving {task_id}, {idx+1}/{len(data)}')
         task_solution, task_texts = solve_task(task_id, task, prompt_creator, sampling_params)
         solutions.update(task_solution)

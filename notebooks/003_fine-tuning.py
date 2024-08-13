@@ -230,7 +230,7 @@ class cfg:
     swap_train_and_test = False
     repeat_prompts = 5 # if bigger than 0 it will repeat the prompts that many times
 
-# Smaller models config
+# Smaller models config 1.5B
 class cfg:
     #model_path = "HuggingFaceTB/SmolLM-135M-Instruct"
     model_path = 'Qwen/Qwen2-1.5B-Instruct'
@@ -261,6 +261,36 @@ class cfg:
     geometric_transforms = 8 # 0-8
     swap_train_and_test = True
     repeat_prompts = False # if bigger than 0 it will repeat the prompts that many times
+
+# Smaller models 1.5 test-time fine-tuning config
+class cfg:
+    model_path = 'Qwen/Qwen2-1.5B-Instruct'
+    adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240809_smaller_models/05_Qwen2-1.5B-Instruct_lr1e-4_r32_8e3steps/checkpoint-4000'
+    train_dataset = '/mnt/hdd0/Kaggle/arc24/data/test_time_fine-tuning/evaluation_n-1.json'
+    val_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
+    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240812_smaller_models_test-time_fine-tuning/03_Qwen2-1.5B-Instruct_lr1e-4_r32_2e3steps_c'
+    max_seq_len = 4096
+    epochs = 0
+    max_steps : Optional[int] =  2000 #1000 # If given it will override epochs
+    eval_steps = 100 #100
+    warmup_ratio = 0.1
+    batch_size = 16
+    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
+    per_device_train_batch_size = 1
+    per_device_eval_batch_size = 2
+    learning_rate = 1e-4
+    # # LoRA
+    # use_rslora = True,
+    # use_dora = True,
+    # lora_r = 4
+    # data augmentation
+    use_data_augmentation = True #True
+    max_train_permutations = 2 # tipically 2
+    color_swaps = 2
+    preserve_original_colors = False
+    geometric_transforms = 8 # 0-8
+    swap_train_and_test = False
+    repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times
 
 # %%
 os.makedirs(cfg.output_dir, exist_ok=True)

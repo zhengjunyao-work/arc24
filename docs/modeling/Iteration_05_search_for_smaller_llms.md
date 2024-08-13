@@ -111,6 +111,7 @@ TODO: make a comparison with the same LoRA capacity.
     - [ ] How the test accuracy changes if I train in the eval set?
     - [ ] How the test accuracy changes if I train in both the train and eval set?
     - [ ] What if I use the train dataset and n-1 eval dataset?
+    - [ ] What if I only do test-time fine-tuning?
 - [ ] Could I speedup Qwen2 training by using a single gpu?
 
 ## TODO
@@ -119,7 +120,7 @@ TODO: make a comparison with the same LoRA capacity.
 - [ ] Long context fine-tuning https://huggingface.co/blog/wenbopan/long-context-fine-tuning
 - [x] What is the role of LoRA `r`?
 - [ ] Read about previous editions of the ARC challenges to see if any other data augmentation is used.
-- [ ] Make a submission with test fine-tuning
+- [x] Make a submission with test fine-tuning
 - [ ] Remember that the test is 4 times smaller than the eval set
 - [x] 2 stage test-time fine-tuning
 - [x] Bfloat vs float
