@@ -54,7 +54,7 @@ class CFG:
     # data augmentation
     use_data_augmentation: bool = True
     max_train_permutations = 2 # tipically 2
-    color_swaps = 1
+    color_swaps: int = 1
     preserve_original_colors = False
     geometric_transforms = 8 # 0-8
     swap_train_and_test = False
@@ -72,6 +72,7 @@ def parse_args():
     parser.add_argument('--eval_steps', type=int, help="Number of steps between evaluations")
     parser.add_argument('--learning_rate', type=float, help='Learning rate for fine-tuning')
     parser.add_argument('--use_data_augmentation', type=bool, help='Wether to use data augmentation')
+    parser.add_argument('--color_swaps', type=int, help="Number of color swaps for data augmentation")
     return parser.parse_args()
 
 
