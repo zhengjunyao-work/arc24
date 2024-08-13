@@ -121,8 +121,10 @@ to have more prior knowledge about the task.
     - [ ] How the test accuracy changes if I train in both the train and eval set?
     - [ ] What if I use the train dataset and n-1 eval dataset?
     - [ ] What if I only do test-time fine-tuning?
+    - [ ] Is it helpful to first train with re-arc?
+    - [ ] Use other arc-like datasets for training
 - [ ] Could I speedup Qwen2 training by using a single gpu?
-- [ ] Maybe I have to start using just 100 eval tasks for validation, that way my test-time fine-tuning experiments will match the Kaggle setup.
+- [ ] Maybe I have to start using just 100 eval tasks for validation, that way my test-time fine-tuning experiments will match the Kaggle setup. Also I would have an additional 300 tasks for training.
 
 ## TODO
 
