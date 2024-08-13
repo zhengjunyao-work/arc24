@@ -100,7 +100,16 @@ I have also run a quick experiment with 2 samples per GPU but there was no speed
 
 ### Qwen2-0.5B-Instruct vs Qwen2-1.5B-Instruct
 
-TODO: make a comparison with the same LoRA capacity.
+![qwen-comparison](res/qwen-comparison.png)
+
+The bigger 1.5B parameters model learned faster on the train set and generalized better to the eval set.
+
+Would this continue to scale with bigger models? That would be interesting to see, f.e. fine-tuning GPT4-o.
+Given the hardware constraints of the challenge I cannot afford using much bigger models than this.
+
+For reference Qwen2-1.5B with LoRA r32 uses 8.5M of parameters, while Qwen2-0.5B with r128 uses ~17M of parameters.
+So the number of trainable parameters is not the difference betweeen trainings. Simply the bigger model seems
+to have more prior knowledge about the task.
 
 ## Conclusion
 
@@ -113,6 +122,7 @@ TODO: make a comparison with the same LoRA capacity.
     - [ ] What if I use the train dataset and n-1 eval dataset?
     - [ ] What if I only do test-time fine-tuning?
 - [ ] Could I speedup Qwen2 training by using a single gpu?
+- [ ] Maybe I have to start using just 100 eval tasks for validation, that way my test-time fine-tuning experiments will match the Kaggle setup.
 
 ## TODO
 
@@ -124,7 +134,7 @@ TODO: make a comparison with the same LoRA capacity.
 - [ ] Remember that the test is 4 times smaller than the eval set
 - [x] 2 stage test-time fine-tuning
 - [x] Bfloat vs float
-- [ ] Qwen/Qwen2-1.5B-Instruct
+- [x] Qwen/Qwen2-1.5B-Instruct
 - [ ] What is the number of steps in the test-time fine-tuning where overfitting starts to happen? On previous experiments it seemed to be above 5k steps
 - [x] Document Kaggle training and inference speeds.
 - [ ] Why experiments on Kaggle are getting worse training losses?
