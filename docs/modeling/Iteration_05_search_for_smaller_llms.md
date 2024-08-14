@@ -111,6 +111,10 @@ For reference Qwen2-1.5B with LoRA r32 uses 8.5M of parameters, while Qwen2-0.5B
 So the number of trainable parameters is not the difference betweeen trainings. Simply the bigger model seems
 to have more prior knowledge about the task.
 
+### Optimal number of steps for test-time fine-tuning
+
+TODO: it seems to be around 3k steps when using the whole eval set.
+
 ## Conclusion
 
 ## Next steps
