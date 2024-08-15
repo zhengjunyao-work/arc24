@@ -25,4 +25,5 @@ of the ensemble will also likely go up.
 
 ## TODO
 
-- [ ]
+- [ ] Refactor 2020 solution code and add arguments, there should only be a source of truth for the paths
+- [ ] Understand how the solution is generated and use that to my advantage when ensembling
