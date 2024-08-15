@@ -31,6 +31,9 @@ However Smollm models have only 2k context length.
 
 ## Results
 
+- [Fine-tuning on ARC tasks](https://wandb.ai/guillermobarbadillo/20240809_smaller_models?nw=nwuserguillermobarbadillo)
+- [Test-time fine-tuning](https://wandb.ai/guillermobarbadillo/20240812_smaller_models_test-time_fine-tuning?nw=nwuserguillermobarbadillo)
+
 ### Test time fine-tuning on Kaggle
 
 | Model                    | parameters (M) | max context length (k) | seq_len | 10 steps time (min) | 1000 steps time (hours) |
@@ -113,7 +116,7 @@ to have more prior knowledge about the task.
 
 ### Optimal number of steps for test-time fine-tuning
 
-TODO: it seems to be around 3k steps when using the whole eval set.
+There are no clear signs of overfitting, but it seems to be around 3k steps when using the whole eval set.
 
 ## Conclusion
 
@@ -141,6 +144,6 @@ TODO: it seems to be around 3k steps when using the whole eval set.
 - [x] 2 stage test-time fine-tuning
 - [x] Bfloat vs float
 - [x] Qwen/Qwen2-1.5B-Instruct
-- [ ] What is the number of steps in the test-time fine-tuning where overfitting starts to happen? On previous experiments it seemed to be above 5k steps
+- [x] What is the number of steps in the test-time fine-tuning where overfitting starts to happen? On previous experiments it seemed to be above 5k steps
 - [x] Document Kaggle training and inference speeds.
 - [ ] Why experiments on Kaggle are getting worse training losses?
