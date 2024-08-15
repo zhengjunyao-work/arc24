@@ -15,6 +15,15 @@ Try different configurations of training data and see how the validation loss is
 
 ## Development
 
+### Create new train-val partition
+
+On the notebook [005_create_new_data_partititions](../../notebooks/005_create_new_data_partititions.ipynb) I have prepared a function
+that given a random seed creates a new train-val partition. It will take 100 random eval tasks for validation and the rest for training.
+
+### Prepare arc-like datasets for training
+
+There are some arc-like datasets that could be useful for fine-tuning an LLM. They are listed [here](../02_Data_Understanding.md#external-data)
+
 ## Results
 
 ## Conclusion

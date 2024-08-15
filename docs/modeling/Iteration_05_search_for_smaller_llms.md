@@ -147,3 +147,4 @@ There are no clear signs of overfitting, but it seems to be around 3k steps when
 - [x] What is the number of steps in the test-time fine-tuning where overfitting starts to happen? On previous experiments it seemed to be above 5k steps
 - [x] Document Kaggle training and inference speeds.
 - [ ] Why experiments on Kaggle are getting worse training losses?
+- [ ] Document results and close iteration
