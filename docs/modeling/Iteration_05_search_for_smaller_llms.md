@@ -15,7 +15,7 @@ Can I get a better result than Phi-3 by using a smaller model with test time fin
 
 ## Motivation
 
-In the previous iteration I have seen that test time fine-tuning works. However when doing a proof of concept
+In the previous iteration I have seen that test time fine-tuning works on the eval set. However when doing a proof of concept
 on Kaggle's hardware I have found that to be able to fine-tune Phi-3 with a sequence length of 4096 first I have
 to use int4 quantization and second the fine-tuning would take 56 hours for 1k steps.
 
@@ -38,14 +38,14 @@ However Smollm models have only 2k context length.
 
 | model               | parameters (B) | eval accuracy | ttft eval accuracy | test accuracy | ttft test accuracy |
 |---------------------|----------------|---------------|--------------------|---------------|--------------------|
-| Phi-3               | 3.8            | 6.50%         | 16.80%             | 3.00%         | -                  |
-| Qwen2-1.5B-Instruct | 1.5            | 7.10%         | 15.90%             | 4.00%         | 4.00%              |
-| Qwen2-0.5B-Instruct | 0.5            | 4.60%         | 12.40%             | 0.00%         | 5.00%              |
+| Phi-3               | 3.8            | 6.50%         | **16.80%**         | 3.00%         | -                  |
+| Qwen2-1.5B-Instruct | 1.5            | **7.10%**     | 15.90%             | **4.00%**     | *4.00%             |
+| Qwen2-0.5B-Instruct | 0.5            | 4.60%         | 12.40%             | 0.00%         | ***5.00%**         |
 
 We have been able to improve accuracy on the test set by using Qwen2 models instead of Phi-3. I'm not sure if test-time
 fine-tuning is correctly implemented on Kaggle, there were some weird results. I have to unify the code to verify that everything is correct.
 
-### Test time fine-tuning on Kaggle
+### Test time fine-tuning speed on Kaggle
 
 | Model                    | parameters (M) | max context length (k) | seq_len | 10 steps time (min) | 1000 steps time (hours) |
 |--------------------------|----------------|------------------------|---------|---------------------|-------------------------|
@@ -83,18 +83,20 @@ the same measurements with more models and `bfloat16` for reference.
 
 ### Role of the rank of LoRA
 
-![role of r](res/role-of-r.png.png)
+![role of r](res/role-of-r.png)
 
 I have made experiments with different values for the rank of LoRA. It has a clear effect on the train loss: when we use a higher rank we get a lower train loss. However the effect on the validation loss is not clear, it seems that using a very small rank such as 4 is harmful but other than that the differences do not seem to be significative.
 
 ### Kaggle runtimes for reference
 
-- `qwen2-0.5b-instruct` Eval set evaluation: 1h15
+- `qwen2-0.5b-instruct` test set evaluation: 1h15
 - `qwen2-0.5b-instruct` 1k steps fine-tuning: 2h19
+- `qwen2-1.5b-instruct` test set evaluation: 1h45
+- `qwen2-1.5b-instruct` 1k steps fine-tuning: ~5h
 
 ### 2 stage test-time fine-tuning
 
-I had the intuition that maybe doing the fine-tuning in two stages could improve the validation loss: a first one with data augmentation and a second one without data augmentation.
+I had the intuition that maybe doing the test-time fine-tuning in two stages could improve the validation loss: a first one with data augmentation and a second one without data augmentation.
 
 However I have tried with a wide range of learning rates for fine-tuning and no consistent improvement was seen.
 
@@ -134,6 +136,9 @@ There are no clear signs of overfitting, but it seems to be around 3k steps when
 `Qwen2-1.5B-Instruct` and `Qwen2-0.5B-Instruct` are two replacement for `Phi-3` that are possible to be test-time fine-tuned on Kaggle.
 
 We have improved the test leaderboard score from 3 to 5 on this iteration.
+
+- I have found that `float16` is 4 times faster than `bfloat16` when fine-tuning on Kaggle
+- The bigger qwen2-1.5b model learns faster than the 0.5b version
 
 ## Next steps
 
