@@ -42,3 +42,4 @@ There are some arc-like datasets that could be useful for fine-tuning an LLM. Th
     - [ ] Is it helpful to first train with re-arc?
     - [ ] Use other arc-like datasets for training
     - [ ] What is the effect of using more training data? Can I estimate how the loss will decrease if generating more tasks?
+- [ ] Check for more datasets on: https://docs.google.com/spreadsheets/d/1fR4cgjY1kNKN_dxiidBQbyT6Gv7_Ko7daKOjlYojwTY/edit?gid=658867951#gid=658867951

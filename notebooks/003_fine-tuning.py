@@ -25,7 +25,8 @@ from datasets import Dataset
 class cfg:
     model_path = "/home/gbarbadillo/data/Phi-3-mini-128k-instruct"
     adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240729_arc_fine_tuning/08_phi-3_rearc100_lr2e-4_data_augmentation/checkpoint-1073'
-    train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
+    # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
+    train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/1D-ARC.json'
     # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/rearc/re_arc_100.json'
     val_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
     output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240729_arc_fine_tuning/10_phi-3_1rearc100_2train_lr5e-5_color-swap-no-preserve_continue'
@@ -292,10 +293,13 @@ class cfg:
     model_path = 'Qwen/Qwen2-0.5B-Instruct'
     adapter_path: Optional[str] = None
     # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
-    train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
+    # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
     # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/rearc/re_arc_100.json'
+    # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/1D-ARC.json'
+    # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/ConceptARC.json'
+    train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/MINI-ARC.json'
     val_dataset = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/02_old-train_Qwen2-0.5B-Instruct_lr1e-4_r32_8e3steps'
+    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/05_MINI-ARC_Qwen2-0.5B-Instruct_lr1e-4_r32_8e3steps'
     max_seq_len = 4096
     epochs = 0
     max_steps : Optional[int] =  6000 #1000 # If given it will override epochs
