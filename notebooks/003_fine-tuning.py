@@ -7,9 +7,6 @@ from abc import ABC, abstractmethod
 import numpy as np
 from termcolor import colored
 from tqdm.auto import tqdm
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-from matplotlib import colors
 import wandb
 from typing import Optional
 from itertools import product, islice, permutations, chain
@@ -20,11 +17,6 @@ from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from datasets import Dataset
 
-plt.plot()
-plt.close('all')
-plt.rcParams["figure.figsize"] = (20, 5)
-mpl.rcParams['lines.linewidth'] = 3
-mpl.rcParams['font.size'] = 16
 
 # %% [markdown]
 # ## Configuration
@@ -294,7 +286,41 @@ class cfg:
     geometric_transforms = 8 # 0-8
     swap_train_and_test = False
     repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times
-# %%
+
+# New partition config
+class cfg:
+    model_path = 'Qwen/Qwen2-0.5B-Instruct'
+    adapter_path: Optional[str] = None
+    # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
+    train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
+    # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/rearc/re_arc_100.json'
+    val_dataset = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
+    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/02_old-train_Qwen2-0.5B-Instruct_lr1e-4_r32_8e3steps'
+    max_seq_len = 4096
+    epochs = 0
+    max_steps : Optional[int] =  6000 #1000 # If given it will override epochs
+    eval_steps = 100 #100
+    warmup_ratio = 0.1
+    batch_size = 16
+    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
+    per_device_train_batch_size = 1
+    per_device_eval_batch_size = 2
+    learning_rate = 1e-4
+    # LoRA
+    use_rslora = True,
+    use_dora = True,
+    lora_r = 32
+    # data augmentation
+    use_data_augmentation = True #True
+    max_train_permutations = 2 # tipically 2
+    color_swaps = 4
+    preserve_original_colors = False
+    geometric_transforms = 8 # 0-8
+    swap_train_and_test = True
+    repeat_prompts = False # if bigger than 0 it will repeat the prompts that many times
+
+
+
 os.makedirs(cfg.output_dir, exist_ok=True)
 with open(os.path.join(cfg.output_dir, 'cfg.json'), 'w') as f:
     json.dump({key:value for key, value in cfg.__dict__.items() if not key.startswith('__')}, f, indent=4)
@@ -720,10 +746,6 @@ def create_dataset(filepath, grid_encoder, use_data_augmentation=True, repeat_pr
     pretty_print_prompt(prompts[0])
 
     prompt_lengths = [len(tokenizer.encode(prompt)) for prompt in tqdm(prompts, desc='Calculating prompt lengths')]
-    plt.hist(prompt_lengths, bins=100);
-    plt.title('Prompt length distribution')
-    plt.xlabel('Number of tokens');
-    plt.show()
 
     prompts = [prompt for prompt, prompt_length in zip(prompts, prompt_lengths) if prompt_length < cfg.max_seq_len]
     print(f'Leaving {len(prompts)} prompts after removing those longer than {cfg.max_seq_len} tokens')
