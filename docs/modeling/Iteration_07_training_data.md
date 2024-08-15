@@ -21,6 +21,8 @@ Try different configurations of training data and see how the validation loss is
 
 ## Next steps
 
+- [ ] Iterable for data augmentation will be much better
+
 ## TODO
 
 - [ ] What is the effect of changing the train data? Keep the same train configuration and just change the data.
