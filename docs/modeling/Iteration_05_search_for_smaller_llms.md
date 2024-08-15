@@ -34,6 +34,17 @@ However Smollm models have only 2k context length.
 - [Fine-tuning on ARC tasks](https://wandb.ai/guillermobarbadillo/20240809_smaller_models?nw=nwuserguillermobarbadillo)
 - [Test-time fine-tuning](https://wandb.ai/guillermobarbadillo/20240812_smaller_models_test-time_fine-tuning?nw=nwuserguillermobarbadillo)
 
+### Results summary
+
+| model               | parameters (B) | eval accuracy | ttft eval accuracy | test accuracy | ttft test accuracy |
+|---------------------|----------------|---------------|--------------------|---------------|--------------------|
+| Phi-3               | 3.8            | 6.50%         | 16.80%             | 3.00%         | -                  |
+| Qwen2-1.5B-Instruct | 1.5            | 7.10%         | 15.90%             | 4.00%         | 4.00%              |
+| Qwen2-0.5B-Instruct | 0.5            | 4.60%         | 12.40%             | 0.00%         | 5.00%              |
+
+We have been able to improve accuracy on the test set by using Qwen2 models instead of Phi-3. I'm not sure if test-time
+fine-tuning is correctly implemented on Kaggle, there were some weird results. I have to unify the code to verify that everything is correct.
+
 ### Test time fine-tuning on Kaggle
 
 | Model                    | parameters (M) | max context length (k) | seq_len | 10 steps time (min) | 1000 steps time (hours) |
@@ -120,6 +131,10 @@ There are no clear signs of overfitting, but it seems to be around 3k steps when
 
 ## Conclusion
 
+`Qwen2-1.5B-Instruct` and `Qwen2-0.5B-Instruct` are two replacement for `Phi-3` that are possible to be test-time fine-tuned on Kaggle.
+
+We have improved the test leaderboard score from 3 to 5 on this iteration.
+
 ## Next steps
 
 - Decomposing the task into step by step could be helpful. That is, creating multiple grids until creating the final output.
@@ -147,4 +162,4 @@ There are no clear signs of overfitting, but it seems to be around 3k steps when
 - [x] What is the number of steps in the test-time fine-tuning where overfitting starts to happen? On previous experiments it seemed to be above 5k steps
 - [x] Document Kaggle training and inference speeds.
 - [ ] Why experiments on Kaggle are getting worse training losses?
-- [ ] Document results and close iteration
+- [x] Document results and close iteration
