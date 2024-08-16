@@ -12,12 +12,47 @@ from collections import defaultdict
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import BaggingClassifier
 from skimage.measure import label, regionprops
+from tqdm.auto import tqdm
 
 import warnings # suppress warnings
 warnings.filterwarnings('ignore')
 
+import sys
+import argparse
 
 
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+    args = parse_args(args)
+    compile_feature_extraction_for_sklearn_tree()
+    run_icecube_solver(
+        dataset_filepath=args.dataset_filepath, solution_filepath='sub_icecube.json')
+    sub_solver = run_main_solvers(
+        dataset_filepath=args.dataset_filepath,
+        sample_submission_filepath=args.sample_submission_filepath,
+        icecuber_solution_filepath='sub_icecube.json')
+    with open(args.output_filepath, 'w') as file:
+        json.dump(sub_solver, file, indent=4)
+
+
+def parse_args(args):
+    epilog = """
+    """
+    description = """
+Tries to solve the ARC task by using a combination of different solvers.
+https://www.kaggle.com/code/mehrankazeminia/3-arc24-developed-2020-winning-solutions
+    """
+    parser = argparse.ArgumentParser(
+        description=description,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        epilog=epilog)
+    parser.add_argument('--dataset_filepath', required=True, help='Path to json file with the dataset that we want to solve')
+    parser.add_argument('--sample_submission_filepath', required=True, help='Path to json file with the dataset that we want to solve')
+    parser.add_argument('--output_filepath', required=True, help='Path to json file that will be created with the solution')
+    args = parser.parse_args(args)
+    print(args)
+    return args
 
 
 """40 Functions - Via Different Solvers"""
@@ -2196,16 +2231,14 @@ def flattener(pred):
 """Icecube"""
 def adapt_arc24_files_to_arc20_format(json_file_path, output_dir):
     # Load the JSON content
-    json_file_path = '/kaggle/input/arc-prize-2024/arc-agi_test_challenges.json'
     with open(json_file_path, 'r') as file:
         data = json.load(file)
 
     # Create the 'test' directory
-    output_dir = '/kaggle/working/abstraction-and-reasoning-challenge/test'
     os.makedirs(output_dir, exist_ok=True)
 
     # Split the JSON content into individual files
-    for task_id, task_data in data.items():
+    for task_id, task_data in tqdm(data.items(), total=len(data), desc='Splitting tasks into multiple files'):
         output_file_path = os.path.join(output_dir, f'{task_id}.json')
         with open(output_file_path, 'w') as output_file:
             json.dump(task_data, output_file, indent=4)
@@ -2219,9 +2252,9 @@ def mySystem(cmd):
     assert(process.wait() == 0)
 
 
-def translate_submission_from_old_csv_format_to_new_json_format(file_path):
+def translate_submission_from_old_csv_format_to_new_json_format(input_filepath, output_filepath):
     # Read the original submission file
-    with open(file_path, 'r') as file:
+    with open(input_filepath, 'r') as file:
         lines = file.readlines()
 
     submission_dict = {}
@@ -2259,27 +2292,32 @@ def translate_submission_from_old_csv_format_to_new_json_format(file_path):
             submission_dict[task_id].append(attempt_dict)
 
     # Write to the new json file
-    with open('sub_icecube.json', 'w') as file:
+    with open(output_filepath, 'w') as file:
         json.dump(submission_dict, file, indent=4)
 
 
-def run_icecube_solver():
-    print("\n\n\t\tRunning Icecube solver")
-    adapt_arc24_files_to_arc20_format(
-        json_file_path='/kaggle/input/arc-prize-2024/arc-agi_test_challenges.json',
-        output_dir='/kaggle/working/abstraction-and-reasoning-challenge/test')
+def check_icecube_dataset_has_correct_version():
     if open("../input/arc-solution-source-files-by-icecuber/version.txt").read().strip() == "671838222":
         print("Dataset has correct version")
     else:
         print("Dataset version not matching!")
         assert(0)
+
+
+def run_icecube_solver(dataset_filepath, solution_filepath):
+    print("\n\n\t\tRunning Icecube solver")
+    adapt_arc24_files_to_arc20_format(
+        json_file_path=dataset_filepath,
+        output_dir='/kaggle/working/abstraction-and-reasoning-challenge/test')
+    check_icecube_dataset_has_correct_version()
     mySystem("cp -r ../input/arc-solution-source-files-by-icecuber ./absres-c-files")
     mySystem("cd absres-c-files; make -j")
     mySystem("cd absres-c-files; python3 safe_run.py")
-    mySystem("cp absres-c-files/submission_part.csv old_submission.csv")
+    mySystem("cp absres-c-files/submission_part.csv old_icecube_submission.csv")
     mySystem("tar -czf store.tar.gz absres-c-files/store")
     mySystem("rm -r absres-c-files")
-    translate_submission_from_old_csv_format_to_new_json_format('/kaggle/working/old_submission.csv')
+    translate_submission_from_old_csv_format_to_new_json_format(
+        '/kaggle/working/old_icecube_submission.csv', solution_filepath)
     print("\t\tIcecube solver completed\n\n")
 
 
@@ -2341,23 +2379,24 @@ def prn_select_2(prn):
     return prn
 
 
-def run_main_solvers(data_path, sample_path):
+def run_main_solvers(dataset_filepath, sample_submission_filepath, icecuber_solution_filepath):
+    print("\n\n\t\tRunning main solvers")
 
-    with open(sample_path,'r') as f:
-        sub_solver = json.load(f)
+    with open(sample_submission_filepath,'r') as f:
+        submission = json.load(f)
 
-    with open('/kaggle/working/sub_icecube.json' , 'r') as f:
+    with open(icecuber_solution_filepath , 'r') as f:
         sub_icecube = json.load(f)
 
     # ...............................................................................
-    with open(data_path,'r') as f:
+    with open(dataset_filepath,'r') as f:
         tasks_name = list(json.load(f).keys())
 
-    with open(data_path,'r') as f:
+    with open(dataset_filepath,'r') as f:
         tasks_file = list(json.load(f).values())
 
     # ...............................................................................
-    for n in range(len(tasks_name)):
+    for n in tqdm(range(len(tasks_name)), desc='Running main solvers', total=len(tasks_name)):
         task = tasks_file[n]
         t = tasks_name[n]
 
@@ -2443,48 +2482,33 @@ def run_main_solvers(data_path, sample_path):
             if (prn != []):
                 prn = prn_select_2(prn)
 
-                sub_solver[t][i]['attempt_1'] = prn[0]
+                submission[t][i]['attempt_1'] = prn[0]
                 # display(pd.DataFrame(data={'Answers for task':t, 'Items':i, 'Attempt':'1', 'Files':'test_challenges'},index=[n]))
                 # plot_pic(prn[0])
 
                 if (len(prn)==2):
-                    sub_solver[t][i]['attempt_2'] = prn[1]
+                    submission[t][i]['attempt_2'] = prn[1]
                     # display(pd.DataFrame(data={'Answers for task':t, 'Items':i, 'Attempt':'2', 'Files':'test_challenges'},index=[n]))
                     # plot_pic(prn[1])
 
             # ............................................................................... 5 - ICECube
-            if (sub_solver[t][i]['attempt_1'] != [[0, 0], [0, 0]]):
+            if (submission[t][i]['attempt_1'] != [[0, 0], [0, 0]]):
                 if (sub_icecube[t][i]['attempt_1'] != [[0, 0], [0, 0]]):
 
-                    if (sub_solver[t][i]['attempt_1'] != sub_icecube[t][i]['attempt_1']):
-                        sub_solver[t][i]['attempt_2'] =  sub_icecube[t][i]['attempt_1']
+                    if (submission[t][i]['attempt_1'] != sub_icecube[t][i]['attempt_1']):
+                        submission[t][i]['attempt_2'] =  sub_icecube[t][i]['attempt_1']
 
-            if (sub_solver[t][i]['attempt_1'] == [[0, 0], [0, 0]]):
-                if (sub_solver[t][i]['attempt_2'] == [[0, 0], [0, 0]]):
+            if (submission[t][i]['attempt_1'] == [[0, 0], [0, 0]]):
+                if (submission[t][i]['attempt_2'] == [[0, 0], [0, 0]]):
 
                     if (sub_icecube[t][i]['attempt_1'] != [[0, 0], [0, 0]]):
-                        sub_solver[t][i]['attempt_1'] = sub_icecube[t][i]['attempt_1']
+                        submission[t][i]['attempt_1'] = sub_icecube[t][i]['attempt_1']
 
                     if (sub_icecube[t][i]['attempt_2'] != [[0, 0], [0, 0]]):
-                        sub_solver[t][i]['attempt_2'] = sub_icecube[t][i]['attempt_2']
+                        submission[t][i]['attempt_2'] = sub_icecube[t][i]['attempt_2']
 
-    # ...............................................................................
-    # display(sub_solver)
-    return sub_solver
+    return submission
 
 
-train1_path = '../input/arc-prize-2024/arc-agi_training_challenges.json'
-train2_path = '../input/arc-prize-2024/arc-agi_training_solutions.json'
-
-eval1_path = '../input/arc-prize-2024/arc-agi_evaluation_challenges.json'
-eval2_path = '../input/arc-prize-2024/arc-agi_evaluation_solutions.json'
-
-test_path = '../input/arc-prize-2024/arc-agi_test_challenges.json'
-sample_path = '../input/arc-prize-2024/sample_submission.json'
-
-
-compile_feature_extraction_for_sklearn_tree()
-run_icecube_solver()
-sub_solver = run_main_solvers(test_path, sample_path)
-with open('submission_program_search.json', 'w') as file:
-    json.dump(sub_solver, file, indent=4)
+if __name__ == '__main__':
+    main()
