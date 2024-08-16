@@ -31,7 +31,6 @@ def main(args=None):
         dataset_filepath=args.dataset_filepath, solution_filepath='sub_icecube.json')
     sub_solver = run_main_solvers(
         dataset_filepath=args.dataset_filepath,
-        sample_submission_filepath=args.sample_submission_filepath,
         icecuber_solution_filepath='sub_icecube.json')
     with open(args.output_filepath, 'w') as file:
         json.dump(sub_solver, file, indent=4)
@@ -49,7 +48,6 @@ https://www.kaggle.com/code/mehrankazeminia/3-arc24-developed-2020-winning-solut
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         epilog=epilog)
     parser.add_argument('--dataset_filepath', required=True, help='Path to json file with the dataset that we want to solve')
-    parser.add_argument('--sample_submission_filepath', required=True, help='Path to json file with the dataset that we want to solve')
     parser.add_argument('--output_filepath', required=True, help='Path to json file that will be created with the solution')
     args = parser.parse_args(args)
     print(args)
@@ -2382,26 +2380,27 @@ def prn_select_2(prn):
     return prn
 
 
-def run_main_solvers(dataset_filepath, sample_submission_filepath, icecuber_solution_filepath):
+def create_dummy_submission(data):
+    submission = {}
+    for task_id, task in data.items():
+        submission[task_id] = []
+        for i in range(len(task['test'])):
+            submission[task_id].append({
+                'attempt_1': [[0, 0], [0, 0]],
+                'attempt_2': [[0, 0], [0, 0]]
+            })
+    return submission
+
+
+def run_main_solvers(dataset_filepath, icecuber_solution_filepath):
     print("\n\n\t\tRunning main solvers")
-
-    with open(sample_submission_filepath,'r') as f:
-        submission = json.load(f)
-
     with open(icecuber_solution_filepath , 'r') as f:
         sub_icecube = json.load(f)
-
-    # ...............................................................................
     with open(dataset_filepath,'r') as f:
-        tasks_name = list(json.load(f).keys())
+        data = list(json.load(f))
+    submission = create_dummy_submission(data)
 
-    with open(dataset_filepath,'r') as f:
-        tasks_file = list(json.load(f).values())
-
-    # ...............................................................................
-    for n in tqdm(range(len(tasks_name)), desc='Running main solvers', total=len(tasks_name)):
-        task = tasks_file[n]
-        t = tasks_name[n]
+    for task_id, task in tqdm(data.items(), desc='Running main solvers', total=len(data)):
 
         for i in range(len(task['test'])):
             test_input = np.array(task['test'][i]['input'])
@@ -2485,30 +2484,30 @@ def run_main_solvers(dataset_filepath, sample_submission_filepath, icecuber_solu
             if (prn != []):
                 prn = prn_select_2(prn)
 
-                submission[t][i]['attempt_1'] = prn[0]
+                submission[task_id][i]['attempt_1'] = prn[0]
                 # display(pd.DataFrame(data={'Answers for task':t, 'Items':i, 'Attempt':'1', 'Files':'test_challenges'},index=[n]))
                 # plot_pic(prn[0])
 
                 if (len(prn)==2):
-                    submission[t][i]['attempt_2'] = prn[1]
+                    submission[task_id][i]['attempt_2'] = prn[1]
                     # display(pd.DataFrame(data={'Answers for task':t, 'Items':i, 'Attempt':'2', 'Files':'test_challenges'},index=[n]))
                     # plot_pic(prn[1])
 
             # ............................................................................... 5 - ICECube
-            if (submission[t][i]['attempt_1'] != [[0, 0], [0, 0]]):
-                if (sub_icecube[t][i]['attempt_1'] != [[0, 0], [0, 0]]):
+            if (submission[task_id][i]['attempt_1'] != [[0, 0], [0, 0]]):
+                if (sub_icecube[task_id][i]['attempt_1'] != [[0, 0], [0, 0]]):
 
-                    if (submission[t][i]['attempt_1'] != sub_icecube[t][i]['attempt_1']):
-                        submission[t][i]['attempt_2'] =  sub_icecube[t][i]['attempt_1']
+                    if (submission[task_id][i]['attempt_1'] != sub_icecube[task_id][i]['attempt_1']):
+                        submission[task_id][i]['attempt_2'] =  sub_icecube[task_id][i]['attempt_1']
 
-            if (submission[t][i]['attempt_1'] == [[0, 0], [0, 0]]):
-                if (submission[t][i]['attempt_2'] == [[0, 0], [0, 0]]):
+            if (submission[task_id][i]['attempt_1'] == [[0, 0], [0, 0]]):
+                if (submission[task_id][i]['attempt_2'] == [[0, 0], [0, 0]]):
 
-                    if (sub_icecube[t][i]['attempt_1'] != [[0, 0], [0, 0]]):
-                        submission[t][i]['attempt_1'] = sub_icecube[t][i]['attempt_1']
+                    if (sub_icecube[task_id][i]['attempt_1'] != [[0, 0], [0, 0]]):
+                        submission[task_id][i]['attempt_1'] = sub_icecube[task_id][i]['attempt_1']
 
-                    if (sub_icecube[t][i]['attempt_2'] != [[0, 0], [0, 0]]):
-                        submission[t][i]['attempt_2'] = sub_icecube[t][i]['attempt_2']
+                    if (sub_icecube[task_id][i]['attempt_2'] != [[0, 0], [0, 0]]):
+                        submission[task_id][i]['attempt_2'] = sub_icecube[task_id][i]['attempt_2']
 
     return submission
 
