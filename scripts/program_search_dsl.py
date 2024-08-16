@@ -3,50 +3,20 @@ This script has been copied and modified from the following source:
 https://www.kaggle.com/code/mehrankazeminia/3-arc24-developed-2020-winning-solutions
 """
 
-import os, gc
-import sys, pdb
-import copy, time
-import json, random
-
+import os
+import json
+from subprocess import Popen, PIPE, STDOUT
 import numpy as np
 import pandas as pd
-import seaborn as sns
-from scipy import stats
-from pathlib import Path
-
-from colorama import Style, Fore
-import signal
-import psutil
-import itertools
-import subprocess
-import base64, gzip
-import networkx as nx
-import multiprocessing
-
-from numpy import array
-from pathlib import Path
-from scipy import ndimage
-from scipy.stats import mode
-from tqdm.auto import trange
-from functools import partial
-from tqdm.notebook import tqdm
-from PIL import Image, ImageDraw
-from xgboost import XGBClassifier
-from itertools import combinations, product
-from collections import defaultdict, Counter
-from skimage.measure import label, regionprops
-
-from sklearn.tree import *
-from sklearn import tree
+from collections import defaultdict
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import BaggingClassifier
 from skimage.measure import label, regionprops
-from sklearn.preprocessing import MinMaxScaler
 
 import warnings # suppress warnings
 warnings.filterwarnings('ignore')
 
-from subprocess import Popen, PIPE, STDOUT
-from glob import glob
+
 
 
 
@@ -719,7 +689,7 @@ def make_features(x, has_frame=False):
         return str_pred
     with open("ex.txt", "w") as f:
         f.write(short_flattener(x.tolist()))
-    
+
     #!./grid_feature_extraction > /dev/null #TODO: fix this
     os.system('./grid_feature_extraction > /dev/null')
     columns = pd.read_csv('features.tsv', sep='\t').columns
