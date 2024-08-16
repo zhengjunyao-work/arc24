@@ -5,6 +5,7 @@ https://www.kaggle.com/code/mehrankazeminia/3-arc24-developed-2020-winning-solut
 
 import os
 import json
+import time
 from subprocess import Popen, PIPE, STDOUT
 import numpy as np
 import pandas as pd
@@ -672,7 +673,7 @@ def predict_tiles_shape(task, test_input):
 
 """Sklearn tree"""
 def compile_feature_extraction_for_sklearn_tree():
-    print("\t\Compiling feature extraction for sklearn tree")
+    print("\t\tCompiling feature extraction for sklearn tree")
     os.system('cp /kaggle/input/arc24-source-code/grid_feature_extraction.cpp .')
     os.system('g++ -pthread -lpthread -O3 -std=c++17 -o grid_feature_extraction grid_feature_extraction.cpp')
     os.system('./grid_feature_extraction')
@@ -2246,10 +2247,12 @@ def adapt_arc24_files_to_arc20_format(json_file_path, output_dir):
 
 def mySystem(cmd):
     print(cmd)
+    t0 = time.time()
     process = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=True)
     for line in iter(process.stdout.readline, b''):
         print(line.decode("utf-8"), end='')
     assert(process.wait() == 0)
+    print(f'{time.time() - t0:.1f} seconds took to run {cmd}')
 
 
 def translate_submission_from_old_csv_format_to_new_json_format(input_filepath, output_filepath):
