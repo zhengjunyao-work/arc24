@@ -38,3 +38,5 @@ I will write my preliminary understandings of what the notebook is doing (they m
 
 - [ ] Refactor 2020 solution code and add arguments, there should only be a source of truth for the paths
 - [ ] Understand how the solution is generated and use that to my advantage when ensembling
+- [ ] Evaluate the solutions for train and evaluation
+- [ ] Better analysis of the generated solutions and see what is the best way to ensemble
