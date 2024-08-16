@@ -50,7 +50,6 @@ from glob import glob
 
 
 
-# %%
 train1_path = '../input/arc-prize-2024/arc-agi_training_challenges.json'
 train2_path = '../input/arc-prize-2024/arc-agi_training_solutions.json'
 
@@ -61,34 +60,9 @@ test_path = '../input/arc-prize-2024/arc-agi_test_challenges.json'
 sample_path = '../input/arc-prize-2024/sample_submission.json'
 
 
-# %% [markdown]
-# ![](https://cdn-images-1.medium.com/max/1000/1*7s_cV4TLZ1L31MJNj2Rk5w.png)
-
-# %% [markdown]
-# # <span style="color:darkred;">Solver 7 | Developed ARC 2020</span>
-#
-# <p style="border-bottom: 15px solid darkcyan"></p>
-# <p style="border-bottom: 5px solid darkred"></p>
-
-# %%
-
-#::::::::::::::::::::::::::::::::::::::::::::::
-
-# %% [markdown]
-# <div>
-#     <img src='https://cdn-images-1.medium.com/max/1000/1*WWWVPaYg_eKA-8g8MKrOjw.png'>
-# </div>
-
-# %% [markdown]
-# # <span style="color:darkred;">1 - Different Solvers</span>
-#
-# <p style="border-bottom: 15px solid darkcyan"></p>
-# <p style="border-bottom: 5px solid darkred"></p>
-
-# %%
-################################################################################
-# 40 Functions - Via Different Solvers
-################################################################################ 1
+"""
+40 Functions - Via Different Solvers
+"""
 def flattener(pred):
     str_pred = str([row for row in pred])
     str_pred = str_pred.replace(', ', '')
@@ -97,7 +71,7 @@ def flattener(pred):
     str_pred = str_pred.replace(']]', '|')
     return str_pred
 
-################################################################################ 2
+
 def get_objects(task):
     xs, ys = [], []
     for obj in task['train']:
@@ -105,7 +79,7 @@ def get_objects(task):
         ys.append(np.array(obj['output']))
     return xs, ys
 
-################################################################################ 3
+
 def find_sub(matrix, sub, ignore=None):
     positions = []
     mask = sub != ignore
@@ -116,7 +90,7 @@ def find_sub(matrix, sub, ignore=None):
                 positions.append((x,y,x+sub.shape[0],y+sub.shape[1]))
     return positions
 
-################################################################################ 4
+
 def check_subitem(task):
     for x, y in zip(*get_objects(task)):
         positions = find_sub(x, y)
@@ -124,14 +98,14 @@ def check_subitem(task):
             return False
     return True
 
-################################################################################ 5
+
 def check_samesize(task):
     for x,y in zip(*get_objects(task)):
         if x.shape != y.shape:
             return False
     return True
 
-################################################################################ 6
+
 def check_sub_mask(task):
     if check_samesize(task):
         return False
@@ -148,7 +122,7 @@ def check_sub_mask(task):
             return False
     return True
 
-################################################################################ 7
+
 def get_cells(x, cols, rows):
     if cols[0] != 0:
         cols = [-1]+cols
@@ -164,7 +138,7 @@ def get_cells(x, cols, rows):
             cells[i][j] = x[cols[i]+1:cols[i+1], rows[j]+1:rows[j+1]]
     return cells
 
-################################################################################ 8
+
 def get_grid(x):
     cols = defaultdict(list)
     rows = defaultdict(list)
@@ -181,7 +155,7 @@ def get_grid(x):
             return c, cols[c], rows[c]
     return -1, [], []
 
-################################################################################ 9
+
 def check_grid(task):
     for x,y in zip(*get_objects(task)):
         color_of_grid, cols, rows = get_grid(x)
@@ -189,13 +163,13 @@ def check_grid(task):
             return False
     return True
 
-################################################################################ 10
+
 def mul_ratio(x, x_ratio):
     x_shape = (x.shape[0]*x_ratio[0], x.shape[1]*x_ratio[1])
     x_ = np.array([x[i//x_ratio[0]][j//x_ratio[1]] for i, j in np.ndindex(x_shape)]).reshape(x_shape)
     return x_
 
-################################################################################ 11
+
 def predict_transforms(xs, ys, test):
     fn = get_transform(xs, ys)
     if fn:
@@ -228,13 +202,13 @@ def predict_transforms(xs, ys, test):
         return [np.concatenate([np.concatenate([fns[i,j](test) for i in range(x_ratio[0])], axis=0) for j in range(x_ratio[1])], axis=1)]
     return []
 
-################################################################################ 12
+
 def predict_grid_transforms(task, test):
     xs, ys = get_objects(task)
     xs = [grid_filter(x) for x in xs]
     return predict_transforms(xs, ys, grid_filter(test))
 
-################################################################################ 13
+
 def get_transform(xs, ys):
     for tranform in get_all_transforms():
         tranformed = True
@@ -248,7 +222,7 @@ def get_transform(xs, ys):
             return tranform
     return None
 
-################################################################################ 14
+
 def get_transforms(xs, ys):
     fn = get_transform(xs, ys)
     if fn:
@@ -280,18 +254,18 @@ def get_transforms(xs, ys):
         return fns
     return None
 
-################################################################################ 15
+
 def check_grid_transforms(task):
     xs, ys = get_objects(task)
     xs = [grid_filter(x) for x in xs]
     return get_transforms(xs, ys) is not None
 
-################################################################################ 16
+
 def get_mode_color(ar):
     colors, counts = np.unique(ar, return_counts=True)
     return colors[np.argmax(counts)]
 
-################################################################################ 17
+
 def grid_filter(x):
     color_of_grid, cols, rows = get_grid(x)
     if color_of_grid == -1:
@@ -299,7 +273,7 @@ def grid_filter(x):
     cells = get_cells(x, cols, rows)
     return np.array([get_mode_color(cell) for cell in cells.reshape(-1)]).reshape(cells.shape)
 
-################################################################################ 18
+
 def mul_ratios(x, y, x_ratio, y_ratio):
     x_shape = (x.shape[0]*x_ratio[0], x.shape[1]*x_ratio[1])
     x_ = np.array([x[i//x_ratio[0]][j//x_ratio[1]] for i, j in np.ndindex(x_shape)]).reshape(x_shape)
@@ -307,7 +281,7 @@ def mul_ratios(x, y, x_ratio, y_ratio):
     y_ = np.array([y[i//y_ratio[0]][j//y_ratio[1]] for i, j in np.ndindex(y_shape)]).reshape(y_shape)
     return x_, y_
 
-################################################################################ 19
+
 def get_ratio(xs, ys):
     x_ratio = []
     y_ratio = []
@@ -324,7 +298,7 @@ def get_ratio(xs, ys):
         return None
     return tuple(x_ratio), tuple(y_ratio)
 
-################################################################################ 20
+
 def check_sub_grid_2x(task):
     if check_samesize(task) or check_subitem(task):
         return False
@@ -337,7 +311,7 @@ def check_sub_grid_2x(task):
             return False
     return True
 
-################################################################################ 21
+
 def check_chess(task, input=False, output=True):
     xs, ys = get_objects(task)
     if input:
@@ -350,7 +324,7 @@ def check_chess(task, input=False, output=True):
                 return False
     return True
 
-################################################################################ 22
+
 def has_chess(g):
     colors = np.unique(g)
     counts = len(colors)
@@ -368,7 +342,7 @@ def has_chess(g):
         indexes[index] = True
     return True
 
-################################################################################ 23
+
 def has_antichess(g):
     colors = np.unique(g)
     counts = len(colors)
@@ -386,7 +360,7 @@ def has_antichess(g):
         indexes[index] = True
     return True
 
-################################################################################ 24
+
 def find_colors(g):
     colors = np.unique(g)
     counts = len(colors)
@@ -404,7 +378,7 @@ def find_colors(g):
             return q_colors
     return None
 
-################################################################################ 25
+
 def predict_chess(g):
     q_colors = find_colors(g)
     if q_colors is None:
@@ -421,13 +395,13 @@ def predict_chess(g):
         q_colors = np.roll(q_colors, 1)
     return results
 
-################################################################################ 26
+
 def predict_transforms_grid_2x(task, test):
     xs, ys = get_objects(task)
     xs = [grid_filter(x) for x in xs]
     return predict_transforms_2x(xs, ys, grid_filter(test))
 
-################################################################################ 27
+
 def predict_transforms_2x(xs, ys, test):
     predictions = []
     transforms = [
@@ -443,7 +417,7 @@ def predict_transforms_2x(xs, ys, test):
         predictions.append(x_)
     return predictions
 
-################################################################################ 28
+
 def has_repeating(g, ignore=0):
     size0b = int(.6 * g.shape[0])
     size1b = int(.6 * g.shape[1])
@@ -470,7 +444,7 @@ def has_repeating(g, ignore=0):
                         return shift0, shift1, pattern
     return None
 
-################################################################################ 29
+
 def check_repeating(task, has_complete=False):
     patterns = []
     for x, y in zip(*get_objects(task)):
@@ -497,7 +471,7 @@ def check_repeating(task, has_complete=False):
             return False
     return True
 
-################################################################################ 30
+
 def predict_repeating(x):
     for c in np.unique(x):
         result = has_repeating(x, c)
@@ -511,7 +485,7 @@ def predict_repeating(x):
             return [pred1,pred2,pred3]
     return []
 
-################################################################################ 31
+
 def predict_repeating_mask(x):
     predictions = predict_repeating(x)
     if len(predictions) > 0:
@@ -519,7 +493,7 @@ def predict_repeating_mask(x):
         return [predictions[0][min(rows):max(rows)+1,min(cols):max(cols)+1]]
     return []
 
-################################################################################ 32
+
 def trim_matrix(x):
     if len(np.unique(x)) == 1:
         return x
@@ -530,7 +504,7 @@ def trim_matrix(x):
             return x[xmin:xmax,ymin:ymax]
     return x
 
-################################################################################ 33
+
 def trim_matrix_box(g, mask=None):
     if mask is None:
         mask = np.unique(g)
@@ -543,7 +517,7 @@ def trim_matrix_box(g, mask=None):
             return (xmin,ymin,xmax,ymax)
     return None
 
-################################################################################ 34
+
 def has_tiles(g, ignore=0):
     for size0b, size1b in [(g.shape[0], int(0.6*g.shape[1])), (int(0.6*g.shape[0]), g.shape[1])]:
         t = np.full((g.shape[0]+size0b, g.shape[1]+size1b), -1)
@@ -575,7 +549,7 @@ def has_tiles(g, ignore=0):
                     return pattern
     return None
 
-################################################################################ 35
+
 def roll_color(g):
     from_values = np.unique(g)
     to_values = np.roll(from_values, 1)
@@ -584,7 +558,7 @@ def roll_color(g):
     idx = np.searchsorted(from_values, g, sorter = sort_idx)
     return to_values[sort_idx][idx]
 
-################################################################################ 36
+
 def get_all_transforms():
     return [
         lambda x: roll_color(x),
@@ -602,7 +576,7 @@ def get_all_transforms():
         lambda x: x,
     ]
 
-################################################################################ 37
+
 def has_tiles_shape(g, shape, ignore=0):
     for size0b, size1b in [(g.shape[0], int(0.6*g.shape[1])), (int(0.6*g.shape[0]), g.shape[1])]:
         t = np.full((g.shape[0]+size0b, g.shape[1]+size1b), -1)
@@ -634,7 +608,7 @@ def has_tiles_shape(g, shape, ignore=0):
             return pattern
     return None
 
-################################################################################ 38
+
 def check_tiles_shape(task, has_complete=0):
     patterns = []
     for x, y in zip(*get_objects(task)):
@@ -662,7 +636,7 @@ def check_tiles_shape(task, has_complete=0):
             return False
     return True
 
-################################################################################ 39
+
 def predict_tiles_shape(task, test_input):
     has_transforms = set()
     has_shapes = set()
@@ -703,16 +677,16 @@ def predict_tiles_shape(task, test_input):
                 preds.append(pred)
     return preds
 
-################################################################################ 40
+"""
+Sklearn tree
+"""
+def extract_features_for_sklearn_tree():
+    print("Extracting features for sklearn tree")
+    os.system('cp /kaggle/input/arc24-source-code/grid_feature_extraction.cpp .')
+    os.system('g++ -pthread -lpthread -O3 -std=c++17 -o grid_feature_extraction grid_feature_extraction.cpp')
+    os.system('./grid_feature_extraction')
 
-#TODO: fix this
-# !g++ -pthread -lpthread -O3 -std=c++17 -o grid_feature_extraction main.cpp
-# !./grid_feature_extraction
-os.system('cp /kaggle/input/arc24-source-code/grid_feature_extraction.cpp .')
-os.system('g++ -pthread -lpthread -O3 -std=c++17 -o grid_feature_extraction grid_feature_extraction.cpp')
-os.system('./grid_feature_extraction')
 
-################################################################################ 2
 def find_sub(matrix, sub):
     positions = []
     for x in range(matrix.shape[0]-sub.shape[0]+1):
@@ -721,7 +695,7 @@ def find_sub(matrix, sub):
                 positions.append((x,y,x+sub.shape[0],y+sub.shape[1]))
     return positions
 
-################################################################################ 3
+
 def check_subitem(task):
     for key in ['train', 'test']:
         for obj in task[key]:
@@ -732,7 +706,7 @@ def check_subitem(task):
                     return False
     return True
 
-################################################################################ 4
+
 def get_objects(task, has_train=True, has_test=False):
     xs, ys = [], []
     names = []
@@ -748,7 +722,7 @@ def get_objects(task, has_train=True, has_test=False):
             ys.append(np.array(obj['output']))
     return xs, ys
 
-################################################################################ 5
+
 def make_features(x, has_frame=False):
     def short_flattener(pred):
         str_pred = str([row for row in pred])
@@ -790,7 +764,7 @@ def make_features(x, has_frame=False):
             df[f"{col}_rank_"] = df.groupby([col])['area'].rank(method="dense", ascending=False)
     return df
 
-################################################################################ 6
+
 def decision_tree(train, test, test_input):
     y = train.pop('label')
     model = BaggingClassifier(base_estimator=DecisionTreeClassifier(), n_estimators=100, random_state=4372).fit(train.drop(['xmin','ymin','xmax','ymax'], axis=1), y)
@@ -810,7 +784,7 @@ def decision_tree(train, test, test_input):
     # plot_objects(objs, titles)
     return objects
 
-################################################################################ 7
+
 def tree1(train, test, test_input):
     y = train.pop('label')
     model = BaggingClassifier(base_estimator=DecisionTreeClassifier(), n_estimators=100, random_state=4372).fit(train.drop(['xmin','ymin','xmax','ymax'], axis=1), y)
@@ -830,7 +804,7 @@ def tree1(train, test, test_input):
     #plot_objects(objs, titles)
     return objs
 
-################################################################################ 8
+
 def format_features(task):
     train = []
     for ttid, obj in enumerate(task['train']):
@@ -846,22 +820,9 @@ def format_features(task):
     train = pd.concat(train).reset_index(drop=True)
     return train
 
-
-# %% [markdown]
-# <div>
-#     <img src='https://cdn-images-1.medium.com/max/1000/1*x8hLqHg5rgGJv1kZHpIGjg.png'>
-# </div>
-
-# %% [markdown]
-# # <span style="color:darkred;">3 - Symmetry Repairing</span>
-#
-# <p style="border-bottom: 15px solid darkcyan"></p>
-# <p style="border-bottom: 5px solid darkred"></p>
-
-# %%
-################################################################################
-# 31 Functions - Via Symmetry Repairing
-################################################################################ 1
+"""
+Symmetry Repairing
+"""
 def Translation(x):
     n = len(x)
     k = len(x[0])
@@ -897,7 +858,7 @@ def Translation(x):
             Ans.append(item)
     return Ans
 
-################################################################################ 2
+
 def Translation1D(x):
     n = len(x)
     k = len(x[0])
@@ -953,7 +914,7 @@ def Translation1D(x):
             Ans.append(item)
     return Ans
 
-################################################################################ 3
+
 def HorSym(x):
     n = len(x)
     k = len(x[0])
@@ -996,7 +957,7 @@ def HorSym(x):
             Ans.append([a,b])
     return Ans
 
-################################################################################ 4
+
 def VertSym(x):
     n = len(x)
     k = len(x[0])
@@ -1040,7 +1001,6 @@ def VertSym(x):
     return Ans
 
 
-################################################################################ 5
 def NWSym(x):
     n = len(x)
     k = len(x[0])
@@ -1086,7 +1046,7 @@ def NWSym(x):
             Ans.append([a,b])
     return Ans
 
-################################################################################ 6
+
 def NESym(x):
     n = len(x)
     k = len(x[0])
@@ -1132,7 +1092,7 @@ def NESym(x):
             Ans.append([a,b])
     return Ans
 
-################################################################################ 7
+
 def Rotate180Sym(x):
 
     n = len(x)
@@ -1185,7 +1145,7 @@ def Rotate180Sym(x):
             Ans.append([a,b])
     return Ans
 
-################################################################################ 8
+
 def Rotate90Sym(x):
     n = len(x)
     k = len(x[0])
@@ -1246,7 +1206,7 @@ def Rotate90Sym(x):
 
     return Ans
 
-################################################################################ 9
+
 def ReportColorChange(x,y):
     n= len(x)
     k = len(x[0])
@@ -1283,7 +1243,7 @@ def ReportColorChange(x,y):
     ColorsC.sort()
     return ColorsP, ColorsC
 
-################################################################################ 10
+
 def Equivalence1(x,y,L):
     n= len(x)
     k = len(x[0])
@@ -1359,7 +1319,7 @@ def Equivalence1(x,y,L):
 
     return 1
 
-################################################################################ 11
+
 Cut = 30
 def Translation_Params(x, badcolor = 20):
     n = len(x)
@@ -1421,7 +1381,7 @@ def Translation_Params(x, badcolor = 20):
 
     return Param[:Cut], Scores[:Cut], Sym_Level
 
-################################################################################ 12
+
 def Translation1D_Params(x, badcolor = 20):
     n = len(x)
     k = len(x[0])
@@ -1466,7 +1426,7 @@ def Translation1D_Params(x, badcolor = 20):
 
     return Ans[:Cut], Penalty[:Cut], Sym_Level
 
-################################################################################ 13
+
 def HorSym_Params(x, badcolor = 20):
     n = len(x)
     k = len(x[0])
@@ -1506,7 +1466,7 @@ def HorSym_Params(x, badcolor = 20):
 
     return Ans[:Cut], Penalty[:Cut], Sym_Level
 
-################################################################################ 14
+
 def VertSym_Params(x, badcolor = 20):
     n = len(x)
     k = len(x[0])
@@ -1544,7 +1504,7 @@ def VertSym_Params(x, badcolor = 20):
 
     return Ans[:Cut], Penalty[:Cut], Sym_Level
 
-################################################################################ 15
+
 def NWSym_Params(x, badcolor = 20):
     n = len(x)
     k = len(x[0])
@@ -1583,7 +1543,7 @@ def NWSym_Params(x, badcolor = 20):
 
     return Ans[:Cut], Penalty[:Cut], Sym_Level
 
-################################################################################ 16
+
 def NESym_Params(x, badcolor = 20):
     n = len(x)
     k = len(x[0])
@@ -1623,7 +1583,7 @@ def NESym_Params(x, badcolor = 20):
 
     return Ans[:Cut], Penalty[:Cut], Sym_Level
 
-################################################################################ 17
+
 def Rotate180Sym_Params(x, badcolor = 20):
 
     n = len(x)
@@ -1671,7 +1631,7 @@ def Rotate180Sym_Params(x, badcolor = 20):
 
     return Ans[:Cut], Penalty[:Cut], Sym_Level
 
-################################################################################ 18
+
 def Rotate90Sym_Params(x, badcolor = 20):
     n = len(x)
     k = len(x[0])
@@ -1721,7 +1681,7 @@ def Rotate90Sym_Params(x, badcolor = 20):
 
     return Ans[:Cut], Penalty[:Cut], Sym_Level
 
-################################################################################ 19
+
 def SymScore(x,First_P):
     F = [Translation_Params, Translation1D_Params, HorSym_Params, VertSym_Params,
          NWSym_Params, NESym_Params, Rotate90Sym_Params, Rotate180Sym_Params]
@@ -1732,7 +1692,7 @@ def SymScore(x,First_P):
         Score += value
     return Score
 
-################################################################################ 20
+
 def Solvable2(task):
     V = [[0], [1], [0,1], [2], [3], [2,3], [4], [5], [4,5], [6], [7], [0,2], [0,3], [0,2,3],[0,4], [0,5],
          [0,4,5], [0,6], [0,7], [2,3,6], [0,2,3,6]]
@@ -1789,7 +1749,7 @@ def Solvable2(task):
 
     return -1
 
-################################################################################ 21
+
 Cut = 30
 def Translation_Eq(x, Param):
     r, s = Param
@@ -1813,7 +1773,7 @@ def Translation_Eq(x, Param):
             Ans.append(item)
     return Ans
 
-################################################################################ 22
+
 def Translation1D_Eq(x, Param):
     n = len(x)
     k = len(x[0])
@@ -1835,7 +1795,7 @@ def Translation1D_Eq(x, Param):
             Ans.append(item)
     return Ans
 
-################################################################################ 23
+
 def HorSym_Eq(x, Param): # symmetric for reflection along a line parallel to the x axis
     n = len(x)
     k = len(x[0])
@@ -1854,7 +1814,7 @@ def HorSym_Eq(x, Param): # symmetric for reflection along a line parallel to the
             Ans.append([a,b])
     return Ans
 
-################################################################################ 24
+
 def VertSym_Eq(x, Param):
     n = len(x)
     k = len(x[0])
@@ -1874,7 +1834,7 @@ def VertSym_Eq(x, Param):
             Ans.append([a,b])
     return Ans
 
-################################################################################ 25
+
 def NWSym_Eq(x, Param):
     n = len(x)
     k = len(x[0])
@@ -1893,7 +1853,7 @@ def NWSym_Eq(x, Param):
             Ans.append([a,b])
     return Ans
 
-################################################################################ 26
+
 def NESym_Eq(x, Param):
     n = len(x)
     k = len(x[0])
@@ -1912,7 +1872,7 @@ def NESym_Eq(x, Param):
             Ans.append([a,b])
     return Ans
 
-################################################################################ 27
+
 def Rotate180Sym_Eq(x, Param):
 
     n = len(x)
@@ -1934,7 +1894,7 @@ def Rotate180Sym_Eq(x, Param):
             Ans.append([a,b])
     return Ans
 
-################################################################################ 28
+
 def Rotate90Sym_Eq(x, Param):
     n = len(x)
     k = len(x[0])
@@ -1959,7 +1919,7 @@ def Rotate90Sym_Eq(x, Param):
 
     return Ans
 
-################################################################################ 29
+
 def Make_Picture(x, Relations, badcolor):
     # returns -1 if there are conflicts between non-badcolors
     n = len(x)
@@ -2014,7 +1974,7 @@ def Make_Picture(x, Relations, badcolor):
             x0[i,j] = fillcolor
     return x0.tolist()
 
-################################################################################ 30
+
 def Proba(task, Bad, First_P):
     Input = [Defensive_Copy(x) for x in task[0]]
     Output = [Defensive_Copy(y) for y in task[1]]
@@ -2067,7 +2027,7 @@ def Proba(task, Bad, First_P):
         return -1
     return Ans[:6]
 
-################################################################################ 31
+
 def symmetry_repairing(task):
     Input = [Defensive_Copy(x) for x in task[0]]
     Output = [Defensive_Copy(y) for y in task[1]]
@@ -2135,21 +2095,9 @@ def symmetry_repairing(task):
     return Ans2[: 3]
 
 
-# %% [markdown]
-# <div>
-#     <img src='https://cdn-images-1.medium.com/max/1000/1*YZbgCNyNdycsrTUn_JNGLQ.png'>
-# </div>
-
-# %% [markdown]
-# # <span style="color:darkred;">4 - Colors Counter</span>
-#
-# <p style="border-bottom: 15px solid darkcyan"></p>
-# <p style="border-bottom: 5px solid darkred"></p>
-
-# %%
-################################################################################
-# 9 Functions - Via Colors Counter
-################################################################################ 1
+"""
+Colors Counter
+"""
 def Defensive_Copy(A):
     n = len(A)
     k = len(A[0])
@@ -2159,7 +2107,7 @@ def Defensive_Copy(A):
             L[i,j] = 0 + A[i][j]
     return L.tolist()
 
-################################################################################ 2
+
 def Create(task, task_id=0):
     n = len(task['train'])
     Input = [Defensive_Copy(task['train'][i]['input']) for i in range(n)]
@@ -2167,7 +2115,7 @@ def Create(task, task_id=0):
     Input.append(Defensive_Copy(task['test'][task_id]['input']))
     return Input, Output
 
-################################################################################ 3
+
 def colors_counter(task):
     Input = task[0]
     Output = task[1]
@@ -2284,7 +2232,7 @@ def colors_counter(task):
 
     return answer.tolist()
 
-################################################################################ 4
+
 def flattener(pred):
     str_pred = str([row for row in pred])
     str_pred = str_pred.replace(', ', '')
@@ -2292,133 +2240,6 @@ def flattener(pred):
     str_pred = str_pred.replace('][', '|')
     str_pred = str_pred.replace(']]', '|')
     return str_pred
-
-################################################################################ 8
-def color_count(testing_path):
-    testing_tasks = sorted(os.listdir(testing_path))
-    void = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-    count_correct = 0
-    count_solved = 0
-
-    solved = []
-    output_id = []
-    testing_files = []
-    testing_solved = []
-    testing_correct = []
-
-    for t in testing_tasks:
-        with open(str(testing_path + '/' + t), 'r') as read_file:
-            task = json.load(read_file)
-            testing_files.append(task)
-
-        L = len(task['test'])
-        for i in range(L):
-            basic_task = Create(task, i)
-            answer = Recolor(basic_task)
-            task_id = t.replace('.json', '_' + str(i))
-            output_id.append(task_id)
-
-            if (answer == -1):
-                solved.append(void)
-
-            if (answer != -1):
-                solved.append(answer)
-                testing_solved.append(task_id)
-                count_solved += 1
-
-                # print(24*'=')
-                # print('No.', count_solved, '- Solved Answer')
-                # print('Task:', task_id)
-                # print(24*'=')
-                # print('\nTask:', answer)
-
-                # plot_picture(answer)
-                # plot_task(task)
-
-
-            if (answer != -1) and (task['test'][i]['output'] == answer):
-                testing_correct.append(task_id)
-                count_correct += 1
-
-                print(24*'=')
-                print('No.', count_correct, '- Correct Answer')
-                print('Task:', task_id)
-                print(24*'=')
-                print('\nTask:', answer)
-
-                # plot_picture(answer)
-                # plot_task(task)
-
-    print('=' * 100)
-    print('Solved List:  Len =', len(testing_solved))
-    print(testing_solved)
-    print('=' * 100)
-    print('Correct List:  Len =', len(testing_correct))
-    print(testing_correct)
-    print('=' * 100)
-    print('END', '='*96, '\n')
-
-    sub = pd.DataFrame({'output_id': output_id , 'solved': solved})
-    return sub
-
-################################################################################ 9
-def color_count_test(testing_path, sample_path):
-    testing_tasks = sorted(os.listdir(test_path))
-    void = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-    count_solved = 0
-
-    solved = []
-    output = []
-    output_id = []
-    testing_files = []
-    testing_solved = []
-
-    for t in testing_tasks:
-        with open(str(testing_path + '/' + t), 'r') as read_file:
-            task = json.load(read_file)
-            testing_files.append(task)
-
-        L = len(task['test'])
-        for i in range(L):
-            basic_task = Create(task, i)
-            answer = Recolor(basic_task)
-            task_id = t.replace('.json', '_' + str(i))
-            output_id.append(task_id)
-
-            if (answer == -1):
-                solved.append(void)
-                flv = flattener(void)
-                output.append(flv+' '+flv+' '+flv)
-
-            if (answer != -1):
-                solved.append(answer)
-                fla = flattener(answer)
-                output.append(fla+' '+fla+' '+fla)
-                testing_solved.append(task_id)
-                count_solved += 1
-
-                print(24*'=')
-                print('No.', count_solved, '- Solved Answer')
-                print('Task:', task_id)
-                print(24*'=')
-                print('\nTask:', answer)
-
-                # plot_picture(answer)
-
-    print('=' * 100)
-    print('Solved List:  Len =', len(testing_solved))
-    print(testing_solved)
-    print('=' * 100)
-
-    sub = pd.DataFrame({'output_id': output_id , 'solved': solved})
-
-    submission = pd.read_csv(sample_path)
-    submission['output'] = output
-
-    if(list(submission['output_id']) == output_id):
-        print('END', '='*96, '\n')
-
-    return sub, submission
 
 """
 Icecube
@@ -2494,7 +2315,7 @@ def translate_submission_from_old_csv_format_to_new_json_format(file_path):
 
 
 def run_icecube_solver():
-    print("Running Icecube solver")
+    print("\n\n\t\tRunning Icecube solver")
     adapt_arc24_files_to_arc20_format(
         json_file_path='/kaggle/input/arc-prize-2024/arc-agi_test_challenges.json',
         output_dir='/kaggle/working/abstraction-and-reasoning-challenge/test')
@@ -2510,6 +2331,7 @@ def run_icecube_solver():
     mySystem("tar -czf store.tar.gz absres-c-files/store")
     mySystem("rm -r absres-c-files")
     translate_submission_from_old_csv_format_to_new_json_format('/kaggle/working/old_submission.csv')
+    print("\t\tIcecube solver completed\n\n")
 
 
 """
@@ -2703,6 +2525,8 @@ def run_main_solvers(data_path, sample_path):
     # display(sub_solver)
     return sub_solver
 
+
+extract_features_for_sklearn_tree()
 run_icecube_solver()
 sub_solver = run_main_solvers(test_path, sample_path)
 with open('submission_program_search.json', 'w') as file:
