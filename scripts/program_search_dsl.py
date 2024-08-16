@@ -1,5 +1,8 @@
+"""
+This script has been copied and modified from the following source:
+https://www.kaggle.com/code/mehrankazeminia/3-arc24-developed-2020-winning-solutions
+"""
 
-# %%
 import os, gc
 import sys, pdb
 import copy, time
@@ -12,29 +15,6 @@ from scipy import stats
 from pathlib import Path
 
 from colorama import Style, Fore
-
-
-# %%
-train1_path = '../input/arc-prize-2024/arc-agi_training_challenges.json'
-train2_path = '../input/arc-prize-2024/arc-agi_training_solutions.json'
-
-eval1_path = '../input/arc-prize-2024/arc-agi_evaluation_challenges.json'
-eval2_path = '../input/arc-prize-2024/arc-agi_evaluation_solutions.json'
-
-test_path = '../input/arc-prize-2024/arc-agi_test_challenges.json'
-sample_path = '../input/arc-prize-2024/sample_submission.json'
-
-
-# %% [markdown]
-# ![](https://cdn-images-1.medium.com/max/1000/1*7s_cV4TLZ1L31MJNj2Rk5w.png)
-
-# %% [markdown]
-# # <span style="color:darkred;">Solver 7 | Developed ARC 2020</span>
-#
-# <p style="border-bottom: 15px solid darkcyan"></p>
-# <p style="border-bottom: 5px solid darkred"></p>
-
-# %%
 import signal
 import psutil
 import itertools
@@ -64,6 +44,34 @@ from sklearn.preprocessing import MinMaxScaler
 #::::::::::::::::::::::::::::::::::::::::::::::
 import warnings # suppress warnings
 warnings.filterwarnings('ignore')
+
+from subprocess import Popen, PIPE, STDOUT
+from glob import glob
+
+
+
+# %%
+train1_path = '../input/arc-prize-2024/arc-agi_training_challenges.json'
+train2_path = '../input/arc-prize-2024/arc-agi_training_solutions.json'
+
+eval1_path = '../input/arc-prize-2024/arc-agi_evaluation_challenges.json'
+eval2_path = '../input/arc-prize-2024/arc-agi_evaluation_solutions.json'
+
+test_path = '../input/arc-prize-2024/arc-agi_test_challenges.json'
+sample_path = '../input/arc-prize-2024/sample_submission.json'
+
+
+# %% [markdown]
+# ![](https://cdn-images-1.medium.com/max/1000/1*7s_cV4TLZ1L31MJNj2Rk5w.png)
+
+# %% [markdown]
+# # <span style="color:darkred;">Solver 7 | Developed ARC 2020</span>
+#
+# <p style="border-bottom: 15px solid darkcyan"></p>
+# <p style="border-bottom: 5px solid darkred"></p>
+
+# %%
+
 #::::::::::::::::::::::::::::::::::::::::::::::
 
 # %% [markdown]
@@ -2412,50 +2420,26 @@ def color_count_test(testing_path, sample_path):
 
     return sub, submission
 
+"""
+Icecube
+"""
 
-# %% [markdown]
-# <div>
-#     <img src='https://cdn-images-1.medium.com/max/1000/1*uFJjR4reMvGfGtXp4I_ZLA.png'>
-# </div>
+def adapt_arc24_files_to_arc20_format(json_file_path, output_dir):
+    # Load the JSON content
+    json_file_path = '/kaggle/input/arc-prize-2024/arc-agi_test_challenges.json'
+    with open(json_file_path, 'r') as file:
+        data = json.load(file)
 
-# %% [markdown]
-# # <span style="color:darkred;">5 - ICECube</span>
-#
-# <p style="border-bottom: 15px solid darkcyan"></p>
-# <p style="border-bottom: 5px solid darkred"></p>
+    # Create the 'test' directory
+    output_dir = '/kaggle/working/abstraction-and-reasoning-challenge/test'
+    os.makedirs(output_dir, exist_ok=True)
 
-# %%
-from subprocess import Popen, PIPE, STDOUT
-from glob import glob
+    # Split the JSON content into individual files
+    for task_id, task_data in data.items():
+        output_file_path = os.path.join(output_dir, f'{task_id}.json')
+        with open(output_file_path, 'w') as output_file:
+            json.dump(task_data, output_file, indent=4)
 
-#######################################################################################
-# Adapt ARC Prize 2024 files to work with Abstraction and Resoning Corpus 2020 rules ##
-#######################################################################################
-
-# Load the JSON content
-json_file_path = '/kaggle/input/arc-prize-2024/arc-agi_test_challenges.json'
-with open(json_file_path, 'r') as file:
-    data = json.load(file)
-
-# Create the 'test' directory
-output_dir = '/kaggle/working/abstraction-and-reasoning-challenge/test'
-os.makedirs(output_dir, exist_ok=True)
-
-# Split the JSON content into individual files
-for task_id, task_data in data.items():
-    output_file_path = os.path.join(output_dir, f'{task_id}.json')
-    with open(output_file_path, 'w') as output_file:
-        json.dump(task_data, output_file, indent=4)
-
-############################################
-# Beginning of icecuber's original solution#
-##########################################
-
-if open("../input/arc-solution-source-files-by-icecuber/version.txt").read().strip() == "671838222":
-  print("Dataset has correct version")
-else:
-  print("Dataset version not matching!")
-  assert(0)
 
 def mySystem(cmd):
     print(cmd)
@@ -2464,28 +2448,8 @@ def mySystem(cmd):
         print(line.decode("utf-8"), end='')
     assert(process.wait() == 0)
 
-dummy_run = False
 
-
-for fn in glob("/kaggle/working/abstraction-and-reasoning-challenge/test/*.json"):
-  if "136b0064" in fn:
-    print("Making dummy submission")
-    f = open("old_submission.csv", "w")
-    f.write("output_id,output\n")
-    f.close()
-    dummy_run = True
-
-
-if not dummy_run:
-  mySystem("cp -r ../input/arc-solution-source-files-by-icecuber ./absres-c-files")
-  mySystem("cd absres-c-files; make -j")
-  mySystem("cd absres-c-files; python3 safe_run.py")
-  mySystem("cp absres-c-files/submission_part.csv old_submission.csv")
-  mySystem("tar -czf store.tar.gz absres-c-files/store")
-  mySystem("rm -r absres-c-files")
-
-# Function to translate from old submission format (csv) to new one (json)
-def translate_submission(file_path):
+def translate_submission_from_old_csv_format_to_new_json_format(file_path):
     # Read the original submission file
     with open(file_path, 'r') as file:
         lines = file.readlines()
@@ -2528,22 +2492,29 @@ def translate_submission(file_path):
     with open('sub_icecube.json', 'w') as file:
         json.dump(submission_dict, file, indent=4)
 
-translate_submission('/kaggle/working/old_submission.csv')
+
+def run_icecube_solver():
+    print("Running Icecube solver")
+    adapt_arc24_files_to_arc20_format(
+        json_file_path='/kaggle/input/arc-prize-2024/arc-agi_test_challenges.json',
+        output_dir='/kaggle/working/abstraction-and-reasoning-challenge/test')
+    if open("../input/arc-solution-source-files-by-icecuber/version.txt").read().strip() == "671838222":
+        print("Dataset has correct version")
+    else:
+        print("Dataset version not matching!")
+        assert(0)
+    mySystem("cp -r ../input/arc-solution-source-files-by-icecuber ./absres-c-files")
+    mySystem("cd absres-c-files; make -j")
+    mySystem("cd absres-c-files; python3 safe_run.py")
+    mySystem("cp absres-c-files/submission_part.csv old_submission.csv")
+    mySystem("tar -czf store.tar.gz absres-c-files/store")
+    mySystem("rm -r absres-c-files")
+    translate_submission_from_old_csv_format_to_new_json_format('/kaggle/working/old_submission.csv')
 
 
-# %% [markdown]
-# <div>
-#     <img src='https://cdn-images-1.medium.com/max/1000/1*M0cRzsyHZd2bKsoOx5WBlA.jpeg'>
-# </div>
-
-# %% [markdown]
-# # <span style="color:darkred;">Run Solvers</span>
-#
-# <p style="border-bottom: 15px solid darkcyan"></p>
-# <p style="border-bottom: 5px solid darkred"></p>
-
-# %%
-# ..................................................................................... 1
+"""
+Run solvers
+"""
 def ganswer_answer(ganswer):
 
     answer = []
@@ -2555,7 +2526,7 @@ def ganswer_answer(ganswer):
 
     return answer
 
-# ..................................................................................... 2
+
 def ganswer_answer_1(ganswer):
 
     answer = []
@@ -2567,7 +2538,7 @@ def ganswer_answer_1(ganswer):
 
     return answer
 
-# ..................................................................................... 3
+
 def prn_plus(prn, answer):
 
     for j in range(len(answer)):
@@ -2578,7 +2549,7 @@ def prn_plus(prn, answer):
 
     return prn
 
-# ..................................................................................... 4
+
 def prn_select_2(prn):
     if (len(prn) > 2):
 
@@ -2600,7 +2571,7 @@ def prn_select_2(prn):
 
     return prn
 
-# %%
+
 def run_main_solvers(data_path, sample_path):
 
     with open(sample_path,'r') as f:
@@ -2732,10 +2703,7 @@ def run_main_solvers(data_path, sample_path):
     # display(sub_solver)
     return sub_solver
 
-# ...............................................................................
+run_icecube_solver()
 sub_solver = run_main_solvers(test_path, sample_path)
-
 with open('submission_program_search.json', 'w') as file:
     json.dump(sub_solver, file, indent=4)
-
-
