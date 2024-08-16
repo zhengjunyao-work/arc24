@@ -22,7 +22,7 @@ import subprocess
 import base64, gzip
 import networkx as nx
 import multiprocessing
-#::::::::::::::::::::::::::::::::::::::::::::::
+
 from numpy import array
 from pathlib import Path
 from scipy import ndimage
@@ -35,13 +35,13 @@ from xgboost import XGBClassifier
 from itertools import combinations, product
 from collections import defaultdict, Counter
 from skimage.measure import label, regionprops
-#::::::::::::::::::::::::::::::::::::::::::::::
+
 from sklearn.tree import *
 from sklearn import tree
 from sklearn.ensemble import BaggingClassifier
 from skimage.measure import label, regionprops
 from sklearn.preprocessing import MinMaxScaler
-#::::::::::::::::::::::::::::::::::::::::::::::
+
 import warnings # suppress warnings
 warnings.filterwarnings('ignore')
 
@@ -50,19 +50,7 @@ from glob import glob
 
 
 
-train1_path = '../input/arc-prize-2024/arc-agi_training_challenges.json'
-train2_path = '../input/arc-prize-2024/arc-agi_training_solutions.json'
-
-eval1_path = '../input/arc-prize-2024/arc-agi_evaluation_challenges.json'
-eval2_path = '../input/arc-prize-2024/arc-agi_evaluation_solutions.json'
-
-test_path = '../input/arc-prize-2024/arc-agi_test_challenges.json'
-sample_path = '../input/arc-prize-2024/sample_submission.json'
-
-
-"""
-40 Functions - Via Different Solvers
-"""
+"""40 Functions - Via Different Solvers"""
 def flattener(pred):
     str_pred = str([row for row in pred])
     str_pred = str_pred.replace(', ', '')
@@ -677,11 +665,9 @@ def predict_tiles_shape(task, test_input):
                 preds.append(pred)
     return preds
 
-"""
-Sklearn tree
-"""
+"""Sklearn tree"""
 def extract_features_for_sklearn_tree():
-    print("Extracting features for sklearn tree")
+    print("\t\tExtracting features for sklearn tree")
     os.system('cp /kaggle/input/arc24-source-code/grid_feature_extraction.cpp .')
     os.system('g++ -pthread -lpthread -O3 -std=c++17 -o grid_feature_extraction grid_feature_extraction.cpp')
     os.system('./grid_feature_extraction')
@@ -820,9 +806,7 @@ def format_features(task):
     train = pd.concat(train).reset_index(drop=True)
     return train
 
-"""
-Symmetry Repairing
-"""
+"""Symmetry Repairing"""
 def Translation(x):
     n = len(x)
     k = len(x[0])
@@ -2095,9 +2079,7 @@ def symmetry_repairing(task):
     return Ans2[: 3]
 
 
-"""
-Colors Counter
-"""
+"""Colors Counter"""
 def Defensive_Copy(A):
     n = len(A)
     k = len(A[0])
@@ -2241,10 +2223,7 @@ def flattener(pred):
     str_pred = str_pred.replace(']]', '|')
     return str_pred
 
-"""
-Icecube
-"""
-
+"""Icecube"""
 def adapt_arc24_files_to_arc20_format(json_file_path, output_dir):
     # Load the JSON content
     json_file_path = '/kaggle/input/arc-prize-2024/arc-agi_test_challenges.json'
@@ -2334,9 +2313,7 @@ def run_icecube_solver():
     print("\t\tIcecube solver completed\n\n")
 
 
-"""
-Run solvers
-"""
+"""Run solvers"""
 def ganswer_answer(ganswer):
 
     answer = []
@@ -2524,6 +2501,16 @@ def run_main_solvers(data_path, sample_path):
     # ...............................................................................
     # display(sub_solver)
     return sub_solver
+
+
+train1_path = '../input/arc-prize-2024/arc-agi_training_challenges.json'
+train2_path = '../input/arc-prize-2024/arc-agi_training_solutions.json'
+
+eval1_path = '../input/arc-prize-2024/arc-agi_evaluation_challenges.json'
+eval2_path = '../input/arc-prize-2024/arc-agi_evaluation_solutions.json'
+
+test_path = '../input/arc-prize-2024/arc-agi_test_challenges.json'
+sample_path = '../input/arc-prize-2024/sample_submission.json'
 
 
 extract_features_for_sklearn_tree()
