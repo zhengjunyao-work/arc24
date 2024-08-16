@@ -2397,7 +2397,7 @@ def run_main_solvers(dataset_filepath, icecuber_solution_filepath):
     with open(icecuber_solution_filepath , 'r') as f:
         sub_icecube = json.load(f)
     with open(dataset_filepath,'r') as f:
-        data = list(json.load(f))
+        data = json.load(f)
     submission = create_dummy_submission(data)
 
     for task_id, task in tqdm(data.items(), desc='Running main solvers', total=len(data)):
