@@ -2483,15 +2483,9 @@ def run_main_solvers(dataset_filepath, icecuber_solution_filepath):
             # ...............................................................................  Conclusion
             if (prn != []):
                 prn = prn_select_2(prn)
-
                 submission[task_id][i]['attempt_1'] = prn[0]
-                # display(pd.DataFrame(data={'Answers for task':t, 'Items':i, 'Attempt':'1', 'Files':'test_challenges'},index=[n]))
-                # plot_pic(prn[0])
-
                 if (len(prn)==2):
                     submission[task_id][i]['attempt_2'] = prn[1]
-                    # display(pd.DataFrame(data={'Answers for task':t, 'Items':i, 'Attempt':'2', 'Files':'test_challenges'},index=[n]))
-                    # plot_pic(prn[1])
 
             # ............................................................................... 5 - ICECube
             if (submission[task_id][i]['attempt_1'] != [[0, 0], [0, 0]]):
@@ -2499,9 +2493,8 @@ def run_main_solvers(dataset_filepath, icecuber_solution_filepath):
 
                     if (submission[task_id][i]['attempt_1'] != sub_icecube[task_id][i]['attempt_1']):
                         submission[task_id][i]['attempt_2'] =  sub_icecube[task_id][i]['attempt_1']
-
-            if (submission[task_id][i]['attempt_1'] == [[0, 0], [0, 0]]):
-                if (submission[task_id][i]['attempt_2'] == [[0, 0], [0, 0]]):
+            else:
+                if (submission[task_id][i]['attempt_2'] == [[0, 0], [0, 0]]): #I have the intuition this is always true
 
                     if (sub_icecube[task_id][i]['attempt_1'] != [[0, 0], [0, 0]]):
                         submission[task_id][i]['attempt_1'] = sub_icecube[task_id][i]['attempt_1']

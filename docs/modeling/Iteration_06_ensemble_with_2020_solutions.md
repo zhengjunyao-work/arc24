@@ -17,6 +17,17 @@ of the ensemble will also likely go up.
 
 ## Development
 
+### Explaining the notebook
+
+I will write my preliminary understandings of what the notebook is doing (they might change over time when I become more familiar with the code.)
+
+- As far as I understand the basis of the solution is icecuber solution from 2020
+- On top of that they try specialized approaches that might work on some tasks
+- The default empty response is `[[0, 0], [0, 0]]`
+- In my opinion it would be more readable if I compute the solution for icecuber with one script, solution with other approaches in other script, and have another script to combine the solutions.
+- It seems that icecuber sometimes leaves empty answers `[]`, it happened 8 times on the train set, always on the 2º attempt.
+  By looking at the old submission it seems that it can generate even more solutions than 2.
+
 ## Results
 
 ## Conclusion
