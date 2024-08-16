@@ -666,8 +666,8 @@ def predict_tiles_shape(task, test_input):
     return preds
 
 """Sklearn tree"""
-def extract_features_for_sklearn_tree():
-    print("\t\tExtracting features for sklearn tree")
+def compile_feature_extraction_for_sklearn_tree():
+    print("\t\Compiling feature extraction for sklearn tree")
     os.system('cp /kaggle/input/arc24-source-code/grid_feature_extraction.cpp .')
     os.system('g++ -pthread -lpthread -O3 -std=c++17 -o grid_feature_extraction grid_feature_extraction.cpp')
     os.system('./grid_feature_extraction')
@@ -2513,7 +2513,7 @@ test_path = '../input/arc-prize-2024/arc-agi_test_challenges.json'
 sample_path = '../input/arc-prize-2024/sample_submission.json'
 
 
-extract_features_for_sklearn_tree()
+compile_feature_extraction_for_sklearn_tree()
 run_icecube_solver()
 sub_solver = run_main_solvers(test_path, sample_path)
 with open('submission_program_search.json', 'w') as file:
