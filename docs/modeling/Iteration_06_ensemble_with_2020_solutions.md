@@ -98,6 +98,9 @@ to be able to create a successful ensemble.
 
 I have developed the code to create an ensemble, but I need more accurate models to improve over the baseline.
 
+Making a submission with 2020 solution is slow, takes around 7 hours. Ideally this should run in the
+background.
+
 ## Next steps
 
 - Icecuber solution is slow, ideally I would run it on the background while i do all the LLM stuff.
