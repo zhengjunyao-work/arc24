@@ -84,9 +84,19 @@ solvers approach to have the best accuracy on the first attempt.
 
 ### Submissions
 
-TODO:
+| experiment                       | test score |
+|----------------------------------|------------|
+| qwen2-1.5b-instruct v1           | 4          |
+| 2020 solution single attempt     | 24         |
+| qwen2-1.5b-instruct v1 with 2020 | 24         |
+| 2020 solution                    | 26         |
+
+Our current LLMs are not able to improve over the baseline 2020 solution. We need more accurate models
+to be able to create a successful ensemble.
 
 ## Conclusion
+
+I have developed the code to create an ensemble, but I need more accurate models to improve over the baseline.
 
 ## Next steps
 
