@@ -333,7 +333,7 @@ class cfg:
     # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/MINI-ARC.json'
     # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v1.json'
     val_dataset = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/08_new-train_Qwen2-0.5B-Instruct_lr1e-4_r32_12e3steps'
+    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/08_new-train_Qwen2-0.5B-Instruct_lr1e-4_r32_12e3steps_b'
     max_seq_len = 4096
     epochs = 0
     max_steps : Optional[int] =  12000 #1000 # If given it will override epochs
