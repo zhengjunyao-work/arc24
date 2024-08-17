@@ -32,21 +32,22 @@ mpl.rcParams['font.size'] = 16
 # fast test time fine-tuning conf
 @dataclass
 class CFG:
-    model_path: str = "/home/gbarbadillo/data/Phi-3-mini-128k-instruct"
-    adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240729_arc_fine_tuning/10_phi-3_1rearc100_2train_lr5e-5_color-swap-no-preserve_continue/checkpoint-1000'
-    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/test_time_fine-tuning/evaluation_n-1.json'
-    val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
-    output_dir: str = f'/mnt/hdd0/Kaggle/arc24/models/20240802_test_time_fine-tuning/07_fast_lr1e-3_1e3steps'
+    model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
+    adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/01_new-train_Qwen2-0.5B-Instruct_lr1e-4_r32_8e3steps/checkpoint-6000'
+    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v2.json'
+    val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/11_combo-v2-from-checkpoint_Qwen2-0.5B-Instruct_lr2e-5_r32_1e3steps'
     max_seq_len: int = 4096
     epochs = 0
     max_steps : Optional[int] =  1000
-    eval_steps: int = 200000
+    eval_steps: int = 50
+    report_to: str = 'wandb'
     warmup_ratio = 0.1
     batch_size = 16
     # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
     per_device_train_batch_size = 1
     per_device_eval_batch_size = 2
-    learning_rate: float = 2e-4
+    learning_rate: float = 2e-5
     # LoRA
     use_rslora = True,
     use_dora = True,
@@ -73,12 +74,13 @@ def parse_args():
     parser.add_argument('--learning_rate', type=float, help='Learning rate for fine-tuning')
     parser.add_argument('--use_data_augmentation', type=bool, help='Wether to use data augmentation')
     parser.add_argument('--color_swaps', type=int, help="Number of color swaps for data augmentation")
+    parser.add_argument('--report_to', type=str, help="Set it to tensorboard to disable wandb")
     return parser.parse_args()
 
 
 # Override default configuration using arguments
 args = parse_args()
-cfg = CFG(**{k: v for k, v in vars(args).items() if v is not None})   
+cfg = CFG(**{k: v for k, v in vars(args).items() if v is not None})
 print(asdict(cfg))
 
 
@@ -199,7 +201,15 @@ elif 'qwen2-1.5b-instruct' in cfg.model_path.lower():
 else:
     device_map = 'balanced'
 
-# device_map = 'balanced'
+
+def get_flash_attention_implementation():
+    try:
+        import flash_attn
+        attn_implementation = "flash_attention_2"
+    except ImportError:
+        attn_implementation = None
+    print(f'Using {attn_implementation} attention implementation')
+    return attn_implementation
 
 model = AutoModelForCausalLM.from_pretrained(
     cfg.model_path,
@@ -207,8 +217,8 @@ model = AutoModelForCausalLM.from_pretrained(
     device_map=device_map,
     # max_memory={0: '9GB', 1: '8GB'},
     trust_remote_code=True,
-    torch_dtype=torch.float16, #bfloat16 is 4 times slower on Kaggle than float16, TODO: what about my computer?
-    # attn_implementation="flash_attention_2",
+    torch_dtype=torch.float16, #bfloat16 is 4 times slower on Kaggle than float16, on my computer they are the same speed
+    attn_implementation=get_flash_attention_implementation(),
     )
 
 # %%
@@ -265,7 +275,7 @@ class GridEncoder(ABC):
     @abstractmethod
     def to_text(self, grid):
         pass
-    
+
     @abstractmethod
     def to_grid(self, text):
         pass
@@ -283,13 +293,13 @@ class MinimalGridEncoder(GridEncoder):
     def to_text(grid):
         text = '\n'.join([''.join([str(x) for x in line]) for line in grid])
         return text
-    
+
     @staticmethod
     def to_grid(text):
         lines = text.strip().splitlines()
         grid = [[int(x) for x in line] for line in lines]
         return grid
-        
+
 test_translator(MinimalGridEncoder())
 
 # %%
@@ -337,7 +347,7 @@ test_translator(GridCodeBlockEncoder(GridWithSeparationEncoder('|')))
 
 # %% [markdown]
 # There are many ways to augment the available arc tasks:
-# 
+#
 # - Rotations and flips
 # - Change the order of the train samples
 # - Swap one of the train samples with one of the test samples
@@ -510,10 +520,6 @@ def create_dataset(filepath, grid_encoder, use_data_augmentation=True, repeat_pr
 
     prompt_lengths = [len(tokenizer.encode(prompt)) for prompt in tqdm(prompts, desc='Calculating prompt lengths')]
     print_prompt_length_percentiles(prompt_lengths)
-    plt.hist(prompt_lengths, bins=100);
-    plt.title('Prompt length distribution')
-    plt.xlabel('Number of tokens');
-    plt.show()
 
     prompts = [prompt for prompt, prompt_length in zip(prompts, prompt_lengths) if prompt_length < cfg.max_seq_len]
     print(f'Leaving {len(prompts)} prompts after removing those longer than {cfg.max_seq_len} tokens')
@@ -597,7 +603,7 @@ else:
 # %%
 batch_size_kwargs = dict(
     # 4-16 batch size should be fine for lora.
-    per_device_train_batch_size=cfg.per_device_train_batch_size, 
+    per_device_train_batch_size=cfg.per_device_train_batch_size,
     gradient_accumulation_steps=cfg.batch_size//cfg.per_device_train_batch_size,
     per_device_eval_batch_size=cfg.per_device_eval_batch_size,
 )
@@ -617,7 +623,7 @@ training_arguments = TrainingArguments(
         logging_steps=10, #50,
         eval_steps=cfg.eval_steps,
         log_level="debug",
-        report_to='tensorboard',
+        report_to=cfg.report_to,
 
         **batch_size_kwargs
 )
@@ -645,11 +651,11 @@ else:
         response_template='<|assistant|>'
     )
 
-# %%
-# w = wandb.init(reinit=True,
-#                dir=cfg.output_dir,
-#                project=os.path.basename(os.path.dirname(cfg.output_dir)),
-#                name=os.path.basename(cfg.output_dir))
+if cfg.report_to == 'wandb':
+    w = wandb.init(reinit=True,
+               dir=cfg.output_dir,
+               project=os.path.basename(os.path.dirname(cfg.output_dir)),
+               name=os.path.basename(cfg.output_dir))
 trainer = SFTTrainer(
     model=model,
     train_dataset=train_dataset,
@@ -661,8 +667,7 @@ trainer = SFTTrainer(
     args=training_arguments,
     # packing=True, # ValueError: You passed a `DataCollatorForCompletionOnlyLM` to the SFTTrainer. This is not compatible with the `packing` argument.
 )
-
+# TODO: can I load the optimizer from the checkpoint?
 trainer.train()
-#w.finish()
-
-
+if cfg.report_to == 'wandb':
+    w.finish()
