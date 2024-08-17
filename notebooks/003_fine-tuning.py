@@ -325,18 +325,21 @@ class cfg:
 # New partition config
 class cfg:
     model_path = 'Qwen/Qwen2-0.5B-Instruct'
-    adapter_path: Optional[str] = None
-    train_dataset = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
+    # adapter_path: Optional[str] = None
+    adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/01_new-train_Qwen2-0.5B-Instruct_lr1e-4_r32_8e3steps/checkpoint-6000'
+    # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
     # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
     # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/1D-ARC.json'
     # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/ConceptARC.json'
     # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/MINI-ARC.json'
     # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v1.json'
+    # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_v2.json'
+    train_dataset = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v2.json'
     val_dataset = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/08_new-train_Qwen2-0.5B-Instruct_lr1e-4_r32_12e3steps_b'
+    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/11_combo-v2-from-checkpoint_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps'
     max_seq_len = 4096
     epochs = 0
-    max_steps : Optional[int] =  12000 #1000 # If given it will override epochs
+    max_steps : Optional[int] =  6000 #1000 # If given it will override epochs
     eval_steps = 100 #100
     warmup_ratio = 0.05
     batch_size = 16
@@ -351,7 +354,39 @@ class cfg:
     # data augmentation
     use_data_augmentation = True #True
     max_train_permutations = 2 # tipically 2
-    color_swaps = 4
+    color_swaps = 2 # 4
+    preserve_original_colors = False
+    geometric_transforms = 8 # 0-8
+    swap_train_and_test = True
+    repeat_prompts = False # if bigger than 0 it will repeat the prompts that many times
+
+
+# New partition config ttft
+class cfg:
+    model_path = 'Qwen/Qwen2-0.5B-Instruct'
+    adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/01_new-train_Qwen2-0.5B-Instruct_lr1e-4_r32_8e3steps/checkpoint-6000'
+    # train_dataset = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_v2.json'
+    train_dataset = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v2.json'
+    val_dataset = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
+    output_dir = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/11_combo-v2-from-checkpoint_Qwen2-0.5B-Instruct_lr1e-5_r32_1e3steps'
+    max_seq_len = 4096
+    epochs = 0
+    max_steps : Optional[int] =  1000 #1000 # If given it will override epochs
+    eval_steps = 50 #100
+    warmup_ratio = 0.1
+    batch_size = 16
+    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
+    per_device_train_batch_size = 1
+    per_device_eval_batch_size = 2
+    learning_rate = 1e-5
+    # LoRA
+    use_rslora = True,
+    use_dora = True,
+    lora_r = 32
+    # data augmentation
+    use_data_augmentation = True #True
+    max_train_permutations = 2 # tipically 2
+    color_swaps = 1 # 4
     preserve_original_colors = False
     geometric_transforms = 8 # 0-8
     swap_train_and_test = True
