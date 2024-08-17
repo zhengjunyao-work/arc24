@@ -84,11 +84,14 @@ solvers approach to have the best accuracy on the first attempt.
 
 ### Submissions
 
+TODO:
+
 ## Conclusion
 
 ## Next steps
 
 - Icecuber solution is slow, ideally I would run it on the background while i do all the LLM stuff.
+- I might use the LLM to choose which attempts to submit, f.e. measuring the log loss of each solution. Ideally the correct solution should have lower perplexity.
 
 ## TODO
 
