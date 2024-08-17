@@ -57,7 +57,7 @@ class CFG:
     color_swaps: int = 1
     preserve_original_colors = False
     geometric_transforms = 8 # 0-8
-    swap_train_and_test = False
+    swap_train_and_test = True
     repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
 
 def parse_args():

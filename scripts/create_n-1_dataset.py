@@ -40,11 +40,16 @@ def create_n_minus_1_dataset(data):
     for task_id, task in data.items():
         if len(task['train']) < 2:
             continue
-        for i, test_sample in enumerate(task['train']):
-            new_data[f'{task_id}_{i}'] = dict(
-                train=[sample for j, sample in enumerate(task['train']) if i != j],
-                test=[test_sample],
-            )
+        new_data[task_id] = dict(
+            train=task['train'][1:],
+            test=task['train'][:1],
+        )
+        # This previous implementation was doing train-test swap, that can be done via data augmentation
+        # for i, test_sample in enumerate(task['train']):
+        #     new_data[f'{task_id}_{i}'] = dict(
+        #         train=[sample for j, sample in enumerate(task['train']) if i != j],
+        #         test=[test_sample],
+        #     )
     return new_data
 
 
