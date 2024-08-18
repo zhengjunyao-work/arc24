@@ -28,3 +28,6 @@ I have rushed on the previous weeks and now I have to stop, unify and improve th
 - [ ] Better control over the prompt templates, I would like to try new approaches in the future
 - [x] Implement option to load the optimizer when fine-tuning
 - [ ] Check if loading an optimizer is helpful for fine-tuning
+- [ ] Problem with wandb rate limits:
+  - https://docs.wandb.ai/guides/track/limits#rate-limits
+  - https://community.wandb.ai/c/w-b-support/36
