@@ -153,6 +153,42 @@ class CFG:
     repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
 
 
+# verify iterable dataset on big scale
+@dataclass
+class CFG:
+    model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
+    adapter_path: Optional[str] = None
+    # train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v2.json'
+    # train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
+    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
+    val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/14_old-train-with-generator_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps'
+    max_seq_len: int = 4096
+    epochs = 0
+    max_steps : Optional[int] =  6000
+    eval_steps: int = 50 #50
+    report_to: str = 'wandb'
+    warmup_ratio = 0.1
+    batch_size = 16 #16
+    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
+    per_device_train_batch_size = 1
+    per_device_eval_batch_size = 2
+    learning_rate: float = 1e-4
+    max_grad_norm: float = 1.0
+    optim: str = "paged_adamw_8bit" # "paged_adamw_8bit"
+    # LoRA
+    use_rslora = True,
+    use_dora = True,
+    lora_r = 32
+    # data augmentation
+    use_data_augmentation: bool = True
+    max_train_permutations = 2 # tipically 2
+    color_swaps: int = 4
+    preserve_original_colors = False
+    geometric_transforms = 8 # 0-8
+    swap_train_and_test = True
+    repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Experiment Configuration")
     parser.add_argument('--model_path', type=str, help="Path to the model")
@@ -654,6 +690,8 @@ def prompt_generator(filepath, grid_encoder):
             task = data[task_id]
             task = random_augment_task(task)
             prompts = create_prompts_from_task(task, grid_encoder)
+            # TODO: is this the better way to deal with multi-output tasks?
+            # Should I give more weight to tasks with multiple outputs?
             prompt = random.choice(prompts)
             prompt_length = len(tokenizer.encode(prompt))
             if prompt_length < cfg.max_seq_len:
@@ -690,13 +728,13 @@ if 'llama' in cfg.model_path:
     grid_encoder = GridCodeBlockEncoder(GridWithSeparationEncoder('|'))
 else:
     grid_encoder = GridCodeBlockEncoder(MinimalGridEncoder())
-train_dataset = create_dataset(
-    cfg.train_dataset, grid_encoder,
-    use_data_augmentation=cfg.use_data_augmentation,
-    repeat_prompts=cfg.repeat_prompts)
+# train_dataset = create_dataset(
+#     cfg.train_dataset, grid_encoder,
+#     use_data_augmentation=cfg.use_data_augmentation,
+#     repeat_prompts=cfg.repeat_prompts)
 
-# train_dataset = IterableDataset.from_generator(prompt_generator,
-#                                                gen_kwargs={"filepath": cfg.train_dataset, 'grid_encoder': grid_encoder})
+train_dataset = IterableDataset.from_generator(prompt_generator,
+                                               gen_kwargs={"filepath": cfg.train_dataset, 'grid_encoder': grid_encoder})
 
 
 # %%
@@ -743,7 +781,8 @@ training_arguments = TrainingArguments(
         warmup_ratio=cfg.warmup_ratio,
         learning_rate=cfg.learning_rate,
         lr_scheduler_type="linear",
-        optim="paged_adamw_8bit",
+        optim=cfg.optim,
+        max_grad_norm=cfg.max_grad_norm,
 
         do_eval=True,
         evaluation_strategy="steps",

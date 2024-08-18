@@ -99,6 +99,23 @@ Now that I'm able to train with an IterableDataset, I have to create a generator
 
 I have made a first implementation and seems to be working at a smaller scale. I need to verify with a long train.
 
+### Divergence in trainings
+
+After experiment `12_combo-v2_Qwen2-0.5B-Instruct_lr1e-4_r32_12e3steps` on `August 17th, 2024 at 8:29:10 pm`
+I have experienced divergence when training with `combo-v2` or `train_rs7`. After 60-120 minutes the training
+suddenly diverges.
+
+I have tried without success:
+
+- Increasing the batch size from 16 to 32
+- Decreasing `max_grad_norm` from default 1.0 to 0.1
+- Changing the optimizer from `paged_adamw_8bit` to `adamw_torch`
+- It also happens with the old-train dataset
+
+Currently I'm trying to train on the canonical train dataset to see if the problem arises.
+
+¿Maybe it is related to updating the library? But the problem started yesterday when the library was not updated.
+
 ## Results
 
 ### IterableDataset results
@@ -119,11 +136,16 @@ TODO: I need to work deeper on that.
 - [x] Unify the train scripts
 - [ ] Unify the evaluation scripts
 - [ ] Refactor code such as data augmentation to remove duplications
-- [ ] Use an iterable dataset to avoid doing all the augmentations before training. This will create
+- [x] Use an iterable dataset to avoid doing all the augmentations before training. This will create
   a better augmented distribution and give more control over the data.
 - [ ] Better control over the prompt templates, I would like to try new approaches in the future
 - [x] Implement option to load the optimizer when fine-tuning
 - [ ] Check if loading an optimizer is helpful for fine-tuning
-- [ ] Problem with wandb rate limits:
+- [x] Problem with wandb rate limits:
   - https://docs.wandb.ai/guides/track/limits#rate-limits
   - https://community.wandb.ai/c/w-b-support/36
+  - Solved without doing anything, seemed to be a wandb problem
+- [ ] Diverging trainings, should I decrease `max_grad_norm`?
+  - [ ] Try decreasing `max_grad_norm`
+  - [ ] Try increasing the batch size
+  - [ ] Maybe change the optimizer? `optim="paged_adamw_8bit"`
