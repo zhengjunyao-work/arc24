@@ -12,6 +12,24 @@ I have rushed on the previous weeks and now I have to stop, unify and improve th
 
 ## Development
 
+### Iterable dataset
+
+Using an iterable dataset will give more control over the data generation. It will also speedup
+the start of the training, because currently all the data augmentation is done previously. Additionally
+RAM usage will be lower.
+
+Possibly useful links:
+
+- https://huggingface.co/docs/datasets/en/about_mapstyle_vs_iterable#creating-map-style-datasets-and-iterable-datasets
+- https://huggingface.co/docs/datasets/en/about_mapstyle_vs_iterable#eager-data-processing-and-lazy-data-processing
+- https://huggingface.co/docs/trl/en/sft_trainer#dataset-format-support
+- https://huggingface.co/docs/trl/en/sft_trainer#datasets
+- [Feature: IterableDataset support for SFTTrainer #1695](https://github.com/huggingface/trl/issues/1695)
+
+> In the SFTTrainer we smartly support datasets.IterableDataset in addition to other style datasets. This is useful if you are using large corpora that you do not want to save all to disk. The data will be tokenized and processed on the fly, even when packing is enabled.
+
+
+
 ## Results
 
 ## Conclusion

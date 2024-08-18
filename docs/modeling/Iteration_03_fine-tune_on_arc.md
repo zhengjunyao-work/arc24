@@ -28,7 +28,7 @@ the priors and second learn to solve the training tasks.
 ### Iterable dataset
 
 I have tried implementing an Iterable dataset for the train dataset, which would be more memory efficient
-and training will start faster. However it seems that `SFTTrainerSFTTrainer` is not ready for it.
+and training will start faster. However it seems that `SFTTrainer` is not ready for it.
 
 ### Train script
 
