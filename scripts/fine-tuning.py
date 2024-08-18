@@ -1,5 +1,4 @@
 
-# %%
 import os
 import random
 import json
@@ -7,9 +6,6 @@ from abc import ABC, abstractmethod
 import numpy as np
 from termcolor import colored
 from tqdm.auto import tqdm
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-from matplotlib import colors
 import wandb
 from typing import Optional
 from itertools import product, islice, permutations, chain
@@ -22,11 +18,6 @@ from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from datasets import Dataset
 
-plt.plot()
-plt.close('all')
-plt.rcParams["figure.figsize"] = (20, 5)
-mpl.rcParams['lines.linewidth'] = 3
-mpl.rcParams['font.size'] = 16
 
 
 # fast test time fine-tuning conf
@@ -49,6 +40,38 @@ class CFG:
     per_device_train_batch_size = 1
     per_device_eval_batch_size = 2
     learning_rate: float = 8e-5
+    # LoRA
+    use_rslora = True,
+    use_dora = True,
+    lora_r = 32
+    # data augmentation
+    use_data_augmentation: bool = True
+    max_train_permutations = 2 # tipically 2
+    color_swaps: int = 4
+    preserve_original_colors = False
+    geometric_transforms = 8 # 0-8
+    swap_train_and_test = True
+    repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
+
+# from zero
+@dataclass
+class CFG:
+    model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
+    adapter_path: Optional[str] = None
+    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v2.json'
+    val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/12_combo-v2_Qwen2-0.5B-Instruct_lr1e-4_r32_12e3steps_b'
+    max_seq_len: int = 4096
+    epochs = 0
+    max_steps : Optional[int] =  12000
+    eval_steps: int = 50
+    report_to: str = 'wandb'
+    warmup_ratio = 0.05
+    batch_size = 16
+    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
+    per_device_train_batch_size = 1
+    per_device_eval_batch_size = 2
+    learning_rate: float = 1e-4
     # LoRA
     use_rslora = True,
     use_dora = True,

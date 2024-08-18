@@ -41,6 +41,14 @@ What are the sources of randomness?
 Maybe cyclic learning rate schedule might allow to escape from poor local optima, but the problem might
 be just a generalization one (because training loss is good).
 
+### What are the best datasets for fine-tuning?
+
+TODO:
+
+### What is the best strategy for test-time fine-tuning?
+
+TODO:
+
 ## Conclusion
 
 ## Next steps
@@ -52,10 +60,11 @@ be just a generalization one (because training loss is good).
 ## TODO
 
 - [ ] What is the effect of changing the train data? Keep the same train configuration and just change the data.
-    - [ ] What if I use the train dataset and n-1 eval dataset?
-    - [ ] What if I only do test-time fine-tuning?
-    - [ ] Is it helpful to first train with re-arc?
-    - [ ] Use other arc-like datasets for training
-    - [ ] What is the effect of using more training data? Can I estimate how the loss will decrease if generating more tasks?
+  - [ ] What if I use the train dataset and n-1 eval dataset?
+  - [ ] What if I only do test-time fine-tuning?
+  - [ ] Is it helpful to first train with re-arc?
+  - [ ] Use other arc-like datasets for training
+  - [ ] What is the effect of using more training data? Can I estimate how the loss will decrease if generating more tasks?
 - [ ] Check for more datasets on: https://docs.google.com/spreadsheets/d/1fR4cgjY1kNKN_dxiidBQbyT6Gv7_Ko7daKOjlYojwTY/edit?gid=658867951#gid=658867951
 - [ ] If I can easily swap train and test on fine-tuning, don't do it when creating the n-1 dataset. That will make configuration easier.
+- [ ] Why training with combo-v2 diverges? Try using batch size 32 instead of 16, other option is gradient clipping.
