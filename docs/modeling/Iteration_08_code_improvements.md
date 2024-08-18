@@ -95,6 +95,15 @@ This seems to be working!
 
 ## Results
 
+### IterableDataset results
+
+I have verified that when not using data augmentation the IterableDataset yields the same results as the Dataset.
+
+### Load optimizer
+
+So far I have implemented a method to load the optimizer, but it seems to load the learning rate as well.
+TODO: I need to work deeper on that.
+
 ## Conclusion
 
 ## Next steps
