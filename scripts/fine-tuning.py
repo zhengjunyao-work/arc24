@@ -85,6 +85,41 @@ class CFG:
     swap_train_and_test = True
     repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
 
+# debug
+@dataclass
+class CFG:
+    model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
+    adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/01_new-train_Qwen2-0.5B-Instruct_lr1e-4_r32_8e3steps/checkpoint-6000'
+    load_optimizer_state: bool = True
+    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v2.json'
+    val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/debug'
+    max_seq_len: int = 4096
+    epochs = 0
+    max_steps : Optional[int] =  10
+    eval_steps: int = 50
+    report_to: str = 'wandb'
+    warmup_ratio = 0.05
+    batch_size = 16
+    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
+    per_device_train_batch_size = 1
+    per_device_eval_batch_size = 2
+    learning_rate: float = 1e-4
+    # LoRA
+    use_rslora = True,
+    use_dora = True,
+    lora_r = 32
+    # data augmentation
+    use_data_augmentation: bool = False
+    max_train_permutations = 2 # tipically 2
+    color_swaps: int = 4
+    preserve_original_colors = False
+    geometric_transforms = 8 # 0-8
+    swap_train_and_test = True
+    repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
+
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Experiment Configuration")
     parser.add_argument('--model_path', type=str, help="Path to the model")
@@ -527,7 +562,7 @@ def create_prompts_from_task(task, grid_encoder):
     return prompts
 
 # %%
-def create_dataset(filepath, grid_encoder, use_data_augmentation=True, repeat_prompts=0):
+def create_dataset(filepath, grid_encoder, use_data_augmentation=True, repeat_prompts=0, print_sample_prompt=True):
     data = load_arc_data_with_solutions(filepath)
 
     tasks = list(data.values())
@@ -540,7 +575,7 @@ def create_dataset(filepath, grid_encoder, use_data_augmentation=True, repeat_pr
     print(len(prompts))
 
     np.random.shuffle(prompts)
-    pretty_print_prompt(prompts[0])
+    if print_sample_prompt: pretty_print_prompt(prompts[0])
 
     prompt_lengths = [len(tokenizer.encode(prompt)) for prompt in tqdm(prompts, desc='Calculating prompt lengths')]
     print_prompt_length_percentiles(prompt_lengths)
@@ -596,7 +631,7 @@ train_dataset = create_dataset(
 print(f'One epoch would be {len(train_dataset)/16:n} steps')
 
 # %%
-val_dataset = create_dataset(cfg.val_dataset, grid_encoder, use_data_augmentation=False)
+val_dataset = create_dataset(cfg.val_dataset, grid_encoder, use_data_augmentation=False, print_sample_prompt=False)
 
 # %% [markdown]
 # ## Train
@@ -691,11 +726,14 @@ trainer = SFTTrainer(
     args=training_arguments,
     # packing=True, # ValueError: You passed a `DataCollatorForCompletionOnlyLM` to the SFTTrainer. This is not compatible with the `packing` argument.
 )
-if cfg.adapter_path is None:
-    optimizer_path = os.path.join(cfg.output_dir, 'optimizer.pt')
+if cfg.load_optimizer_state and cfg.adapter_path is not None:
+    optimizer_path = os.path.join(cfg.adapter_path, 'optimizer.pt')
     if os.path.exists(optimizer_path):
         print(f'Loading optimizer from {optimizer_path}')
-        trainer.optimizer.load_state_dict(optimizer_path)
+        trainer.create_optimizer()
+        trainer.optimizer.load_state_dict(torch.load(optimizer_path))
+    else:
+        print(f'Optimizer not found on adapter path: {optimizer_path}')
 trainer.train()
 if cfg.report_to == 'wandb':
     w.finish()

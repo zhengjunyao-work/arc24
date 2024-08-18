@@ -20,10 +20,11 @@ I have rushed on the previous weeks and now I have to stop, unify and improve th
 
 ## TODO
 
-- [ ] Unify the train scripts
+- [x] Unify the train scripts
 - [ ] Unify the evaluation scripts
 - [ ] Refactor code such as data augmentation to remove duplications
 - [ ] Use an iterable dataset to avoid doing all the augmentations before training. This will create
   a better augmented distribution and give more control over the data.
 - [ ] Better control over the prompt templates, I would like to try new approaches in the future
+- [x] Implement option to load the optimizer when fine-tuning
 - [ ] Check if loading an optimizer is helpful for fine-tuning
