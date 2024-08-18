@@ -16,7 +16,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, pipeline
 from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
-from datasets import Dataset
+from datasets import Dataset, IterableDataset
 
 
 
@@ -118,6 +118,39 @@ class CFG:
     swap_train_and_test = True
     repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
 
+
+# iterable dataset
+@dataclass
+class CFG:
+    model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
+    adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/01_new-train_Qwen2-0.5B-Instruct_lr1e-4_r32_8e3steps/checkpoint-6000'
+    load_optimizer_state: bool = True
+    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1.json'
+    val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240818_iterable_dataset/04_baseline-data-augmentation'
+    max_seq_len: int = 4096
+    epochs = 0
+    max_steps : Optional[int] =  100
+    eval_steps: int = 50
+    report_to: str = 'wandb'
+    warmup_ratio = 0.1
+    batch_size = 16
+    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
+    per_device_train_batch_size = 1
+    per_device_eval_batch_size = 2
+    learning_rate: float = 1e-5
+    # LoRA
+    use_rslora = True,
+    use_dora = True,
+    lora_r = 32
+    # data augmentation
+    use_data_augmentation: bool = True
+    max_train_permutations = 2 # tipically 2
+    color_swaps: int = 1
+    preserve_original_colors = False
+    geometric_transforms = 8 # 0-8
+    swap_train_and_test = True
+    repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
 
 
 def parse_args():
@@ -591,6 +624,7 @@ def create_dataset(filepath, grid_encoder, use_data_augmentation=True, repeat_pr
             prompts.extend(repeated_prompts)
         print(f'Repeating prompts {repeat_prompts} times, now there are {len(prompts)} prompts')
 
+    print(f'One epoch would be {len(prompts)/16:n} steps')
     dataset = Dataset.from_dict({'text': prompts})
     return dataset
 
@@ -627,8 +661,15 @@ train_dataset = create_dataset(
     use_data_augmentation=cfg.use_data_augmentation,
     repeat_prompts=cfg.repeat_prompts)
 
-# %%
-print(f'One epoch would be {len(train_dataset)/16:n} steps')
+# # TODO: remove this poc code
+# def my_generator(dataset):
+#     while True:
+#         dataset = dataset.shuffle()
+#         for item in iter(dataset):
+#             yield item
+# print('Creating iterable dataset')
+# train_dataset = IterableDataset.from_generator(my_generator, gen_kwargs={"dataset": train_dataset})
+
 
 # %%
 val_dataset = create_dataset(cfg.val_dataset, grid_encoder, use_data_augmentation=False, print_sample_prompt=False)
