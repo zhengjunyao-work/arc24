@@ -93,6 +93,12 @@ train_dataset = IterableDataset.from_generator(my_generator, gen_kwargs={"datase
 
 This seems to be working!
 
+#### Enabling data augmentation on a generator
+
+Now that I'm able to train with an IterableDataset, I have to create a generator that uses data augmentation.
+
+I have made a first implementation and seems to be working at a smaller scale. I need to verify with a long train.
+
 ## Results
 
 ### IterableDataset results
