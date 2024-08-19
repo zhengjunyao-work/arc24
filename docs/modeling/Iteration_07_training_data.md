@@ -62,7 +62,7 @@ be just a generalization one (because training loss is good).
 
 ### What is the best strategy for test-time fine-tuning?
 
-TODO:
+TODO: try different learning rates, try with combo-v2
 
 ### Is it helpful to first train on RE-ARC?
 
@@ -73,6 +73,7 @@ TODO:
 - [ ] Unify training scripts
 - [ ] Iterable for data augmentation will be much better
 - [ ] Load the state of the optimizer when fine-tuning in multiple stages? https://chatgpt.com/c/ce6a4f9c-7a50-4c19-a6f3-83793fe6a11d
+- [ ] There might be room for improvement if using a generator instead of a fixed dataset. F.e. better use of RE-ARC dataset
 
 ## TODO
 
