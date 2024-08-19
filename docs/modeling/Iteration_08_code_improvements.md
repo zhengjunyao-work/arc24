@@ -99,7 +99,7 @@ Now that I'm able to train with an IterableDataset, I have to create a generator
 
 I have made a first implementation and seems to be working at a smaller scale. I need to verify with a long train.
 
-### Divergence in trainings
+### Divergence in trainings caused by float16
 
 After experiment `12_combo-v2_Qwen2-0.5B-Instruct_lr1e-4_r32_12e3steps` on `August 17th, 2024 at 8:29:10 pm`
 I have experienced divergence when training with `combo-v2` or `train_rs7`. After 60-120 minutes the training
@@ -118,7 +118,8 @@ Currently I'm trying to train on the canonical train dataset to see if the probl
 
 I have run a train with the old script and it run smoothly, so it seems it is a problem of the new script.
 
-¿Could it be related to `bloat16` and `float16`?
+¿Could it be related to `bloat16` and `float16`? YES! Switching to `float16` on my computer resulted
+on unstable trainings, I should be careful on Kaggle because there using `float16` is 4 times faster.
 
 ## Results
 
@@ -142,6 +143,7 @@ TODO: I need to work deeper on that.
 - [ ] Refactor code such as data augmentation to remove duplications
 - [x] Use an iterable dataset to avoid doing all the augmentations before training. This will create
   a better augmented distribution and give more control over the data.
+- [ ] I need to validate that the iterable works equal or better, to do that I will use old train and val sets for better reproducibility.
 - [ ] Better control over the prompt templates, I would like to try new approaches in the future
 - [x] Implement option to load the optimizer when fine-tuning
 - [ ] Check if loading an optimizer is helpful for fine-tuning
@@ -149,7 +151,8 @@ TODO: I need to work deeper on that.
   - https://docs.wandb.ai/guides/track/limits#rate-limits
   - https://community.wandb.ai/c/w-b-support/36
   - Solved without doing anything, seemed to be a wandb problem
-- [ ] Diverging trainings, should I decrease `max_grad_norm`?
-  - [ ] Try decreasing `max_grad_norm`
-  - [ ] Try increasing the batch size
-  - [ ] Maybe change the optimizer? `optim="paged_adamw_8bit"`
+- [x] Diverging trainings, should I decrease `max_grad_norm`?
+  - [x] Try decreasing `max_grad_norm`
+  - [x] Try increasing the batch size
+  - [x] Maybe change the optimizer? `optim="paged_adamw_8bit"`
+  - [x] It was for using float16 instead of bfloat16
