@@ -158,17 +158,17 @@ class CFG:
 class CFG:
     model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
     adapter_path: Optional[str] = None
-    # train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v2.json'
+    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v2.json'
     # train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
-    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
+    # train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/14_old-train-with-generator_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/16_combo-v2-with-generator-bfloat16_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps'
     max_seq_len: int = 4096
     epochs = 0
     max_steps : Optional[int] =  6000
     eval_steps: int = 50 #50
     report_to: str = 'wandb'
-    warmup_ratio = 0.1
+    warmup_ratio = 0.05
     batch_size = 16 #16
     # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
     per_device_train_batch_size = 1
@@ -176,6 +176,7 @@ class CFG:
     learning_rate: float = 1e-4
     max_grad_norm: float = 1.0
     optim: str = "paged_adamw_8bit" # "paged_adamw_8bit"
+    torch_dtype: str = "bfloat16" # "bfloat16" or "float16", float16 causes divergence when training on my PC, but it is 4x faster on Kaggle
     # LoRA
     use_rslora = True,
     use_dora = True,
@@ -203,6 +204,7 @@ def parse_args():
     parser.add_argument('--use_data_augmentation', type=bool, help='Wether to use data augmentation')
     parser.add_argument('--color_swaps', type=int, help="Number of color swaps for data augmentation")
     parser.add_argument('--report_to', type=str, help="Set it to tensorboard to disable wandb")
+    parser.add_argument('--torch_dtype', type=str, help="Which dtype to use with torch")
     return parser.parse_args()
 
 
@@ -339,13 +341,23 @@ def get_flash_attention_implementation():
     print(f'Using {attn_implementation} attention implementation')
     return attn_implementation
 
+def get_torch_dtype(torch_dtype):
+    if torch_dtype == 'float16':
+        print('Using float16 torch dtype')
+        return torch.float16
+    elif torch_dtype == 'bfloat16':
+        print('Using bfloat16 torch dtype')
+        return torch.bfloat16
+    else:
+        raise ValueError(f'Unknown torch dtype {torch_dtype}')
+
 model = AutoModelForCausalLM.from_pretrained(
     cfg.model_path,
     #quantization_config=bnb_config,
     device_map=device_map,
     # max_memory={0: '9GB', 1: '8GB'},
     trust_remote_code=True,
-    torch_dtype=torch.float16, #bfloat16 is 4 times slower on Kaggle than float16, on my computer they are the same speed
+    torch_dtype=get_torch_dtype(cfg.torch_dtype), #bfloat16 is 4 times slower on Kaggle than float16, on my computer they are the same speed
     attn_implementation=get_flash_attention_implementation(),
     )
 

@@ -116,6 +116,10 @@ Currently I'm trying to train on the canonical train dataset to see if the probl
 
 ¿Maybe it is related to updating the library? But the problem started yesterday when the library was not updated.
 
+I have run a train with the old script and it run smoothly, so it seems it is a problem of the new script.
+
+¿Could it be related to `bloat16` and `float16`?
+
 ## Results
 
 ### IterableDataset results
