@@ -43,11 +43,28 @@ be just a generalization one (because training loss is good).
 
 ### What are the best datasets for fine-tuning?
 
-TODO:
+| dataset                                      | tasks | tasks variations | best val loss | best val step |
+|----------------------------------------------|-------|------------------|---------------|---------------|
+| combo-v2 (new train + val n-1)               | 800   |                  | 0.1145        | 6000          |
+| new train                                    | 700   |                  | 0.1406        | 6000          |
+| combo-v1 (new train + ConceptARC + Mini-ARC) | 0     |                  | 0.1551        | 6000          |
+| val n-1                                      | 100   |                  | 0.164         | 1600          |
+| train                                        | 400   |                  | 0.1831        | 3100          |
+| RE-ARC                                       | 400   | 40000            | 0.25          | 1100          |
+| ConceptARC                                   | 176   | 528              | 0.2784        | 400           |
+| Mini-ARC                                     | 149   | 149              | 0.3           | 100           |
+| 1D-ARC                                       | 901   | 901              | 0.34          | 100           |
+
+- Although we have seen that validation losses are not reproducible we can see a big improvement
+  when using the new train set compared to the old one.
+- External datasets do not get good validation losses and quickly overfit.
+- Making a combo with new train and val n-1 is the best option.
 
 ### What is the best strategy for test-time fine-tuning?
 
 TODO:
+
+### Is it helpful to first train on RE-ARC?
 
 ## Conclusion
 
@@ -60,10 +77,10 @@ TODO:
 ## TODO
 
 - [ ] What is the effect of changing the train data? Keep the same train configuration and just change the data.
-  - [ ] What if I use the train dataset and n-1 eval dataset?
-  - [ ] What if I only do test-time fine-tuning?
+  - [x] What if I use the train dataset and n-1 eval dataset?
+  - [x] What if I only do test-time fine-tuning?
   - [ ] Is it helpful to first train with re-arc?
-  - [ ] Use other arc-like datasets for training
+  - [x] Use other arc-like datasets for training
   - [ ] What is the effect of using more training data? Can I estimate how the loss will decrease if generating more tasks?
 - [ ] Check for more datasets on: https://docs.google.com/spreadsheets/d/1fR4cgjY1kNKN_dxiidBQbyT6Gv7_Ko7daKOjlYojwTY/edit?gid=658867951#gid=658867951
 - [ ] If I can easily swap train and test on fine-tuning, don't do it when creating the n-1 dataset. That will make configuration easier.
