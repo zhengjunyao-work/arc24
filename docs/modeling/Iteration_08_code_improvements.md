@@ -121,6 +121,21 @@ I have run a train with the old script and it run smoothly, so it seems it is a 
 ¿Could it be related to `bloat16` and `float16`? YES! Switching to `float16` on my computer resulted
 on unstable trainings, I should be careful on Kaggle because there using `float16` is 4 times faster.
 
+### Unstable validation loss
+
+In this situations the loss is unstable:
+
+- batch 2, shuffle validation set at start
+
+In this situations the loss is stable:
+
+- batch 2, do not shuffle validation set at start
+- batch 1, wether I shuffle or not at start
+
+I believe it is something related to the batch. Because there are 94 validation prompts, so there is no prompt leave out. Shuffling will influence the pairs and the pairs are influencing the loss. Maybe is related to padding?
+
+I will be using a batch size of 1 from now on.
+
 ## Results
 
 ### IterableDataset results

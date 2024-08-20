@@ -281,7 +281,7 @@ class CFG:
     # train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v2.json'
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240820_study_validation_losses/01_baseline_Qwen2-0.5B-Instruct_lr1e-5_100steps'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240820_study_validation_losses/06_random-seed-batch1_Qwen2-0.5B-Instruct_lr1e-5_100steps'
     max_seq_len: int = 4096
     epochs = 0
     max_steps : Optional[int] =  100
@@ -290,9 +290,10 @@ class CFG:
     report_to: str = 'wandb'
     warmup_ratio = 0.9
     batch_size = 16
+    random_seed: Optional[int] = None
     # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
     per_device_train_batch_size = 1
-    per_device_eval_batch_size = 2
+    per_device_eval_batch_size = 1 #2
     learning_rate: float = 1e-5
     lr_scheduler_type: str = "constant_with_warmup" #linear, constant_with_warmup, cosine, cosine_with_restarts
     max_grad_norm: float = 1.0
@@ -779,44 +780,28 @@ def create_prompts_from_task(task, grid_encoder):
         prompts.append(prompt)
     return prompts
 
-# %%
-def create_dataset(filepath, grid_encoder, use_data_augmentation=True, repeat_prompts=0, print_sample_prompt=True):
+
+def create_validation_dataset(filepath, grid_encoder, print_sample_prompt=True):
     data = load_arc_data_with_solutions(filepath)
-
     tasks = list(data.values())
-    if use_data_augmentation:
-        tasks = apply_all_data_augmentations(tasks)
-
     prompts = []
     for task in tqdm(tasks, desc='create prompts'):
         prompts.extend(create_prompts_from_task(task, grid_encoder))
-    print(len(prompts))
-
-    np.random.shuffle(prompts)
     if print_sample_prompt: pretty_print_prompt(prompts[0])
-
     prompt_lengths = [len(tokenizer.encode(prompt)) for prompt in tqdm(prompts, desc='Calculating prompt lengths')]
     print_prompt_length_percentiles(prompt_lengths)
-
     prompts = [prompt for prompt, prompt_length in zip(prompts, prompt_lengths) if prompt_length < cfg.max_seq_len]
-    print(f'Leaving {len(prompts)} prompts after removing those longer than {cfg.max_seq_len} tokens')
-
-    if repeat_prompts:
-        repeated_prompts = prompts.copy()
-        for _ in range(repeat_prompts):
-            repeated_prompts = repeated_prompts.copy()
-            np.random.shuffle(repeated_prompts)
-            prompts.extend(repeated_prompts)
-        print(f'Repeating prompts {repeat_prompts} times, now there are {len(prompts)} prompts')
-
-    print(f'One epoch would be {len(prompts)/16:n} steps')
+    print(f'Leaving {len(prompts)} validation prompts after removing those longer than {cfg.max_seq_len} tokens')
     dataset = Dataset.from_dict({'text': prompts})
     return dataset
+
 
 def prompt_generator(filepath, grid_encoder):
     data = load_arc_data_with_solutions(filepath)
     task_ids = list(data.keys())
     # TODO: log stats about too long prompts every so often
+    random.seed(cfg.random_seed)
+    np.random.seed(cfg.random_seed)
     while True:
         random.shuffle(task_ids)
         for task_id in task_ids:
@@ -829,9 +814,6 @@ def prompt_generator(filepath, grid_encoder):
             prompt_length = len(tokenizer.encode(prompt))
             if prompt_length < cfg.max_seq_len:
                 yield {'text': prompt}
-
-
-
 
 
 def print_prompt_length_percentiles(prompt_lengths):
@@ -861,17 +843,12 @@ if 'llama' in cfg.model_path:
     grid_encoder = GridCodeBlockEncoder(GridWithSeparationEncoder('|'))
 else:
     grid_encoder = GridCodeBlockEncoder(MinimalGridEncoder())
-# train_dataset = create_dataset(
-#     cfg.train_dataset, grid_encoder,
-#     use_data_augmentation=cfg.use_data_augmentation,
-#     repeat_prompts=cfg.repeat_prompts)
-
 train_dataset = IterableDataset.from_generator(prompt_generator,
                                                gen_kwargs={"filepath": cfg.train_dataset, 'grid_encoder': grid_encoder})
 
 
 # %%
-val_dataset = create_dataset(cfg.val_dataset, grid_encoder, use_data_augmentation=False, print_sample_prompt=False)
+val_dataset = create_validation_dataset(cfg.val_dataset, grid_encoder, print_sample_prompt=False)
 
 # %% [markdown]
 # ## Train
@@ -922,7 +899,7 @@ training_arguments = TrainingArguments(
         save_steps=cfg.eval_steps,
         logging_steps=cfg.logging_steps, #50,
         eval_steps=cfg.eval_steps,
-        log_level="debug",
+        log_level="info",
         report_to=cfg.report_to,
 
         **batch_size_kwargs
