@@ -127,6 +127,13 @@ on unstable trainings, I should be careful on Kaggle because there using `float1
 
 I have verified that when not using data augmentation the IterableDataset yields the same results as the Dataset.
 
+Then I have run a 1k steps experiment using data augmentation and the results suggest that there is no difference.
+
+![iterable dataset](res/2024-08-20-07-44-52.png)
+
+The train loss is almost the same. We see variations in the validation loss as in other experiments, but the iterable dataset
+is not worse so we can validate the implementation.
+
 ### Load optimizer
 
 So far I have implemented a method to load the optimizer, but it seems to load the learning rate as well.

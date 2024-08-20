@@ -66,6 +66,12 @@ TODO: try different learning rates, try with combo-v2
 
 ### Is it helpful to first train on RE-ARC?
 
+![training from RE-ARC](res/2024-08-20-07-48-54.png)
+
+It is unclear that training in two stages (first with RE-ARC and second with ARC) is positive. Training loss
+is lower as expected because initialization is better, but validation loss ends up being worse. However
+we have seen that validation loss is volatile, so in other experiment might be better.
+
 ## Conclusion
 
 ## Next steps
