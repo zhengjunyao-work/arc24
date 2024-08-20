@@ -136,6 +136,10 @@ I believe it is something related to the batch. Because there are 94 validation 
 
 I will be using a batch size of 1 from now on.
 
+### Scale compute
+
+To run wandb on a server without login I have to setup the `WANDB_API_KEY` environment variable.
+
 ## Results
 
 ### IterableDataset results
