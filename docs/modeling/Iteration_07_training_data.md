@@ -80,15 +80,19 @@ we have seen that validation loss is volatile, so in other experiment might be b
 - [ ] Iterable for data augmentation will be much better
 - [ ] Load the state of the optimizer when fine-tuning in multiple stages? https://chatgpt.com/c/ce6a4f9c-7a50-4c19-a6f3-83793fe6a11d
 - [ ] There might be room for improvement if using a generator instead of a fixed dataset. F.e. better use of RE-ARC dataset
+- [ ] I need much better results when doing test-time fine-tuning. I could iterate faster if I focus on a single example or a few examples.
+- [ ] Try using beam search, does it improve the results? https://docs.vllm.ai/en/latest/dev/sampling_params.html
+- [ ] It seems we are hitting a ceiling, probably we need a better data formatting or more data
 
 ## TODO
 
 - [ ] What is the effect of changing the train data? Keep the same train configuration and just change the data.
   - [x] What if I use the train dataset and n-1 eval dataset?
   - [x] What if I only do test-time fine-tuning?
-  - [ ] Is it helpful to first train with re-arc?
+  - [x] Is it helpful to first train with re-arc?
   - [x] Use other arc-like datasets for training
   - [ ] What is the effect of using more training data? Can I estimate how the loss will decrease if generating more tasks?
 - [ ] Check for more datasets on: https://docs.google.com/spreadsheets/d/1fR4cgjY1kNKN_dxiidBQbyT6Gv7_Ko7daKOjlYojwTY/edit?gid=658867951#gid=658867951
-- [ ] If I can easily swap train and test on fine-tuning, don't do it when creating the n-1 dataset. That will make configuration easier.
-- [ ] Why training with combo-v2 diverges? Try using batch size 32 instead of 16, other option is gradient clipping.
+- [x] If I can easily swap train and test on fine-tuning, don't do it when creating the n-1 dataset. That will make configuration easier.
+- [x] Why training with combo-v2 diverges? Try using batch size 32 instead of 16, other option is gradient clipping. Bfloat16 vs float16, explained on next iteration.
+- [ ] Train 1.5B model with the best configuration
