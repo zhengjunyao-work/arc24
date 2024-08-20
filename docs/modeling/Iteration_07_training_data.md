@@ -60,10 +60,6 @@ be just a generalization one (because training loss is good).
 - External datasets do not get good validation losses and quickly overfit.
 - Making a combo with new train and val n-1 is the best option.
 
-### What is the best strategy for test-time fine-tuning?
-
-TODO: try different learning rates, try with combo-v2
-
 ### Is it helpful to first train on RE-ARC?
 
 ![training from RE-ARC](res/2024-08-20-07-48-54.png)
@@ -71,6 +67,18 @@ TODO: try different learning rates, try with combo-v2
 It is unclear that training in two stages (first with RE-ARC and second with ARC) is positive. Training loss
 is lower as expected because initialization is better, but validation loss ends up being worse. However
 we have seen that validation loss is volatile, so in other experiment might be better.
+
+### What is the best strategy for test-time fine-tuning?
+
+TODO: try different learning rates, try with combo-v2
+
+Why the exact same experiment can start with a validation loss of 0.1524 or 0.127 just on step 50? Initial
+weights are the same, so the source of randomness needs to come from the data augmentation and generator.
+It's very difficult to work in this conditions...
+
+To make the problem even more misterious, the training loss of the experiments is almost the same.
+
+TODO: Does this also happen if I use a bigger batch size? Make quick trainings with more frequent val evaluation.
 
 ## Conclusion
 

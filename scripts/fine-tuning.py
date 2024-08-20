@@ -243,7 +243,7 @@ class CFG:
     # train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v2.json'
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240819_new_partition_ttft/02_longer_Qwen2-0.5B-Instruct_lr4e-6_2e3steps'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240819_new_partition_ttft/03_constant-lr_Qwen2-0.5B-Instruct_lr1e-5_2e3steps_b'
     max_seq_len: int = 4096
     epochs = 0
     max_steps : Optional[int] =  2000
@@ -254,7 +254,8 @@ class CFG:
     # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
     per_device_train_batch_size = 1
     per_device_eval_batch_size = 2
-    learning_rate: float = 4e-6
+    learning_rate: float = 1e-5
+    lr_scheduler_type: str = "constant_with_warmup" #linear, constant_with_warmup, cosine, cosine_with_restarts
     max_grad_norm: float = 1.0
     optim: str = "paged_adamw_8bit" # "paged_adamw_8bit"
     torch_dtype: str = "bfloat16" # "bfloat16" or "float16", float16 causes divergence when training on my PC, but it is 4x faster on Kaggle
@@ -874,7 +875,7 @@ training_arguments = TrainingArguments(
         max_steps=cfg.max_steps,
         warmup_ratio=cfg.warmup_ratio,
         learning_rate=cfg.learning_rate,
-        lr_scheduler_type="linear",
+        lr_scheduler_type=cfg.lr_scheduler_type, #constant_with_warmup, cosine, cosine_with_restarts
         optim=cfg.optim,
         max_grad_norm=cfg.max_grad_norm,
 
