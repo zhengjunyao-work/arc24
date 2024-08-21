@@ -1,0 +1,6 @@
+git+https://github.com/huggingface/trl.git
+termcolor
+wandb
+peft
+flash-attn
+bitsandbytes

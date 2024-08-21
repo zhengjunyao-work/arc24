@@ -138,7 +138,19 @@ I will be using a batch size of 1 from now on.
 
 ### Scale compute
 
-To run wandb on a server without login I have to setup the `WANDB_API_KEY` environment variable.
+- To run wandb on a server without login I have to setup the `WANDB_API_KEY` environment variable.
+- CUDA version seems to be `12.1.105` and cudnn `8.9.2.26` when I look with `conda list | grep nvidia`
+- Python version is `3.10`
+- I need to create a `requirements.txt` file
+- `huggingface/transformers-pytorch-gpu:4.41.3` might be a good candidate docker image. [Link to docker hub](https://hub.docker.com/r/huggingface/transformers-pytorch-gpu)
+
+```bash
+cd /mnt/hdd0/MEGA/AI/22_Kaggle/arc24
+pip3 install -r requirements.txt; python3 scripts/fine-tuning.py --help
+pip install -r requirements.txt; python scripts/fine-tuning.py --help
+```
+
+So far everything is working on my computer.
 
 ## Results
 
