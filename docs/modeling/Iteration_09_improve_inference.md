@@ -33,10 +33,34 @@ So far I'm only doing geometric augmentations, but I could also do color swaps a
 
 ## Results
 
+### Beam search speed
+
+```
+Evaluation on 5 tasks, either beam search is not improving or I'm not using it correctly.
+
+27s dict(temperature=0.0, max_tokens=1000)
+
+accuracy: 0.0%	correct_pixels: 48.8%	correct_size: 60.0%	unanswered: 10.0
+
+45s dict(temperature=0.0, max_tokens=1000, use_beam_search=True, best_of=3)
+accuracy: 0.0%	correct_pixels: 48.7%	correct_size: 60.0%	unanswered: 10.0%
+
+1m34 dict(temperature=0, max_tokens=1000, use_beam_search=True, best_of=10)
+accuracy: 0.0%	correct_pixels: 48.7%	correct_size: 60.0%	unanswered: 10.0%
+
+2m39 dict(temperature=0, max_tokens=1000, use_beam_search=True, best_of=20)
+accuracy: 0.0%	correct_pixels: 48.7%	correct_size: 60.0%	unanswered: 10.0%
+
+ValueError: temperature must be 0 when using beam search.
+```
+
 ## Conclusion
 
 ## Next steps
 
 ## TODO
 
-- [ ]
+- [ ] Modify generation script to allow generating an arbitrary number of solutions
+- [ ] Create a function to select the solution
+- [ ] Create a notebook to understand how beam search works, first using text
+- [ ] Can I speedup inference?

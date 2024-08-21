@@ -241,10 +241,10 @@ class CFG:
     adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240820_new_partition/01_new-train_Qwen2-1.5B-Instruct_lr1e-4_r32_6e3steps/checkpoint-2500'
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240820_new_partition_ttft/05_linear_Qwen2-1.5B-Instruct_lr1e-5_1e3steps'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240820_new_partition_ttft/05_linear_Qwen2-1.5B-Instruct_lr1e-5_600steps'
     max_seq_len: int = 4096
     epochs = 0
-    max_steps : Optional[int] =  1000 # 1000
+    max_steps : Optional[int] =  600 # 1000
     logging_steps: int = 10 #10
     eval_steps: int = 50 #50
     report_to: str = 'wandb'
