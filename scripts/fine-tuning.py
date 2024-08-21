@@ -276,8 +276,6 @@ def parse_args():
     parser.add_argument('--max_seq_len', type=int, help="Max sequence length in tokens")
     parser.add_argument('--eval_steps', type=int, help="Number of steps between evaluations")
     parser.add_argument('--learning_rate', type=float, help='Learning rate for fine-tuning')
-    parser.add_argument('--use_data_augmentation', type=bool, help='Wether to use data augmentation')
-    parser.add_argument('--color_swaps', type=int, help="Number of color swaps for data augmentation")
     parser.add_argument('--report_to', type=str, help="Set it to tensorboard to disable wandb")
     parser.add_argument('--torch_dtype', type=str, help="Which dtype to use with torch")
     return parser.parse_args()
