@@ -1,5 +1,4 @@
 FROM nvidia/cuda:12.0.0-cudnn8-devel-ubuntu20.04
-FROM nvidia/cuda:12.0.0-cudnn8-devel-ubuntu20.04
 
 # This has been copied from https://github.com/ironbar/insightface/blob/master/recognition/arcface_torch/docker/Dockerfile
 

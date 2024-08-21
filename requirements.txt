@@ -1,6 +1,8 @@
-git+https://github.com/huggingface/trl.git
+torch==2.3.1
 termcolor
 wandb
 peft
-flash-attn
 bitsandbytes
+numpy
+git+https://github.com/huggingface/trl.git
+# flash-attn # We have to install flash-attn after installing pytorch
