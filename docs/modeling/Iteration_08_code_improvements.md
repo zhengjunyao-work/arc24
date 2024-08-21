@@ -145,12 +145,14 @@ I will be using a batch size of 1 from now on.
 - `huggingface/transformers-pytorch-gpu:4.41.3` might be a good candidate docker image. [Link to docker hub](https://hub.docker.com/r/huggingface/transformers-pytorch-gpu)
 
 ```bash
+docker run --gpus all -v /mnt:/mnt -it huggingface/transformers-pytorch-gpu:4.41.3
 cd /mnt/hdd0/MEGA/AI/22_Kaggle/arc24
+#/usr/bin/python3
 pip3 install -r requirements.txt; python3 scripts/fine-tuning.py --help
 pip install -r requirements.txt; python scripts/fine-tuning.py --help
 ```
 
-So far everything is working on my computer.
+So far everything is working on my computer. I have been able to run a training successfully.
 
 ## Results
 
