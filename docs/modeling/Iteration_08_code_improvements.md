@@ -154,6 +154,14 @@ pip install -r requirements.txt; python scripts/fine-tuning.py --help
 
 So far everything is working on my computer. I have been able to run a training successfully.
 
+Creating the docker images
+
+```bash
+docker build -t cuda-python:python3.10-cuda12 .
+docker tag cuda-python:python3.10-cuda12 gbarbadillo/cuda-python:python3.10-cuda12
+docker push gbarbadillo/cuda-python:python3.10-cuda12
+```
+
 ## Results
 
 ### IterableDataset results
