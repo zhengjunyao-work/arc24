@@ -70,15 +70,19 @@ we have seen that validation loss is volatile, so in other experiment might be b
 
 ### What is the best strategy for test-time fine-tuning?
 
-TODO: try different learning rates, try with combo-v2
+If we use a constant learning rate with warmup the model overfits. The step of overfit changes with
+the learning rate. A lower learning rate will start overfitting later.
 
-Why the exact same experiment can start with a validation loss of 0.1524 or 0.127 just on step 50? Initial
-weights are the same, so the source of randomness needs to come from the data augmentation and generator.
-It's very difficult to work in this conditions...
+![Overfit](res/2024-08-21-15-29-16.png)
 
-To make the problem even more misterious, the training loss of the experiments is almost the same.
+By using a linear schedule we can get even better results at 1k steps.
 
-TODO: Does this also happen if I use a bigger batch size? Make quick trainings with more frequent val evaluation.
+![linear is better](res/2024-08-21-15-30-02.png)
+
+- I have also tried using a bigger batch size but did not improve.
+- I have also tried using a combination of train and test data but did not improve either.
+
+Thus a linear schedule with learning rate 1e-5 and 1k steps seems to be a good option.
 
 ## Conclusion
 
