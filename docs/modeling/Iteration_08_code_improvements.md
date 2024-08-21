@@ -145,10 +145,13 @@ I will be using a batch size of 1 from now on.
 - `huggingface/transformers-pytorch-gpu:4.41.3` might be a good candidate docker image. [Link to docker hub](https://hub.docker.com/r/huggingface/transformers-pytorch-gpu)
 
 ```bash
-docker run --gpus all -v /mnt:/mnt -it huggingface/transformers-pytorch-gpu:4.41.3
+#docker run --gpus all -v /mnt:/mnt -it huggingface/transformers-pytorch-gpu:4.41.3
+docker run --gpus all -v /mnt:/mnt -it cuda-python:python3.10-cuda12
 cd /mnt/hdd0/MEGA/AI/22_Kaggle/arc24
 #/usr/bin/python3
 pip3 install -r requirements.txt; python3 scripts/fine-tuning.py --help
+pip3 install -r requirements.txt --index-url https://download.pytorch.org/whl/cu120
+
 pip install -r requirements.txt; python scripts/fine-tuning.py --help
 ```
 
