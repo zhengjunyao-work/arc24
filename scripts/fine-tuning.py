@@ -167,43 +167,7 @@ class CFG:
     repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
 
 
-# fast test time fine-tuning conf
-@dataclass
-class CFG:
-    model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
-    adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/01_new-train_Qwen2-0.5B-Instruct_lr1e-4_r32_8e3steps/checkpoint-6000'
-    # train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v2.json'
-    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1.json'
-    val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240820_new_partition_ttft/02_linear-lr_Qwen2-0.5B-Instruct_lr2e-5_1e3steps'
-    max_seq_len: int = 4096
-    epochs = 0
-    max_steps : Optional[int] =  1000
-    logging_steps: int = 10 #10
-    eval_steps: int = 50
-    report_to: str = 'wandb'
-    warmup_ratio = 0.1
-    batch_size = 16
-    random_seed: Optional[int] = None
-    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
-    per_device_train_batch_size = 1
-    per_device_eval_batch_size = 1 # if using 2 the validation loss is not correctly computed
-    learning_rate: float = 2e-5
-    lr_scheduler_type: str = "linear" #linear, constant_with_warmup, cosine, cosine_with_restarts
-    max_grad_norm: float = 1.0
-    optim: str = "paged_adamw_8bit" # "paged_adamw_8bit"
-    torch_dtype: str = "bfloat16" # "bfloat16" or "float16", float16 causes divergence when training on my PC, but it is 4x faster on Kaggle
-    # LoRA
-    use_rslora = True,
-    use_dora = True,
-    lora_r = 32
-    # data augmentation
-    use_data_augmentation: bool = True
-    max_train_permutations = 2 # tipically 2
-    color_swaps: int = 4
-    preserve_original_colors = False
-    geometric_transforms = 8 # 0-8
-    swap_train_and_test = True
+
 
 
 # train big model
@@ -227,6 +191,38 @@ class CFG:
     per_device_train_batch_size = 1
     per_device_eval_batch_size = 1 # if using 2 the validation loss is not correctly computed
     learning_rate: float = 1e-4
+    lr_scheduler_type: str = "linear" #linear, constant_with_warmup, cosine, cosine_with_restarts
+    max_grad_norm: float = 1.0
+    optim: str = "paged_adamw_8bit" # "paged_adamw_8bit"
+    torch_dtype: str = "bfloat16" # "bfloat16" or "float16", float16 causes divergence when training on my PC, but it is 4x faster on Kaggle
+    # LoRA
+    use_rslora = True,
+    use_dora = True,
+    lora_r = 32
+
+
+# fast test time fine-tuning conf
+@dataclass
+class CFG:
+    model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
+    adapter_path: Optional[str] = '/mnt/hdd0/Kaggle/arc24/models/20240814_new_partition/01_new-train_Qwen2-0.5B-Instruct_lr1e-4_r32_8e3steps/checkpoint-6000'
+    # train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v2.json'
+    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1.json'
+    val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240820_new_partition_ttft/03_linear-lr-bs32_Qwen2-0.5B-Instruct_lr2e-5_500steps'
+    max_seq_len: int = 4096
+    epochs = 0
+    max_steps : Optional[int] =  500 # 1000
+    logging_steps: int = 5 #10
+    eval_steps: int = 25 #50
+    report_to: str = 'wandb'
+    warmup_ratio = 0.1
+    batch_size = 32 #16
+    random_seed: Optional[int] = None
+    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
+    per_device_train_batch_size = 1
+    per_device_eval_batch_size = 1 # if using 2 the validation loss is not correctly computed
+    learning_rate: float = 2e-5
     lr_scheduler_type: str = "linear" #linear, constant_with_warmup, cosine, cosine_with_restarts
     max_grad_norm: float = 1.0
     optim: str = "paged_adamw_8bit" # "paged_adamw_8bit"
