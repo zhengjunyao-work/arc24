@@ -1,15 +1,29 @@
 FROM nvidia/cuda:12.0.0-cudnn8-devel-ubuntu20.04
+FROM nvidia/cuda:12.0.0-cudnn8-devel-ubuntu20.04
 
 # This has been copied from https://github.com/ironbar/insightface/blob/master/recognition/arcface_torch/docker/Dockerfile
 
 # Set environment variable to avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
-# Combine apt-get commands and clean up to reduce layers and image size
+# Add the deadsnakes PPA to get Python 3.10
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3-pip python3.10 && \
+    apt-get install -y --no-install-recommends \
+    software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python3.10 \
+    python3.10-venv \
+    python3.10-dev \
+    python3.10-distutils \
+    curl \
+    git && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
+# Install pip
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+# Set Python 3.10 as the default python3
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 # Default user for calculon cluster
 RUN useradd -ms /bin/bash -u 1000 python-dev && \
     echo "python-dev ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
