@@ -23,6 +23,14 @@ in a file and then have a function to take a decision. I will have to create a n
 
 So far I'm only doing geometric augmentations, but I could also do color swaps and change the order of the train samples. That will increase the compute used at inference, but I could probably optimize the inference speed.
 
+### Beam search
+
+- [What is Beam Search? Explaining The Beam Search Algorithm](https://www.width.ai/post/what-is-beam-search)
+- [VLLM sampling params](https://docs.vllm.ai/en/latest/dev/sampling_params.html)
+
+> **use_beam_search** – Whether to use beam search instead of sampling.  
+> **best_of** – Number of output sequences that are generated from the prompt. From these best_of sequences, the top n sequences are returned. best_of must be greater than or equal to n. This is treated as the beam width when use_beam_search is True. By default, best_of is set to n.
+
 ## Results
 
 ## Conclusion
