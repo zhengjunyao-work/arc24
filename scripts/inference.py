@@ -56,10 +56,6 @@ answer_template = Template("""### Output
 
 {{ test_output }}""")
 
-train_samples = [dict(input=[0], output=[1]), dict(input=[2], output=[3])]
-prompt = prompt_template.render(train_samples=train_samples, test_input=[4])
-print(prompt)
-print(answer_template.render(test_output=[5]))
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Experiment Configuration")
@@ -68,32 +64,12 @@ def parse_args():
     parser.add_argument('--n_tasks', type=int, help="If given only the first n tasks will be evaluated")
     return parser.parse_args()
 
-
 # Override default configuration using arguments
 args = parse_args()
 cfg = CFG(**{k: v for k, v in vars(args).items() if v is not None})
 print(asdict(cfg))
 
 
-# %%
-import os
-is_dry_run = cfg.dataset_path == '/kaggle/input/arc-prize-2024/arc-agi_test_challenges.json' and not os.getenv('KAGGLE_IS_COMPETITION_RERUN')
-if is_dry_run:
-    print('This is a dry run, no inference nor installation of packages will be done')
-
-# %% [markdown]
-# ## Install
-
-# %%
-if not is_dry_run:
-    # model imports
-    from vllm import LLM, SamplingParams
-    from transformers import AutoTokenizer
-
-# %% [markdown]
-# ## Imports
-
-# %%
 from abc import ABC, abstractmethod
 import json
 import os
@@ -104,6 +80,9 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 from termcolor import colored
 import shutil
+
+from vllm import LLM, SamplingParams
+from transformers import AutoTokenizer
 
 # %%
 import logging
@@ -292,21 +271,20 @@ def plot_input_token_length_distribution(data, prompt_creator):
     plt.hist(token_length_distribution)
     plt.xlabel('n tokens')
 
-# %%
-if not is_dry_run:
-    print(f'Loading {cfg.model_path}')
-    llm = LLM(model=cfg.model_path,
-              trust_remote_code=True,
-              dtype='half',
-              tensor_parallel_size=2, # to use 2 gpus
-              max_model_len=cfg.max_model_len,
-              #kv_cache_dtype='fp8_e5m2', I have disabled kv cache quantization because it is hurtful
-              enforce_eager=True, # without this 13.9GB of memory is used on each GPU, with this is 13.3GB,
-              disable_log_stats=True,
-             )
-    tokenizer = AutoTokenizer.from_pretrained(cfg.model_path)
-    for number in '0123456789':
-        print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
+
+print(f'Loading {cfg.model_path}')
+llm = LLM(model=cfg.model_path,
+            trust_remote_code=True,
+            dtype='half',
+            tensor_parallel_size=2, # to use 2 gpus
+            max_model_len=cfg.max_model_len,
+            #kv_cache_dtype='fp8_e5m2', I have disabled kv cache quantization because it is hurtful
+            enforce_eager=True, # without this 13.9GB of memory is used on each GPU, with this is 13.3GB,
+            disable_log_stats=True,
+            )
+tokenizer = AutoTokenizer.from_pretrained(cfg.model_path)
+for number in '0123456789':
+    print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
 
 # %% [markdown]
 # The tokenizer from phi-3 encodes each digit indepently, it does not group numbers such as 10 or 100.
@@ -523,26 +501,20 @@ if cfg.n_tasks is not None and cfg.n_tasks > 0:
     data = dict(islice(data.items(), cfg.n_tasks))
 print(f'There are {len(data)} tasks to solve.')
 
-# %%
-if not is_dry_run:
-    prompt_creator = SimplePromptCreator(GridCodeBlockEncoder(MinimalGridEncoder()))
-    print_sample_prompt(data, prompt_creator)
+
+prompt_creator = SimplePromptCreator(GridCodeBlockEncoder(MinimalGridEncoder()))
+print_sample_prompt(data, prompt_creator)
     #plot_input_token_length_distribution(data, prompt_creator)
 
-# %%
-if is_dry_run:
-    with open('submission.json', 'w') as f:
-        json.dump(dict(dry_run=True), f)
-else:
-    sampling_params = SamplingParams(n=1, **cfg.sampling_params)
-    solutions, texts = inference(data, prompt_creator, sampling_params)
-    with open('submission.json', 'w') as f:
-        json.dump(solutions, f)
 
-# %%
-if not is_dry_run:
-    number_of_predictions_per_task = analyze_number_of_predictions_per_task(data, texts)
-    number_of_predictions_per_task
+sampling_params = SamplingParams(n=1, **cfg.sampling_params)
+solutions, texts = inference(data, prompt_creator, sampling_params)
+with open('submission.json', 'w') as f:
+    json.dump(solutions, f)
+
+
+number_of_predictions_per_task = analyze_number_of_predictions_per_task(data, texts)
+
 
 # %% [markdown]
 # ## Evaluation
@@ -577,5 +549,4 @@ def clear_vllm_gpu_memory():
     gc.collect()
     torch.cuda.empty_cache()
 
-if not is_dry_run:
-    clear_vllm_gpu_memory()
+clear_vllm_gpu_memory()
