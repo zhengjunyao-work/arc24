@@ -165,6 +165,8 @@ docker tag cuda-python:python3.10-cuda12 gbarbadillo/cuda-python:python3.10-cuda
 docker push gbarbadillo/cuda-python:python3.10-cuda12
 ```
 
+I can train on a single A6000 GPU.
+
 ## Results
 
 ### IterableDataset results
