@@ -8,11 +8,11 @@ class CFG:
     model_path: str = "/home/gbarbadillo/data/Qwen2-0.5B-arc"
     max_model_len: int = 8192 #61000 for phi-3
     # Dataset
-    #dataset_path = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json'
-    dataset_path: str = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
+    #dataset_path: str = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
+    dataset_path: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
     n_tasks: Optional[int] = None # Optional parameter to limit the number of task in the inference, set it to None to use all the tasks
     # Inference params
-    max_predictions_per_task: int = 2 # 
+    max_predictions_per_task: int = 2 #
     sampling_params: dict = field(default_factory=lambda: dict(temperature=0.0, max_tokens=1000)) # https://docs.vllm.ai/en/latest/dev/sampling_params.html
 
 # %%
@@ -71,7 +71,7 @@ def parse_args():
 
 # Override default configuration using arguments
 args = parse_args()
-cfg = CFG(**{k: v for k, v in vars(args).items() if v is not None})   
+cfg = CFG(**{k: v for k, v in vars(args).items() if v is not None})
 print(asdict(cfg))
 
 
@@ -128,7 +128,7 @@ class GridEncoder(ABC):
     @abstractmethod
     def to_text(self, grid):
         pass
-    
+
     @abstractmethod
     def to_grid(self, text):
         pass
@@ -146,13 +146,13 @@ class MinimalGridEncoder(GridEncoder):
     def to_text(grid):
         text = '\n'.join([''.join([str(x) for x in line]) for line in grid])
         return text
-    
+
     @staticmethod
     def to_grid(text):
         lines = text.strip().splitlines()
         grid = [[int(x) for x in line] for line in lines]
         return grid
-        
+
 test_translator(MinimalGridEncoder())
 
 # %%
@@ -163,28 +163,28 @@ class GridWithSeparationEncoder(GridEncoder):
     def to_text(self, grid):
         text = '\n'.join([self.split_symbol.join([str(x) for x in line]) for line in grid])
         return text
-    
+
     def to_grid(self, text):
         lines = text.strip().splitlines()
         grid = [[int(x) for x in line.split(self.split_symbol)] for line in lines]
         return grid
-        
+
 test_translator(GridWithSeparationEncoder('|'))
 
 # %%
 class GridCodeBlockEncoder(GridEncoder):
     def __init__(self, base_encoder):
         self.encoder = base_encoder
-    
+
     def to_text(self, grid):
         text = f'```grid\n{self.encoder.to_text(grid)}\n```'
         return text
-    
+
     def to_grid(self, text):
         grid_text = text.split('```grid\n')[1].split('\n```')[0]
         grid = self.encoder.to_grid(grid_text)
         return grid
-        
+
 test_translator(GridCodeBlockEncoder(MinimalGridEncoder()))
 
 test_translator(GridCodeBlockEncoder(GridWithSeparationEncoder('|')))
@@ -193,18 +193,18 @@ test_translator(GridCodeBlockEncoder(GridWithSeparationEncoder('|')))
 # ### Prompting
 
 # %% [markdown]
-# There are also many ways to build a prompt for the ARC challenge. The class that builds the prompt will receive a grid encoder as input, this way we can try different prompts with different grid encoders. 
+# There are also many ways to build a prompt for the ARC challenge. The class that builds the prompt will receive a grid encoder as input, this way we can try different prompts with different grid encoders.
 # The class that builds the prompts needs to be also capable of parsing the response from the model.
 
 # %%
 class PromptCreator(ABC):
     def __init__(self, grid_encoder: GridEncoder):
         self.grid_encoder = grid_encoder
-    
+
     @abstractmethod
     def create_task_prompts(self, task):
         pass
-    
+
     @abstractmethod
     def parse_response(self, text):
         pass
@@ -213,12 +213,12 @@ class PromptCreator(ABC):
 class SimplePromptCreator(PromptCreator):
     def __init__(self, grid_encoder):
         super().__init__(grid_encoder)
-    
-    def create_task_prompts(self, task):        
-        train_samples = [{key: self.grid_encoder.to_text(grid) for key, grid in sample.items()} for sample in task['train']]     
+
+    def create_task_prompts(self, task):
+        train_samples = [{key: self.grid_encoder.to_text(grid) for key, grid in sample.items()} for sample in task['train']]
         prompts = []
         for test_sample in task['test']:
-            user_message = prompt_template.render(train_samples=train_samples, 
+            user_message = prompt_template.render(train_samples=train_samples,
                                                   test_input=self.grid_encoder.to_text(test_sample['input']))
             messages = [{"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_message},
@@ -229,11 +229,11 @@ class SimplePromptCreator(PromptCreator):
                                                    add_generation_prompt=False)
             prompts.append(remove_assistant_ending(prompt))
         return prompts
-    
+
     def parse_response(self, text):
         return self.grid_encoder.to_grid('```grid\n' + text)
-    
-    
+
+
 def remove_assistant_ending(text):
     """
 phi-3
@@ -265,7 +265,7 @@ def print_sample_prompt(data, prompt_creator):
     prompts = [prompt_creator.create_task_prompts(task)[0] for task in data.values()]
     prompts = sorted(prompts, key=lambda x: len(x))
     pretty_print_prompt(prompts[0])
-    
+
 def pretty_print_prompt(text, default_color='black'):
     color = default_color
     attrs = None
@@ -296,8 +296,8 @@ def plot_input_token_length_distribution(data, prompt_creator):
 if not is_dry_run:
     print(f'Loading {cfg.model_path}')
     llm = LLM(model=cfg.model_path,
-              trust_remote_code=True, 
-              dtype='half', 
+              trust_remote_code=True,
+              dtype='half',
               tensor_parallel_size=2, # to use 2 gpus
               max_model_len=cfg.max_model_len,
               #kv_cache_dtype='fp8_e5m2', I have disabled kv cache quantization because it is hurtful
@@ -322,20 +322,20 @@ class DataAugmentation():
     def __init__(self, flip, n_rot90):
         self.flip = flip
         self.n_rot90 = n_rot90
-        
+
     def augment_task(self, task):
         augmented_task = dict()
         for partition, samples in task.items():
             augmented_task[partition] = [{name:self.augment_grid(grid) for name,grid in sample.items()} for sample in samples]
         return augmented_task
-    
+
     def augment_grid(self, grid):
         grid = np.array(grid)
         if self.flip:
             grid = np.flip(grid, axis=1)
         grid = np.rot90(grid, k=self.n_rot90)
         return grid.tolist()
-    
+
     def revert_augmentation(self, grid):
         grid = np.array(grid)
         grid = np.rot90(grid, k=-self.n_rot90)
@@ -361,12 +361,12 @@ def plot_task(task):
         if 'output' in sample:
             plt.subplot(2, len(samples), plot_idx + 1 + len(samples))
             plot_grid(sample['output'])
-            
+
 def plot_grids(grids):
     for plot_idx, grid in enumerate(grids):
         plt.subplot(1, len(grids), plot_idx + 1)
         plot_grid(grid)
-            
+
 def plot_grid(grid):
     grid = np.array(grid)
     cmap = colors.ListedColormap(
@@ -374,7 +374,7 @@ def plot_grid(grid):
          '#AAAAAA', '#F012BE', '#FF851B', '#7FDBFF', '#870C25'])
     norm = colors.Normalize(vmin=0, vmax=9)
     plt.imshow(grid, cmap=cmap, norm=norm)
-    plt.grid(True,which='both',color='lightgrey', linewidth=0.5) 
+    plt.grid(True,which='both',color='lightgrey', linewidth=0.5)
     plt.xticks(np.arange(-0.5, grid.shape[1]), [])
     plt.yticks(np.arange(-0.5, grid.shape[0]), [])
     plt.xlim(-0.5, grid.shape[1]-0.5)
@@ -397,7 +397,7 @@ def analyze_number_of_predictions_per_task(data, texts):
 def evaluate(ground_truth, solutions):
     """
     Computes the following metrics:
-    
+
     - Accuracy
     - Correct pixels
     - Correct size
@@ -409,7 +409,7 @@ def evaluate(ground_truth, solutions):
         for idx, correct_grid in enumerate(task_ground_truth):
             predicted_grids = list(solutions[task_id][idx].values())
             predicted_grids = [grid for grid in predicted_grids if grid]
-            
+
             task_metrics.append(evaluate_grid(correct_grid, predicted_grids))
             print_metrics(task_metrics[-1], f'{task_id}_{idx}')
             #plot_grids([correct_grid] + predicted_grids)
@@ -421,7 +421,7 @@ def evaluate(ground_truth, solutions):
     save_metrics(metrics, solutions)
     #plot_metrics_distribution(metrics)
     print_metrics(average_metrics(metrics))
-    
+
 def plot_metrics_distribution(metrics):
     for key in metrics[0]:
         values = [x[key] for x in metrics]
@@ -430,13 +430,13 @@ def plot_metrics_distribution(metrics):
         plt.xlabel(key)
         plt.ylabel('count')
         plt.show()
-    
+
 def average_metrics(metrics):
     averaged_metrics = dict()
     for key in metrics[0]:
         averaged_metrics[key] = np.mean([x[key] for x in metrics])
     return averaged_metrics
-        
+
 def save_metrics(metrics, solutions):
     formatted_metrics = dict(global_metrics=average_metrics(metrics))
     for task_id, task_metrics in zip(solutions, metrics):
@@ -450,7 +450,7 @@ def print_metrics(metrics, prefix=''):
         text += f'{key}: {value*100:.1f}%\t'
     print(text)
 
-    
+
 def evaluate_grid(correct_grid, predicted_grids):
     correct_grid = np.array(correct_grid)
     metrics = dict(accuracy=0, correct_pixels=0, correct_size=0, unanswered=(2 - len(predicted_grids))/2)
@@ -467,7 +467,7 @@ def evaluate_grid(correct_grid, predicted_grids):
 
 # %% [markdown]
 # We need to generate 2 different predictions for each task. The model could fail to generate a prediction, or the parsing can fail... Thus we need a method that is robust to fails.
-# 
+#
 # One way to solve this would be to use data augmentation. By applying rotations and flips we could generate up to 8 variations of each task. So we could try with different data augmentations until we have 2 predictions for each task. Another alternative would be to make inference with the 8 variations and use majority voting.
 
 # %%
@@ -537,7 +537,7 @@ else:
     sampling_params = SamplingParams(n=1, **cfg.sampling_params)
     solutions, texts = inference(data, prompt_creator, sampling_params)
     with open('submission.json', 'w') as f:
-        json.dump(solutions, f)    
+        json.dump(solutions, f)
 
 # %%
 if not is_dry_run:
@@ -554,7 +554,7 @@ if os.path.exists(ground_truth_path):
         ground_truth = json.load(f)
     ground_truth = {key: ground_truth[key] for key in solutions}
     evaluate(ground_truth, solutions)
-    
+
     with open('texts.json', 'w') as f:
         json.dump(texts, f)
     with open('number_of_predictions_per_task.json', 'w') as f:
