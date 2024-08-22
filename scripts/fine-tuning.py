@@ -170,35 +170,7 @@ class CFG:
 
 
 
-# train big model
-@dataclass
-class CFG:
-    model_path: str = 'Qwen/Qwen2-1.5B-Instruct'
-    adapter_path: Optional[str] = None
-    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
-    val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240820_new_partition/01_new-train_Qwen2-1.5B-Instruct_lr1e-4_r32_6e3steps'
-    max_seq_len: int = 4096
-    epochs = 0
-    max_steps : Optional[int] =  6000
-    logging_steps: int = 10 #10
-    eval_steps: int = 100 #50
-    report_to: str = 'wandb'
-    warmup_ratio = 0.05
-    batch_size = 16 #16
-    random_seed: Optional[int] = None
-    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
-    per_device_train_batch_size = 1
-    per_device_eval_batch_size = 1 # if using 2 the validation loss is not correctly computed
-    learning_rate: float = 1e-4
-    lr_scheduler_type: str = "linear" #linear, constant_with_warmup, cosine, cosine_with_restarts
-    max_grad_norm: float = 1.0
-    optim: str = "paged_adamw_8bit" # "paged_adamw_8bit"
-    torch_dtype: str = "bfloat16" # "bfloat16" or "float16", float16 causes divergence when training on my PC, but it is 4x faster on Kaggle
-    # LoRA
-    use_rslora = True,
-    use_dora = True,
-    lora_r = 32
+
 
 
 # fast test time fine-tuning conf
@@ -265,6 +237,39 @@ class CFG:
     lora_r = 32
 
 
+# train from zero
+@dataclass
+class CFG:
+    model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
+    adapter_path: Optional[str] = None
+    # train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
+    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/combos/combo_v2.json'
+    val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240820_new_partition/02_combo-v2_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps'
+    n_gpus: int = 2
+    max_seq_len: int = 4096
+    epochs = 0
+    max_steps : Optional[int] =  6000
+    logging_steps: int = 10 #10a
+    eval_steps: int = 100 #50
+    report_to: str = 'wandb'
+    warmup_ratio = 0.05
+    batch_size = 16 #16
+    random_seed: Optional[int] = None
+    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
+    per_device_train_batch_size = 1
+    per_device_eval_batch_size = 1 # if using 2 the validation loss is not correctly computed
+    learning_rate: float = 1e-4
+    lr_scheduler_type: str = "linear" #linear, constant_with_warmup, cosine, cosine_with_restarts
+    max_grad_norm: float = 1.0
+    optim: str = "paged_adamw_8bit" # "paged_adamw_8bit"
+    torch_dtype: str = "bfloat16" # "bfloat16" or "float16", float16 causes divergence when training on my PC, but it is 4x faster on Kaggle
+    # LoRA
+    use_rslora = True,
+    use_dora = True,
+    lora_r: int = 32
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Experiment Configuration")
     parser.add_argument('--model_path', type=str, help="Path to the model")
@@ -278,6 +283,8 @@ def parse_args():
     parser.add_argument('--learning_rate', type=float, help='Learning rate for fine-tuning')
     parser.add_argument('--report_to', type=str, help="Set it to tensorboard to disable wandb")
     parser.add_argument('--torch_dtype', type=str, help="Which dtype to use with torch")
+    parser.add_argument('--lora_r', type=int, help="Rank of the LoRA adapter")
+    parser.add_argument('--n_gpus', type=int, help="Number of gpus to use")
     return parser.parse_args()
 
 
@@ -296,113 +303,115 @@ with open(os.path.join(cfg.output_dir, 'cfg.json'), 'w') as f:
 # %% [markdown]
 # ## Model
 
-# %%
-if 'llama' in cfg.model_path.lower():
-    device_map = {
-        'model.embed_tokens': 0,
-        'model.layers.0': 0,
-        'model.layers.1': 0,
-        'model.layers.2': 0,
-        'model.layers.3': 0,
-        'model.layers.4': 0,
-        'model.layers.5': 0,
-        'model.layers.6': 0,
-        'model.layers.7': 0,
-        'model.layers.8': 0,
-        'model.layers.9': 0,
-        'model.layers.10': 0,
-        'model.layers.11': 0,
-        'model.layers.12': 0,
-        'model.layers.13': 0,
-        'model.layers.14': 0,
-        'model.layers.15': 0,
-        'model.layers.16': 0,
-        'model.layers.17': 1,
-        'model.layers.18': 1,
-        'model.layers.19': 1,
-        'model.layers.20': 1,
-        'model.layers.21': 1,
-        'model.layers.22': 1,
-        'model.layers.23': 1,
-        'model.layers.24': 1,
-        'model.layers.25': 1,
-        'model.layers.26': 1,
-        'model.layers.27': 1,
-        'model.layers.28': 1,
-        'model.layers.29': 1,
-        'model.layers.30': 1,
-        'model.layers.31': 1,
-        'model.norm': 1,
-        'model.rotary_emb': 1,
-        'lm_head': 1,
-    }
-elif 'qwen2-0.5b-instruct' in cfg.model_path.lower():
-    print('Using qwen2-0.5b-instruct device map')
-    device_map = {
-        'model.embed_tokens': 0,
-        'lm_head': 0,
-        'model.layers.0': 0,
-        'model.layers.1': 0,
-        'model.layers.2': 0,
-        'model.layers.3': 0,
-        'model.layers.4': 0,
-        'model.layers.5': 0,
-        'model.layers.6': 0,
-        'model.layers.7': 0,
-        'model.layers.8': 1,
-        'model.layers.9': 1,
-        'model.layers.10': 1,
-        'model.layers.11': 1,
-        'model.layers.12': 1,
-        'model.layers.13': 1,
-        'model.layers.14': 1,
-        'model.layers.15': 1,
-        'model.layers.16': 1,
-        'model.layers.17': 1,
-        'model.layers.18': 1,
-        'model.layers.19': 1,
-        'model.layers.20': 1,
-        'model.layers.21': 1,
-        'model.layers.22': 1,
-        'model.layers.23': 1,
-        'model.norm': 1
-    }
-elif 'qwen2-1.5b-instruct' in cfg.model_path.lower():
-    print('Using qwen2-1.5b-instruct device map')
-    device_map = {
-        'model.embed_tokens': 0,
-        'lm_head': 0,
-        'model.layers.0': 0,
-        'model.layers.1': 0,
-        'model.layers.2': 0,
-        'model.layers.3': 0,
-        'model.layers.4': 0,
-        'model.layers.5': 0,
-        'model.layers.6': 0,
-        'model.layers.7': 0,
-        'model.layers.8': 0,
-        'model.layers.9': 0,
-        'model.layers.10': 0,
-        'model.layers.11': 1,
-        'model.layers.12': 1,
-        'model.layers.13': 1,
-        'model.layers.14': 1,
-        'model.layers.15': 1,
-        'model.layers.16': 1,
-        'model.layers.17': 1,
-        'model.layers.18': 1,
-        'model.layers.19': 1,
-        'model.layers.20': 1,
-        'model.layers.21': 1,
-        'model.layers.22': 1,
-        'model.layers.23': 1,
-        'model.layers.24': 1,
-        'model.layers.25': 1,
-        'model.layers.26': 1,
-        'model.layers.27': 1,
-        'model.norm': 1}
+if cfg.n_gpus > 1:
+    if 'llama' in cfg.model_path.lower():
+        device_map = {
+            'model.embed_tokens': 0,
+            'model.layers.0': 0,
+            'model.layers.1': 0,
+            'model.layers.2': 0,
+            'model.layers.3': 0,
+            'model.layers.4': 0,
+            'model.layers.5': 0,
+            'model.layers.6': 0,
+            'model.layers.7': 0,
+            'model.layers.8': 0,
+            'model.layers.9': 0,
+            'model.layers.10': 0,
+            'model.layers.11': 0,
+            'model.layers.12': 0,
+            'model.layers.13': 0,
+            'model.layers.14': 0,
+            'model.layers.15': 0,
+            'model.layers.16': 0,
+            'model.layers.17': 1,
+            'model.layers.18': 1,
+            'model.layers.19': 1,
+            'model.layers.20': 1,
+            'model.layers.21': 1,
+            'model.layers.22': 1,
+            'model.layers.23': 1,
+            'model.layers.24': 1,
+            'model.layers.25': 1,
+            'model.layers.26': 1,
+            'model.layers.27': 1,
+            'model.layers.28': 1,
+            'model.layers.29': 1,
+            'model.layers.30': 1,
+            'model.layers.31': 1,
+            'model.norm': 1,
+            'model.rotary_emb': 1,
+            'lm_head': 1,
+        }
+    elif 'qwen2-0.5b-instruct' in cfg.model_path.lower():
+        print('Using qwen2-0.5b-instruct device map')
+        device_map = {
+            'model.embed_tokens': 0,
+            'lm_head': 0,
+            'model.layers.0': 0,
+            'model.layers.1': 0,
+            'model.layers.2': 0,
+            'model.layers.3': 0,
+            'model.layers.4': 0,
+            'model.layers.5': 0,
+            'model.layers.6': 0,
+            'model.layers.7': 0,
+            'model.layers.8': 1,
+            'model.layers.9': 1,
+            'model.layers.10': 1,
+            'model.layers.11': 1,
+            'model.layers.12': 1,
+            'model.layers.13': 1,
+            'model.layers.14': 1,
+            'model.layers.15': 1,
+            'model.layers.16': 1,
+            'model.layers.17': 1,
+            'model.layers.18': 1,
+            'model.layers.19': 1,
+            'model.layers.20': 1,
+            'model.layers.21': 1,
+            'model.layers.22': 1,
+            'model.layers.23': 1,
+            'model.norm': 1
+        }
+    elif 'qwen2-1.5b-instruct' in cfg.model_path.lower():
+        print('Using qwen2-1.5b-instruct device map')
+        device_map = {
+            'model.embed_tokens': 0,
+            'lm_head': 0,
+            'model.layers.0': 0,
+            'model.layers.1': 0,
+            'model.layers.2': 0,
+            'model.layers.3': 0,
+            'model.layers.4': 0,
+            'model.layers.5': 0,
+            'model.layers.6': 0,
+            'model.layers.7': 0,
+            'model.layers.8': 0,
+            'model.layers.9': 0,
+            'model.layers.10': 0,
+            'model.layers.11': 1,
+            'model.layers.12': 1,
+            'model.layers.13': 1,
+            'model.layers.14': 1,
+            'model.layers.15': 1,
+            'model.layers.16': 1,
+            'model.layers.17': 1,
+            'model.layers.18': 1,
+            'model.layers.19': 1,
+            'model.layers.20': 1,
+            'model.layers.21': 1,
+            'model.layers.22': 1,
+            'model.layers.23': 1,
+            'model.layers.24': 1,
+            'model.layers.25': 1,
+            'model.layers.26': 1,
+            'model.layers.27': 1,
+            'model.norm': 1}
+    else:
+        device_map = 'balanced'
 else:
-    device_map = 'balanced'
+    device_map = None
 
 
 def get_flash_attention_implementation():
