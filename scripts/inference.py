@@ -15,7 +15,6 @@ class CFG:
     max_predictions_per_task: int = 2 #
     sampling_params: dict = field(default_factory=lambda: dict(temperature=0.0, max_tokens=1000)) # https://docs.vllm.ai/en/latest/dev/sampling_params.html
 
-# %%
 from jinja2 import Template
 
 system_prompt = """You are a helpful AI assistant. Your job is to solve tasks from the Abstraction and Reasoning Challenge (ARC). 
@@ -84,7 +83,6 @@ import shutil
 from vllm import LLM, SamplingParams
 from transformers import AutoTokenizer
 
-# %%
 import logging
 
 for handler in logging.root.handlers[:]:
@@ -102,7 +100,6 @@ logging.info('Started logging')
 # %% [markdown]
 # There are many ways to encode/format the grid as input to the LLM. In this section we are going to define several encoders so we can sistematically try them all.
 
-# %%
 class GridEncoder(ABC):
     @abstractmethod
     def to_text(self, grid):
@@ -112,14 +109,12 @@ class GridEncoder(ABC):
     def to_grid(self, text):
         pass
 
-# %%
 sample_grid = np.eye(3, dtype=int).tolist()
 
 def test_translator(translator):
     assert sample_grid == translator.to_grid(translator.to_text(sample_grid))
     print(translator.to_text(sample_grid))
 
-# %%
 class MinimalGridEncoder(GridEncoder):
     @staticmethod
     def to_text(grid):
@@ -134,7 +129,6 @@ class MinimalGridEncoder(GridEncoder):
 
 test_translator(MinimalGridEncoder())
 
-# %%
 class GridWithSeparationEncoder(GridEncoder):
     def __init__(self, split_symbol):
         self.split_symbol = split_symbol
@@ -150,7 +144,6 @@ class GridWithSeparationEncoder(GridEncoder):
 
 test_translator(GridWithSeparationEncoder('|'))
 
-# %%
 class GridCodeBlockEncoder(GridEncoder):
     def __init__(self, base_encoder):
         self.encoder = base_encoder
@@ -175,7 +168,6 @@ test_translator(GridCodeBlockEncoder(GridWithSeparationEncoder('|')))
 # There are also many ways to build a prompt for the ARC challenge. The class that builds the prompt will receive a grid encoder as input, this way we can try different prompts with different grid encoders.
 # The class that builds the prompts needs to be also capable of parsing the response from the model.
 
-# %%
 class PromptCreator(ABC):
     def __init__(self, grid_encoder: GridEncoder):
         self.grid_encoder = grid_encoder
@@ -188,7 +180,6 @@ class PromptCreator(ABC):
     def parse_response(self, text):
         pass
 
-# %%
 class SimplePromptCreator(PromptCreator):
     def __init__(self, grid_encoder):
         super().__init__(grid_encoder)
@@ -239,7 +230,6 @@ llama 3.1
         split_text = '<|end|>'
     return split_text.join(text.split(split_text)[:-1])
 
-# %%
 def print_sample_prompt(data, prompt_creator):
     prompts = [prompt_creator.create_task_prompts(task)[0] for task in data.values()]
     prompts = sorted(prompts, key=lambda x: len(x))
@@ -261,7 +251,6 @@ def pretty_print_prompt(text, default_color='black'):
             attrs = None
         print(colored(line, color, attrs=attrs))
 
-# %%
 def plot_input_token_length_distribution(data, prompt_creator):
     prompts = []
     for task in data.values():
@@ -295,7 +284,6 @@ for number in '0123456789':
 # %% [markdown]
 # We need data augmentation to make multiple predictions for each task.
 
-# %%
 class DataAugmentation():
     def __init__(self, flip, n_rot90):
         self.flip = flip
@@ -328,119 +316,6 @@ for flip in [True, False]:
         assert sample_grid == data_augmentation.revert_augmentation(data_augmentation.augment_grid(sample_grid))
 
 # %% [markdown]
-# ### Plots
-
-# %%
-def plot_task(task):
-    samples = task['train'] + task['test']
-    for plot_idx, sample in enumerate(samples):
-        plt.subplot(2, len(samples), plot_idx + 1)
-        plot_grid(sample['input'])
-        if 'output' in sample:
-            plt.subplot(2, len(samples), plot_idx + 1 + len(samples))
-            plot_grid(sample['output'])
-
-def plot_grids(grids):
-    for plot_idx, grid in enumerate(grids):
-        plt.subplot(1, len(grids), plot_idx + 1)
-        plot_grid(grid)
-
-def plot_grid(grid):
-    grid = np.array(grid)
-    cmap = colors.ListedColormap(
-        ['#000000', '#0074D9','#FF4136','#2ECC40','#FFDC00',
-         '#AAAAAA', '#F012BE', '#FF851B', '#7FDBFF', '#870C25'])
-    norm = colors.Normalize(vmin=0, vmax=9)
-    plt.imshow(grid, cmap=cmap, norm=norm)
-    plt.grid(True,which='both',color='lightgrey', linewidth=0.5)
-    plt.xticks(np.arange(-0.5, grid.shape[1]), [])
-    plt.yticks(np.arange(-0.5, grid.shape[0]), [])
-    plt.xlim(-0.5, grid.shape[1]-0.5)
-
-# %% [markdown]
-# ### Evaluation
-
-# %%
-def analyze_number_of_predictions_per_task(data, texts):
-    number_of_predictions = dict()
-    for task_id, task in data.items():
-        number_of_predictions[task_id] = len(texts[task_id]['responses'])/len(task['test'])
-    plt.title('Distribution of the number of predictions per task')
-    plt.hist(number_of_predictions.values(), bins=np.arange(1.5, 9))
-    plt.xlabel('number of predictions')
-    plt.ylabel('count')
-    return number_of_predictions
-
-# %%
-def evaluate(ground_truth, solutions):
-    """
-    Computes the following metrics:
-
-    - Accuracy
-    - Correct pixels
-    - Correct size
-    """
-    metrics = []
-    for task_id, task_ground_truth in ground_truth.items():
-        task_metrics = []
-        #plot_task(data[task_id]); plt.suptitle(f'{task_id}'); plt.show()
-        for idx, correct_grid in enumerate(task_ground_truth):
-            predicted_grids = list(solutions[task_id][idx].values())
-            predicted_grids = [grid for grid in predicted_grids if grid]
-
-            task_metrics.append(evaluate_grid(correct_grid, predicted_grids))
-            print_metrics(task_metrics[-1], f'{task_id}_{idx}')
-            #plot_grids([correct_grid] + predicted_grids)
-            plt.suptitle(f'{task_id}_{idx}')
-            plt.show()
-        metrics.append(average_metrics(task_metrics))
-    print('\n'*3 + '# Aggregated metrics:')
-    print_metrics(average_metrics(metrics))
-    save_metrics(metrics, solutions)
-    #plot_metrics_distribution(metrics)
-    print_metrics(average_metrics(metrics))
-
-def plot_metrics_distribution(metrics):
-    for key in metrics[0]:
-        values = [x[key] for x in metrics]
-        plt.title(f'Distribution of {key}')
-        plt.hist(values, bins=np.linspace(0, 1, 10))
-        plt.xlabel(key)
-        plt.ylabel('count')
-        plt.show()
-
-def average_metrics(metrics):
-    averaged_metrics = dict()
-    for key in metrics[0]:
-        averaged_metrics[key] = np.mean([x[key] for x in metrics])
-    return averaged_metrics
-
-def save_metrics(metrics, solutions):
-    formatted_metrics = dict(global_metrics=average_metrics(metrics))
-    for task_id, task_metrics in zip(solutions, metrics):
-        formatted_metrics[task_id] = task_metrics
-    with open('metrics.json', 'w') as f:
-        json.dump(formatted_metrics, f)
-
-def print_metrics(metrics, prefix=''):
-    text = f'{prefix}'
-    for key, value in metrics.items():
-        text += f'{key}: {value*100:.1f}%\t'
-    print(text)
-
-
-def evaluate_grid(correct_grid, predicted_grids):
-    correct_grid = np.array(correct_grid)
-    metrics = dict(accuracy=0, correct_pixels=0, correct_size=0, unanswered=(2 - len(predicted_grids))/2)
-    for predicted_grid in predicted_grids:
-        predicted_grid = np.array(predicted_grid)
-        if correct_grid.shape == predicted_grid.shape:
-            metrics['accuracy'] = max(metrics['accuracy'], np.all(predicted_grid == correct_grid))
-            metrics['correct_pixels'] = max(metrics['correct_pixels'], np.mean(predicted_grid == correct_grid))
-            metrics['correct_size'] = max(metrics['correct_size'], correct_grid.shape == predicted_grid.shape)
-    return metrics
-
-# %% [markdown]
 # ## Inference
 
 # %% [markdown]
@@ -448,7 +323,6 @@ def evaluate_grid(correct_grid, predicted_grids):
 #
 # One way to solve this would be to use data augmentation. By applying rotations and flips we could generate up to 8 variations of each task. So we could try with different data augmentations until we have 2 predictions for each task. Another alternative would be to make inference with the 8 variations and use majority voting.
 
-# %%
 def solve_task(task_id, task, prompt_creator, sampling_params):
     data_augmentation_params = product([False, True], [0, 1, 2, 3])
     solution = {task_id:[{"attempt_1": [], "attempt_2": []} for _ in task['test']]}
@@ -484,7 +358,7 @@ def is_solution_done(solution):
                     return False
     return True
 
-# %%
+
 def inference(data, prompt_creator, sampling_params):
     solutions, texts = dict(), dict()
     for idx, (task_id, task) in tqdm(enumerate(data.items()), total=len(data), desc='Solving tasks', smoothing=0):
@@ -494,7 +368,6 @@ def inference(data, prompt_creator, sampling_params):
         texts.update(task_texts)
     return solutions, texts
 
-# %%
 with open(cfg.dataset_path) as f:
     data = json.load(f)
 if cfg.n_tasks is not None and cfg.n_tasks > 0:
@@ -504,38 +377,12 @@ print(f'There are {len(data)} tasks to solve.')
 
 prompt_creator = SimplePromptCreator(GridCodeBlockEncoder(MinimalGridEncoder()))
 print_sample_prompt(data, prompt_creator)
-    #plot_input_token_length_distribution(data, prompt_creator)
-
 
 sampling_params = SamplingParams(n=1, **cfg.sampling_params)
 solutions, texts = inference(data, prompt_creator, sampling_params)
 with open('submission.json', 'w') as f:
     json.dump(solutions, f)
 
-
-number_of_predictions_per_task = analyze_number_of_predictions_per_task(data, texts)
-
-
-# %% [markdown]
-# ## Evaluation
-
-# %%
-ground_truth_path = cfg.dataset_path.replace('challenges.json', 'solutions.json')
-if os.path.exists(ground_truth_path):
-    with open(ground_truth_path, 'r') as f:
-        ground_truth = json.load(f)
-    ground_truth = {key: ground_truth[key] for key in solutions}
-    evaluate(ground_truth, solutions)
-
-    with open('texts.json', 'w') as f:
-        json.dump(texts, f)
-    with open('number_of_predictions_per_task.json', 'w') as f:
-        json.dump(number_of_predictions_per_task, f)
-
-# %% [markdown]
-# ## Clean
-
-# %%
 def clear_vllm_gpu_memory():
     global llm
     # https://github.com/vllm-project/vllm/issues/1908

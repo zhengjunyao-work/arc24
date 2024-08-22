@@ -31,6 +31,10 @@ So far I'm only doing geometric augmentations, but I could also do color swaps a
 > **use_beam_search** – Whether to use beam search instead of sampling.  
 > **best_of** – Number of output sequences that are generated from the prompt. From these best_of sequences, the top n sequences are returned. best_of must be greater than or equal to n. This is treated as the beam width when use_beam_search is True. By default, best_of is set to n.
 
+### Update inference script
+
+It takes 13 minutes to do inference in 100 evaluation tasks.
+
 ## Results
 
 ### Beam search speed
