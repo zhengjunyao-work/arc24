@@ -31,10 +31,48 @@ So far I'm only doing geometric augmentations, but I could also do color swaps a
 > **use_beam_search** – Whether to use beam search instead of sampling.  
 > **best_of** – Number of output sequences that are generated from the prompt. From these best_of sequences, the top n sequences are returned. best_of must be greater than or equal to n. This is treated as the beam width when use_beam_search is True. By default, best_of is set to n.
 
+I have been playing with beam search and it generates a sequence with higher probability than simply greedy decoding.
+
+![effect of beam search](res/2024-08-22-16-11-40.png)
+
+```
+## Best of 1 (logprob: -51.21, runtime: 2.06s)
+Alexander the Great was a legendary conqueror who ruled over a vast empire that
+stretched from Greece to India. One of his most famous conquests was the city of
+Tyre, which was located on the coast of Lebanon. Alexander had heard of Tyre's
+wealth and power, and he was determined to conquer it. He sent a fleet of ships
+to attack the city, and they were successful in capturing it. Alexander then
+spent several years building up the city and making it his own. However, Ty
+
+## Best of 2 (logprob: -37.66, runtime: 1.90s)
+Alexander the Great, the son of Philip II of Macedon, was one of the most famous
+conquerors in history. He was born in 356 BC and died in 323 BC, but his legacy
+lives on to this day. Alexander was known for his military prowess and his
+ability to conquer vast territories. One of the most famous battles that
+Alexander fought was against the city of Tyre. Tyre was a powerful city-state in
+the eastern Mediterranean, and it had been a
+
+## Best of 128 (logprob: -31.82, runtime: 12.52s)
+Alexander the Great was one of the most famous conquerors in history. He was
+born in 356 BC and died in 323 BC, but his legacy lives on to this day. One of
+the most famous battles he fought was the Battle of Tyre, which took place in
+332 BC. The city of Tyre was one of the most powerful cities in the world at the
+time. It was located on the coast of the Mediterranean Sea and was known for its
+```
+
+Thus it seems reasonable that we could improve the accuracy of the predictions by using beam search.
+
 ### Update inference script
 
 It takes 13 minutes to do inference in 100 evaluation tasks.
 54 minutes to do inference with 8 predictions per task.
+
+I believe I could speedup the inference if I batch the calls.
+
+```
+## 20 inferences (runtime: 98.38s)
+## Batch size 20 (runtime: 5.52s)
+```
 
 ## Results
 
