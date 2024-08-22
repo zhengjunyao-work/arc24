@@ -4,6 +4,7 @@ from dataclasses import dataclass, asdict, field
 
 @dataclass
 class CFG:
+    output_filepath: str = 'submission.json'
     # Model
     model_path: str = "/home/gbarbadillo/data/Qwen2-0.5B-arc"
     max_model_len: int = 8192 #61000 for phi-3
@@ -61,6 +62,7 @@ def parse_args():
     parser.add_argument('--model_path', type=str, help="Path to the model")
     parser.add_argument('--dataset_path', type=str, help="Path to the dataset to make inference")
     parser.add_argument('--n_tasks', type=int, help="If given only the first n tasks will be evaluated")
+    parser.add_argument('--output_filepath', type=str, help="Path to the json file with the predictions")
     return parser.parse_args()
 
 # Override default configuration using arguments
@@ -380,7 +382,7 @@ print_sample_prompt(data, prompt_creator)
 
 sampling_params = SamplingParams(n=1, **cfg.sampling_params)
 solutions, texts = inference(data, prompt_creator, sampling_params)
-with open('submission.json', 'w') as f:
+with open(args.output_filepath, 'w') as f:
     json.dump(solutions, f)
 
 def clear_vllm_gpu_memory():
