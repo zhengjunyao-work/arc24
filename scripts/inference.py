@@ -384,6 +384,8 @@ sampling_params = SamplingParams(n=1, **cfg.sampling_params)
 solutions, texts = inference(data, prompt_creator, sampling_params)
 with open(args.output_filepath, 'w') as f:
     json.dump(solutions, f)
+with open('texts.json', 'w') as f:
+    json.dump(texts, f)
 
 def clear_vllm_gpu_memory():
     global llm
