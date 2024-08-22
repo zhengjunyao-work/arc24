@@ -34,6 +34,7 @@ So far I'm only doing geometric augmentations, but I could also do color swaps a
 ### Update inference script
 
 It takes 13 minutes to do inference in 100 evaluation tasks.
+54 minutes to do inference with 8 predictions per task.
 
 ## Results
 
