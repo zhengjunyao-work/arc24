@@ -15,6 +15,7 @@ class CFG:
     # Inference params
     max_predictions_per_task: int = 2 #
     sampling_params: dict = field(default_factory=lambda: dict(temperature=0.0, max_tokens=1000)) # https://docs.vllm.ai/en/latest/dev/sampling_params.html
+    #sampling_params: dict = field(default_factory=lambda: dict(temperature=0.0, max_tokens=1000, use_beam_search=True, best_of=4)) # https://docs.vllm.ai/en/latest/dev/sampling_params.html
 
 from jinja2 import Template
 

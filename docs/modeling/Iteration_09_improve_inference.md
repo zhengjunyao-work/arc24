@@ -103,7 +103,8 @@ ValueError: temperature must be 0 when using beam search.
 
 ## TODO
 
-- [ ] Modify generation script to allow generating an arbitrary number of solutions
+- [x] Modify generation script to allow generating an arbitrary number of solutions
 - [ ] Create a function to select the solution
-- [ ] Create a notebook to understand how beam search works, first using text
-- [ ] Can I speedup inference?
+- [x] Create a notebook to understand how beam search works, first using text
+- [ ] Can I speedup inference? There is evidence that batching could make a great speedup.
+- [ ] Does beam-search increase the accuracy of the model?
