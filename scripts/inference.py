@@ -63,6 +63,7 @@ def parse_args():
     parser.add_argument('--dataset_path', type=str, help="Path to the dataset to make inference")
     parser.add_argument('--n_tasks', type=int, help="If given only the first n tasks will be evaluated")
     parser.add_argument('--output_filepath', type=str, help="Path to the json file with the predictions")
+    parser.add_argument('--max_predictions_per_task', type=int, help="Max number of predictions per task")
     return parser.parse_args()
 
 # Override default configuration using arguments
@@ -327,38 +328,25 @@ for flip in [True, False]:
 
 def solve_task(task_id, task, prompt_creator, sampling_params):
     data_augmentation_params = product([False, True], [0, 1, 2, 3])
-    solution = {task_id:[{"attempt_1": [], "attempt_2": []} for _ in task['test']]}
+    solution = {task_id:[{f"attempt_{i}": [] for i in range(cfg.max_predictions_per_task)} for _ in task['test']]}
     texts = dict(prompts=[], responses=[], exceptions=[])
-    for flip, n_rot90 in islice(data_augmentation_params, cfg.max_predictions_per_task):
+    for attempt_idx, (flip, n_rot90) in islice(enumerate(data_augmentation_params), cfg.max_predictions_per_task):
         data_augmentation = DataAugmentation(flip, n_rot90)
         augmented_task = data_augmentation.augment_task(task)
         prompts = prompt_creator.create_task_prompts(augmented_task)
         outputs = llm.generate(prompts, sampling_params, use_tqdm=False)
         responses = [output.outputs[0].text for output in outputs]
-        for idx, response in enumerate(responses):
+        for test_idx, response in enumerate(responses):
             try:
                 augmented_grid = prompt_creator.parse_response(response)
                 grid = data_augmentation.revert_augmentation(augmented_grid)
-                if not solution[task_id][idx]["attempt_1"]:
-                    solution[task_id][idx]["attempt_1"] = grid
-                elif solution[task_id][idx]["attempt_1"] != grid and not solution[task_id][idx]["attempt_2"]:
-                    solution[task_id][idx]["attempt_2"] = grid
+                solution[task_id][test_idx][f"attempt_{attempt_idx}"] = grid
             except Exception as e:
                 print(f'Exception when parsing response from {task_id}: {e}')
                 texts['exceptions'].append(str(e))
         texts['prompts'].append(prompts)
         texts['responses'].append(responses)
-        if is_solution_done(solution):
-            break
     return solution, {task_id:texts}
-
-def is_solution_done(solution):
-    for task_id, predictions in solution.items():
-        for prediction in predictions:
-            for grid in prediction.values():
-                if not grid:
-                    return False
-    return True
 
 
 def inference(data, prompt_creator, sampling_params):
@@ -382,7 +370,7 @@ print_sample_prompt(data, prompt_creator)
 
 sampling_params = SamplingParams(n=1, **cfg.sampling_params)
 solutions, texts = inference(data, prompt_creator, sampling_params)
-with open(args.output_filepath, 'w') as f:
+with open(cfg.output_filepath, 'w') as f:
     json.dump(solutions, f)
 with open('texts.json', 'w') as f:
     json.dump(texts, f)
