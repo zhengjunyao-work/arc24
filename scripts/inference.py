@@ -16,6 +16,7 @@ class CFG:
     # Inference params
     predictions_per_task: int = 8 # How many predictions to make for each task, ideally should be a multiple of 8 (the number of geometric data augmentations)
     best_of: int = 1 # controls the number of beams used in beam search
+    temperature: float = 0.0 # temperature for sampling, 0.0 for greedy search
 
 
 def parse_args():
@@ -26,6 +27,7 @@ def parse_args():
     parser.add_argument('--output_filepath', type=str, help="Path to the json file with the predictions")
     parser.add_argument('--predictions_per_task', type=int, help="Number of predictions per task, use a multiple of 8")
     parser.add_argument('--best_of', type=int, help="controls the number of beams used in beam search")
+    parser.add_argument('--temperature', type=float, help="temperature for sampling, 0.0 for greedy search")
     return parser.parse_args()
 
 
@@ -80,7 +82,7 @@ def main():
     prompts = [conf['prompt'] for conf in prompts_conf]
     print_smaller_prompt(prompts)
 
-    sampling_params = get_sampling_params(cfg.best_of)
+    sampling_params = get_sampling_params(cfg.best_of, cfg.temperature)
     # TODO: maybe I should create smaller batches, f.e. there were 54272 prompts when using 512 data augmentation
     outputs = llm.generate(prompts, sampling_params, use_tqdm=True)
     solutions = create_solutions(outputs, prompts_conf, prompt_creator, data)
@@ -113,15 +115,17 @@ def create_prompts(data, prompt_creator, predictions_per_task):
     return prompts
 
 
-def get_sampling_params(best_of):
+def get_sampling_params(best_of, temperature):
     # # https://docs.vllm.ai/en/latest/dev/sampling_params.html
     if best_of == 1:
         print('Using greedy search')
-        return SamplingParams(n=1, temperature=0.0, max_tokens=1000)
+        sampling_params = SamplingParams(n=1, temperature=temperature, max_tokens=1000)
     else:
-        print(f'Using beam search with best_of={best_of}')
-        return SamplingParams(n=1, temperature=0.0, max_tokens=1000,
+        print(f'Using beam search with best_of={best_of}, temperature is set to 0.0')
+        sampling_params = SamplingParams(n=1, temperature=0.0, max_tokens=1000,
                               use_beam_search=True, best_of=best_of)
+    print(f'Sampling params: {sampling_params}')
+    return sampling_params
 
 
 def create_solutions(outputs, prompts, prompt_creator, data):
