@@ -145,6 +145,7 @@ def study_effect_of_the_number_of_solutions(solutions, data, n_tries=40):
         plt.xscale('log')
         plt.xticks(n_predictions_range, n_predictions_range)
     plt.suptitle('Effect of the number of predictions on the metrics')
+    plt.show()
 
 def subsample_solutions(solutions, n_predictions):
     solutions_subset = dict()
