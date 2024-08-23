@@ -66,45 +66,33 @@ Thus it seems reasonable that we could improve the accuracy of the predictions b
 
 It takes 13 minutes to do inference in 100 evaluation tasks.
 54 minutes to do inference with 8 predictions per task.
-
-I believe I could speedup the inference if I batch the calls.
-
-```
-## 20 inferences (runtime: 98.38s)
-## Batch size 20 (runtime: 5.52s)
-```
+After improving inference it takes 8 minutes, so it is 7x faster. Maybe it can be even faster by
+grouping all the prompts.
 
 ## Results
 
-### Beam search speed
+### Beam search results
 
-```
-Evaluation on 5 tasks, either beam search is not improving or I'm not using it correctly.
+| best_of | pass_n | accuracy | correct_pixels | correct_size | runtime |
+|---------|--------|----------|----------------|--------------|---------|
+| 1       | 12%    | 4.40%    | 77%            | 88%          | 7m      |
+| 2       | 13.50% | 5.90%    | 78.70%         | 90%          | 50m     |
+| 4       | 13.50% | 6%       | 77.50%         | 89%          | 1h30    |
 
-27s dict(temperature=0.0, max_tokens=1000)
-
-accuracy: 0.0%	correct_pixels: 48.8%	correct_size: 60.0%	unanswered: 10.0
-
-45s dict(temperature=0.0, max_tokens=1000, use_beam_search=True, best_of=3)
-accuracy: 0.0%	correct_pixels: 48.7%	correct_size: 60.0%	unanswered: 10.0%
-
-1m34 dict(temperature=0, max_tokens=1000, use_beam_search=True, best_of=10)
-accuracy: 0.0%	correct_pixels: 48.7%	correct_size: 60.0%	unanswered: 10.0%
-
-2m39 dict(temperature=0, max_tokens=1000, use_beam_search=True, best_of=20)
-accuracy: 0.0%	correct_pixels: 48.7%	correct_size: 60.0%	unanswered: 10.0%
-
-ValueError: temperature must be 0 when using beam search.
-```
+We can see that the results improve, but at the cost of much bigger runtime. I have the feeling that
+beam search is not as efficient as normal generation.
 
 ## Conclusion
 
 ## Next steps
 
+- [ ] Can I use the model to judge which predictions are the best? https://github.com/vllm-project/vllm/issues/5234
+
 ## TODO
 
 - [x] Modify generation script to allow generating an arbitrary number of solutions
-- [ ] Create a function to select the solution
+- [ ] Create a function to select the solution (by voting f.e.)
 - [x] Create a notebook to understand how beam search works, first using text
-- [ ] Can I speedup inference? There is evidence that batching could make a great speedup.
+- [x] Can I speedup inference? There is evidence that batching could make a great speedup.
+- [ ] Can I speedup inference even more? Group all the prompts together
 - [ ] Does beam-search increase the accuracy of the model?

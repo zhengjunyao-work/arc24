@@ -7,3 +7,4 @@ notebooks/.ipynb_checkpoints/*
 .pytest_cache/*
 notebooks/wandb/debug-cli.gbarbadillo.log
 notebooks/*.json
+scripts/*.json
