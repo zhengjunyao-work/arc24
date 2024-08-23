@@ -3,7 +3,6 @@ import argparse
 from dataclasses import dataclass, asdict
 
 
-
 @dataclass
 class CFG:
     output_filepath: str = 'submission.json'
@@ -18,6 +17,7 @@ class CFG:
     max_predictions_per_task: int = 8 #
     best_of: int = 1 # controls the number of beams used in beam search
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Experiment Configuration")
     parser.add_argument('--model_path', type=str, help="Path to the model")
@@ -29,13 +29,6 @@ def parse_args():
     return parser.parse_args()
 
 
-# Override default configuration using arguments
-args = parse_args()
-cfg = CFG(**{k: v for k, v in vars(args).items() if v is not None})
-print(asdict(cfg))
-
-
-
 import json
 import os
 from tqdm.auto import tqdm
@@ -44,7 +37,7 @@ from itertools import islice, product
 from vllm import LLM, SamplingParams
 from transformers import AutoTokenizer
 
-from arc24.data_augmentation import DataAugmentation
+from arc24.data_augmentation import apply_data_augmentation, revert_data_augmentation
 from arc24.prompting import SimplePromptCreator, print_sample_prompt
 from arc24.encoders import GridCodeBlockEncoder, MinimalGridEncoder
 
@@ -52,6 +45,100 @@ import logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 logging.info('Started logging')
+
+
+def main():
+    # Override default configuration using arguments
+    args = parse_args()
+    cfg = CFG(**{k: v for k, v in vars(args).items() if v is not None})
+    print(asdict(cfg))
+
+    with open(cfg.dataset_path) as f:
+        data = json.load(f)
+    if cfg.n_tasks is not None and cfg.n_tasks > 0:
+        data = dict(islice(data.items(), cfg.n_tasks))
+    print(f'There are {len(data)} tasks to solve.')
+
+
+    print(f'Loading {cfg.model_path}')
+    llm = LLM(model=cfg.model_path,
+                trust_remote_code=True,
+                dtype='half',
+                tensor_parallel_size=2, # to use 2 gpus
+                max_model_len=cfg.max_model_len,
+                #kv_cache_dtype='fp8_e5m2', I have disabled kv cache quantization because it is hurtful
+                enforce_eager=True, # without this 13.9GB of memory is used on each GPU, with this is 13.3GB,
+                disable_log_stats=True,
+                )
+    tokenizer = AutoTokenizer.from_pretrained(cfg.model_path)
+    for number in '0123456789':
+        print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
+
+
+    prompt_creator = SimplePromptCreator(GridCodeBlockEncoder(MinimalGridEncoder()), tokenizer, cfg.model_path)
+    #print_sample_prompt(data, prompt_creator) TODO: print the smaller prompt
+
+    prompts = create_prompts(data, prompt_creator)
+
+    if cfg.best_of == 1:
+        # # https://docs.vllm.ai/en/latest/dev/sampling_params.html
+        print('Using greedy search')
+        sampling_params = SamplingParams(n=1, temperature=0.0, max_tokens=1000)
+    else:
+        print(f'Using beam search with best_of={cfg.best_of}')
+        sampling_params = SamplingParams(n=1, temperature=0.0, max_tokens=1000, use_beam_search=True, best_of=cfg.best_of)
+    outputs = llm.generate([prompt['prompt'] for prompt in prompts], sampling_params, use_tqdm=True)
+    solutions = create_solutions(outputs, prompts, prompt_creator, data)
+
+    # solutions, texts = inference(data, prompt_creator, sampling_params)
+    with open(cfg.output_filepath, 'w') as f:
+        json.dump(solutions, f)
+    # with open('texts.json', 'w') as f:
+    #     json.dump(texts, f)
+
+    del llm.llm_engine.model_executor
+    del llm
+    clear_vllm_gpu_memory()
+
+
+def create_prompts(data, prompt_creator):
+    prompts = []
+    for task_id, task in tqdm(data.items(), total=len(data), desc='Creating prompts'):
+        data_augmentation_params = product([False, True], [0, 1, 2, 3])
+        for hflip, n_rot90 in data_augmentation_params:
+            data_augmentation_kwargs = dict(hflip=hflip, n_rot90=n_rot90)
+            augmented_task = apply_data_augmentation(task, **data_augmentation_kwargs)
+            task_prompts = prompt_creator.create_task_prompts(augmented_task)
+            for idx, prompt in enumerate(task_prompts):
+                prompts.append(dict(task_id=task_id,
+                                    data_augmentation_kwargs=data_augmentation_kwargs,
+                                    prompt=prompt,
+                                    idx=idx))
+    return prompts
+
+
+def create_solutions(outputs, prompts, prompt_creator, data):
+    solutions = create_empty_solutions(data)
+    for idx, output in tqdm(enumerate(outputs), total=len(outputs), desc='Parsing outputs'):
+        task_id = prompts[idx]['task_id']
+        data_augmentation_kwargs = prompts[idx]['data_augmentation_kwargs']
+        sample_idx = prompts[idx]['idx']
+        response = output.outputs[0].text
+        try:
+            grid = prompt_creator.parse_response(response)
+            grid = revert_data_augmentation(grid, **data_augmentation_kwargs)
+        except Exception as e:
+            print(f'Exception when parsing response from {task_id}_{sample_idx}: {e} {response}')
+            grid = []
+        attempt_name = f"attempt_{len(solutions[task_id][sample_idx]) + 1}"
+        solutions[task_id][sample_idx][attempt_name] = grid
+    return solutions
+
+def create_empty_solutions(data):
+    solutions = dict()
+    for task_id, task in data.items():
+        solutions[task_id] = [dict() for _ in task['test']]
+    return solutions
 
 
 def solve_task(task_id, task, prompt_creator, sampling_params):
@@ -96,56 +183,15 @@ def inference(data, prompt_creator, sampling_params):
 
 
 def clear_vllm_gpu_memory():
-    global llm
     # https://github.com/vllm-project/vllm/issues/1908
     from vllm.distributed.parallel_state import destroy_model_parallel, destroy_distributed_environment
     import torch
     import gc
     destroy_model_parallel()
     destroy_distributed_environment()
-    del llm.llm_engine.model_executor
-    del llm
     gc.collect()
     torch.cuda.empty_cache()
 
 
-with open(cfg.dataset_path) as f:
-    data = json.load(f)
-if cfg.n_tasks is not None and cfg.n_tasks > 0:
-    data = dict(islice(data.items(), cfg.n_tasks))
-print(f'There are {len(data)} tasks to solve.')
-
-
-print(f'Loading {cfg.model_path}')
-llm = LLM(model=cfg.model_path,
-            trust_remote_code=True,
-            dtype='half',
-            tensor_parallel_size=2, # to use 2 gpus
-            max_model_len=cfg.max_model_len,
-            #kv_cache_dtype='fp8_e5m2', I have disabled kv cache quantization because it is hurtful
-            enforce_eager=True, # without this 13.9GB of memory is used on each GPU, with this is 13.3GB,
-            disable_log_stats=True,
-            )
-tokenizer = AutoTokenizer.from_pretrained(cfg.model_path)
-for number in '0123456789':
-    print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
-
-
-prompt_creator = SimplePromptCreator(GridCodeBlockEncoder(MinimalGridEncoder()), tokenizer, cfg.model_path)
-print_sample_prompt(data, prompt_creator)
-
-if cfg.best_of == 1:
-    # # https://docs.vllm.ai/en/latest/dev/sampling_params.html
-    print('Using greedy search')
-    sampling_params = SamplingParams(n=1, temperature=0.0, max_tokens=1000)
-else:
-    print(f'Using beam search with best_of={cfg.best_of}')
-    sampling_params = SamplingParams(n=1, temperature=0.0, max_tokens=1000, use_beam_search=True, best_of=cfg.best_of)
-
-solutions, texts = inference(data, prompt_creator, sampling_params)
-with open(cfg.output_filepath, 'w') as f:
-    json.dump(solutions, f)
-with open('texts.json', 'w') as f:
-    json.dump(texts, f)
-
-clear_vllm_gpu_memory()
+if __name__ == '__main__':
+    main()
