@@ -64,14 +64,23 @@ Thus it seems reasonable that we could improve the accuracy of the predictions b
 
 ### Update inference script
 
-It takes 13 minutes to do inference in 100 evaluation tasks.
-54 minutes to do inference with 8 predictions per task.
-After improving inference it takes 8 minutes, so it is 7x faster. Maybe it can be even faster by
-grouping all the prompts.
+The table shows inference time for 100 evaluation tasks with `Qwen-0.5B` and 8 predictions per task.
+
+| implementation         | inference time | speedup |
+|------------------------|----------------|---------|
+| baseline               | 54m            | -       |
+| batch all task prompts | 7m             | 7.7     |
+| batch all prompts      | 1m50s          | 29.5    |
+
+By batching the prompts I have been able to speedup inference by ~30 times. This is a valuable lesson for the future: always batch the LLM predictions if we are not interested in latency but in throughput.
+
+This speedup opens the door to generating many more predictions per task and later do voting or other more advanced selection process.
 
 ## Results
 
 ### Beam search results
+
+This are the results of using `Qwen-0.5B` and making 8 predictions per task.
 
 | best_of | pass_n | accuracy | correct_pixels | correct_size | runtime |
 |---------|--------|----------|----------------|--------------|---------|
@@ -79,8 +88,14 @@ grouping all the prompts.
 | 2       | 13.50% | 5.90%    | 78.70%         | 90%          | 50m     |
 | 4       | 13.50% | 6%       | 77.50%         | 89%          | 1h30    |
 
-We can see that the results improve, but at the cost of much bigger runtime. I have the feeling that
-beam search is not as efficient as normal generation.
+We can see that the results improve, but at the cost of much bigger runtime.
+
+GPU utilization is much lower when using beam-search. [Likely related issue](https://github.com/vllm-project/vllm/issues/1646),
+maybe it is not optimized because they were [considering to remove the beam search feature](https://github.com/vllm-project/vllm/issues/6226).
+
+### Increasing the number of predictions
+
+TODO: show how pass_n improves with the number of predictions for different models
 
 ## Conclusion
 

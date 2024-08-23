@@ -81,6 +81,7 @@ def main():
     print_smaller_prompt(prompts)
 
     sampling_params = get_sampling_params(cfg.best_of)
+    # TODO: maybe I should create smaller batches, f.e. there were 54272 prompts when using 512 data augmentation
     outputs = llm.generate(prompts, sampling_params, use_tqdm=True)
     solutions = create_solutions(outputs, prompts_conf, prompt_creator, data)
 
