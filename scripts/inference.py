@@ -13,9 +13,8 @@ class CFG:
     dataset_path: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
     n_tasks: Optional[int] = None # Optional parameter to limit the number of task in the inference, set it to None to use all the tasks
     # Inference params
-    max_predictions_per_task: int = 2 #
-    sampling_params: dict = field(default_factory=lambda: dict(temperature=0.0, max_tokens=1000)) # https://docs.vllm.ai/en/latest/dev/sampling_params.html
-    #sampling_params: dict = field(default_factory=lambda: dict(temperature=0.0, max_tokens=1000, use_beam_search=True, best_of=4)) # https://docs.vllm.ai/en/latest/dev/sampling_params.html
+    max_predictions_per_task: int = 8 #
+    best_of: int = 1 # controls the number of beams used in beam search
 
 from jinja2 import Template
 
@@ -65,6 +64,7 @@ def parse_args():
     parser.add_argument('--n_tasks', type=int, help="If given only the first n tasks will be evaluated")
     parser.add_argument('--output_filepath', type=str, help="Path to the json file with the predictions")
     parser.add_argument('--max_predictions_per_task', type=int, help="Max number of predictions per task")
+    parser.add_argument('--best_of', type=int, help="controls the number of beams used in beam search")
     return parser.parse_args()
 
 # Override default configuration using arguments
@@ -330,23 +330,31 @@ for flip in [True, False]:
 def solve_task(task_id, task, prompt_creator, sampling_params):
     data_augmentation_params = product([False, True], [0, 1, 2, 3])
     solution = {task_id:[{f"attempt_{i}": [] for i in range(cfg.max_predictions_per_task)} for _ in task['test']]}
-    texts = dict(prompts=[], responses=[], exceptions=[])
+
+    prompts, data_augmentations = [], []
     for attempt_idx, (flip, n_rot90) in islice(enumerate(data_augmentation_params), cfg.max_predictions_per_task):
         data_augmentation = DataAugmentation(flip, n_rot90)
         augmented_task = data_augmentation.augment_task(task)
-        prompts = prompt_creator.create_task_prompts(augmented_task)
-        outputs = llm.generate(prompts, sampling_params, use_tqdm=False)
-        responses = [output.outputs[0].text for output in outputs]
-        for test_idx, response in enumerate(responses):
-            try:
-                augmented_grid = prompt_creator.parse_response(response)
-                grid = data_augmentation.revert_augmentation(augmented_grid)
-                solution[task_id][test_idx][f"attempt_{attempt_idx}"] = grid
-            except Exception as e:
-                print(f'Exception when parsing response from {task_id}: {e}')
-                texts['exceptions'].append(str(e))
-        texts['prompts'].append(prompts)
-        texts['responses'].append(responses)
+        prompts.extend(prompt_creator.create_task_prompts(augmented_task))
+        data_augmentations.append(data_augmentation)
+    # group all the prompts in a batch for faster inference
+    outputs = llm.generate(prompts, sampling_params, use_tqdm=False)
+    n_test = len(task['test'])
+
+    texts = dict(prompts=prompts, responses=[], exceptions=[])
+    for idx, output in enumerate(outputs):
+        response = output.outputs[0].text
+        test_idx = idx % n_test
+        attempt_idx = idx // n_test
+        data_augmentation = data_augmentations[attempt_idx]
+        try:
+            augmented_grid = prompt_creator.parse_response(response)
+            grid = data_augmentation.revert_augmentation(augmented_grid)
+            solution[task_id][test_idx][f"attempt_{attempt_idx}"] = grid
+        except Exception as e:
+            print(f'Exception when parsing response from {task_id}: {e}')
+            texts['exceptions'].append(str(e))
+        texts['responses'].append(response)
     return solution, {task_id:texts}
 
 
@@ -369,7 +377,14 @@ print(f'There are {len(data)} tasks to solve.')
 prompt_creator = SimplePromptCreator(GridCodeBlockEncoder(MinimalGridEncoder()))
 print_sample_prompt(data, prompt_creator)
 
-sampling_params = SamplingParams(n=1, **cfg.sampling_params)
+if cfg.best_of == 1:
+    # # https://docs.vllm.ai/en/latest/dev/sampling_params.html
+    print('Using greedy search')
+    sampling_params = SamplingParams(n=1, temperature=0.0, max_tokens=1000)
+else:
+    print(f'Using beam search with best_of={cfg.best_of}')
+    sampling_params = SamplingParams(n=1, temperature=0.0, max_tokens=1000, use_beam_search=True, best_of=cfg.best_of)
+
 solutions, texts = inference(data, prompt_creator, sampling_params)
 with open(cfg.output_filepath, 'w') as f:
     json.dump(solutions, f)
