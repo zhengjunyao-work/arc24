@@ -90,7 +90,6 @@ def main():
     outputs = llm.generate([prompt['prompt'] for prompt in prompts], sampling_params, use_tqdm=True)
     solutions = create_solutions(outputs, prompts, prompt_creator, data)
 
-    # solutions, texts = inference(data, prompt_creator, sampling_params)
     with open(cfg.output_filepath, 'w') as f:
         json.dump(solutions, f)
     # with open('texts.json', 'w') as f:
@@ -118,7 +117,7 @@ def create_prompts(data, prompt_creator):
 
 
 def create_solutions(outputs, prompts, prompt_creator, data):
-    solutions = create_empty_solutions(data)
+    solutions = _create_empty_solutions(data)
     for idx, output in tqdm(enumerate(outputs), total=len(outputs), desc='Parsing outputs'):
         task_id = prompts[idx]['task_id']
         data_augmentation_kwargs = prompts[idx]['data_augmentation_kwargs']
@@ -128,58 +127,19 @@ def create_solutions(outputs, prompts, prompt_creator, data):
             grid = prompt_creator.parse_response(response)
             grid = revert_data_augmentation(grid, **data_augmentation_kwargs)
         except Exception as e:
+            # TODO: better exception printing (shape of the grid)
             print(f'Exception when parsing response from {task_id}_{sample_idx}: {e} {response}')
             grid = []
         attempt_name = f"attempt_{len(solutions[task_id][sample_idx]) + 1}"
         solutions[task_id][sample_idx][attempt_name] = grid
     return solutions
 
-def create_empty_solutions(data):
+
+def _create_empty_solutions(data):
     solutions = dict()
     for task_id, task in data.items():
         solutions[task_id] = [dict() for _ in task['test']]
     return solutions
-
-
-def solve_task(task_id, task, prompt_creator, sampling_params):
-    data_augmentation_params = product([False, True], [0, 1, 2, 3])
-    solution = {task_id:[{f"attempt_{i}": [] for i in range(cfg.max_predictions_per_task)} for _ in task['test']]}
-
-    prompts, data_augmentations = [], []
-    for attempt_idx, (flip, n_rot90) in islice(enumerate(data_augmentation_params), cfg.max_predictions_per_task):
-        data_augmentation = DataAugmentation(flip, n_rot90)
-        augmented_task = data_augmentation.augment_task(task)
-        prompts.extend(prompt_creator.create_task_prompts(augmented_task))
-        data_augmentations.append(data_augmentation)
-    # group all the prompts in a batch for faster inference
-    outputs = llm.generate(prompts, sampling_params, use_tqdm=False)
-    n_test = len(task['test'])
-
-    texts = dict(prompts=prompts, responses=[], exceptions=[])
-    for idx, output in enumerate(outputs):
-        response = output.outputs[0].text
-        test_idx = idx % n_test
-        attempt_idx = idx // n_test
-        data_augmentation = data_augmentations[attempt_idx]
-        try:
-            augmented_grid = prompt_creator.parse_response(response)
-            grid = data_augmentation.revert_augmentation(augmented_grid)
-            solution[task_id][test_idx][f"attempt_{attempt_idx}"] = grid
-        except Exception as e:
-            print(f'Exception when parsing response from {task_id}: {e}')
-            texts['exceptions'].append(str(e))
-        texts['responses'].append(response)
-    return solution, {task_id:texts}
-
-
-def inference(data, prompt_creator, sampling_params):
-    solutions, texts = dict(), dict()
-    for idx, (task_id, task) in tqdm(enumerate(data.items()), total=len(data), desc='Solving tasks', smoothing=0):
-        logging.info(f'Solving {task_id}, {idx+1}/{len(data)}')
-        task_solution, task_texts = solve_task(task_id, task, prompt_creator, sampling_params)
-        solutions.update(task_solution)
-        texts.update(task_texts)
-    return solutions, texts
 
 
 def clear_vllm_gpu_memory():
