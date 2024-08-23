@@ -37,7 +37,7 @@ from itertools import islice, product
 from vllm import LLM, SamplingParams
 from transformers import AutoTokenizer
 
-from arc24.data_augmentation import apply_data_augmentation, revert_data_augmentation
+from arc24.data_augmentation import apply_data_augmentation, revert_data_augmentation, get_random_color_map
 from arc24.prompting import SimplePromptCreator, print_smaller_prompt
 from arc24.encoders import GridCodeBlockEncoder, MinimalGridEncoder
 
@@ -99,7 +99,8 @@ def create_prompts(data, prompt_creator):
     for task_id, task in tqdm(data.items(), total=len(data), desc='Creating prompts'):
         data_augmentation_params = product([False, True], [0, 1, 2, 3])
         for hflip, n_rot90 in data_augmentation_params:
-            data_augmentation_kwargs = dict(hflip=hflip, n_rot90=n_rot90)
+            color_map = get_random_color_map(change_background_probability=0.1)
+            data_augmentation_kwargs = dict(hflip=hflip, n_rot90=n_rot90, color_map=color_map)
             augmented_task = apply_data_augmentation(task, **data_augmentation_kwargs)
             task_prompts = prompt_creator.create_task_prompts(augmented_task)
             for idx, prompt in enumerate(task_prompts):
@@ -119,6 +120,7 @@ def get_sampling_params(best_of):
         print(f'Using beam search with best_of={best_of}')
         return SamplingParams(n=1, temperature=0.0, max_tokens=1000,
                               use_beam_search=True, best_of=best_of)
+
 
 def create_solutions(outputs, prompts, prompt_creator, data):
     solutions = _create_empty_solutions(data)

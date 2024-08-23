@@ -94,6 +94,6 @@ beam search is not as efficient as normal generation.
 - [ ] Create a function to select the solution (by voting f.e.)
 - [x] Create a notebook to understand how beam search works, first using text
 - [x] Can I speedup inference? There is evidence that batching could make a great speedup.
-- [ ] Can I speedup inference even more? Group all the prompts together
+- [x] Can I speedup inference even more? Group all the prompts together
 - [x] Does beam-search increase the accuracy of the model?
 - [ ] Does it help to add more data augmentations? (train samples reorder, color swap)
