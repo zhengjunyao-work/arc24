@@ -95,7 +95,34 @@ maybe it is not optimized because they were [considering to remove the beam sear
 
 ### Increasing the number of predictions
 
+#### Qwen-0.5B
+
+```
+#python inference.py --predictions_per_task=512 --output_filepath=submission_x512.json
+Maximum number of predictions: 512
+Number of predictions: 1 accuracy: 5.0%	correct_pixels: 65.3%	correct_size: 81.0%	pass_n: 5.0%	unanswered: 2.5%	
+Number of predictions: 2 accuracy: 4.4%	correct_pixels: 71.2%	correct_size: 85.6%	pass_n: 6.7%	unanswered: 2.7%	
+Number of predictions: 4 accuracy: 4.6%	correct_pixels: 75.2%	correct_size: 88.3%	pass_n: 10.1%	unanswered: 2.6%	
+Number of predictions: 8 accuracy: 4.7%	correct_pixels: 78.6%	correct_size: 90.0%	pass_n: 13.4%	unanswered: 2.7%	
+Number of predictions: 16 accuracy: 4.5%	correct_pixels: 81.2%	correct_size: 91.3%	pass_n: 17.0%	unanswered: 2.7%	
+Number of predictions: 32 accuracy: 4.5%	correct_pixels: 83.4%	correct_size: 92.8%	pass_n: 19.8%	unanswered: 2.6%	
+Number of predictions: 64 accuracy: 4.6%	correct_pixels: 85.3%	correct_size: 93.6%	pass_n: 22.5%	unanswered: 2.6%	
+Number of predictions: 128 accuracy: 4.5%	correct_pixels: 86.5%	correct_size: 94.3%	pass_n: 23.8%	unanswered: 2.7%	
+Number of predictions: 256 accuracy: 4.5%	correct_pixels: 87.4%	correct_size: 94.6%	pass_n: 25.1%	unanswered: 2.7%	
+Number of predictions: 512 accuracy: 4.5%	correct_pixels: 87.8%	correct_size: 95.0%	pass_n: 26.0%	unanswered: 2.7%
+```
+
+![Qwen-0.5B increase number of predictions](res/2024-08-23-15-37-08.png)
+
+We went from a model that on average only solves 6.7% of the tasks with 2 predictions to solving 26% by making 512 predictions. Would we be able to select the correct prediction among 512 options?
+
+#### Qwen-1.5B
+
 TODO: show how pass_n improves with the number of predictions for different models
+
+```
+#python inference.py --predictions_per_task=32 --output_filepath=submission_qwen15_x32.json --model_path="/home/gbarbadillo/data/Qwen2-1.5B-arc"
+```
 
 ## Conclusion
 
@@ -112,3 +139,5 @@ TODO: show how pass_n improves with the number of predictions for different mode
 - [x] Can I speedup inference even more? Group all the prompts together
 - [x] Does beam-search increase the accuracy of the model?
 - [ ] Does it help to add more data augmentations? (train samples reorder, color swap)
+- [ ] Document how good the voting script is compared to random selection
+- [ ] What is the effect of using T!=0?
