@@ -107,6 +107,13 @@ llama 3.1
     return split_text.join(text.split(split_text)[:-1])
 
 
+def print_smaller_prompt(prompts):
+    smaller_prompt = sorted(prompts, key=lambda x: len(x))[0]
+    print('\n\nSmaller prompt:')
+    pretty_print_prompt(smaller_prompt)
+    print('\n\n')
+
+
 def print_sample_prompt(data, prompt_creator):
     prompts = [prompt_creator.create_task_prompts(task)[0] for task in data.values()]
     prompts = sorted(prompts, key=lambda x: len(x))
@@ -116,6 +123,7 @@ def print_sample_prompt(data, prompt_creator):
 def pretty_print_prompt(text, default_color='black'):
     color = default_color
     attrs = None
+    print('-'*80)
     for line in text.splitlines():
         if line.startswith('<|assistant|>'):
             color = 'blue'
@@ -128,3 +136,4 @@ def pretty_print_prompt(text, default_color='black'):
         else:
             attrs = None
         print(colored(line, color, attrs=attrs))
+    print('-'*80)

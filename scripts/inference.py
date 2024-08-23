@@ -38,7 +38,7 @@ from vllm import LLM, SamplingParams
 from transformers import AutoTokenizer
 
 from arc24.data_augmentation import apply_data_augmentation, revert_data_augmentation
-from arc24.prompting import SimplePromptCreator, print_sample_prompt
+from arc24.prompting import SimplePromptCreator, print_smaller_prompt
 from arc24.encoders import GridCodeBlockEncoder, MinimalGridEncoder
 
 import logging
@@ -76,19 +76,13 @@ def main():
 
 
     prompt_creator = SimplePromptCreator(GridCodeBlockEncoder(MinimalGridEncoder()), tokenizer, cfg.model_path)
-    #print_sample_prompt(data, prompt_creator) TODO: print the smaller prompt
+    prompts_conf = create_prompts(data, prompt_creator)
+    prompts = [conf['prompt'] for conf in prompts_conf]
+    print_smaller_prompt(prompts)
 
-    prompts = create_prompts(data, prompt_creator)
-
-    if cfg.best_of == 1:
-        # # https://docs.vllm.ai/en/latest/dev/sampling_params.html
-        print('Using greedy search')
-        sampling_params = SamplingParams(n=1, temperature=0.0, max_tokens=1000)
-    else:
-        print(f'Using beam search with best_of={cfg.best_of}')
-        sampling_params = SamplingParams(n=1, temperature=0.0, max_tokens=1000, use_beam_search=True, best_of=cfg.best_of)
-    outputs = llm.generate([prompt['prompt'] for prompt in prompts], sampling_params, use_tqdm=True)
-    solutions = create_solutions(outputs, prompts, prompt_creator, data)
+    sampling_params = get_sampling_params(cfg.best_of)
+    outputs = llm.generate(prompts, sampling_params, use_tqdm=True)
+    solutions = create_solutions(outputs, prompts_conf, prompt_creator, data)
 
     with open(cfg.output_filepath, 'w') as f:
         json.dump(solutions, f)
@@ -115,6 +109,16 @@ def create_prompts(data, prompt_creator):
                                     idx=idx))
     return prompts
 
+
+def get_sampling_params(best_of):
+    # # https://docs.vllm.ai/en/latest/dev/sampling_params.html
+    if best_of == 1:
+        print('Using greedy search')
+        return SamplingParams(n=1, temperature=0.0, max_tokens=1000)
+    else:
+        print(f'Using beam search with best_of={best_of}')
+        return SamplingParams(n=1, temperature=0.0, max_tokens=1000,
+                              use_beam_search=True, best_of=best_of)
 
 def create_solutions(outputs, prompts, prompt_creator, data):
     solutions = _create_empty_solutions(data)
