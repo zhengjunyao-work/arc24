@@ -114,7 +114,7 @@ def evaluate_grid(correct_grid, predicted_grids):
             metrics['correct_size'] = max(metrics['correct_size'], correct_grid.shape == predicted_grid.shape)
     return metrics
 
-def study_effect_of_the_number_of_solutions(solutions, data, n_tries=2):
+def study_effect_of_the_number_of_solutions(solutions, data, n_tries=40):
     max_predictions = max([len(x[0]) for x in solutions.values()])
     print(f'Maximum number of predictions: {max_predictions}')
     n_predictions_range = 2**np.arange(0, int(np.log2(max_predictions) + 1))
@@ -154,6 +154,16 @@ def subsample_solutions(solutions, n_predictions):
             random_keys = np.random.choice(list(sample_solutions.keys()), n_predictions, replace=False)
             solutions_subset[task_id].append({key: sample_solutions[key] for key in random_keys})
     return solutions_subset
+
+
+def study_attempt_accuracy(solutions, data):
+    max_predictions = max([len(x[0]) for x in solutions.values()])
+    for attempt_idx in range(1, max_predictions + 1):
+        solutions_attempt = {task_id: [{f'attempt_{attempt_idx}': sample_solutions[f'attempt_{attempt_idx}']} for sample_solutions in task_solutions] for task_id, task_solutions in solutions.items()}
+        metrics = evaluate(data, solutions_attempt, verbose=False)[0]
+        print_metrics(metrics, f'Attempt {attempt_idx} ')
+
+
 
 # Visualization
 def plot_task(task):
