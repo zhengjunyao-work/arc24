@@ -14,7 +14,7 @@ class CFG:
     dataset_path: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
     n_tasks: Optional[int] = None # Optional parameter to limit the number of task in the inference, set it to None to use all the tasks
     # Inference params
-    max_predictions_per_task: int = 8 #
+    predictions_per_task: int = 8 # How many predictions to make for each task, ideally should be a multiple of 8 (the number of geometric data augmentations)
     best_of: int = 1 # controls the number of beams used in beam search
 
 
@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument('--dataset_path', type=str, help="Path to the dataset to make inference")
     parser.add_argument('--n_tasks', type=int, help="If given only the first n tasks will be evaluated")
     parser.add_argument('--output_filepath', type=str, help="Path to the json file with the predictions")
-    parser.add_argument('--max_predictions_per_task', type=int, help="Max number of predictions per task")
+    parser.add_argument('--predictions_per_task', type=int, help="Number of predictions per task, use a multiple of 8")
     parser.add_argument('--best_of', type=int, help="controls the number of beams used in beam search")
     return parser.parse_args()
 
@@ -76,7 +76,7 @@ def main():
 
 
     prompt_creator = SimplePromptCreator(GridCodeBlockEncoder(MinimalGridEncoder()), tokenizer, cfg.model_path)
-    prompts_conf = create_prompts(data, prompt_creator)
+    prompts_conf = create_prompts(data, prompt_creator, cfg.predictions_per_task)
     prompts = [conf['prompt'] for conf in prompts_conf]
     print_smaller_prompt(prompts)
 
@@ -94,20 +94,21 @@ def main():
     clear_vllm_gpu_memory()
 
 
-def create_prompts(data, prompt_creator):
+def create_prompts(data, prompt_creator, predictions_per_task):
     prompts = []
     for task_id, task in tqdm(data.items(), total=len(data), desc='Creating prompts'):
-        data_augmentation_params = product([False, True], [0, 1, 2, 3])
+        data_augmentation_params = list(product([False, True], [0, 1, 2, 3]))
         for hflip, n_rot90 in data_augmentation_params:
-            color_map = get_random_color_map(change_background_probability=0.1)
-            data_augmentation_kwargs = dict(hflip=hflip, n_rot90=n_rot90, color_map=color_map)
-            augmented_task = apply_data_augmentation(task, **data_augmentation_kwargs)
-            task_prompts = prompt_creator.create_task_prompts(augmented_task)
-            for idx, prompt in enumerate(task_prompts):
-                prompts.append(dict(task_id=task_id,
-                                    data_augmentation_kwargs=data_augmentation_kwargs,
-                                    prompt=prompt,
-                                    idx=idx))
+            for _ in range(predictions_per_task//len(data_augmentation_params)):
+                color_map = get_random_color_map(change_background_probability=0.1)
+                data_augmentation_kwargs = dict(hflip=hflip, n_rot90=n_rot90, color_map=color_map)
+                augmented_task = apply_data_augmentation(task, **data_augmentation_kwargs)
+                task_prompts = prompt_creator.create_task_prompts(augmented_task)
+                for idx, prompt in enumerate(task_prompts):
+                    prompts.append(dict(task_id=task_id,
+                                        data_augmentation_kwargs=data_augmentation_kwargs,
+                                        prompt=prompt,
+                                        idx=idx))
     return prompts
 
 
