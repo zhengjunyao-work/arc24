@@ -19,8 +19,10 @@ def select_most_voted_solutions(solutions, n):
     for task_id, task_solutions in solutions.items():
         most_voted_solutions[task_id] = list()
         for sample_solutions in task_solutions:
-            unique_solutions, counts = get_unique_matrices_and_counts_sorted(list(sample_solutions.values()))
-            most_voted_sample_solutions = {f'attempt_{i+1}': solution for i, solution in enumerate(unique_solutions[:n])}
+            valid_solutions = [solution for solution in sample_solutions.values() if solution]
+            if valid_solutions:
+                unique_solutions, counts = get_unique_matrices_and_counts_sorted(valid_solutions)
+                most_voted_sample_solutions = {f'attempt_{i+1}': solution for i, solution in enumerate(unique_solutions[:n])}
             if len(most_voted_sample_solutions) < n:
                 for i in range(len(most_voted_sample_solutions), n):
                     most_voted_sample_solutions[f'attempt_{i+1}'] = []
