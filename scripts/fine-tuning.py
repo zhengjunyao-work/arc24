@@ -507,6 +507,7 @@ sample_grid = np.eye(3, dtype=int).tolist()
 
 def test_translator(translator):
     assert sample_grid == translator.to_grid(translator.to_text(sample_grid))
+    print(type(translator).__name__)
     print(translator.to_text(sample_grid))
 
 # %%
@@ -557,6 +558,24 @@ class GridCodeBlockEncoder(GridEncoder):
 test_translator(GridCodeBlockEncoder(MinimalGridEncoder()))
 
 test_translator(GridCodeBlockEncoder(GridWithSeparationEncoder('|')))
+
+class RepeatNumberEncoder(GridEncoder):
+    def __init__(self, n=3):
+        self.n = n
+
+    def to_text(self, grid):
+        text = '\n'.join([''.join([str(x)*self.n for x in line]) for line in grid])
+        return text
+
+    def to_grid(self, text):
+        lines = text.strip().splitlines()
+        #TODO: make something more robust
+        grid = [[int(x) for x in line[::self.n]] for line in lines]
+        return grid
+
+test_translator(RepeatNumberEncoder())
+test_translator(RepeatNumberEncoder(2))
+
 
 # %% [markdown]
 # ### Plot
