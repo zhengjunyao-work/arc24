@@ -22,6 +22,9 @@ the likelihood of an answer once it has been created. And maybe that can be used
 I'm going to create a notebook to do a proof of concept of the idea using VLLM. If it works I will
 convert it to a script that can replace the current voting script.
 
+I have found that when requiring VLLM to compute the logprobs of the prompt it causes OOM error if the prompt length is not small.
+Thus we cannot use that feature. I'm going to try instead to use the logprob of the generated grids.
+
 Links:
 
 - [Github issue: Add efficient interface for evaluating probabilities of fixed prompt-completion pairs](https://github.com/vllm-project/vllm/issues/5234)
