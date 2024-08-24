@@ -17,6 +17,16 @@ the likelihood of an answer once it has been created. And maybe that can be used
 
 ## Development
 
+### Measuring likelihood of a prompt
+
+I'm going to create a notebook to do a proof of concept of the idea using VLLM. If it works I will
+convert it to a script that can replace the current voting script.
+
+Links:
+
+- [Github issue: Add efficient interface for evaluating probabilities of fixed prompt-completion pairs](https://github.com/vllm-project/vllm/issues/5234)
+- [prompt_logprobs](https://docs.vllm.ai/en/latest/dev/sampling_params.html) – Number of log probabilities to return per prompt token.
+
 ## Results
 
 ## Conclusion
