@@ -10,6 +10,7 @@ def main(args=None):
     with open(args.input_filepath) as f:
         solutions = json.load(f)
     solutions = select_most_voted_solutions(solutions, args.n)
+    args.output_filepath = args.output_filepath or args.input_filepath.replace('.json', '_voting.json')
     with open(args.output_filepath, 'w') as f:
         json.dump(solutions, f)
 
@@ -59,7 +60,7 @@ Creates a new solution by voting and choosing the most common solutions for each
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         epilog=epilog)
     parser.add_argument('--input_filepath', required=True, help='Path to input json file with the solutions')
-    parser.add_argument('--output_filepath', required=True, help='Path to output json file with the solutions')
+    parser.add_argument('--output_filepath', required=False, help='Path to output json file with the solutions')
     parser.add_argument('--n', type=int, default=2, help='Number of final solutions to keep')
     args = parser.parse_args(args)
     print(description)
