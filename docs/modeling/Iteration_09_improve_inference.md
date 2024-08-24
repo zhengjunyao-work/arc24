@@ -155,6 +155,12 @@ We can see that the voting selection mechanism has an accuracy between 30-50% to
 
 TODO:
 
+### How does the output size affect the results?
+
+![output size](res/2024-08-24-08-42-55.png)
+
+I don't see a clear relation between output size and results.
+
 ## Conclusion
 
 ## Next steps
@@ -172,4 +178,4 @@ TODO:
 - [x] Does it help to add more data augmentations? (train samples reorder, color swap)
 - [x] Document how good the voting script is compared to random selection
 - [x] What is the effect of using T!=0?
-- [ ] What is the influence of the shape in the accuracy?
+- [x] What is the influence of the shape in the accuracy?
