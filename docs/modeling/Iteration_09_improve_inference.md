@@ -97,8 +97,9 @@ maybe it is not optimized because they were [considering to remove the beam sear
 
 #### Qwen-0.5B
 
+![Qwen-0.5B increase number of predictions](res/2024-08-23-15-37-08.png)
+
 ```
-#python inference.py --predictions_per_task=512 --output_filepath=submission_x512.json
 Maximum number of predictions: 512
 Number of predictions: 1 accuracy: 5.0%	correct_pixels: 65.3%	correct_size: 81.0%	pass_n: 5.0%	unanswered: 2.5%	
 Number of predictions: 2 accuracy: 4.4%	correct_pixels: 71.2%	correct_size: 85.6%	pass_n: 6.7%	unanswered: 2.7%	
@@ -112,17 +113,25 @@ Number of predictions: 256 accuracy: 4.5%	correct_pixels: 87.4%	correct_size: 94
 Number of predictions: 512 accuracy: 4.5%	correct_pixels: 87.8%	correct_size: 95.0%	pass_n: 26.0%	unanswered: 2.7%
 ```
 
-![Qwen-0.5B increase number of predictions](res/2024-08-23-15-37-08.png)
-
 We went from a model that on average only solves 6.7% of the tasks with 2 predictions to solving 26% by making 512 predictions. Would we be able to select the correct prediction among 512 options?
 
 #### Qwen-1.5B
 
-TODO: show how pass_n improves with the number of predictions for different models
+![Qwen-1.5B increase number of predictions](res/2024-08-24-07-51-04.png)
 
 ```
-#python inference.py --predictions_per_task=32 --output_filepath=submission_qwen15_x32.json --model_path="/home/gbarbadillo/data/Qwen2-1.5B-arc"
+Maximum number of predictions: 128
+Number of predictions: 1 accuracy: 5.0%	correct_pixels: 67.5%	correct_size: 82.9%	pass_n: 5.0%	unanswered: 3.2%	
+Number of predictions: 2 accuracy: 4.9%	correct_pixels: 72.8%	correct_size: 86.0%	pass_n: 7.8%	unanswered: 3.3%	
+Number of predictions: 4 accuracy: 5.0%	correct_pixels: 76.3%	correct_size: 88.2%	pass_n: 10.8%	unanswered: 3.4%	
+Number of predictions: 8 accuracy: 5.0%	correct_pixels: 79.1%	correct_size: 89.4%	pass_n: 14.3%	unanswered: 3.5%	
+Number of predictions: 16 accuracy: 5.1%	correct_pixels: 81.7%	correct_size: 90.7%	pass_n: 17.5%	unanswered: 3.4%	
+Number of predictions: 32 accuracy: 5.0%	correct_pixels: 83.5%	correct_size: 91.8%	pass_n: 20.3%	unanswered: 3.4%	
+Number of predictions: 64 accuracy: 5.0%	correct_pixels: 85.0%	correct_size: 92.9%	pass_n: 22.5%	unanswered: 3.4%	
+Number of predictions: 128 accuracy: 5.0%	correct_pixels: 86.0%	correct_size: 93.0%	pass_n: 25.0%	unanswered: 3.4%
 ```
+
+We see the same tendency, maybe more linear with this model.
 
 ### Effect of the temperature
 
@@ -131,6 +140,8 @@ TODO: show how pass_n improves with the number of predictions for different mode
 ![qwen-1.5B](res/2024-08-24-07-22-47.png)
 
 Increasing the temperature makes the model more creative: pass_n increases, but overall accuracy decreases. Unanswered also increases, likely due to errors when generating the grids.
+
+### How good is voting?
 
 ## Conclusion
 
@@ -146,7 +157,7 @@ Increasing the temperature makes the model more creative: pass_n increases, but 
 - [x] Can I speedup inference? There is evidence that batching could make a great speedup.
 - [x] Can I speedup inference even more? Group all the prompts together
 - [x] Does beam-search increase the accuracy of the model?
-- [ ] Does it help to add more data augmentations? (train samples reorder, color swap)
+- [x] Does it help to add more data augmentations? (train samples reorder, color swap)
 - [ ] Document how good the voting script is compared to random selection
 - [x] What is the effect of using T!=0?
 - [ ] What is the influence of the shape in the accuracy?
