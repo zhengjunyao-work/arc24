@@ -124,6 +124,14 @@ TODO: show how pass_n improves with the number of predictions for different mode
 #python inference.py --predictions_per_task=32 --output_filepath=submission_qwen15_x32.json --model_path="/home/gbarbadillo/data/Qwen2-1.5B-arc"
 ```
 
+### Effect of the temperature
+
+![qwen-0.5B](res/2024-08-24-07-22-32.png)
+
+![qwen-1.5B](res/2024-08-24-07-22-47.png)
+
+Increasing the temperature makes the model more creative: pass_n increases, but overall accuracy decreases. Unanswered also increases, likely due to errors when generating the grids.
+
 ## Conclusion
 
 ## Next steps
@@ -133,11 +141,12 @@ TODO: show how pass_n improves with the number of predictions for different mode
 ## TODO
 
 - [x] Modify generation script to allow generating an arbitrary number of solutions
-- [ ] Create a function to select the solution (by voting f.e.)
+- [x] Create a function to select the solution (by voting f.e.)
 - [x] Create a notebook to understand how beam search works, first using text
 - [x] Can I speedup inference? There is evidence that batching could make a great speedup.
 - [x] Can I speedup inference even more? Group all the prompts together
 - [x] Does beam-search increase the accuracy of the model?
 - [ ] Does it help to add more data augmentations? (train samples reorder, color swap)
 - [ ] Document how good the voting script is compared to random selection
-- [ ] What is the effect of using T!=0?
+- [x] What is the effect of using T!=0?
+- [ ] What is the influence of the shape in the accuracy?
