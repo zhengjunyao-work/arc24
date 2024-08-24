@@ -143,6 +143,18 @@ Increasing the temperature makes the model more creative: pass_n increases, but 
 
 ### How good is voting?
 
+| model           | predictions | pass_n | random2 | voting | attempt_1 | voting accuracy |
+|-----------------|-------------|--------|---------|--------|-----------|-----------------|
+| Qwen-0.5B       | 512         | 26.0%  | 6.7%    | 12.5%  | 7.5%      | 48%             |
+| Qwen-0.5B T=0.8 | 128         | 31.5%  | 6.7%    | 9.5%   | 9.5%      | 30%             |
+| Qwen-1.5B       | 128         | 25.0%  | 7.8%    | 10.5%  | 9.5%      | 42%             |
+
+We can see that the voting selection mechanism has an accuracy between 30-50% to select the correct answer. It is much better than random, but at the same time we are leaving more than half of the correct answers. Could we use the model to select the best answer?
+
+### Submission results
+
+TODO:
+
 ## Conclusion
 
 ## Next steps
@@ -158,6 +170,6 @@ Increasing the temperature makes the model more creative: pass_n increases, but 
 - [x] Can I speedup inference even more? Group all the prompts together
 - [x] Does beam-search increase the accuracy of the model?
 - [x] Does it help to add more data augmentations? (train samples reorder, color swap)
-- [ ] Document how good the voting script is compared to random selection
+- [x] Document how good the voting script is compared to random selection
 - [x] What is the effect of using T!=0?
 - [ ] What is the influence of the shape in the accuracy?
