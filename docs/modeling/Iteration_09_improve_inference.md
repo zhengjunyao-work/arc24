@@ -179,3 +179,5 @@ I don't see a clear relation between output size and results.
 - [x] Document how good the voting script is compared to random selection
 - [x] What is the effect of using T!=0?
 - [x] What is the influence of the shape in the accuracy?
+- [ ] Add submission results
+- [ ] Add conclusions
