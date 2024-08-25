@@ -87,13 +87,13 @@ def main():
     sampling_params = get_sampling_params(cfg.best_of, cfg.temperature, cfg.n)
     # TODO: maybe I should create smaller batches, f.e. there were 54272 prompts when using 512 data augmentation
     outputs = llm.generate(prompts, sampling_params, use_tqdm=True)
-    solutions = create_solutions(outputs, prompts_conf, prompt_creator, data)
+    task_results = create_tasks_results(outputs, prompts_conf, prompt_creator)
+    solutions = create_solutions(task_results, data)
 
     with open(cfg.output_filepath, 'w') as f:
         json.dump(solutions, f)
-    # with open(cfg.output_filepath.replace('.json', '_rich.json'), 'w') as f:
-    #     rich_output = create_rich_output(outputs, prompts_conf, prompt_creator)
-    #     json.dump(rich_output, f)
+    with open(cfg.output_filepath.replace('.json', '_task_results.json'), 'w') as f:
+        json.dump(task_results, f)
 
     del llm.llm_engine.model_executor
     del llm
@@ -131,12 +131,12 @@ def get_sampling_params(best_of, temperature, n):
     return sampling_params
 
 
-def create_solutions(outputs, prompts, prompt_creator, data):
-    solutions = _create_empty_solutions(data)
+def create_tasks_results(outputs, prompts_conf, prompt_creator):
+    task_results = prompts_conf.copy()
     for idx, output in tqdm(enumerate(outputs), total=len(outputs), desc='Parsing outputs'):
-        task_id = prompts[idx]['task_id']
-        data_augmentation_kwargs = prompts[idx]['data_augmentation_kwargs']
-        sample_idx = prompts[idx]['idx']
+        task_id = prompts_conf[idx]['task_id']
+        data_augmentation_kwargs = prompts_conf[idx]['data_augmentation_kwargs']
+        sample_idx = prompts_conf[idx]['idx']
         response = output.outputs[0].text
         try:
             grid = prompt_creator.parse_response(response)
@@ -145,8 +145,20 @@ def create_solutions(outputs, prompts, prompt_creator, data):
             # TODO: better exception printing (shape of the grid)
             print(f'Exception when parsing response from {task_id}_{sample_idx}: {e} {response}')
             grid = []
+        task_results[idx]['grid'] = grid
+        task_results[idx]['response'] = response
+        task_results[idx]['cumulative_logprob'] = output.outputs[0].cumulative_logprob
+        task_results[idx]['n_tokens'] = len(output.outputs[0].token_ids)
+    return task_results
+
+
+def create_solutions(task_results, data):
+    solutions = _create_empty_solutions(data)
+    for task_result in task_results:
+        task_id = task_result['task_id']
+        sample_idx = task_result['idx']
         attempt_name = f"attempt_{len(solutions[task_id][sample_idx]) + 1}"
-        solutions[task_id][sample_idx][attempt_name] = grid
+        solutions[task_id][sample_idx][attempt_name] = task_result['grid']
     return solutions
 
 
@@ -162,7 +174,6 @@ def create_rich_output(outputs, prompts_conf, prompt_creator):
             grid = []
         rich_output[idx]['grid'] = grid
     return rich_output
-
 
 
 def _create_empty_solutions(data):
