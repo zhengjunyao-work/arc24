@@ -25,6 +25,6 @@ logprob. This would be similar to beam-search, but the implementation would be m
 ## TODO
 
 - [ ] Modify inference script to support this
-  - [ ] Are the outputs provided by LLM sorted by logprob, or I have to sort them myself?
+  - [x] Are the outputs provided by LLM sorted by logprob, or I have to sort them myself? YES THEY ARE ALREADY SORTED
 - [ ] How does the inference speed changes when requesting more responses per prompt?
 - [ ] Does the accuracy improves?
