@@ -179,6 +179,7 @@ def plot_task(task):
         if 'output' in sample:
             plt.subplot(2, len(samples), plot_idx + 1 + len(samples))
             plot_grid(sample['output'])
+    plt.tight_layout()
 
 def plot_grids(grids):
     for plot_idx, grid in enumerate(grids):
