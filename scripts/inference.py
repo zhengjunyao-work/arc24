@@ -89,8 +89,9 @@ def main():
 
     with open(cfg.output_filepath, 'w') as f:
         json.dump(solutions, f)
-    # with open('texts.json', 'w') as f:
-    #     json.dump(texts, f)
+    # with open(cfg.output_filepath.replace('.json', '_rich.json'), 'w') as f:
+    #     rich_output = create_rich_output(outputs, prompts_conf, prompt_creator)
+    #     json.dump(rich_output, f)
 
     del llm.llm_engine.model_executor
     del llm
@@ -145,6 +146,21 @@ def create_solutions(outputs, prompts, prompt_creator, data):
         attempt_name = f"attempt_{len(solutions[task_id][sample_idx]) + 1}"
         solutions[task_id][sample_idx][attempt_name] = grid
     return solutions
+
+
+def create_rich_output(outputs, prompts_conf, prompt_creator):
+    rich_output = prompts_conf
+    for idx, output in tqdm(enumerate(outputs), total=len(outputs), desc='Creating rich output'):
+        rich_output[idx]['cumulative_logprob'] = output.outputs[0].cumulative_logprob
+        rich_output[idx]['n_tokens'] = len(output.outputs[0].token_ids)
+        rich_output[idx]['response'] = output.outputs[0].text
+        try:
+            grid = prompt_creator.parse_response(output.outputs[0].text)
+        except Exception as e:
+            grid = []
+        rich_output[idx]['grid'] = grid
+    return rich_output
+
 
 
 def _create_empty_solutions(data):
