@@ -31,7 +31,7 @@ logprob. This would be similar to beam-search, but the implementation would be m
 
 The runtime increases linearly with `n`, however there is a constant time that makes that using `n=4` only twice the time as `n=1`.
 
-```
+```bash
 python inference.py --model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc --predictions_per_task=8 --temperature=0.1 --output_filepath=submission_qwen05_x8_T01_n1.json --n=1
 ```
 
@@ -43,6 +43,21 @@ This table could work as a rule of thumb of the slowdown when using pseudo beam-
 | 4  | 2        |
 | 10 | 4        |
 | 20 | 8        |
+
+### Accuracy effect
+
+On a previous iteration I was able to see improvements due to beam-search with just 8 predictions per task. Let's try do to the same.
+I will be using `n=8` and different temperatures.
+
+```bash
+# estimated runtime 1h30 ~ 16*6
+python inference.py --model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc --predictions_per_task=8 --n=20 --output_filepath=submission_qwen05_x8_n20_T01.json --temperature=0.1
+python inference.py --model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc --predictions_per_task=8 --n=20 --output_filepath=submission_qwen05_x8_n20_T02.json --temperature=0.2
+python inference.py --model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc --predictions_per_task=8 --n=20 --output_filepath=submission_qwen05_x8_n20_T04.json --temperature=0.4
+python inference.py --model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc --predictions_per_task=8 --n=20 --output_filepath=submission_qwen05_x8_n20_T06.json --temperature=0.6
+python inference.py --model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc --predictions_per_task=8 --n=20 --output_filepath=submission_qwen05_x8_n20_T08.json --temperature=0.8
+python inference.py --model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc --predictions_per_task=8 --n=20 --output_filepath=submission_qwen05_x8_n20_T10.json --temperature=1.0
+```
 
 ## Conclusion
 
