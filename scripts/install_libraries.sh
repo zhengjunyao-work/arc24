@@ -10,6 +10,7 @@ if ! python -c "import vllm" &> /dev/null; then # 5s
     pip install -q --no-index --find-links=/kaggle/input/making-wheels-of-necessary-packages-for-vllm peft
     pip install -q --no-index --find-links=/kaggle/input/making-wheels-of-necessary-packages-for-vllm trl
     pip install -q --no-index --find-links=/kaggle/input/making-wheels-of-necessary-packages-for-vllm bitsandbytes
+    pip install -q --no-index --find-links=/kaggle/input/making-wheels-of-necessary-packages-for-vllm GPUtil
 else
     echo "vllm is already installed."
 fi
