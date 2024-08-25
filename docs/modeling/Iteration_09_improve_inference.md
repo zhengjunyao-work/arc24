@@ -153,7 +153,12 @@ We can see that the voting selection mechanism has an accuracy between 30-50% to
 
 ### Submission results
 
-TODO:
+| experiment                   | old LB score | new LB score |
+|------------------------------|--------------|--------------|
+| qwen2-0.5b-instruct/2        | 2%           | 6%           |
+| qwen2-0.5b-instruct/2 + ttft | 4%           | 5%           |
+| qwen2-1.5b-instruct/2        | 4%           | 5%           |
+| qwen2-1.5b-instruct/2 + ttft | 4%           | 7%           |
 
 ### How does the output size affect the results?
 
@@ -163,9 +168,20 @@ I don't see a clear relation between output size and results.
 
 ## Conclusion
 
+By improving the inference speed and the answer selection we now are scoring 7 using LLMs instead of the previous
+best leaderboard score of 5.
+
+- Beam search might be helpful, but it is not efficiently implemented in VLLM yet
+- By batching the prompts I have been able to speedup inference by ~30 times
+- If we increase the number of predictions we got a correct answer for more tasks, but the challenge is how to select the correct answer
+- Voting can select the correct answer between 30-50% of the times for the current models. I guess that this accuracy would improve for better models
+- It's possible to use the temperature to trade accuracy for pass_n, the model becomes more creative and can solve more tasks
+
 ## Next steps
 
 - [ ] Can I use the model to judge which predictions are the best? https://github.com/vllm-project/vllm/issues/5234
+- [ ] The improvement of using test time fine-tuning is not that big. What if I fine-tune for each task independently?
+- [ ] Could I try an imitation of beam-search by setting a non-zero temperature, creating multiple predictions for the same prompt and collecting only the one with the highest logprob? Prefix caching might help, but probably the generation is already doing that if requiring more than one response.
 
 ## TODO
 
@@ -179,5 +195,5 @@ I don't see a clear relation between output size and results.
 - [x] Document how good the voting script is compared to random selection
 - [x] What is the effect of using T!=0?
 - [x] What is the influence of the shape in the accuracy?
-- [ ] Add submission results
-- [ ] Add conclusions
+- [x] Add submission results
+- [x] Add conclusions
