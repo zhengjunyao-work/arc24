@@ -25,6 +25,16 @@ My idea will be to run a very short train with a fixed seed, refactor the code a
 
 ## Results
 
+### Experiment with different grid encoders
+
+```
+GridCodeBlockEncoder(MinimalGridEncoder())
+GridCodeBlockEncoder(RowNumberEncoder(MinimalGridEncoder()))
+GridShapeEncoder(MinimalGridEncoder())
+GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))
+```
+
+
 ## Conclusion
 
 ## Next steps

@@ -145,4 +145,5 @@ if __name__ == '__main__':
     test_grid_encoder_is_reversible('GridCodeBlockEncoder(RepeatNumberEncoder(2))')
     test_grid_encoder_is_reversible('GridShapeEncoder(MinimalGridEncoder())')
     test_grid_encoder_is_reversible('GridShapeEncoder(RepeatNumberEncoder(3))')
+    test_grid_encoder_is_reversible('GridCodeBlockEncoder(RowNumberEncoder(MinimalGridEncoder()))')
     test_grid_encoder_is_reversible('GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))')
