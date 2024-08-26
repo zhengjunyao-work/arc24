@@ -262,7 +262,7 @@ class CFG:
     adapter_path: Optional[str] = None
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/07_unify_peft_b'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/08_big_refactor'
     n_gpus: int = 2
     max_seq_len: int = 4096
     epochs = 0
@@ -305,130 +305,207 @@ def parse_args():
     return parser.parse_args()
 
 
-# Override default configuration using arguments
-args = parse_args()
-cfg = CFG(**{k: v for k, v in vars(args).items() if v is not None})
-print(asdict(cfg))
+def main():
+    # Override default configuration using arguments
+    args = parse_args()
+    cfg = CFG(**{k: v for k, v in vars(args).items() if v is not None})
+    print(asdict(cfg))
 
+    os.makedirs(cfg.output_dir, exist_ok=True)
+    with open(os.path.join(cfg.output_dir, 'cfg.json'), 'w') as f:
+        json.dump({key:value for key, value in cfg.__dict__.items() if not key.startswith('__')}, f, indent=4)
 
+    model = get_model(cfg.model_path, cfg.n_gpus, cfg.torch_dtype)
+    tokenizer = get_tokenizer(cfg.model_path)
+    model = get_lora_model(model, cfg.adapter_path, cfg.lora_r, cfg.use_rslora, cfg.use_dora)
 
-# %%
-os.makedirs(cfg.output_dir, exist_ok=True)
-with open(os.path.join(cfg.output_dir, 'cfg.json'), 'w') as f:
-    json.dump({key:value for key, value in cfg.__dict__.items() if not key.startswith('__')}, f, indent=4)
-
-# %% [markdown]
-# ## Model
-
-if cfg.n_gpus > 1:
-    if 'llama' in cfg.model_path.lower():
-        device_map = {
-            'model.embed_tokens': 0,
-            'model.layers.0': 0,
-            'model.layers.1': 0,
-            'model.layers.2': 0,
-            'model.layers.3': 0,
-            'model.layers.4': 0,
-            'model.layers.5': 0,
-            'model.layers.6': 0,
-            'model.layers.7': 0,
-            'model.layers.8': 0,
-            'model.layers.9': 0,
-            'model.layers.10': 0,
-            'model.layers.11': 0,
-            'model.layers.12': 0,
-            'model.layers.13': 0,
-            'model.layers.14': 0,
-            'model.layers.15': 0,
-            'model.layers.16': 0,
-            'model.layers.17': 1,
-            'model.layers.18': 1,
-            'model.layers.19': 1,
-            'model.layers.20': 1,
-            'model.layers.21': 1,
-            'model.layers.22': 1,
-            'model.layers.23': 1,
-            'model.layers.24': 1,
-            'model.layers.25': 1,
-            'model.layers.26': 1,
-            'model.layers.27': 1,
-            'model.layers.28': 1,
-            'model.layers.29': 1,
-            'model.layers.30': 1,
-            'model.layers.31': 1,
-            'model.norm': 1,
-            'model.rotary_emb': 1,
-            'lm_head': 1,
-        }
-    elif 'qwen2-0.5b-instruct' in cfg.model_path.lower():
-        print('Using qwen2-0.5b-instruct device map')
-        device_map = {
-            'model.embed_tokens': 0,
-            'lm_head': 0,
-            'model.layers.0': 0,
-            'model.layers.1': 0,
-            'model.layers.2': 0,
-            'model.layers.3': 0,
-            'model.layers.4': 0,
-            'model.layers.5': 0,
-            'model.layers.6': 0,
-            'model.layers.7': 0,
-            'model.layers.8': 1,
-            'model.layers.9': 1,
-            'model.layers.10': 1,
-            'model.layers.11': 1,
-            'model.layers.12': 1,
-            'model.layers.13': 1,
-            'model.layers.14': 1,
-            'model.layers.15': 1,
-            'model.layers.16': 1,
-            'model.layers.17': 1,
-            'model.layers.18': 1,
-            'model.layers.19': 1,
-            'model.layers.20': 1,
-            'model.layers.21': 1,
-            'model.layers.22': 1,
-            'model.layers.23': 1,
-            'model.norm': 1
-        }
-    elif 'qwen2-1.5b-instruct' in cfg.model_path.lower():
-        print('Using qwen2-1.5b-instruct device map')
-        device_map = {
-            'model.embed_tokens': 0,
-            'lm_head': 0,
-            'model.layers.0': 0,
-            'model.layers.1': 0,
-            'model.layers.2': 0,
-            'model.layers.3': 0,
-            'model.layers.4': 0,
-            'model.layers.5': 0,
-            'model.layers.6': 0,
-            'model.layers.7': 0,
-            'model.layers.8': 0,
-            'model.layers.9': 0,
-            'model.layers.10': 0,
-            'model.layers.11': 1,
-            'model.layers.12': 1,
-            'model.layers.13': 1,
-            'model.layers.14': 1,
-            'model.layers.15': 1,
-            'model.layers.16': 1,
-            'model.layers.17': 1,
-            'model.layers.18': 1,
-            'model.layers.19': 1,
-            'model.layers.20': 1,
-            'model.layers.21': 1,
-            'model.layers.22': 1,
-            'model.layers.23': 1,
-            'model.layers.24': 1,
-            'model.layers.25': 1,
-            'model.layers.26': 1,
-            'model.layers.27': 1,
-            'model.norm': 1}
+    if 'llama' in cfg.model_path:
+        # we need to add separation between numbers in the grid
+        grid_encoder = GridCodeBlockEncoder(GridWithSeparationEncoder('|'))
     else:
-        device_map = 'balanced'
-else:
-    device_map = None
+        grid_encoder = GridCodeBlockEncoder(MinimalGridEncoder())
+    train_dataset = IterableDataset.from_generator(prompt_generator,
+                                                gen_kwargs={"filepath": cfg.train_dataset,
+                                                            'grid_encoder': grid_encoder,
+                                                            'tokenizer': tokenizer,
+                                                            'max_seq_len': cfg.max_seq_len,
+                                                            'random_seed': cfg.random_seed,})
+    val_dataset = create_validation_dataset(
+        cfg.val_dataset, grid_encoder, tokenizer, cfg.max_seq_len, print_sample_prompt=True)
+
+    # %%
+    batch_size_kwargs = dict(
+        # 4-16 batch size should be fine for lora.
+        per_device_train_batch_size=cfg.per_device_train_batch_size,
+        gradient_accumulation_steps=cfg.batch_size//cfg.per_device_train_batch_size,
+        per_device_eval_batch_size=cfg.per_device_eval_batch_size,
+    )
+
+    training_arguments = TrainingArguments(
+            output_dir=cfg.output_dir,
+            num_train_epochs=cfg.epochs,
+            max_steps=cfg.max_steps,
+            warmup_ratio=cfg.warmup_ratio,
+            learning_rate=cfg.learning_rate,
+            lr_scheduler_type=cfg.lr_scheduler_type, #constant_with_warmup, cosine, cosine_with_restarts
+            optim=cfg.optim,
+            max_grad_norm=cfg.max_grad_norm,
+
+            do_eval=True,
+            evaluation_strategy="steps",
+            save_steps=cfg.eval_steps,
+            logging_steps=cfg.logging_steps, #50,
+            eval_steps=cfg.eval_steps,
+            log_level="info",
+            report_to=cfg.report_to,
+
+            **batch_size_kwargs
+    )
+
+    data_collator = get_data_collator(cfg.model_path, tokenizer)
+    if cfg.report_to == 'wandb':
+        w = wandb.init(reinit=True,
+                dir=cfg.output_dir,
+                project=os.path.basename(os.path.dirname(cfg.output_dir)),
+                name=os.path.basename(cfg.output_dir))
+    trainer = SFTTrainer(
+        model=model,
+        train_dataset=train_dataset,
+        eval_dataset=val_dataset,
+        dataset_text_field="text",
+        max_seq_length=cfg.max_seq_len,
+        data_collator=data_collator,
+        args=training_arguments,
+        # optimizers=(torch.load(os.path.join(cfg.adapter_path, 'optimizer.pt')), None)
+        # packing=True, # ValueError: You passed a `DataCollatorForCompletionOnlyLM` to the SFTTrainer. This is not compatible with the `packing` argument.
+    )
+    # if cfg.load_optimizer_state and cfg.adapter_path is not None:
+    #     optimizer_path = os.path.join(cfg.adapter_path, 'optimizer.pt')
+    #     if os.path.exists(optimizer_path):
+    #         print(f'Loading optimizer from {optimizer_path}')
+    #         trainer.create_optimizer()
+    #         trainer.optimizer.load_state_dict(torch.load(optimizer_path))
+    #     else:
+    #         print(f'Optimizer not found on adapter path: {optimizer_path}')
+    trainer.train()
+    if cfg.report_to == 'wandb':
+        w.finish()
+
+
+
+# Model
+
+def get_device_map(n_gpus, model_path):
+    if n_gpus > 1:
+        if 'llama' in model_path.lower():
+            device_map = {
+                'model.embed_tokens': 0,
+                'model.layers.0': 0,
+                'model.layers.1': 0,
+                'model.layers.2': 0,
+                'model.layers.3': 0,
+                'model.layers.4': 0,
+                'model.layers.5': 0,
+                'model.layers.6': 0,
+                'model.layers.7': 0,
+                'model.layers.8': 0,
+                'model.layers.9': 0,
+                'model.layers.10': 0,
+                'model.layers.11': 0,
+                'model.layers.12': 0,
+                'model.layers.13': 0,
+                'model.layers.14': 0,
+                'model.layers.15': 0,
+                'model.layers.16': 0,
+                'model.layers.17': 1,
+                'model.layers.18': 1,
+                'model.layers.19': 1,
+                'model.layers.20': 1,
+                'model.layers.21': 1,
+                'model.layers.22': 1,
+                'model.layers.23': 1,
+                'model.layers.24': 1,
+                'model.layers.25': 1,
+                'model.layers.26': 1,
+                'model.layers.27': 1,
+                'model.layers.28': 1,
+                'model.layers.29': 1,
+                'model.layers.30': 1,
+                'model.layers.31': 1,
+                'model.norm': 1,
+                'model.rotary_emb': 1,
+                'lm_head': 1,
+            }
+        elif 'qwen2-0.5b-instruct' in model_path.lower():
+            print('Using qwen2-0.5b-instruct device map')
+            device_map = {
+                'model.embed_tokens': 0,
+                'lm_head': 0,
+                'model.layers.0': 0,
+                'model.layers.1': 0,
+                'model.layers.2': 0,
+                'model.layers.3': 0,
+                'model.layers.4': 0,
+                'model.layers.5': 0,
+                'model.layers.6': 0,
+                'model.layers.7': 0,
+                'model.layers.8': 1,
+                'model.layers.9': 1,
+                'model.layers.10': 1,
+                'model.layers.11': 1,
+                'model.layers.12': 1,
+                'model.layers.13': 1,
+                'model.layers.14': 1,
+                'model.layers.15': 1,
+                'model.layers.16': 1,
+                'model.layers.17': 1,
+                'model.layers.18': 1,
+                'model.layers.19': 1,
+                'model.layers.20': 1,
+                'model.layers.21': 1,
+                'model.layers.22': 1,
+                'model.layers.23': 1,
+                'model.norm': 1
+            }
+        elif 'qwen2-1.5b-instruct' in model_path.lower():
+            print('Using qwen2-1.5b-instruct device map')
+            device_map = {
+                'model.embed_tokens': 0,
+                'lm_head': 0,
+                'model.layers.0': 0,
+                'model.layers.1': 0,
+                'model.layers.2': 0,
+                'model.layers.3': 0,
+                'model.layers.4': 0,
+                'model.layers.5': 0,
+                'model.layers.6': 0,
+                'model.layers.7': 0,
+                'model.layers.8': 0,
+                'model.layers.9': 0,
+                'model.layers.10': 0,
+                'model.layers.11': 1,
+                'model.layers.12': 1,
+                'model.layers.13': 1,
+                'model.layers.14': 1,
+                'model.layers.15': 1,
+                'model.layers.16': 1,
+                'model.layers.17': 1,
+                'model.layers.18': 1,
+                'model.layers.19': 1,
+                'model.layers.20': 1,
+                'model.layers.21': 1,
+                'model.layers.22': 1,
+                'model.layers.23': 1,
+                'model.layers.24': 1,
+                'model.layers.25': 1,
+                'model.layers.26': 1,
+                'model.layers.27': 1,
+                'model.norm': 1}
+        else:
+            device_map = 'balanced'
+    else:
+        device_map = None
+    return device_map
 
 
 def get_flash_attention_implementation():
@@ -440,6 +517,7 @@ def get_flash_attention_implementation():
     print(f'Using {attn_implementation} attention implementation')
     return attn_implementation
 
+
 def get_torch_dtype(torch_dtype):
     if torch_dtype == 'float16':
         print('Using float16 torch dtype')
@@ -450,44 +528,66 @@ def get_torch_dtype(torch_dtype):
     else:
         raise ValueError(f'Unknown torch dtype {torch_dtype}')
 
-model = AutoModelForCausalLM.from_pretrained(
-    cfg.model_path,
-    #quantization_config=bnb_config,
-    device_map=device_map,
-    # max_memory={0: '9GB', 1: '8GB'},
-    trust_remote_code=True,
-    torch_dtype=get_torch_dtype(cfg.torch_dtype), #bfloat16 is 4 times slower on Kaggle than float16, on my computer they are the same speed
-    attn_implementation=get_flash_attention_implementation(),
-    )
 
-# %%
-tokenizer = AutoTokenizer.from_pretrained(
-    cfg.model_path,
-    trust_remote_code=True)
-if 'llama' in cfg.model_path:
-    print('Adding <|pad|> token to tokenizer')
-    tokenizer.add_special_tokens({'pad_token': '<|pad|>'})
-    model.resize_token_embeddings(len(tokenizer))
-    tokenizer.padding_side = 'right'
-print(tokenizer.special_tokens_map)
-print('Verification of number tokens')
-for number in '0123456789':
-        print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
+def get_model(model_path, n_gpus, torch_dtype):
+    model = AutoModelForCausalLM.from_pretrained(
+        model_path,
+        #quantization_config=bnb_config,
+        device_map=get_device_map(n_gpus, model_path),
+        # max_memory={0: '9GB', 1: '8GB'},
+        trust_remote_code=True,
+        torch_dtype=get_torch_dtype(torch_dtype), #bfloat16 is 4 times slower on Kaggle than float16, on my computer they are the same speed
+        attn_implementation=get_flash_attention_implementation(),
+        )
+    print_gpu_memory()
+    return model
 
 
-# %%
+def get_tokenizer(model_path):
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_path,
+        trust_remote_code=True)
+    if 'llama' in model_path:
+        print('Adding <|pad|> token to tokenizer')
+        tokenizer.add_special_tokens({'pad_token': '<|pad|>'})
+        model.resize_token_embeddings(len(tokenizer))
+        tokenizer.padding_side = 'right'
+    print(tokenizer.special_tokens_map)
+    print('Verification of number tokens')
+    for number in '0123456789':
+            print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
+    return tokenizer
+
+
+def get_lora_model(model, adapter_path, r, use_rslora, use_dora):
+    if adapter_path is None:
+        peft_config = LoraConfig(
+            # lora_alpha: LoRA scaling factor.
+            lora_alpha=64, #64,
+            lora_dropout=0.1, # 0.1, althought Vaca suggested to use 0.05 for big models
+            # r: the rank of the update matrices, expressed in int. Lower rank results in smaller update matrices with fewer trainable parameters.
+            r=r, #16
+            bias="none",
+            task_type="CAUSAL_LM",
+            # target_modules: The modules (for example, attention blocks) to apply the LoRA update matrices.
+            target_modules= ['k_proj', 'q_proj', 'v_proj', 'o_proj'],
+            use_rslora=use_rslora,
+            use_dora=use_dora,
+        )
+        print(f'Creating LoRA with the following config: {peft_config}')
+        model = get_peft_model(model, peft_config)
+    else:
+        print(f'Loading adapter from {adapter_path}')
+        model = PeftModel.from_pretrained(model, adapter_path, is_trainable=True)
+    return model
+
+
 def print_gpu_memory():
     for device in range(torch.cuda.device_count()):
         print(f'GPU {device} memory allocated: {torch.cuda.memory_allocated(device)/1024**3:.1f} GB, max memory allocated: {torch.cuda.max_memory_allocated(device)/1024**3:.1f} GB')
-print_gpu_memory()
 
-# %% [markdown]
-# ## Data
-
-# %% [markdown]
-# ### Load data
-
-# %%
+# Data
+# TODO: move this to a separate file
 def load_arc_data_with_solutions(filepath):
     with open(filepath, 'r') as f:
         data = json.load(f)
@@ -503,7 +603,7 @@ def load_arc_data_with_solutions(filepath):
     return data
 
 
-def create_validation_dataset(filepath, grid_encoder, print_sample_prompt=True):
+def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, print_sample_prompt=True):
     data = load_arc_data_with_solutions(filepath)
     tasks = list(data.values())
     prompts = []
@@ -512,18 +612,18 @@ def create_validation_dataset(filepath, grid_encoder, print_sample_prompt=True):
     if print_sample_prompt: print_smaller_prompt(prompts)
     prompt_lengths = [len(tokenizer.encode(prompt)) for prompt in tqdm(prompts, desc='Calculating prompt lengths')]
     print_prompt_length_percentiles(prompt_lengths)
-    prompts = [prompt for prompt, prompt_length in zip(prompts, prompt_lengths) if prompt_length < cfg.max_seq_len]
-    print(f'Leaving {len(prompts)} validation prompts after removing those longer than {cfg.max_seq_len} tokens')
+    prompts = [prompt for prompt, prompt_length in zip(prompts, prompt_lengths) if prompt_length < max_seq_len]
+    print(f'Leaving {len(prompts)} validation prompts after removing those longer than {max_seq_len} tokens')
     dataset = Dataset.from_dict({'text': prompts})
     return dataset
 
 
-def prompt_generator(filepath, grid_encoder):
+def prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, random_seed):
     data = load_arc_data_with_solutions(filepath)
     task_ids = list(data.keys())
     # TODO: log stats about too long prompts every so often
-    random.seed(cfg.random_seed)
-    np.random.seed(cfg.random_seed)
+    random.seed(random_seed)
+    np.random.seed(random_seed)
     while True:
         random.shuffle(task_ids)
         for task_id in task_ids:
@@ -534,7 +634,7 @@ def prompt_generator(filepath, grid_encoder):
             # Should I give more weight to tasks with multiple outputs?
             prompt = random.choice(prompts)
             prompt_length = len(tokenizer.encode(prompt))
-            if prompt_length < cfg.max_seq_len:
+            if prompt_length < max_seq_len:
                 yield {'text': prompt}
 
 
@@ -542,113 +642,32 @@ def print_prompt_length_percentiles(prompt_lengths):
     for percentile in [50, 75, 90, 95, 97]:
         print(f'Prompt lenght percentile {percentile}: {np.percentile(prompt_lengths, percentile)}')
 
+# Train
+def get_data_collator(model_path, tokenizer):
+    # TODO: create a function that returns model type from model path
+    if 'llama' in model_path.lower():
+        print('Using llama template for collator')
+        data_collator = DataCollatorForCompletionOnlyLM(
+            tokenizer=tokenizer,
+            instruction_template='<|start_header_id|>user<|end_header_id|>',
+            response_template='<|start_header_id|>assistant<|end_header_id|>',
+        )
+    elif 'SmolLM' in model_path.lower() or 'qwen' in model_path.lower():
+        print('Using SmolLM template for collator')
+        data_collator = DataCollatorForCompletionOnlyLM(
+            tokenizer=tokenizer,
+            instruction_template='<|im_start|>user',
+            response_template='<|im_start|>assistant',
+        )
+    else:
+        print('Using Phi-3 template for collator')
+        data_collator = DataCollatorForCompletionOnlyLM(
+            tokenizer=tokenizer,
+            instruction_template='<|user|>',
+            response_template='<|assistant|>'
+        )
+    return data_collator
 
-if 'llama' in cfg.model_path:
-    # we need to add separation between numbers in the grid
-    grid_encoder = GridCodeBlockEncoder(GridWithSeparationEncoder('|'))
-else:
-    grid_encoder = GridCodeBlockEncoder(MinimalGridEncoder())
-train_dataset = IterableDataset.from_generator(prompt_generator,
-                                               gen_kwargs={"filepath": cfg.train_dataset,
-                                                           'grid_encoder': grid_encoder})
-val_dataset = create_validation_dataset(cfg.val_dataset, grid_encoder, print_sample_prompt=True)
 
-
-if cfg.adapter_path is None:
-    peft_config = LoraConfig(
-        # lora_alpha: LoRA scaling factor.
-        lora_alpha=64, #64,
-        lora_dropout=0.1, # 0.1, althought Vaca suggested to use 0.05 for big models
-        # r: the rank of the update matrices, expressed in int. Lower rank results in smaller update matrices with fewer trainable parameters.
-        r=cfg.lora_r, #16
-        bias="none",
-        task_type="CAUSAL_LM",
-        # target_modules: The modules (for example, attention blocks) to apply the LoRA update matrices.
-        target_modules= ['k_proj', 'q_proj', 'v_proj', 'o_proj'],
-        use_rslora=cfg.use_rslora,
-        use_dora=cfg.use_dora,
-    )
-    model = get_peft_model(model, peft_config)
-else:
-    print(f'Loading adapter from {cfg.adapter_path}')
-    model = PeftModel.from_pretrained(model, cfg.adapter_path, is_trainable=True)
-
-# %%
-batch_size_kwargs = dict(
-    # 4-16 batch size should be fine for lora.
-    per_device_train_batch_size=cfg.per_device_train_batch_size,
-    gradient_accumulation_steps=cfg.batch_size//cfg.per_device_train_batch_size,
-    per_device_eval_batch_size=cfg.per_device_eval_batch_size,
-)
-
-training_arguments = TrainingArguments(
-        output_dir=cfg.output_dir,
-        num_train_epochs=cfg.epochs,
-        max_steps=cfg.max_steps,
-        warmup_ratio=cfg.warmup_ratio,
-        learning_rate=cfg.learning_rate,
-        lr_scheduler_type=cfg.lr_scheduler_type, #constant_with_warmup, cosine, cosine_with_restarts
-        optim=cfg.optim,
-        max_grad_norm=cfg.max_grad_norm,
-
-        do_eval=True,
-        evaluation_strategy="steps",
-        save_steps=cfg.eval_steps,
-        logging_steps=cfg.logging_steps, #50,
-        eval_steps=cfg.eval_steps,
-        log_level="info",
-        report_to=cfg.report_to,
-
-        **batch_size_kwargs
-)
-
-# %%
-if 'llama' in cfg.model_path:
-    print('Using llama template for collator')
-    data_collator = DataCollatorForCompletionOnlyLM(
-        tokenizer=tokenizer,
-        instruction_template='<|start_header_id|>user<|end_header_id|>',
-        response_template='<|start_header_id|>assistant<|end_header_id|>',
-    )
-elif 'SmolLM' in cfg.model_path or 'qwen' in cfg.model_path.lower():
-    print('Using SmolLM template for collator')
-    data_collator = DataCollatorForCompletionOnlyLM(
-        tokenizer=tokenizer,
-        instruction_template='<|im_start|>user',
-        response_template='<|im_start|>assistant',
-    )
-else:
-    print('Using Phi-3 template for collator')
-    data_collator = DataCollatorForCompletionOnlyLM(
-        tokenizer=tokenizer,
-        instruction_template='<|user|>',
-        response_template='<|assistant|>'
-    )
-
-if cfg.report_to == 'wandb':
-    w = wandb.init(reinit=True,
-               dir=cfg.output_dir,
-               project=os.path.basename(os.path.dirname(cfg.output_dir)),
-               name=os.path.basename(cfg.output_dir))
-trainer = SFTTrainer(
-    model=model,
-    train_dataset=train_dataset,
-    eval_dataset=val_dataset,
-    dataset_text_field="text",
-    max_seq_length=cfg.max_seq_len,
-    data_collator=data_collator,
-    args=training_arguments,
-    # optimizers=(torch.load(os.path.join(cfg.adapter_path, 'optimizer.pt')), None)
-    # packing=True, # ValueError: You passed a `DataCollatorForCompletionOnlyLM` to the SFTTrainer. This is not compatible with the `packing` argument.
-)
-# if cfg.load_optimizer_state and cfg.adapter_path is not None:
-#     optimizer_path = os.path.join(cfg.adapter_path, 'optimizer.pt')
-#     if os.path.exists(optimizer_path):
-#         print(f'Loading optimizer from {optimizer_path}')
-#         trainer.create_optimizer()
-#         trainer.optimizer.load_state_dict(torch.load(optimizer_path))
-#     else:
-#         print(f'Optimizer not found on adapter path: {optimizer_path}')
-trainer.train()
-if cfg.report_to == 'wandb':
-    w.finish()
+if __name__ == '__main__':
+    main()
