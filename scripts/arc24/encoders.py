@@ -129,9 +129,29 @@ class RepeatNumberEncoder(GridEncoder):
         return grid
 
 
+class ReplaceNumberEncoder(GridEncoder):
+    symbols = ['ñ', 'ò', '÷', 'û', 'ą', 'ć', 'ď', 'ę', 'Ě', 'Ğ']
+
+    def __init__(self, base_encoder):
+        self.encoder = base_encoder
+
+    def to_text(self, grid):
+        text = self.encoder.to_text(grid)
+        for idx, symbol in enumerate(self.symbols):
+            text = text.replace(str(idx), symbol)
+        return text
+
+    def to_grid(self, text):
+        for idx, symbol in enumerate(self.symbols):
+            text = text.replace(symbol, str(idx))
+        grid = self.encoder.to_grid(text)
+        return grid
+
+
 def test_grid_encoder_is_reversible(encoder_name):
     grid_encoder = create_grid_encoder(encoder_name)
     sample_grid = np.eye(3, dtype=int).tolist()
+    sample_grid = np.reshape(np.arange(9), (3, 3)).tolist()
     assert sample_grid == grid_encoder.to_grid(grid_encoder.to_text(sample_grid))
     print(grid_encoder.to_text(sample_grid) + '\n')
 
@@ -147,3 +167,5 @@ if __name__ == '__main__':
     test_grid_encoder_is_reversible('GridShapeEncoder(RepeatNumberEncoder(3))')
     test_grid_encoder_is_reversible('GridCodeBlockEncoder(RowNumberEncoder(MinimalGridEncoder()))')
     test_grid_encoder_is_reversible('GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))')
+    test_grid_encoder_is_reversible('GridShapeEncoder(ReplaceNumberEncoder(MinimalGridEncoder()))')
+    test_grid_encoder_is_reversible('GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))')
