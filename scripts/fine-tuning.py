@@ -2,13 +2,10 @@
 import os
 import random
 import json
-from abc import ABC, abstractmethod
 import numpy as np
-from termcolor import colored
 from tqdm.auto import tqdm
 import wandb
 from typing import Optional
-from itertools import product, islice, permutations, chain
 import argparse
 from dataclasses import dataclass, asdict
 
@@ -24,7 +21,7 @@ from arc24.encoders import (
     GridWithSeparationEncoder,
 )
 from arc24.data_augmentation import random_augment_task
-
+from arc24.prompting import pretty_print_prompt, create_prompts_from_task, print_smaller_prompt
 
 # from zero
 @dataclass
@@ -281,7 +278,7 @@ class CFG:
     adapter_path: Optional[str] = None
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/04_move_data_augmentation'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/06_move_prompts'
     n_gpus: int = 2
     max_seq_len: int = 4096
     epochs = 0
@@ -522,51 +519,15 @@ def load_arc_data_with_solutions(filepath):
     return data
 
 
-# %% [markdown]
-# ### Format data
-
-# %%
-task_description = """You are a helpful AI assistant. Your job is to solve tasks from the Abstraction and Reasoning Challenge (ARC). 
-The user will present you with sample input and output grids for each task. 
-Your job will be to understand the transformation between the input and the output and apply it to the last input grid given by the user. 
-The puzzle-like inputs and outputs present a grid where each square can be one of ten colors. A grid can be any height or width between 1x1 and 30x30.
-The background of the grid is typically colored with 0.
-The tasks from ARC are based on the following priors:
-
-- Objectness: Objects persist and cannot appear or disappear without reason. Objects can interact or not depending on the circumstances.
-- Goal-directed: Objects can be animate or inanimate. Some objects are "agents" - they have intentions and they pursue goals.
-- Numbers & counting: Objects can be counted or sorted by their shape, appearance, or movement using basic mathematics like addition, subtraction, and comparison.
-- Basic geometry & topology: Objects can be shapes like rectangles, triangles, and circles which can be mirrored, rotated, translated, deformed, combined, repeated, etc. Differences in distances can be detected.
-
-The transformations between input and output should be based on these priors.
-"""
-
-def create_prompts_from_task(task, grid_encoder):
-    prompts = []
-    for test_sample in task['test']:
-        messages = [{"role": "system", "content": task_description}]
-        user_message = "Let's see if you can solve this simple ARC task. These are some input-output grid examples that define the task.\n"
-        for example_idx, sample in enumerate(task['train']):
-            user_message += f"\n## Example {example_idx}\n\n### Input\n\n{grid_encoder.to_text(sample['input'])}\n"
-            user_message += f"### Output\n\n{grid_encoder.to_text(sample['output'])}\n"
-        user_message += f"\n## Test case\n\n### Input\n\n{grid_encoder.to_text(test_sample['input'])}\n"
-        messages.append({"role": "user", "content": user_message})
-        messages.append({"role": "assistant", "content": f"### Output\n\n{grid_encoder.to_text(test_sample['output'])}\n"})
-
-        prompt = tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=False)
-        prompts.append(prompt)
-    return prompts
-
-
 def create_validation_dataset(filepath, grid_encoder, print_sample_prompt=True):
     data = load_arc_data_with_solutions(filepath)
     tasks = list(data.values())
     prompts = []
     for task in tqdm(tasks, desc='create prompts'):
-        prompts.extend(create_prompts_from_task(task, grid_encoder))
+        prompts.extend(create_prompts_from_task(task, grid_encoder, tokenizer))
     if print_sample_prompt: pretty_print_prompt(prompts[0])
     prompt_lengths = [len(tokenizer.encode(prompt)) for prompt in tqdm(prompts, desc='Calculating prompt lengths')]
+    print_smaller_prompt(prompts)
     print_prompt_length_percentiles(prompt_lengths)
     prompts = [prompt for prompt, prompt_length in zip(prompts, prompt_lengths) if prompt_length < cfg.max_seq_len]
     print(f'Leaving {len(prompts)} validation prompts after removing those longer than {cfg.max_seq_len} tokens')
@@ -585,7 +546,7 @@ def prompt_generator(filepath, grid_encoder):
         for task_id in task_ids:
             task = data[task_id]
             task = random_augment_task(task)
-            prompts = create_prompts_from_task(task, grid_encoder)
+            prompts = create_prompts_from_task(task, grid_encoder, tokenizer)
             # TODO: is this the better way to deal with multi-output tasks?
             # Should I give more weight to tasks with multiple outputs?
             prompt = random.choice(prompts)
@@ -599,42 +560,17 @@ def print_prompt_length_percentiles(prompt_lengths):
         print(f'Prompt lenght percentile {percentile}: {np.percentile(prompt_lengths, percentile)}')
 
 
-def pretty_print_prompt(text, default_color='white'):
-    color = default_color
-    attrs = None
-    for line in text.splitlines():
-        if line.startswith('<|assistant|>'):
-            color = 'blue'
-        elif line.startswith('<|user|>'):
-            color = default_color
-        elif line.startswith('<|system|>'):
-            color = 'green'
-        if line.startswith('<'):
-            attrs = ['bold']
-        else:
-            attrs = None
-        print(colored(line, color, attrs=attrs))
-
-# %%
 if 'llama' in cfg.model_path:
     # we need to add separation between numbers in the grid
     grid_encoder = GridCodeBlockEncoder(GridWithSeparationEncoder('|'))
 else:
     grid_encoder = GridCodeBlockEncoder(MinimalGridEncoder())
 train_dataset = IterableDataset.from_generator(prompt_generator,
-                                               gen_kwargs={"filepath": cfg.train_dataset, 'grid_encoder': grid_encoder})
-
-
-# %%
+                                               gen_kwargs={"filepath": cfg.train_dataset,
+                                                           'grid_encoder': grid_encoder})
 val_dataset = create_validation_dataset(cfg.val_dataset, grid_encoder, print_sample_prompt=False)
 
-# %% [markdown]
-# ## Train
 
-# %%
-#raise
-
-# %%
 if cfg.adapter_path is None:
     peft_config = LoraConfig(
         # lora_alpha: LoRA scaling factor.

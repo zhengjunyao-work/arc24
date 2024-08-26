@@ -80,6 +80,25 @@ class SimplePromptCreator(PromptCreator):
         return self.grid_encoder.to_grid('```grid\n' + text)
 
 
+def create_prompts_from_task(task, grid_encoder, tokenizer):
+    # TODO: unify functions and check remove_assistant_ending
+    train_samples = [{key: grid_encoder.to_text(grid) for key, grid in sample.items()} for sample in task['train']]
+    prompts = []
+    for test_sample in task['test']:
+        user_message = prompt_template.render(train_samples=train_samples,
+                                                test_input=grid_encoder.to_text(test_sample['input']))
+        messages = [{"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_message},
+                    {"role": "assistant", "content": f"### Output\n\n{grid_encoder.to_text(test_sample['output'])}\n"}]
+                    # {"role": "assistant", "content": """### Output\n```grid\n"""}]
+        prompt = tokenizer.apply_chat_template(messages,
+                                                tokenize=False,
+                                                add_generation_prompt=False)
+        prompts.append(prompt)
+    return prompts
+
+
+
 def remove_assistant_ending(text, model_path):
     """
 phi-3
