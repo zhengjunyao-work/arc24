@@ -333,35 +333,7 @@ def main():
     val_dataset = create_validation_dataset(
         cfg.val_dataset, grid_encoder, tokenizer, cfg.max_seq_len, print_sample_prompt=True)
 
-    # %%
-    batch_size_kwargs = dict(
-        # 4-16 batch size should be fine for lora.
-        per_device_train_batch_size=cfg.per_device_train_batch_size,
-        gradient_accumulation_steps=cfg.batch_size//cfg.per_device_train_batch_size,
-        per_device_eval_batch_size=cfg.per_device_eval_batch_size,
-    )
-
-    training_arguments = TrainingArguments(
-            output_dir=cfg.output_dir,
-            num_train_epochs=cfg.epochs,
-            max_steps=cfg.max_steps,
-            warmup_ratio=cfg.warmup_ratio,
-            learning_rate=cfg.learning_rate,
-            lr_scheduler_type=cfg.lr_scheduler_type, #constant_with_warmup, cosine, cosine_with_restarts
-            optim=cfg.optim,
-            max_grad_norm=cfg.max_grad_norm,
-
-            do_eval=True,
-            evaluation_strategy="steps",
-            save_steps=cfg.eval_steps,
-            logging_steps=cfg.logging_steps, #50,
-            eval_steps=cfg.eval_steps,
-            log_level="info",
-            report_to=cfg.report_to,
-
-            **batch_size_kwargs
-    )
-
+    training_arguments = get_training_arguments(cfg)
     data_collator = get_data_collator(cfg.model_path, tokenizer)
     if cfg.report_to == 'wandb':
         w = wandb.init(reinit=True,
@@ -667,6 +639,37 @@ def get_data_collator(model_path, tokenizer):
             response_template='<|assistant|>'
         )
     return data_collator
+
+
+def get_training_arguments(cfg):
+    batch_size_kwargs = dict(
+        # 4-16 batch size should be fine for lora.
+        per_device_train_batch_size=cfg.per_device_train_batch_size,
+        gradient_accumulation_steps=cfg.batch_size//cfg.per_device_train_batch_size,
+        per_device_eval_batch_size=cfg.per_device_eval_batch_size,
+    )
+
+    training_arguments = TrainingArguments(
+            output_dir=cfg.output_dir,
+            num_train_epochs=cfg.epochs,
+            max_steps=cfg.max_steps,
+            warmup_ratio=cfg.warmup_ratio,
+            learning_rate=cfg.learning_rate,
+            lr_scheduler_type=cfg.lr_scheduler_type, #constant_with_warmup, cosine, cosine_with_restarts
+            optim=cfg.optim,
+            max_grad_norm=cfg.max_grad_norm,
+
+            do_eval=True,
+            evaluation_strategy="steps",
+            save_steps=cfg.eval_steps,
+            logging_steps=cfg.logging_steps, #50,
+            eval_steps=cfg.eval_steps,
+            log_level="info",
+            report_to=cfg.report_to,
+
+            **batch_size_kwargs
+    )
+    return training_arguments
 
 
 if __name__ == '__main__':
