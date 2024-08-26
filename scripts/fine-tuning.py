@@ -11,7 +11,7 @@ from dataclasses import dataclass, asdict
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, pipeline
-from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training
+from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training, get_peft_model
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from datasets import Dataset, IterableDataset
 
@@ -122,16 +122,6 @@ class CFG:
     swap_train_and_test = True
     repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
 
-
-
-
-
-
-
-
-
-
-
 # train from RE-ARC
 @dataclass
 class CFG:
@@ -166,12 +156,6 @@ class CFG:
     geometric_transforms = 8 # 0-8
     swap_train_and_test = True
     repeat_prompts = 0 # if bigger than 0 it will repeat the prompts that many times, useful to induce variation in the order of the prompts
-
-
-
-
-
-
 
 
 # fast test time fine-tuning conf
@@ -278,7 +262,7 @@ class CFG:
     adapter_path: Optional[str] = None
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/06_move_prompts'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/07_unify_peft_b'
     n_gpus: int = 2
     max_seq_len: int = 4096
     epochs = 0
@@ -584,9 +568,9 @@ if cfg.adapter_path is None:
         use_rslora=cfg.use_rslora,
         use_dora=cfg.use_dora,
     )
+    model = get_peft_model(model, peft_config)
 else:
     print(f'Loading adapter from {cfg.adapter_path}')
-    peft_config = None
     model = PeftModel.from_pretrained(model, cfg.adapter_path, is_trainable=True)
 
 # %%
@@ -650,7 +634,6 @@ trainer = SFTTrainer(
     model=model,
     train_dataset=train_dataset,
     eval_dataset=val_dataset,
-    peft_config=peft_config,
     dataset_text_field="text",
     max_seq_length=cfg.max_seq_len,
     data_collator=data_collator,
