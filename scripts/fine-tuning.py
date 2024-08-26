@@ -270,6 +270,38 @@ class CFG:
     lora_r: int = 32
 
 
+# debug refactor
+@dataclass
+class CFG:
+    model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
+    adapter_path: Optional[str] = None
+    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
+    val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/02_repeat_baseline'
+    n_gpus: int = 2
+    max_seq_len: int = 4096
+    epochs = 0
+    max_steps : Optional[int] =  25
+    logging_steps: int = 1 #10a
+    eval_steps: int = 25 #50
+    report_to: str = 'wandb'
+    warmup_ratio = 0.05
+    batch_size = 16 #16
+    random_seed: Optional[int] = 7
+    # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
+    per_device_train_batch_size = 1
+    per_device_eval_batch_size = 1 # if using 2 the validation loss is not correctly computed
+    learning_rate: float = 1e-4
+    lr_scheduler_type: str = "linear" #linear, constant_with_warmup, cosine, cosine_with_restarts
+    max_grad_norm: float = 1.0
+    optim: str = "paged_adamw_8bit" # "paged_adamw_8bit"
+    torch_dtype: str = "bfloat16" # "bfloat16" or "float16", float16 causes divergence when training on my PC, but it is 4x faster on Kaggle
+    # LoRA
+    use_rslora = True,
+    use_dora = True,
+    lora_r: int = 32
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Experiment Configuration")
     parser.add_argument('--model_path', type=str, help="Path to the model")
