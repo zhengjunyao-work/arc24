@@ -8,7 +8,7 @@ def apply_data_augmentation(task, hflip, n_rot90, color_map=None):
     augmented_task = _apply_augmentation_to_task(task, partial(geometric_augmentation, hflip=hflip, n_rot90=n_rot90))
     if color_map is not None:
         augmented_task = swap_task_colors(augmented_task, color_map)
-    augmented_task = permute_train_samples(augmented_task, max_permutations=1)[0]
+    augmented_task = permute_train_samples(augmented_task)
     return augmented_task
 
 
@@ -24,7 +24,7 @@ def random_augment_task(task):
     task = _apply_augmentation_to_task(task, partial(geometric_augmentation,
                                                      hflip=random.choice([True, False]),
                                                      n_rot90=random.choice([0, 1, 2, 3])))
-    task = permute_train_samples(task, max_permutations=1)[0]
+    task = permute_train_samples(task)
     task = random_swap_train_and_test(task)
     return task
 
@@ -83,16 +83,13 @@ def get_random_color_map(change_background_probability):
     return color_map
 
 
-def permute_train_samples(task, max_permutations=6):
-    augmented_tasks = []
-    for _ in range(max_permutations):
-        train_order = np.arange(len(task['train']))
-        np.random.shuffle(train_order)
-        augmented_task = dict()
-        augmented_task['train'] = [task['train'][idx] for idx in train_order]
-        augmented_task['test'] = task['test']
-        augmented_tasks.append(augmented_task)
-    return augmented_tasks
+def permute_train_samples(task):
+    train_order = np.arange(len(task['train']))
+    np.random.shuffle(train_order)
+    augmented_task = dict()
+    augmented_task['train'] = [task['train'][idx] for idx in train_order]
+    augmented_task['test'] = task['test']
+    return augmented_task
 
 
 def random_swap_train_and_test(task):
