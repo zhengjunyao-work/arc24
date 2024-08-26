@@ -1,15 +1,24 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
-def get_grid_encoder(encoder_name):
-    name_to_encoder = {
-        'GridCodeBlockEncoder(MinimalGridEncoder())': GridCodeBlockEncoder(MinimalGridEncoder()),
-    }
-    if encoder_name not in name_to_encoder:
-        raise ValueError(f'Unknown encoder: {encoder_name}')
-    print(f'Using grid encoder: {encoder_name}')
-    return name_to_encoder[encoder_name]
 
+def create_grid_encoder(encoder_name):
+    """
+    This is a security risk, but I'm the only user of the library
+    Otherwise I will need to write and maintain dictionary with the encoder names
+    It allows me to use plain text in the configuration to specify the encoder
+
+    Examples of encoders:
+
+    GridCodeBlockEncoder(MinimalGridEncoder())
+    GridCodeBlockEncoder(GridWithSeparationEncoder('|'))
+    """
+    grid_encoder = eval(encoder_name)
+    if isinstance(grid_encoder, GridEncoder):
+        print(f'Created {encoder_name} as grid encoder')
+        return grid_encoder
+    else:
+        raise ValueError(f'{encoder_name} is not a GridEncoder subclass')
 
 
 class GridEncoder(ABC):

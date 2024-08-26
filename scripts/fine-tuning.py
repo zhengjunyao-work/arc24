@@ -15,7 +15,7 @@ from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training, get_pef
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from datasets import Dataset, IterableDataset
 
-from arc24.encoders import get_grid_encoder
+from arc24.encoders import create_grid_encoder
 from arc24.data_augmentation import random_augment_task
 from arc24.prompting import pretty_print_prompt, create_prompts_from_task, print_smaller_prompt
 
@@ -258,7 +258,7 @@ class CFG:
     adapter_path: Optional[str] = None
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/09_add_encoder_parameter'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/10_create_encoder'
     n_gpus: int = 2
     max_seq_len: int = 4096
     epochs = 0
@@ -317,7 +317,7 @@ def main():
     tokenizer = get_tokenizer(cfg.model_path)
     model = get_lora_model(model, cfg.adapter_path, cfg.lora_r, cfg.use_rslora, cfg.use_dora)
 
-    grid_encoder = get_grid_encoder(cfg.grid_encoder)
+    grid_encoder = create_grid_encoder(cfg.grid_encoder)
     dataset_kwargs = {'grid_encoder': grid_encoder, 'tokenizer': tokenizer, 'max_seq_len': cfg.max_seq_len}
     train_dataset = IterableDataset.from_generator(
         prompt_generator,
