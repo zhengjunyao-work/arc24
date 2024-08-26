@@ -15,7 +15,7 @@ def create_grid_encoder(encoder_name):
     """
     grid_encoder = eval(encoder_name)
     if isinstance(grid_encoder, GridEncoder):
-        print(f'Created {encoder_name} as grid encoder')
+        print(f'Created `{encoder_name}` as grid encoder')
         return grid_encoder
     else:
         raise ValueError(f'{encoder_name} is not a GridEncoder subclass')
@@ -87,17 +87,17 @@ class RepeatNumberEncoder(GridEncoder):
         return grid
 
 
-def test_translator(translator):
+def test_grid_encoder_is_reversible(encoder_name):
+    grid_encoder = create_grid_encoder(encoder_name)
     sample_grid = np.eye(3, dtype=int).tolist()
-    assert sample_grid == translator.to_grid(translator.to_text(sample_grid))
-    print(type(translator).__name__)
-    print(translator.to_text(sample_grid) + '\n')
+    assert sample_grid == grid_encoder.to_grid(grid_encoder.to_text(sample_grid))
+    print(grid_encoder.to_text(sample_grid) + '\n')
 
 
 if __name__ == '__main__':
-    test_translator(MinimalGridEncoder())
-    test_translator(GridWithSeparationEncoder('|'))
-    test_translator(GridCodeBlockEncoder(MinimalGridEncoder()))
-    test_translator(GridCodeBlockEncoder(GridWithSeparationEncoder('|')))
-    test_translator(RepeatNumberEncoder())
-    test_translator(RepeatNumberEncoder(2))
+    test_grid_encoder_is_reversible('MinimalGridEncoder()')
+    test_grid_encoder_is_reversible("GridWithSeparationEncoder('|')")
+    test_grid_encoder_is_reversible('GridCodeBlockEncoder(MinimalGridEncoder())')
+    test_grid_encoder_is_reversible("GridCodeBlockEncoder(GridWithSeparationEncoder('|'))")
+    test_grid_encoder_is_reversible('GridCodeBlockEncoder(RepeatNumberEncoder(3))')
+    test_grid_encoder_is_reversible('GridCodeBlockEncoder(RepeatNumberEncoder(2))')
