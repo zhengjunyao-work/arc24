@@ -1,6 +1,7 @@
 import numpy as np
 import random
 from functools import partial
+from itertools import product
 
 
 def apply_data_augmentation(task, hflip, n_rot90, color_map=None):
@@ -16,6 +17,32 @@ def revert_data_augmentation(grid, hflip, n_rot90, color_map=None):
     if color_map is not None:
         grid = revert_color_swap(grid, color_map)
     return grid
+
+
+def random_augment_task(task):
+    task = swap_task_colors(task)
+    # task = _apply_augmentation_to_task(task, partial(geometric_augmentation,
+    #                                                  hflip=random.choice([True, False]),
+    #                                                  n_rot90=random.choice([0, 1, 2, 3])))
+    task = apply_geometric_augmentations(task, n_augmentations=1)[0]
+    task = permute_train_samples(task, max_permutations=1)[0]
+    task = random_swap_train_and_test(task)
+    return task
+
+
+def apply_geometric_augmentations(task, n_augmentations=8):
+    # TODO: remove this function
+    augmented_tasks = []
+    data_augmentation_params = product([False, True], [0, 1, 2, 3])
+    if n_augmentations < 8:
+        data_augmentation_params = list(data_augmentation_params)
+        indices = np.random.choice(np.arange(len(data_augmentation_params)), n_augmentations, replace=False)
+        data_augmentation_params = [data_augmentation_params[idx] for idx in indices]
+    for hflip, n_rot90 in data_augmentation_params:
+        augmented_task = augmented_task = _apply_augmentation_to_task(task, partial(geometric_augmentation, hflip=hflip, n_rot90=n_rot90))
+        augmented_tasks.append(augmented_task)
+    return augmented_tasks
+
 
 
 def _apply_augmentation_to_task(task, augmentation):
@@ -39,12 +66,6 @@ def revert_geometric_augmentation(grid, hflip, n_rot90):
     if hflip:
         grid = np.flip(grid, axis=1)
     return grid.tolist()
-
-
-sample_grid = np.eye(3, dtype=int).tolist()
-for flip in [True, False]:
-    for n_rot90 in range(4):
-        assert sample_grid == revert_geometric_augmentation(geometric_augmentation(sample_grid, flip, n_rot90), flip, n_rot90)
 
 
 def swap_task_colors(task, color_map=None, change_background_probability=0.1):
@@ -88,3 +109,19 @@ def permute_train_samples(task, max_permutations=6):
         augmented_task['test'] = task['test']
         augmented_tasks.append(augmented_task)
     return augmented_tasks
+
+
+def random_swap_train_and_test(task):
+    augmented_task = task.copy()
+    train_idx = np.random.randint(len(task['train']))
+    test_idx = np.random.randint(len(task['test']))
+    augmented_task['train'] = task['train'][:train_idx] + [task['test'][test_idx]] + task['train'][train_idx+1:]
+    augmented_task['test'] = task['test'][:test_idx] + [task['train'][train_idx]] + task['test'][test_idx+1:]
+    return augmented_task
+
+
+if __name__ == '__main__':
+    sample_grid = np.eye(3, dtype=int).tolist()
+    for flip in [True, False]:
+        for n_rot90 in range(4):
+            assert sample_grid == revert_geometric_augmentation(geometric_augmentation(sample_grid, flip, n_rot90), flip, n_rot90)
