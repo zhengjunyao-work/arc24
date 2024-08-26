@@ -23,6 +23,16 @@ Code should be shared between train and evaluation.
 
 My idea will be to run a very short train with a fixed seed, refactor the code and verify that it still works the same way.
 
+### Finding a set of symbols to replace the numbers
+
+Using the Llama and Qwen tokenizers I have been able to find a set of symbols that are unique (do not form part of other words in the vocabulary)
+Using this symbols the model should receive a representation that is equivalent to the current numbers one.
+But maybe the model can work better with that set of symbols.
+
+```
+selection = ['ñ', 'ò', '÷', 'û', 'ą', 'ć', 'ď', 'ę', 'Ě', 'Ğ']
+```
+
 ## Results
 
 ### Experiment with different grid encoders
@@ -32,6 +42,7 @@ GridCodeBlockEncoder(MinimalGridEncoder())
 GridCodeBlockEncoder(RowNumberEncoder(MinimalGridEncoder()))
 GridShapeEncoder(MinimalGridEncoder())
 GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))
+GridCodeBlockEncoder(ReplaceNumberEncoder(MinimalGridEncoder()))
 ```
 
 
