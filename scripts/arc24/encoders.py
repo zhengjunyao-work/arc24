@@ -1,6 +1,17 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
+def get_grid_encoder(encoder_name):
+    name_to_encoder = {
+        'GridCodeBlockEncoder(MinimalGridEncoder())': GridCodeBlockEncoder(MinimalGridEncoder()),
+    }
+    if encoder_name not in name_to_encoder:
+        raise ValueError(f'Unknown encoder: {encoder_name}')
+    print(f'Using grid encoder: {encoder_name}')
+    return name_to_encoder[encoder_name]
+
+
+
 class GridEncoder(ABC):
     @abstractmethod
     def to_text(self, grid):

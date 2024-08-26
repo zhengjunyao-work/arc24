@@ -15,11 +15,7 @@ from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training, get_pef
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from datasets import Dataset, IterableDataset
 
-from arc24.encoders import (
-    GridCodeBlockEncoder,
-    MinimalGridEncoder,
-    GridWithSeparationEncoder,
-)
+from arc24.encoders import get_grid_encoder
 from arc24.data_augmentation import random_augment_task
 from arc24.prompting import pretty_print_prompt, create_prompts_from_task, print_smaller_prompt
 
@@ -262,7 +258,7 @@ class CFG:
     adapter_path: Optional[str] = None
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/08_big_refactor'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/09_add_encoder_parameter'
     n_gpus: int = 2
     max_seq_len: int = 4096
     epochs = 0
@@ -273,6 +269,7 @@ class CFG:
     warmup_ratio = 0.05
     batch_size = 16 #16
     random_seed: Optional[int] = 7
+    grid_encoder: str = 'GridCodeBlockEncoder(MinimalGridEncoder())'
     # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
     per_device_train_batch_size = 1
     per_device_eval_batch_size = 1 # if using 2 the validation loss is not correctly computed
@@ -302,6 +299,7 @@ def parse_args():
     parser.add_argument('--torch_dtype', type=str, help="Which dtype to use with torch")
     parser.add_argument('--lora_r', type=int, help="Rank of the LoRA adapter")
     parser.add_argument('--n_gpus', type=int, help="Number of gpus to use")
+    parser.add_argument('--grid_encoder', type=str, help="Name of the grid encoder")
     return parser.parse_args()
 
 
@@ -319,19 +317,12 @@ def main():
     tokenizer = get_tokenizer(cfg.model_path)
     model = get_lora_model(model, cfg.adapter_path, cfg.lora_r, cfg.use_rslora, cfg.use_dora)
 
-    if 'llama' in cfg.model_path:
-        # we need to add separation between numbers in the grid
-        grid_encoder = GridCodeBlockEncoder(GridWithSeparationEncoder('|'))
-    else:
-        grid_encoder = GridCodeBlockEncoder(MinimalGridEncoder())
-    train_dataset = IterableDataset.from_generator(prompt_generator,
-                                                gen_kwargs={"filepath": cfg.train_dataset,
-                                                            'grid_encoder': grid_encoder,
-                                                            'tokenizer': tokenizer,
-                                                            'max_seq_len': cfg.max_seq_len,
-                                                            'random_seed': cfg.random_seed,})
-    val_dataset = create_validation_dataset(
-        cfg.val_dataset, grid_encoder, tokenizer, cfg.max_seq_len, print_sample_prompt=True)
+    grid_encoder = get_grid_encoder(cfg.grid_encoder)
+    dataset_kwargs = {'grid_encoder': grid_encoder, 'tokenizer': tokenizer, 'max_seq_len': cfg.max_seq_len}
+    train_dataset = IterableDataset.from_generator(
+        prompt_generator,
+        gen_kwargs=dict(filepath=cfg.train_dataset, random_seed=cfg.random_seed, **dataset_kwargs))
+    val_dataset = create_validation_dataset(cfg.val_dataset, print_sample_prompt=True, **dataset_kwargs)
 
     training_arguments = get_training_arguments(cfg)
     data_collator = get_data_collator(cfg.model_path, tokenizer)
