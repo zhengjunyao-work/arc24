@@ -18,7 +18,11 @@ from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from datasets import Dataset, IterableDataset
 
-
+from arc24.encoders import (
+    GridCodeBlockEncoder,
+    MinimalGridEncoder,
+    GridWithSeparationEncoder,
+)
 
 
 
@@ -277,7 +281,7 @@ class CFG:
     adapter_path: Optional[str] = None
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/02_repeat_baseline'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/03_move_encoders'
     n_gpus: int = 2
     max_seq_len: int = 4096
     epochs = 0
@@ -521,93 +525,6 @@ def load_arc_data_with_solutions(filepath):
 train_data = load_arc_data_with_solutions(cfg.train_dataset)
 sample_task = list(train_data.values())[0]
 
-# %% [markdown]
-# ### Grid encoders
-
-# %%
-class GridEncoder(ABC):
-    @abstractmethod
-    def to_text(self, grid):
-        pass
-
-    @abstractmethod
-    def to_grid(self, text):
-        pass
-
-# %%
-sample_grid = np.eye(3, dtype=int).tolist()
-
-def test_translator(translator):
-    assert sample_grid == translator.to_grid(translator.to_text(sample_grid))
-    print(type(translator).__name__)
-    print(translator.to_text(sample_grid))
-
-# %%
-class MinimalGridEncoder(GridEncoder):
-    @staticmethod
-    def to_text(grid):
-        text = '\n'.join([''.join([str(x) for x in line]) for line in grid])
-        return text
-
-    @staticmethod
-    def to_grid(text):
-        lines = text.strip().splitlines()
-        grid = [[int(x) for x in line] for line in lines]
-        return grid
-
-test_translator(MinimalGridEncoder())
-
-# %%
-class GridWithSeparationEncoder(GridEncoder):
-    def __init__(self, split_symbol):
-        self.split_symbol = split_symbol
-
-    def to_text(self, grid):
-        text = '\n'.join([self.split_symbol.join([str(x) for x in line]) for line in grid])
-        return text
-
-    def to_grid(self, text):
-        lines = text.strip().splitlines()
-        grid = [[int(x) for x in line.split(self.split_symbol)] for line in lines]
-        return grid
-
-test_translator(GridWithSeparationEncoder('|'))
-
-# %%
-class GridCodeBlockEncoder(GridEncoder):
-    def __init__(self, base_encoder):
-        self.encoder = base_encoder
-
-    def to_text(self, grid):
-        text = f'```grid\n{self.encoder.to_text(grid)}\n```'
-        return text
-
-    def to_grid(self, text):
-        grid_text = text.split('```grid\n')[1].split('\n```')[0]
-        grid = self.encoder.to_grid(grid_text)
-        return grid
-
-test_translator(GridCodeBlockEncoder(MinimalGridEncoder()))
-
-test_translator(GridCodeBlockEncoder(GridWithSeparationEncoder('|')))
-
-class RepeatNumberEncoder(GridEncoder):
-    def __init__(self, n=3):
-        self.n = n
-
-    def to_text(self, grid):
-        text = '\n'.join([''.join([str(x)*self.n for x in line]) for line in grid])
-        return text
-
-    def to_grid(self, text):
-        lines = text.strip().splitlines()
-        #TODO: make something more robust
-        grid = [[int(x) for x in line[::self.n]] for line in lines]
-        return grid
-
-test_translator(RepeatNumberEncoder())
-test_translator(RepeatNumberEncoder(2))
-
 
 # %% [markdown]
 # ### Plot
@@ -653,10 +570,10 @@ class DataAugmentation():
         return grid.tolist()
 
 
-for flip in [True, False]:
-    for n_rot90 in range(4):
-        data_augmentation = DataAugmentation(flip, n_rot90)
-        assert sample_grid == data_augmentation.revert_augmentation(data_augmentation.augment_grid(sample_grid))
+# for flip in [True, False]:
+#     for n_rot90 in range(4):
+#         data_augmentation = DataAugmentation(flip, n_rot90)
+#         assert sample_grid == data_augmentation.revert_augmentation(data_augmentation.augment_grid(sample_grid))
 
 
 # %%
