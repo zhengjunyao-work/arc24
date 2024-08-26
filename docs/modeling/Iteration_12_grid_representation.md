@@ -12,6 +12,8 @@ Before going to generate synthetic data to learn the priors I want to know what 
 of the problem for an LLM. LLMs typically deal with 1d data, not 2d data. Thus trying different representations
 makes a lot of sense. This can have a big impact on the accuracy of the model.
 
+The grid representation should not use too many tokens, otherwise hardware requirements grow.
+
 ## Development
 
 ### Fine-tuning script refactor

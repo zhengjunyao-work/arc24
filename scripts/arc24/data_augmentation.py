@@ -21,28 +21,12 @@ def revert_data_augmentation(grid, hflip, n_rot90, color_map=None):
 
 def random_augment_task(task):
     task = swap_task_colors(task)
-    # task = _apply_augmentation_to_task(task, partial(geometric_augmentation,
-    #                                                  hflip=random.choice([True, False]),
-    #                                                  n_rot90=random.choice([0, 1, 2, 3])))
-    task = apply_geometric_augmentations(task, n_augmentations=1)[0]
+    task = _apply_augmentation_to_task(task, partial(geometric_augmentation,
+                                                     hflip=random.choice([True, False]),
+                                                     n_rot90=random.choice([0, 1, 2, 3])))
     task = permute_train_samples(task, max_permutations=1)[0]
     task = random_swap_train_and_test(task)
     return task
-
-
-def apply_geometric_augmentations(task, n_augmentations=8):
-    # TODO: remove this function
-    augmented_tasks = []
-    data_augmentation_params = product([False, True], [0, 1, 2, 3])
-    if n_augmentations < 8:
-        data_augmentation_params = list(data_augmentation_params)
-        indices = np.random.choice(np.arange(len(data_augmentation_params)), n_augmentations, replace=False)
-        data_augmentation_params = [data_augmentation_params[idx] for idx in indices]
-    for hflip, n_rot90 in data_augmentation_params:
-        augmented_task = augmented_task = _apply_augmentation_to_task(task, partial(geometric_augmentation, hflip=hflip, n_rot90=n_rot90))
-        augmented_tasks.append(augmented_task)
-    return augmented_tasks
-
 
 
 def _apply_augmentation_to_task(task, augmentation):
