@@ -311,7 +311,7 @@ def main():
     save_train_conf(cfg)
 
     model = get_model(cfg.model_path, cfg.n_gpus, cfg.torch_dtype)
-    tokenizer = get_tokenizer(cfg.model_path)
+    tokenizer = get_tokenizer(cfg.model_path, model)
     model = get_lora_model(model, cfg.adapter_path, cfg.lora_r, cfg.use_rslora, cfg.use_dora)
 
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
@@ -503,7 +503,7 @@ def get_model(model_path, n_gpus, torch_dtype):
     return model
 
 
-def get_tokenizer(model_path):
+def get_tokenizer(model_path, model):
     tokenizer = AutoTokenizer.from_pretrained(
         model_path,
         trust_remote_code=True)
