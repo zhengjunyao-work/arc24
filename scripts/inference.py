@@ -18,6 +18,7 @@ class CFG:
     best_of: int = 1 # controls the number of beams used in beam search
     temperature: float = 0.0 # temperature for sampling, 0.0 for greedy search
     n: int = 1 # number of samples to generate
+    batch_size: int = 512 # batch size for inference
 
 
 def parse_args():
@@ -30,6 +31,7 @@ def parse_args():
     parser.add_argument('--best_of', type=int, help="controls the number of beams used in beam search")
     parser.add_argument('--temperature', type=float, help="temperature for sampling, 0.0 for greedy search")
     parser.add_argument('--n', type=int, help="number of samples to generate")
+    parser.add_argument('--batch_size', type=int, help="batch size for inference")
     return parser.parse_args()
 
 
@@ -85,8 +87,7 @@ def main():
     print_smaller_prompt(prompts)
 
     sampling_params = get_sampling_params(cfg.best_of, cfg.temperature, cfg.n)
-    # TODO: maybe I should create smaller batches, f.e. there were 54272 prompts when using 512 data augmentation
-    outputs = llm.generate(prompts, sampling_params, use_tqdm=True)
+    outputs = generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=cfg.batch_size)
     task_results = create_tasks_results(outputs, prompts_conf, prompt_creator)
     solutions = create_solutions(task_results, data)
 
@@ -129,6 +130,16 @@ def get_sampling_params(best_of, temperature, n):
                               use_beam_search=True, best_of=best_of)
     print(f'Sampling params: {sampling_params}')
     return sampling_params
+
+
+def generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=512):
+    outputs = []
+    print(f'Generating outputs with batch_size={batch_size}, there are {len(prompts)} prompts')
+    for i in tqdm(range(0, len(prompts), batch_size), desc='Generating outputs with batches', smoothing=0):
+        batch = prompts[i:i+batch_size]
+        if batch:
+            outputs += llm.generate(batch, sampling_params, use_tqdm=True)
+    return outputs
 
 
 def create_tasks_results(outputs, prompts_conf, prompt_creator):
