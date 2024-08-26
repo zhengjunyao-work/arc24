@@ -192,11 +192,11 @@ TODO: I need to work deeper on that.
 ## TODO
 
 - [x] Unify the train scripts
-- [ ] Unify the evaluation scripts
+- [x] Unify the evaluation scripts
 - [ ] Refactor code such as data augmentation to remove duplications
 - [x] Use an iterable dataset to avoid doing all the augmentations before training. This will create
   a better augmented distribution and give more control over the data.
-- [ ] I need to validate that the iterable works equal or better, to do that I will use old train and val sets for better reproducibility.
+- [x] I need to validate that the iterable works equal or better, to do that I will use old train and val sets for better reproducibility.
 - [ ] Better control over the prompt templates, I would like to try new approaches in the future
 - [x] Implement option to load the optimizer when fine-tuning
 - [ ] Check if loading an optimizer is helpful for fine-tuning
