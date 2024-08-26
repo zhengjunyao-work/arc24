@@ -72,6 +72,48 @@ class GridCodeBlockEncoder(GridEncoder):
         return grid
 
 
+class GridShapeEncoder(GridEncoder):
+    def __init__(self, base_encoder):
+        self.encoder = base_encoder
+
+    def to_text(self, grid):
+        text = f'```grid shape: {len(grid)}x{len(grid[0])}\n{self.encoder.to_text(grid)}\n```'
+        return text
+
+    def to_grid(self, text):
+        grid_lines = []
+        is_grid_line = False
+        for line in text.splitlines():
+            if line.startswith('```grid shape:'):
+                is_grid_line = True
+            elif is_grid_line:
+                if line.startswith('```'):
+                    break
+                grid_lines.append(line)
+        grid_text = '\n'.join(grid_lines)
+        grid = self.encoder.to_grid(grid_text)
+        return grid
+
+
+class RowNumberEncoder(GridEncoder):
+    def __init__(self, base_encoder):
+        self.encoder = base_encoder
+
+    def to_text(self, grid):
+        text = self.encoder.to_text(grid)
+        text_with_row_numbers = ''
+        for idx, line in enumerate(text.splitlines()):
+            text_with_row_numbers += f'{idx+1} {line}\n'
+        return text_with_row_numbers.strip()
+
+    def to_grid(self, text):
+        text_without_row_numbers = ''
+        for line in text.splitlines():
+            text_without_row_numbers += line.split(' ', 1)[1] + '\n'
+        grid = self.encoder.to_grid(text_without_row_numbers)
+        return grid
+
+
 class RepeatNumberEncoder(GridEncoder):
     def __init__(self, n=3):
         self.n = n
@@ -101,3 +143,6 @@ if __name__ == '__main__':
     test_grid_encoder_is_reversible("GridCodeBlockEncoder(GridWithSeparationEncoder('|'))")
     test_grid_encoder_is_reversible('GridCodeBlockEncoder(RepeatNumberEncoder(3))')
     test_grid_encoder_is_reversible('GridCodeBlockEncoder(RepeatNumberEncoder(2))')
+    test_grid_encoder_is_reversible('GridShapeEncoder(MinimalGridEncoder())')
+    test_grid_encoder_is_reversible('GridShapeEncoder(RepeatNumberEncoder(3))')
+    test_grid_encoder_is_reversible('GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))')
