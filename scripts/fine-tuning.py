@@ -10,14 +10,16 @@ import argparse
 from dataclasses import dataclass, asdict
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training, get_peft_model
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from datasets import Dataset, IterableDataset
 
 from arc24.encoders import create_grid_encoder
 from arc24.data_augmentation import random_augment_task
-from arc24.prompting import pretty_print_prompt, create_prompts_from_task, print_smaller_prompt
+from arc24.prompting import create_prompts_from_task, print_smaller_prompt
+from arc24.data import load_arc_data_with_solutions
+
 
 # from zero
 @dataclass
@@ -258,7 +260,7 @@ class CFG:
     adapter_path: Optional[str] = None
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/10_create_encoder'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/11_data'
     n_gpus: int = 2
     max_seq_len: int = 4096
     epochs = 0
@@ -550,22 +552,6 @@ def print_gpu_memory():
         print(f'GPU {device} memory allocated: {torch.cuda.memory_allocated(device)/1024**3:.1f} GB, max memory allocated: {torch.cuda.max_memory_allocated(device)/1024**3:.1f} GB')
 
 # Data
-# TODO: move this to a separate file
-def load_arc_data_with_solutions(filepath):
-    with open(filepath, 'r') as f:
-        data = json.load(f)
-    solutions_filepath = filepath.replace('challenges.json', 'solutions.json')
-    if filepath != solutions_filepath and os.path.exists(solutions_filepath):
-        with open(solutions_filepath, 'r') as f:
-            solutions = json.load(f)
-        for sample_id, task in data.items():
-            for idx, sample in enumerate(task['test']):
-                sample['output'] = solutions[sample_id][idx]
-    else:
-        print('No solutions file found, the solutions should already be in the data')
-    return data
-
-
 def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, print_sample_prompt=True):
     data = load_arc_data_with_solutions(filepath)
     tasks = list(data.values())
@@ -603,7 +589,7 @@ def prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, random_seed
 
 def print_prompt_length_percentiles(prompt_lengths):
     for percentile in [50, 75, 90, 95, 97]:
-        print(f'Prompt lenght percentile {percentile}: {np.percentile(prompt_lengths, percentile)}')
+        print(f'Prompt length percentile {percentile}: {np.percentile(prompt_lengths, percentile)}')
 
 # Train
 def get_data_collator(model_path, tokenizer):
