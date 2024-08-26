@@ -47,7 +47,13 @@ This table could work as a rule of thumb of the slowdown when using pseudo beam-
 ### Accuracy effect
 
 On a previous iteration I was able to see improvements due to beam-search with just 8 predictions per task. Let's try do to the same.
-I will be using `n=8` and different temperatures.
+I will be using `n=20` and different temperatures.
+
+![8 predictions](res/2024-08-26-05-10-51.png)
+
+![16 predictions](res/2024-08-26-05-10-58.png)
+
+The tendency when increasing the temperature is completely different to the observed on previous experiments. But the improvement in accuracy is not clear.
 
 ```bash
 # estimated runtime 1h30 ~ 16*6
@@ -66,7 +72,15 @@ python inference.py --model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc --predict
 python inference.py --model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc --predictions_per_task=16 --n=20 --output_filepath=submission_qwen05_x16_n20_T10.json --temperature=1.0
 ```
 
+#### Full experiment
+
+I have run an experiment for 4h49: `submission_qwen05_x128_n20_T08` and I'm comparing it to `submission_qwen15_x128`.
+The accuracy improves from 5% to 5.2% so the improvement is tiny, and the inference time has been close to 10 times.
+So it does not seem this is a promising path.
+
 ## Conclusion
+
+Accuracy improvement is tiny despite inference time being increased a lot. Is better to use compute in other ways.
 
 ## Next steps
 
@@ -75,4 +89,4 @@ python inference.py --model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc --predict
 - [x] Modify inference script to support this
   - [x] Are the outputs provided by LLM sorted by logprob, or I have to sort them myself? YES THEY ARE ALREADY SORTED
 - [x] How does the inference speed changes when requesting more responses per prompt?
-- [ ] Does the accuracy improves?
+- [x] Does the accuracy improves?
