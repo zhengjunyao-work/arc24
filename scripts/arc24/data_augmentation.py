@@ -20,13 +20,10 @@ def revert_data_augmentation(grid, hflip, n_rot90, color_map=None):
 
 
 def random_augment_task(task):
-    task = swap_task_colors(task)
-    task = _apply_augmentation_to_task(task, partial(geometric_augmentation,
-                                                     hflip=random.choice([True, False]),
-                                                     n_rot90=random.choice([0, 1, 2, 3])))
-    task = permute_train_samples(task)
-    task = random_swap_train_and_test(task)
-    return task
+    augmented_task = apply_data_augmentation(
+        task, color_map=get_random_color_map(), **get_random_geometric_augmentation_params())
+    augmented_task = random_swap_train_and_test(augmented_task)
+    return augmented_task
 
 
 def _apply_augmentation_to_task(task, augmentation):
@@ -34,6 +31,10 @@ def _apply_augmentation_to_task(task, augmentation):
     for partition, samples in task.items():
         augmented_task[partition] = [{name:augmentation(grid) for name,grid in sample.items()} for sample in samples]
     return augmented_task
+
+
+def get_random_geometric_augmentation_params():
+    return dict(hflip=random.choice([True, False]), n_rot90=random.choice([0, 1, 2, 3]))
 
 
 def geometric_augmentation(grid, hflip, n_rot90):
@@ -69,7 +70,7 @@ def revert_color_swap(grid, color_map):
     return vectorized_mapping(grid).tolist()
 
 
-def get_random_color_map(change_background_probability):
+def get_random_color_map(change_background_probability=0.1):
     colors = list(range(10))
     if random.random() < change_background_probability:
         new_colors = list(range(10))
