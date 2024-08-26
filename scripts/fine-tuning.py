@@ -260,7 +260,7 @@ class CFG:
     adapter_path: Optional[str] = None
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/11_data'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_debug_refactor/12_end_refactor'
     n_gpus: int = 2
     max_seq_len: int = 4096
     epochs = 0
@@ -307,13 +307,8 @@ def parse_args():
 
 def main():
     # Override default configuration using arguments
-    args = parse_args()
-    cfg = CFG(**{k: v for k, v in vars(args).items() if v is not None})
-    print(asdict(cfg))
-
-    os.makedirs(cfg.output_dir, exist_ok=True)
-    with open(os.path.join(cfg.output_dir, 'cfg.json'), 'w') as f:
-        json.dump({key:value for key, value in cfg.__dict__.items() if not key.startswith('__')}, f, indent=4)
+    cfg = CFG(**{k: v for k, v in vars(parse_args()).items() if v is not None})
+    save_train_conf(cfg)
 
     model = get_model(cfg.model_path, cfg.n_gpus, cfg.torch_dtype)
     tokenizer = get_tokenizer(cfg.model_path)
@@ -324,7 +319,7 @@ def main():
     train_dataset = IterableDataset.from_generator(
         prompt_generator,
         gen_kwargs=dict(filepath=cfg.train_dataset, random_seed=cfg.random_seed, **dataset_kwargs))
-    val_dataset = create_validation_dataset(cfg.val_dataset, print_sample_prompt=True, **dataset_kwargs)
+    val_dataset = create_validation_dataset(cfg.val_dataset, **dataset_kwargs)
 
     training_arguments = get_training_arguments(cfg)
     data_collator = get_data_collator(cfg.model_path, tokenizer)
@@ -647,6 +642,13 @@ def get_training_arguments(cfg):
             **batch_size_kwargs
     )
     return training_arguments
+
+
+def save_train_conf(cfg):
+    print(asdict(cfg))
+    os.makedirs(cfg.output_dir, exist_ok=True)
+    with open(os.path.join(cfg.output_dir, 'cfg.json'), 'w') as f:
+        json.dump({key:value for key, value in cfg.__dict__.items() if not key.startswith('__')}, f, indent=4)
 
 
 if __name__ == '__main__':
