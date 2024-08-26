@@ -144,11 +144,11 @@ def pretty_print_prompt(text, default_color='black'):
     attrs = None
     print('-'*80)
     for line in text.splitlines():
-        if line.startswith('<|assistant|>'):
+        if line.startswith('<|assistant|>') or line.startswith('<|im_start|>assistant'):
             color = 'blue'
-        elif line.startswith('<|user|>'):
+        elif line.startswith('<|user|>') or line.startswith('<|im_start|>user'):
             color = default_color
-        elif line.startswith('<|system|>'):
+        elif line.startswith('<|system|>') or line.startswith('<|im_start|>system'):
             color = 'green'
         if line.startswith('<'):
             attrs = ['bold']

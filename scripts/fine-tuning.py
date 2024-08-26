@@ -525,9 +525,8 @@ def create_validation_dataset(filepath, grid_encoder, print_sample_prompt=True):
     prompts = []
     for task in tqdm(tasks, desc='create prompts'):
         prompts.extend(create_prompts_from_task(task, grid_encoder, tokenizer))
-    if print_sample_prompt: pretty_print_prompt(prompts[0])
+    if print_sample_prompt: print_smaller_prompt(prompts)
     prompt_lengths = [len(tokenizer.encode(prompt)) for prompt in tqdm(prompts, desc='Calculating prompt lengths')]
-    print_smaller_prompt(prompts)
     print_prompt_length_percentiles(prompt_lengths)
     prompts = [prompt for prompt, prompt_length in zip(prompts, prompt_lengths) if prompt_length < cfg.max_seq_len]
     print(f'Leaving {len(prompts)} validation prompts after removing those longer than {cfg.max_seq_len} tokens')
@@ -568,7 +567,7 @@ else:
 train_dataset = IterableDataset.from_generator(prompt_generator,
                                                gen_kwargs={"filepath": cfg.train_dataset,
                                                            'grid_encoder': grid_encoder})
-val_dataset = create_validation_dataset(cfg.val_dataset, grid_encoder, print_sample_prompt=False)
+val_dataset = create_validation_dataset(cfg.val_dataset, grid_encoder, print_sample_prompt=True)
 
 
 if cfg.adapter_path is None:
