@@ -8,12 +8,14 @@ class CFG:
     output_filepath: str = 'submission.json'
     # Model
     model_path: str = "/home/gbarbadillo/data/Qwen2-0.5B-arc"
-    max_model_len: int = 8192 #61000 for phi-3
+    max_model_len: int = 10240 #61000 for phi-3
+    grid_encoder: str = 'GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))'
     # Dataset
     #dataset_path: str = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
     dataset_path: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
     n_tasks: Optional[int] = None # Optional parameter to limit the number of task in the inference, set it to None to use all the tasks
     # Inference params
+    max_output_tokens: int = 1100 # Maximum number of tokens to generate
     predictions_per_task: int = 8 # How many predictions to make for each task, ideally should be a multiple of 8 (the number of geometric data augmentations)
     best_of: int = 1 # controls the number of beams used in beam search
     temperature: float = 0.0 # temperature for sampling, 0.0 for greedy search
@@ -32,6 +34,8 @@ def parse_args():
     parser.add_argument('--temperature', type=float, help="temperature for sampling, 0.0 for greedy search")
     parser.add_argument('--n', type=int, help="number of samples to generate")
     parser.add_argument('--batch_size', type=int, help="batch size for inference")
+    parser.add_argument('--grid_encoder', type=str, help="Name of the grid encoder")
+    parser.add_argument('--max_output_tokens', type=int, help="Maximum number of tokens to generate")
     return parser.parse_args()
 
 
@@ -45,7 +49,7 @@ from transformers import AutoTokenizer
 
 from arc24.data_augmentation import apply_data_augmentation, revert_data_augmentation, get_random_color_map
 from arc24.prompting import SimplePromptCreator, print_smaller_prompt
-from arc24.encoders import GridCodeBlockEncoder, MinimalGridEncoder
+from arc24.encoders import create_grid_encoder
 
 import logging
 logging.basicConfig(level=logging.INFO,
@@ -80,13 +84,13 @@ def main():
     for number in '0123456789':
         print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
 
-
-    prompt_creator = SimplePromptCreator(GridCodeBlockEncoder(MinimalGridEncoder()), tokenizer, cfg.model_path)
+    grid_encoder = create_grid_encoder(cfg.grid_encoder)
+    prompt_creator = SimplePromptCreator(grid_encoder, tokenizer, cfg.model_path)
     prompts_conf = create_prompts(data, prompt_creator, cfg.predictions_per_task)
     prompts = [conf['prompt'] for conf in prompts_conf]
     print_smaller_prompt(prompts)
 
-    sampling_params = get_sampling_params(cfg.best_of, cfg.temperature, cfg.n)
+    sampling_params = get_sampling_params(cfg.best_of, cfg.temperature, cfg.n, cfg.max_output_tokens)
     outputs = generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=cfg.batch_size)
     task_results = create_tasks_results(outputs, prompts_conf, prompt_creator)
     solutions = create_solutions(task_results, data)
@@ -119,14 +123,14 @@ def create_prompts(data, prompt_creator, predictions_per_task):
     return prompts
 
 
-def get_sampling_params(best_of, temperature, n):
+def get_sampling_params(best_of, temperature, n, max_output_tokens):
     # # https://docs.vllm.ai/en/latest/dev/sampling_params.html
     if best_of == 1:
         print('Using greedy search')
-        sampling_params = SamplingParams(n=n, temperature=temperature, max_tokens=1000)
+        sampling_params = SamplingParams(n=n, temperature=temperature, max_tokens=max_output_tokens)
     else:
         print(f'Using beam search with best_of={best_of}, temperature is set to 0.0')
-        sampling_params = SamplingParams(n=n, temperature=0.0, max_tokens=1000,
+        sampling_params = SamplingParams(n=n, temperature=0.0, max_tokens=max_output_tokens,
                               use_beam_search=True, best_of=best_of)
     print(f'Sampling params: {sampling_params}')
     return sampling_params
@@ -154,7 +158,7 @@ def create_tasks_results(outputs, prompts_conf, prompt_creator):
             grid = revert_data_augmentation(grid, **data_augmentation_kwargs)
         except Exception as e:
             # TODO: better exception printing (shape of the grid)
-            print(f'Exception when parsing response from {task_id}_{sample_idx}: {e} {response}')
+            print(f'Exception when parsing response from {task_id}_{sample_idx}: {e} \n{response}')
             grid = []
         task_results[idx]['grid'] = grid
         task_results[idx]['response'] = response

@@ -28,7 +28,7 @@ class CFG:
     adapter_path: Optional[str] = None
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
-    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_grid_encoders/05_other-symbols_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps'
+    output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_grid_encoders/06_other-symbols-shape-and-number_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps'
     n_gpus: int = 2
     max_seq_len: int = 4096
     epochs = 0
@@ -39,7 +39,7 @@ class CFG:
     warmup_ratio = 0.05
     batch_size = 16 #16
     random_seed: Optional[int] = 7
-    grid_encoder: str = 'GridCodeBlockEncoder(ReplaceNumberEncoder(MinimalGridEncoder()))'
+    grid_encoder: str = 'GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))'
     # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
     per_device_train_batch_size = 1
     per_device_eval_batch_size = 1 # if using 2 the validation loss is not correctly computed

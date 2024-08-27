@@ -68,7 +68,7 @@ class SimplePromptCreator(PromptCreator):
                                                   test_input=self.grid_encoder.to_text(test_sample['input']))
             messages = [{"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_message},
-                        {"role": "assistant", "content": """### Output\n```grid\n"""}]
+                        {"role": "assistant", "content": """### Output\n```grid"""}]
             # TODO: add start of assistant reply
             prompt = self.tokenizer.apply_chat_template(messages,
                                                    tokenize=False,
@@ -77,7 +77,7 @@ class SimplePromptCreator(PromptCreator):
         return prompts
 
     def parse_response(self, text):
-        return self.grid_encoder.to_grid('```grid\n' + text)
+        return self.grid_encoder.to_grid('```grid' + text)
 
 
 def create_prompts_from_task(task, grid_encoder, tokenizer):
