@@ -33,6 +33,14 @@ But maybe the model can work better with that set of symbols.
 selection = ['ñ', 'ò', '÷', 'û', 'ą', 'ć', 'ď', 'ę', 'Ě', 'Ğ']
 ```
 
+### Create a simple evaluation script
+
+Currently I have a notebook to merge weights of the model and lora, a script to do inference and a notebook
+to evaluate. That works if I only have to evaluate a single model, but does not scale to evaluating many models.
+
+Thus I have to create either a script or a notebook that simply takes the path of the checkpoint
+that I want to evaluate, and does all the job.
+
 ## Results
 
 ### Experiment with different grid encoders
@@ -42,7 +50,9 @@ GridCodeBlockEncoder(MinimalGridEncoder())
 GridCodeBlockEncoder(RowNumberEncoder(MinimalGridEncoder()))
 GridShapeEncoder(MinimalGridEncoder())
 GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))
+
 GridCodeBlockEncoder(ReplaceNumberEncoder(MinimalGridEncoder()))
+GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))
 ```
 
 
