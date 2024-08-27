@@ -85,7 +85,7 @@ def main():
         print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
 
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
-    prompt_creator = SimplePromptCreator(grid_encoder, tokenizer, cfg.model_path)
+    prompt_creator = SimplePromptCreator(grid_encoder, tokenizer)
     prompts_conf = create_prompts(data, prompt_creator, cfg.predictions_per_task)
     prompts = [conf['prompt'] for conf in prompts_conf]
     print_smaller_prompt(prompts)

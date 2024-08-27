@@ -55,10 +55,9 @@ class PromptCreator(ABC):
         pass
 
 class SimplePromptCreator(PromptCreator):
-    def __init__(self, grid_encoder, tokenizer, model_path):
+    def __init__(self, grid_encoder, tokenizer):
         super().__init__(grid_encoder)
         self.tokenizer = tokenizer
-        self.model_path = model_path
 
     def create_task_prompts(self, task):
         train_samples = [{key: self.grid_encoder.to_text(grid) for key, grid in sample.items()} for sample in task['train']]
@@ -73,7 +72,7 @@ class SimplePromptCreator(PromptCreator):
             prompt = self.tokenizer.apply_chat_template(messages,
                                                    tokenize=False,
                                                    add_generation_prompt=False)
-            prompts.append(remove_assistant_ending(prompt, self.model_path))
+            prompts.append(remove_assistant_ending(prompt))
         return prompts
 
     def parse_response(self, text):
@@ -99,27 +98,30 @@ def create_prompts_from_task(task, grid_encoder, tokenizer):
 
 
 
-def remove_assistant_ending(text, model_path):
+def remove_assistant_ending(text):
     """
 phi-3
 
+```
 <|assistant|>
 ### Output
 ```grid
 <|end|>
 <|endoftext|>
+```
 
 llama 3.1
 
+```
 <|eot_id|><|start_header_id|>assistant<|end_header_id|>
 
 ### Output
 ```grid<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+```
     """
-    # TODO: better way to solve this, model_path could be not informative
-    if 'llama' in model_path.lower():
+    if '<|eot_id|>' in text:
         split_text = '<|eot_id|>'
-    elif 'qwen' in model_path.lower():
+    elif '<|im_end|>' in text:
         split_text = '<|im_end|>'
     else:
         split_text = '<|end|>'

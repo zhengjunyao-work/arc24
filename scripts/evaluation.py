@@ -5,6 +5,8 @@ This is not a script, but rather a collection of functions that can be imported 
 to evaluate and visualize the performance of the model.
 """
 import os
+import sys
+import argparse
 import json
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,7 +14,6 @@ from matplotlib import colors
 from collections import defaultdict
 
 from arc24.data import load_arc_data_with_solutions
-
 
 # Evaluation
 def analyze_number_of_predictions_per_task(data, texts):
@@ -236,3 +237,35 @@ def plot_predictions(correct_grid, predicted_grids, max_grids=5):
             plt.xlabel(f'Correct\nCount: {count}')
         else:
             plt.xlabel(f'Count: {count}')
+
+# The script
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+    args = parse_args(args)
+    with open(args.inference_path, 'r') as f:
+        solutions = json.load(f)
+    ground_truth = load_arc_data_with_solutions(args.dataset_path)
+    metrics = evaluate(ground_truth, solutions, verbose=False)[0]
+    print_metrics(metrics)
+
+
+def parse_args(args):
+    epilog = """
+    """
+    description = """
+    """
+    parser = argparse.ArgumentParser(
+        description=description,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        epilog=epilog)
+    parser.add_argument('inference_path', help='Path to json file with the inference results')
+    parser.add_argument('--dataset_path', type=str, help="Path to the dataset to make inference",
+                        default='/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json')
+    args = parser.parse_args(args)
+    print(args)
+    return args
+
+
+if __name__ == '__main__':
+    main()
