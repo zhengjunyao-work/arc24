@@ -45,6 +45,22 @@ that I want to evaluate, and does all the job.
 
 ### Experiment with different grid encoders
 
+[Wandb](https://wandb.ai/guillermobarbadillo/20240826_grid_encoders?nw=nwuserguillermobarbadillo)
+
+| row numbers | grid shape  | other symbols | accuracy | correct_pixels | correct_size | unanswered |
+|-------------|-------------|---------------|----------|----------------|--------------|------------|
+|             |             |               | 2.0%     | 58.0%          | 74.0%        | **2.2%**   |
+| x           |             |               | 2.3%     | 63.9%          | 81.5%        | 3.4%       |
+|             | x           |               | **2.8%** | 62.3%          | 79.8%        | **2.8%**   |
+| x           | x           |               | **2.8%** | **66.3%**      | **84.2%**    | **2.8%**   |
+|             |             | x             | 1.9%     | 59.1%          | 75.5%        | **2.4%**   |
+| x           | x           | x             | 2.3%     | **66.7%**      | **84.9%**    | 4.1%       |
+
+- Using row numbers and grid shape increase accuracy, correct pixels and correct size
+- There is no evidence that using alternative symbols instead of numbers gives better results.
+
+Thus the best encoder configuration for Qwen would be `GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))`.
+
 ```
 GridCodeBlockEncoder(MinimalGridEncoder())
 GridCodeBlockEncoder(RowNumberEncoder(MinimalGridEncoder()))
