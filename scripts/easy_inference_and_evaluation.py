@@ -13,7 +13,10 @@ def main(args=None):
     print(cfg)
     model_path = merge_lora_with_model(args.checkpoint_path, cfg['model_path'])
     output_folder = args.checkpoint_path.replace('arc24/models', 'arc24/evaluations')
-    output_filepath = inference(model_path, output_folder, cfg.get('grid_encoder', 'GridCodeBlockEncoder(MinimalGridEncoder())'))
+    output_filepath = inference(
+        model_path, output_folder,
+        cfg.get('grid_encoder', 'GridCodeBlockEncoder(MinimalGridEncoder())'),
+        args.predictions_per_task)
     evaluation(output_filepath)
     output_filepath = voting(output_filepath)
     evaluation(output_filepath)
@@ -32,12 +35,12 @@ def merge_lora_with_model(lora_path, model_path):
     return output_path
 
 
-def inference(model_path, output_folder, grid_encoder):
+def inference(model_path, output_folder, grid_encoder, predictions_per_task):
     print('-'*80)
     print(f'Inference with model {model_path}')
     os.makedirs(output_folder, exist_ok=True)
-    output_filepath = os.path.join(output_folder, 'inference.json')
-    cmd = f'python inference.py --model_path {model_path} --output_filepath {output_filepath} --predictions_per_task 64 --grid_encoder "{grid_encoder}"'
+    output_filepath = os.path.join(output_folder, f'inference_x{predictions_per_task}.json')
+    cmd = f'python inference.py --model_path {model_path} --output_filepath {output_filepath} --predictions_per_task {predictions_per_task} --grid_encoder "{grid_encoder}"'
     print(cmd)
     ret = os.system(cmd)
     if ret != 0:
@@ -77,6 +80,8 @@ def parse_args(args):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         epilog=epilog)
     parser.add_argument('checkpoint_path', help='Path to folder with the checkpoint that we want to evaluate')
+    parser.add_argument('--predictions_per_task', type=int, default=64,
+                        help="Number of predictions per task, use a multiple of 8")
     args = parser.parse_args(args)
     print(args)
     return args
