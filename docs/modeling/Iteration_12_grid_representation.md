@@ -55,7 +55,6 @@ GridCodeBlockEncoder(ReplaceNumberEncoder(MinimalGridEncoder()))
 GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))
 ```
 
-
 ## Conclusion
 
 ## Next steps
@@ -66,3 +65,5 @@ GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))
 - [ ] Does it help to add row idx at the start of each line?
 - [ ] Is the system prompt helpful?
 - [ ] Are the pixel symbols relevant? Or could I replace the number for other symbols?
+- [ ] Train for longer, is validation loss really useful?
+- [ ] Test time fine-tuning
