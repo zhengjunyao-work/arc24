@@ -41,7 +41,7 @@ def evaluate(ground_truth, solutions, verbose=True):
         for test_idx, test_sample in enumerate(ground_truth[task_id]['test']):
             correct_grid = test_sample['output']
             predicted_grids = list(solutions[task_id][test_idx].values())
-            task_metrics.append(evaluate_grid(correct_grid, predicted_grids))
+            task_metrics.append(evaluate_predicted_grids(correct_grid, predicted_grids))
             #print_metrics(task_metrics[-1], f'{task_id}_{test_idx}')
         metrics[task_id] = average_metrics(task_metrics)
     global_metrics = average_metrics(list(metrics.values()))
@@ -89,18 +89,25 @@ def print_metrics(metrics, prefix=''):
         text += f'{key}: {value*100:.1f}%\t'
     print(text)
 
-def evaluate_grid(correct_grid, predicted_grids):
-    correct_grid = np.array(correct_grid)
-    valid_predicted_grids = [grid for grid in predicted_grids if grid]
-    metrics = dict(accuracy=0, correct_pixels=0, correct_size=0, pass_n=0, unanswered=(len(predicted_grids) - len(valid_predicted_grids))/len(predicted_grids))
+def evaluate_predicted_grids(correct_grid, predicted_grids):
+    correct_grid = np.array(correct_grid, dtype=int)
+    valid_predicted_grids = [np.array(grid, dtype=int) for grid in predicted_grids if grid]
+    metrics = dict(accuracy=0,
+                   correct_pixels=0,
+                   max_correct_pixels=0,
+                   correct_size=0,
+                   any_correct_size=0,
+                   pass_n=0,
+                   unanswered=(len(predicted_grids) - len(valid_predicted_grids))/len(predicted_grids))
     for predicted_grid in valid_predicted_grids:
-        predicted_grid = np.array(predicted_grid)
         if correct_grid.shape == predicted_grid.shape:
             if np.all(predicted_grid == correct_grid):
                 metrics['pass_n'] = 1
                 metrics['accuracy'] += 1./len(predicted_grids)
-            metrics['correct_pixels'] = max(metrics['correct_pixels'], np.mean(predicted_grid == correct_grid))
-            metrics['correct_size'] = max(metrics['correct_size'], correct_grid.shape == predicted_grid.shape)
+            metrics['correct_pixels'] += np.mean(predicted_grid == correct_grid)/len(predicted_grids)
+            metrics['correct_size'] += 1./len(predicted_grids)
+            metrics['max_correct_pixels'] = max(metrics['max_correct_pixels'], np.mean(predicted_grid == correct_grid))
+            metrics['any_correct_size'] = 1
     return metrics
 
 def study_effect_of_the_number_of_solutions(solutions, data, n_tries=40):
