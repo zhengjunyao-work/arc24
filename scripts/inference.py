@@ -79,6 +79,7 @@ def main():
                 #kv_cache_dtype='fp8_e5m2', I have disabled kv cache quantization because it is hurtful
                 enforce_eager=True, # without this 13.9GB of memory is used on each GPU, with this is 13.3GB,
                 disable_log_stats=True,
+                # max_num_seqs=255, # default is supposed to be 256 I have used it to solve some weird illegal memory error
                 )
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_path)
     for number in '0123456789':
