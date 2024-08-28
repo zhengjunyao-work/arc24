@@ -71,6 +71,14 @@ GridCodeBlockEncoder(ReplaceNumberEncoder(MinimalGridEncoder()))
 GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))
 ```
 
+TODO: val loss vs val results
+
+### Longer trainings
+
+I'm going to train for 12k steps both Qwen models.
+
+TODO:
+
 ## Conclusion
 
 ## Next steps
