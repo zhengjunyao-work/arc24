@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import shutil
 import argparse
 
 
@@ -8,7 +9,8 @@ def main(args=None):
     if args is None:
         args = sys.argv[1:]
     args = parse_args(args)
-    with open(os.path.join(os.path.dirname(args.checkpoint_path), 'cfg.json'), 'r') as f:
+    train_conf_path = os.path.join(os.path.dirname(args.checkpoint_path), 'cfg.json')
+    with open(train_conf_path, 'r') as f:
         cfg = json.load(f)
     print(cfg)
     model_path = merge_lora_with_model(args.checkpoint_path, cfg['model_path'])
@@ -17,6 +19,7 @@ def main(args=None):
         model_path, output_folder,
         cfg.get('grid_encoder', 'GridCodeBlockEncoder(MinimalGridEncoder())'),
         args.predictions_per_task)
+    copy_train_conf(train_conf_path)
     evaluation(output_filepath)
     output_filepath = voting(output_filepath)
     evaluation(output_filepath)
@@ -46,6 +49,10 @@ def inference(model_path, output_folder, grid_encoder, predictions_per_task):
     if ret != 0:
         raise Exception('Error running inference')
     return output_filepath
+
+
+def copy_train_conf(train_conf_path):
+    shutil.copy(train_conf_path, train_conf_path.replace('arc24/models', 'arc24/evaluations'))
 
 
 def evaluation(filepath):
