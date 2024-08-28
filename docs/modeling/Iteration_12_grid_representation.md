@@ -85,9 +85,11 @@ TODO:
 
 ## TODO
 
-- [ ] Does it help to predict the shape of the grid?
-- [ ] Does it help to add row idx at the start of each line?
+- [x] Does it help to predict the shape of the grid?
+- [x] Does it help to add row idx at the start of each line?
 - [ ] Is the system prompt helpful?
-- [ ] Are the pixel symbols relevant? Or could I replace the number for other symbols?
+- [x] Are the pixel symbols relevant? Or could I replace the number for other symbols?
+- [ ] How useful is the validation loss?
 - [ ] Train for longer, is validation loss really useful?
 - [ ] Test time fine-tuning
+- [ ] Do we get improvements in submission?
