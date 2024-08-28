@@ -71,7 +71,17 @@ GridCodeBlockEncoder(ReplaceNumberEncoder(MinimalGridEncoder()))
 GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))
 ```
 
-TODO: val loss vs val results
+### Validation loss is not a perfect proxy
+
+I have evaluated multiple checkpoints of a training, and the following plots show how the metrics change during the training.
+
+![](res/2024-08-28-17-31-07.png)
+
+We see an almost monotonic improvement during training, however the validation loss shows a different story.
+
+![](res/2024-08-28-17-31-58.png)
+
+Thus I should probably evaluate the last and the best checkpoint, and launch longer trainings because there might be room for improvement.
 
 ### Longer trainings
 
