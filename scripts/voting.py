@@ -14,6 +14,7 @@ def main(args=None):
     with open(args.output_filepath, 'w') as f:
         json.dump(solutions, f)
 
+# First implementation that simply does voting
 
 def select_most_voted_solutions(solutions, n):
     most_voted_solutions = dict()
@@ -24,6 +25,8 @@ def select_most_voted_solutions(solutions, n):
             if valid_solutions:
                 unique_solutions, counts = get_unique_matrices_and_counts_sorted(valid_solutions)
                 most_voted_sample_solutions = {f'attempt_{i+1}': solution for i, solution in enumerate(unique_solutions[:n])}
+            else:
+                most_voted_sample_solutions = {}
             if len(most_voted_sample_solutions) < n:
                 for i in range(len(most_voted_sample_solutions), n):
                     most_voted_sample_solutions[f'attempt_{i+1}'] = []
@@ -48,6 +51,7 @@ def get_unique_matrices_and_counts_sorted(matrices):
     counts = [count for _, count in sorted_matrices]
 
     return unique_matrices, counts
+
 
 def parse_args(args):
     epilog = """
