@@ -19,11 +19,32 @@ Thus my initial score is much better than theirs, but I don't experience that im
 test-time fine-tuning.
 
 On recent experiments with the evaluation dataset I could improve from 9% to 15%. Again not even close to what Jack Cole said.
+TODO: this is an ongoing work, maybe using longer trainings or higher learning rates could improve my results.
 
 Maybe the problem is that so far I have been fine-tuning in the whole test set. That might be suboptimal because
 the tasks could be contradictory. So maybe it's better to fine-tune for each task independently. Instead of fine-tuning for 1k steps on 100 tasks, fine-tune for 10 steps in each of the 100 tasks.
 
+Other possible explanations:
+
+- It might also be the case that we need a stronger base model, but we leave that for future experiments.
+- Maybe my test fine-tuning method is not as good as theirs
+
 ## Development
+
+The easier way to test this is to fork the Kaggle notebook and make the following modifications.
+
+1. Decompose the test file into single task files
+2. Fine-tune on each of those tasks, generating n saved models
+3. Make inference with all of the models, each on its task
+4. Concatenate all the predictions on a single file
+
+The drawback of this approach is that the warmup time of fine-tuning and inference will happen 100 times
+instead of just one. But I believe there is enough time in the submission to do that.
+
+Another possible problem is that if there is a single task, it might be the case that the training data
+is too long for training. I will have to think of how to solve that. Probably the best way is to randomly
+get rid of some of the inputs in that case. I could add that option to training. Otherwise the data generator
+will be stuck in an infinite loop.
 
 ## Results
 
