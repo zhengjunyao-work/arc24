@@ -21,8 +21,13 @@ def main(args=None):
         args.predictions_per_task)
     copy_train_conf(train_conf_path)
     evaluation(output_filepath)
-    output_filepath = voting(output_filepath)
-    evaluation(output_filepath)
+    voting_output_filepath = voting(output_filepath)
+    evaluation(voting_output_filepath)
+    # v2 voting
+    voting_output_filepath = voting(output_filepath.replace('.json', '_task_results.json'))
+    evaluation(voting_output_filepath)
+    print('-'*80)
+    print('Done!\n\n\n')
 
 
 def merge_lora_with_model(lora_path, model_path):
@@ -43,6 +48,9 @@ def inference(model_path, output_folder, grid_encoder, predictions_per_task):
     print(f'Inference with model {model_path}')
     os.makedirs(output_folder, exist_ok=True)
     output_filepath = os.path.join(output_folder, f'inference_x{predictions_per_task}.json')
+    if os.path.exists(output_filepath):
+        print('Output file already exists, skipping inference')
+        return output_filepath
     cmd = f'python inference.py --model_path {model_path} --output_filepath {output_filepath} --predictions_per_task {predictions_per_task} --grid_encoder "{grid_encoder}"'
     print(cmd)
     ret = os.system(cmd)
