@@ -36,6 +36,7 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, help="batch size for inference")
     parser.add_argument('--grid_encoder', type=str, help="Name of the grid encoder")
     parser.add_argument('--max_output_tokens', type=int, help="Maximum number of tokens to generate")
+    parser.add_argument('--max_model_len', type=int, help="Maximum number of tokens in the model")
     return parser.parse_args()
 
 
