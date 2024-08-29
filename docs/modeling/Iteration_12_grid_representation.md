@@ -87,7 +87,20 @@ Thus I should probably evaluate the last and the best checkpoint, and launch lon
 
 I'm going to train for 12k steps both Qwen models.
 
+```bash
+python fine-tuning.py \
+--train_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1.json \
+--adapter_path /mnt/hdd0/Kaggle/arc24/models/20240826_grid_encoders/04_row-number-and-grid-shape_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps/checkpoint-6000/ \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240828_grid_encoders_ttft/01_shape-and-number_Qwen2-0.5B-Instruct_lr1e-5_r32_1e3steps \
+--learning_rate 1e-5 \
+--max_steps 1000
+```
 TODO:
+
+### Test time fine-tuning
+
+TODO: What is the best configuration? Show again that we cannot trust validation loss. Trying with higher learning rates and constant schedule
 
 ## Conclusion
 
@@ -99,7 +112,7 @@ TODO:
 - [x] Does it help to add row idx at the start of each line?
 - [ ] Is the system prompt helpful?
 - [x] Are the pixel symbols relevant? Or could I replace the number for other symbols?
-- [ ] How useful is the validation loss?
+- [x] How useful is the validation loss?
 - [ ] Train for longer, is validation loss really useful?
-- [ ] Test time fine-tuning
+- [ ] Test time fine-tuning, train with different number of steps
 - [ ] Do we get improvements in submission?
