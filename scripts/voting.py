@@ -2,6 +2,7 @@ import sys
 import argparse
 import json
 from collections import defaultdict
+import numpy as np
 
 def main(args=None):
     if args is None:
@@ -14,8 +15,8 @@ def main(args=None):
     with open(args.output_filepath, 'w') as f:
         json.dump(solutions, f)
 
-# First implementation that simply does voting
 
+# First implementation that simply does voting
 def select_most_voted_solutions(solutions, n):
     most_voted_solutions = dict()
     for task_id, task_solutions in solutions.items():
@@ -51,6 +52,52 @@ def get_unique_matrices_and_counts_sorted(matrices):
     counts = [count for _, count in sorted_matrices]
 
     return unique_matrices, counts
+
+
+# Second implementation that solves ties using the solution with highest logprob
+def select_most_voted_solutions_solving_ties_with_logprob(task_outputs, n, tie_breaking_metric='mean_cumulative_logprob'):
+    grouped_predictions = group_predictions(task_outputs)
+    most_voted_solutions = dict()
+    for task_id, task_solutions in grouped_predictions.items():
+        most_voted_solutions[task_id] = list()
+        for sample_solutions in task_solutions:
+            for output in sample_solutions.values():
+                output['ranking'] = (len(output[tie_breaking_metric]), np.mean(output[tie_breaking_metric]))
+            outputs = sorted(outputs.values(), key=lambda x: x['ranking'], reverse=True)
+
+            most_voted_sample_solutions = {f'attempt_{i+1}': output['grid'] for i, output in enumerate(outputs[:n])}
+            if len(most_voted_sample_solutions) < n:
+                for i in range(len(most_voted_sample_solutions), n):
+                    most_voted_sample_solutions[f'attempt_{i+1}'] = []
+            most_voted_solutions[task_id].append(most_voted_sample_solutions)
+    return most_voted_solutions
+
+
+def group_predictions(task_outputs):
+    """
+    Group predictions by task_id, test_idx and grid
+    Allows to know how many times a grid was predicted and the cumulative logprob of those predictions
+    """
+    grouped_predictions = dict()
+    for output in task_outputs:
+        if not output['grid']:
+            # discard empty grids
+            continue
+
+        task_id = output['task_id']
+        test_idx = output['idx']
+        grid_key = str(output['grid'])
+        if task_id not in grouped_predictions:
+            grouped_predictions[task_id] = dict()
+        if test_idx not in grouped_predictions[task_id]:
+            grouped_predictions[task_id][test_idx] = dict()
+        if grid_key not in grouped_predictions[task_id][test_idx]:
+            grouped_predictions[task_id][test_idx][grid_key] = dict(
+                grid=output['grid'], cumulative_logprob=[], mean_cumulative_logprob=[])
+
+        grouped_predictions[task_id][test_idx][grid_key]['cumulative_logprob'].append(output['cumulative_logprob'])
+        grouped_predictions[task_id][test_idx][grid_key]['mean_cumulative_logprob'].append(output['cumulative_logprob'] / output['n_tokens'])
+    return grouped_predictions
 
 
 def parse_args(args):
