@@ -29,6 +29,7 @@ class CFG:
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
     output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_grid_encoders/06_other-symbols-shape-and-number_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps'
+    remove_train_samples_to_fit_max_seq_len: bool = False
     n_gpus: int = 2
     max_seq_len: int = 4096
     epochs = 0
@@ -70,6 +71,8 @@ def parse_args():
     parser.add_argument('--lora_r', type=int, help="Rank of the LoRA adapter")
     parser.add_argument('--n_gpus', type=int, help="Number of gpus to use")
     parser.add_argument('--grid_encoder', type=str, help="Name of the grid encoder")
+    parser.add_argument('--remove_train_samples_to_fit_max_seq_len', type=bool,
+                        help="Whether to remove training samples to fit max_seq_len")
     return parser.parse_args()
 
 
@@ -330,7 +333,8 @@ def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, pr
     return dataset
 
 
-def prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, random_seed):
+def prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, random_seed, 
+                     remove_train_samples_to_fit_max_seq_len):
     data = load_arc_data_with_solutions(filepath)
     task_ids = list(data.keys())
     # TODO: log stats about too long prompts every so often
@@ -341,13 +345,38 @@ def prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, random_seed
         for task_id in task_ids:
             task = data[task_id]
             task = random_augment_task(task)
-            prompts = create_prompts_from_task(task, grid_encoder, tokenizer)
-            # TODO: is this the better way to deal with multi-output tasks?
-            # Should I give more weight to tasks with multiple outputs?
-            prompt = random.choice(prompts)
-            prompt_length = len(tokenizer.encode(prompt))
-            if prompt_length < max_seq_len:
+            if remove_train_samples_to_fit_max_seq_len:
+                while True:
+                    prompt = _create_prompt_smaller_than_max_seq_len(
+                        task, grid_encoder, tokenizer, max_seq_len)
+                    if prompt is not None:
+                        break
+                    task = remove_last_train_sample(task)
                 yield {'text': prompt}
+            else:
+                prompt = _create_prompt_smaller_than_max_seq_len(
+                    task, grid_encoder, tokenizer, max_seq_len)
+                if prompt is not None:
+                    yield {'text': prompt}
+
+
+def _create_prompt_smaller_than_max_seq_len(task, grid_encoder, tokenizer, max_seq_len):
+    prompts = create_prompts_from_task(task, grid_encoder, tokenizer)
+    # TODO: is this the better way to deal with multi-output tasks?
+    # Should I give more weight to tasks with multiple outputs?
+    prompt = random.choice(prompts)
+    prompt_length = len(tokenizer.encode(prompt))
+    if prompt_length < max_seq_len:
+        return prompt
+    else:
+        return None
+
+
+def remove_last_train_sample(task):
+    new_task = task.copy()
+    new_task['train'] = new_task['train'][:-1]
+    assert len(new_task['train'])
+    return new_task
 
 
 def print_prompt_length_percentiles(prompt_lengths):
