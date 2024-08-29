@@ -54,4 +54,6 @@ will be stuck in an infinite loop.
 
 ## TODO
 
-- [ ]
+- [x] Add the option to the train script to remove train samples to fit training sequence length
+- [ ] Measure the effect of using the feature above in a normal training
+- [ ] Optimize the parametrization of single task ttft (stttft) (learning rate and steps) Does it improve over the baseline?
