@@ -18,7 +18,7 @@ faster and added voting, I get LB scores of 6 and 5 for Qwen2-0.5B and Qwen2-1.5
 Thus my initial score is much better than theirs, but I don't experience that improvement when using
 test-time fine-tuning.
 
-TODO: add examples from the evaluation dataset.
+On recent experiments with the evaluation dataset I could improve from 9% to 15%. Again not even close to what Jack Cole said.
 
 Maybe the problem is that so far I have been fine-tuning in the whole test set. That might be suboptimal because
 the tasks could be contradictory. So maybe it's better to fine-tune for each task independently. Instead of fine-tuning for 1k steps on 100 tasks, fine-tune for 10 steps in each of the 100 tasks.
