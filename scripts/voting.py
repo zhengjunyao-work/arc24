@@ -8,9 +8,16 @@ def main(args=None):
     if args is None:
         args = sys.argv[1:]
     args = parse_args(args)
-    with open(args.input_filepath) as f:
-        solutions = json.load(f)
-    solutions = select_most_voted_solutions(solutions, args.n)
+    if args.input_filepath.endswith('_task_results.json'):
+        print('Using the second voting implementation to solve ties with logprob')
+        with open(args.input_filepath) as f:
+            task_results = json.load(f)
+        solutions = select_most_voted_solutions_solving_ties_with_logprob(task_results, args.n)
+    else:
+        print('Using the first voting implementation, ties will be solved randomly')
+        with open(args.input_filepath) as f:
+            solutions = json.load(f)
+        solutions = select_most_voted_solutions(solutions, args.n)
     args.output_filepath = args.output_filepath or args.input_filepath.replace('.json', '_voting.json')
     with open(args.output_filepath, 'w') as f:
         json.dump(solutions, f)
@@ -60,12 +67,13 @@ def select_most_voted_solutions_solving_ties_with_logprob(task_outputs, n, tie_b
     most_voted_solutions = dict()
     for task_id, task_solutions in grouped_predictions.items():
         most_voted_solutions[task_id] = list()
-        for sample_solutions in task_solutions:
-            for output in sample_solutions.values():
-                output['ranking'] = (len(output[tie_breaking_metric]), np.mean(output[tie_breaking_metric]))
-            outputs = sorted(outputs.values(), key=lambda x: x['ranking'], reverse=True)
+        for test_idx, _ in enumerate(task_solutions):
+            sample_solutions = task_solutions[test_idx]
+            for solution in sample_solutions.values():
+                solution['ranking'] = (len(solution[tie_breaking_metric]), np.mean(solution[tie_breaking_metric]))
+            sorted_sample_solutions = sorted(sample_solutions.values(), key=lambda x: x['ranking'], reverse=True)
 
-            most_voted_sample_solutions = {f'attempt_{i+1}': output['grid'] for i, output in enumerate(outputs[:n])}
+            most_voted_sample_solutions = {f'attempt_{i+1}': output['grid'] for i, output in enumerate(sorted_sample_solutions[:n])}
             if len(most_voted_sample_solutions) < n:
                 for i in range(len(most_voted_sample_solutions), n):
                     most_voted_sample_solutions[f'attempt_{i+1}'] = []
