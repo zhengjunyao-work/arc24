@@ -74,10 +74,22 @@ naive mean_cumulative_logprob mean correct position: 4.3 ([82, 4, 1, 0, 0, 40, 3
 naive cumulative_logprob mean correct position: 4.4 ([83, 5, 1, 0, 0, 40, 3, 5, 101, 27, 0, 86, 15, 0, 14, 0, 0, 0, 3, 0, 0, 79, 1, 6, 42, 0])
 ```
 
+### Improvements on multiple evaluations
+
+I have done multiple evaluations as part of other iteration, the following plot shows how the new voting algorithm improves
+almost in all situations to the old voting.
+
+![new voting](res/2024-08-29-07-57-22.png)
+
 ## Conclusion
+
+We have developed a new grid selection algorithm that uses voting and logprobs as the metric to solve the ties. This method does not require extra computation (we use the logprobs from inference) and improves the results slightly.
 
 ## Next steps
 
+I might develop a script to measure the likelihood of a response using torch, because VLLM is not
+optimized to do that. That may allow to improve the results.
+
 ## TODO
 
-- [ ]
+- [x] Create new script to select grids
