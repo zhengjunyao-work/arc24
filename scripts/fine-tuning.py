@@ -66,6 +66,7 @@ def parse_args():
     parser.add_argument('--max_seq_len', type=int, help="Max sequence length in tokens")
     parser.add_argument('--eval_steps', type=int, help="Number of steps between evaluations")
     parser.add_argument('--learning_rate', type=float, help='Learning rate for fine-tuning')
+    parser.add_argument('--lr_scheduler_type', type=str, help='Learning rate scheduler type')
     parser.add_argument('--report_to', type=str, help="Set it to tensorboard to disable wandb")
     parser.add_argument('--torch_dtype', type=str, help="Which dtype to use with torch")
     parser.add_argument('--lora_r', type=int, help="Rank of the LoRA adapter")
@@ -89,7 +90,8 @@ def main():
     dataset_kwargs = {'grid_encoder': grid_encoder, 'tokenizer': tokenizer, 'max_seq_len': cfg.max_seq_len}
     train_dataset = IterableDataset.from_generator(
         prompt_generator,
-        gen_kwargs=dict(filepath=cfg.train_dataset, random_seed=cfg.random_seed, **dataset_kwargs))
+        gen_kwargs=dict(filepath=cfg.train_dataset, random_seed=cfg.random_seed, **dataset_kwargs,
+                        remove_train_samples_to_fit_max_seq_len=cfg.remove_train_samples_to_fit_max_seq_len))
     val_dataset = create_validation_dataset(cfg.val_dataset, **dataset_kwargs)
 
     training_arguments = get_training_arguments(cfg)
