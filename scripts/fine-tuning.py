@@ -89,7 +89,7 @@ def main():
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
     dataset_kwargs = {'grid_encoder': grid_encoder, 'tokenizer': tokenizer, 'max_seq_len': cfg.max_seq_len}
     train_dataset = IterableDataset.from_generator(
-        prompt_generator,
+        random_prompt_generator,
         gen_kwargs=dict(filepath=cfg.train_dataset, random_seed=cfg.random_seed, **dataset_kwargs,
                         remove_train_samples_to_fit_max_seq_len=cfg.remove_train_samples_to_fit_max_seq_len))
     val_dataset = create_validation_dataset(cfg.val_dataset, **dataset_kwargs)
@@ -335,34 +335,40 @@ def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, pr
     return dataset
 
 
-def prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, random_seed, 
-                     remove_train_samples_to_fit_max_seq_len):
+def random_prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, random_seed,
+                            remove_train_samples_to_fit_max_seq_len, 
+                            log_prompt_length_every=1000):
+    """
+    """
     data = load_arc_data_with_solutions(filepath)
     task_ids = list(data.keys())
-    # TODO: log stats about too long prompts every so often
+    prompt_lengths = []
     random.seed(random_seed)
     np.random.seed(random_seed)
     while True:
+        if len(prompt_lengths) > log_prompt_length_every:
+            print_prompt_length_percentiles(prompt_lengths)
+            #TODO: add security check for the case where all the prompts are longer than max_seq_len
+            prompt_lengths = []
         random.shuffle(task_ids)
         for task_id in task_ids:
             task = data[task_id]
             task = random_augment_task(task)
             if remove_train_samples_to_fit_max_seq_len:
                 while len(task['train']):
-                    prompt = _create_prompt_smaller_than_max_seq_len(
+                    prompt, prompt_length = _create_prompt_smaller_than_max_seq_len(
                         task, grid_encoder, tokenizer, max_seq_len)
                     if prompt is not None:
                         break
                     task = remove_last_train_sample(task)
-                if prompt is not None:
-                    yield {'text': prompt}
-                else:
-                    print(f'No prompt smaller than {max_seq_len} tokens for task {task_id}')
             else:
-                prompt = _create_prompt_smaller_than_max_seq_len(
+                prompt, prompt_length = _create_prompt_smaller_than_max_seq_len(
                     task, grid_encoder, tokenizer, max_seq_len)
-                if prompt is not None:
-                    yield {'text': prompt}
+            prompt_lengths.append(prompt_length)
+            if prompt is not None:
+                yield {'text': prompt}
+            else:
+                print(f'Prompt was {prompt_length}>{max_seq_len} tokens for task {task_id}, skipping task')
 
 
 def _create_prompt_smaller_than_max_seq_len(task, grid_encoder, tokenizer, max_seq_len):
@@ -372,9 +378,9 @@ def _create_prompt_smaller_than_max_seq_len(task, grid_encoder, tokenizer, max_s
     prompt = random.choice(prompts)
     prompt_length = len(tokenizer.encode(prompt))
     if prompt_length < max_seq_len:
-        return prompt
+        return prompt, prompt_length
     else:
-        return None
+        return None, prompt_length
 
 
 def remove_last_train_sample(task):
