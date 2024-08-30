@@ -348,13 +348,16 @@ def prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, random_seed
             task = data[task_id]
             task = random_augment_task(task)
             if remove_train_samples_to_fit_max_seq_len:
-                while True:
+                while len(task['train']):
                     prompt = _create_prompt_smaller_than_max_seq_len(
                         task, grid_encoder, tokenizer, max_seq_len)
                     if prompt is not None:
                         break
                     task = remove_last_train_sample(task)
-                yield {'text': prompt}
+                if prompt is not None:
+                    yield {'text': prompt}
+                else:
+                    print(f'No prompt smaller than {max_seq_len} tokens for task {task_id}')
             else:
                 prompt = _create_prompt_smaller_than_max_seq_len(
                     task, grid_encoder, tokenizer, max_seq_len)
@@ -377,7 +380,6 @@ def _create_prompt_smaller_than_max_seq_len(task, grid_encoder, tokenizer, max_s
 def remove_last_train_sample(task):
     new_task = task.copy()
     new_task['train'] = new_task['train'][:-1]
-    assert len(new_task['train'])
     return new_task
 
 
