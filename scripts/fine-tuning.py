@@ -72,7 +72,7 @@ def parse_args():
     parser.add_argument('--lora_r', type=int, help="Rank of the LoRA adapter")
     parser.add_argument('--n_gpus', type=int, help="Number of gpus to use")
     parser.add_argument('--grid_encoder', type=str, help="Name of the grid encoder")
-    parser.add_argument('--remove_train_samples_to_fit_max_seq_len', type=bool,
+    parser.add_argument('--remove_train_samples_to_fit_max_seq_len', action='store_true',
                         help="Whether to remove training samples to fit max_seq_len")
     return parser.parse_args()
 
@@ -348,7 +348,7 @@ def random_prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, rand
     while True:
         if len(prompt_lengths) >= log_prompt_length_every:
             print_prompt_length_percentiles(prompt_lengths, prefix='Training')
-            #TODO: add security check for the case where all the prompts are longer than max_seq_len
+            check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len)
             prompt_lengths = []
         random.shuffle(task_ids)
         for task_id in task_ids:
@@ -368,7 +368,8 @@ def random_prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, rand
             if prompt is not None:
                 yield {'text': prompt}
             else:
-                print(f'Prompt was {prompt_length}>{max_seq_len} tokens for task {task_id}, skipping task')
+                pass # commented the line above because it was becoming too verbose
+                # print(f'Prompt was {prompt_length}>{max_seq_len} tokens for task {task_id}, skipping task')
 
 
 def _create_prompt_smaller_than_max_seq_len(task, grid_encoder, tokenizer, max_seq_len):
@@ -393,6 +394,13 @@ def print_prompt_length_percentiles(prompt_lengths, prefix):
     print(f'\t{prefix} prompt length percentiles, number of prompts: {len(prompt_lengths)}')
     for percentile in [50, 75, 90, 95, 97]:
         print(f'{prefix} prompt length percentile {percentile}: {int(np.percentile(prompt_lengths, percentile))}')
+
+
+def check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len, max_allowed_ratio=0.5):
+    ratio = np.mean(np.array(prompt_lengths) > max_seq_len)
+    print(f'Ratio of prompts above max_seq_len: {ratio:.1%}')
+    if ratio > max_allowed_ratio:
+        raise ValueError(f'Too many prompts above max_seq_len: {ratio:.1%}')
 
 # Train
 def get_data_collator(model_path, tokenizer):
