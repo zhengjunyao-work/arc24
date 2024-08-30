@@ -346,7 +346,7 @@ def random_prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, rand
     random.seed(random_seed)
     np.random.seed(random_seed)
     while True:
-        if len(prompt_lengths) > log_prompt_length_every:
+        if len(prompt_lengths) >= log_prompt_length_every:
             print_prompt_length_percentiles(prompt_lengths, prefix='Training')
             #TODO: add security check for the case where all the prompts are longer than max_seq_len
             prompt_lengths = []
@@ -390,6 +390,7 @@ def remove_last_train_sample(task):
 
 
 def print_prompt_length_percentiles(prompt_lengths, prefix):
+    print(f'\t{prefix} prompt length percentiles, number of prompts: {len(prompt_lengths)}')
     for percentile in [50, 75, 90, 95, 97]:
         print(f'{prefix} prompt length percentile {percentile}: {int(np.percentile(prompt_lengths, percentile))}')
 
