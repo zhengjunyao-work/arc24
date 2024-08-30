@@ -37,8 +37,8 @@ class CFG:
     logging_steps: int = 10 #10a
     eval_steps: int = 50 #50
     report_to: str = 'wandb'
-    warmup_ratio = 0.05
-    batch_size = 16 #16
+    warmup_ratio: float = 0.05
+    batch_size: int = 16 #16
     random_seed: Optional[int] = 7
     grid_encoder: str = 'GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))'
     # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
@@ -46,6 +46,7 @@ class CFG:
     per_device_eval_batch_size = 1 # if using 2 the validation loss is not correctly computed
     learning_rate: float = 1e-4
     lr_scheduler_type: str = "linear" #linear, constant_with_warmup, cosine, cosine_with_restarts
+    lr_num_cycles: int = 4 # only applicable for cosine_with_restarts
     max_grad_norm: float = 1.0
     optim: str = "paged_adamw_8bit" # "paged_adamw_8bit"
     torch_dtype: str = "bfloat16" # "bfloat16" or "float16", float16 causes divergence when training on my PC, but it is 4x faster on Kaggle
@@ -63,10 +64,13 @@ def parse_args():
     parser.add_argument('--train_dataset', type=str, help="Path to the dataset for training")
     parser.add_argument('--val_dataset', type=str, help="Path to the dataset for validation")
     parser.add_argument('--max_steps', type=int, help="Max steps to fine-tune")
+    parser.add_argument('--warmup_ratio', type=float, help="Warmup ratio, relative to training steps")
     parser.add_argument('--max_seq_len', type=int, help="Max sequence length in tokens")
     parser.add_argument('--eval_steps', type=int, help="Number of steps between evaluations")
+    parser.add_argument('--logging_steps', type=int, help="Number of steps between logging")
     parser.add_argument('--learning_rate', type=float, help='Learning rate for fine-tuning')
     parser.add_argument('--lr_scheduler_type', type=str, help='Learning rate scheduler type')
+    parser.add_argument('--lr_num_cycles', type=int, help='Number of cycles for cosine_with_restarts scheduler')
     parser.add_argument('--report_to', type=str, help="Set it to tensorboard to disable wandb")
     parser.add_argument('--torch_dtype', type=str, help="Which dtype to use with torch")
     parser.add_argument('--lora_r', type=int, help="Rank of the LoRA adapter")
@@ -437,6 +441,9 @@ def get_training_arguments(cfg):
         per_device_eval_batch_size=cfg.per_device_eval_batch_size,
     )
 
+    lr_scheduler_kwargs = {}
+    if cfg.lr_scheduler_type == 'cosine_with_restarts':
+        lr_scheduler_kwargs['num_cycles'] = cfg.lr_num_cycles
     training_arguments = TrainingArguments(
             output_dir=cfg.output_dir,
             num_train_epochs=cfg.epochs,
@@ -444,6 +451,7 @@ def get_training_arguments(cfg):
             warmup_ratio=cfg.warmup_ratio,
             learning_rate=cfg.learning_rate,
             lr_scheduler_type=cfg.lr_scheduler_type, #constant_with_warmup, cosine, cosine_with_restarts
+            lr_scheduler_kwargs=lr_scheduler_kwargs,
             optim=cfg.optim,
             max_grad_norm=cfg.max_grad_norm,
 
