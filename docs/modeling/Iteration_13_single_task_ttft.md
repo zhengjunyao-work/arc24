@@ -45,6 +45,16 @@ Another possible problem is that if there is a single task, it might be the case
 is too long for training. I will have to think of how to solve that. Probably the best way is to randomly
 get rid of some of the inputs in that case. I could add that option to training. Otherwise the data generator
 will be stuck in an infinite loop.
+However I have found that if task has both inputs and outputs of 30x30, it might be the case that even
+with just one train sample we cannot fit the data in the `max_seq_len`. Thus I have to think of how
+to deal with those cases.
+
+### Tasks that are too big for training
+
+No prompt smaller than 4096 tokens for task 25094a63
+No prompt smaller than 4096 tokens for task f9d67f8b
+No prompt smaller than 4096 tokens for task 981571dc
+No prompt smaller than 4096 tokens for task b9630600
 
 ## Results
 
@@ -55,5 +65,6 @@ will be stuck in an infinite loop.
 ## TODO
 
 - [x] Add the option to the train script to remove train samples to fit training sequence length
+- [ ] I have found that sometimes a task would not fit into max seq length. How to detect that case and what to do?
 - [ ] Measure the effect of using the feature above in a normal training
 - [ ] Optimize the parametrization of single task ttft (stttft) (learning rate and steps) Does it improve over the baseline?

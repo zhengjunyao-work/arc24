@@ -96,15 +96,26 @@ python fine-tuning.py \
 --learning_rate 1e-5 \
 --max_steps 1000
 ```
-TODO:
+TODO: So far there is no sign of stopping improvement after increasing training duration to 12k steps from previous 6k
+TODO: plot of val loss, train loss vs val metrics
 
 ### Test time fine-tuning
 
 TODO: What is the best configuration? Show again that we cannot trust validation loss. Trying with higher learning rates and constant schedule
 
+Best result so far are obtained with lr=1e-4 and 4k steps. Maybe training for longer will yield better results.
+Cyclic learning rates might speedup training.
+
+Constant schedule was worse than linear.
+
+TODO: a plot of validation loss vs other metrics
+
 ## Conclusion
 
 ## Next steps
+
+- I might have to reconsider the role of lora ranking now that I know that validation loss is not a good proxy.
+  Run a series of experiments with different r. Maybe having a higher r could allow for faster ttft.
 
 ## TODO
 
@@ -114,5 +125,13 @@ TODO: What is the best configuration? Show again that we cannot trust validation
 - [x] Are the pixel symbols relevant? Or could I replace the number for other symbols?
 - [x] How useful is the validation loss?
 - [ ] Train for longer, is validation loss really useful?
+  - [ ] What is the optimal train steps?
+  - [ ] I'm using the best learning rate?
+  - [ ] Can I get better results using a different lora rank?
 - [ ] Test time fine-tuning, train with different number of steps
+  - [x] 1e-4 is the best learning rate
+  - [x] So far the best results are obtained training for longer, I have trained up to 4k steps
+  - [ ] Do I get better results if I train for more than 4k steps?
+  - [ ] Can the model learn faster using cyclic learning rates?
+  - [ ] Does it help to to remove train samples to fit training sequence length? First experiment gives worse results, but not sure if the differences are significative.
 - [ ] Do we get improvements in submission?

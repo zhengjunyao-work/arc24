@@ -425,6 +425,10 @@ TODO:
 
 > Reasoning is a knowledge acquisition efficiency
 
+## Other links
+
+- <https://lab42.global/community-2023-july-arc-sota/>
+
 ## TODO
 
 - [x] Jack Cole approach (active inference)
