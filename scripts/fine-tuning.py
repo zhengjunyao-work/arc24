@@ -328,7 +328,7 @@ def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, pr
         prompts.extend(create_prompts_from_task(task, grid_encoder, tokenizer))
     if print_sample_prompt: print_smaller_prompt(prompts)
     prompt_lengths = [len(tokenizer.encode(prompt)) for prompt in tqdm(prompts, desc='Calculating prompt lengths')]
-    print_prompt_length_percentiles(prompt_lengths)
+    print_prompt_length_percentiles(prompt_lengths, prefix='Validation')
     prompts = [prompt for prompt, prompt_length in zip(prompts, prompt_lengths) if prompt_length < max_seq_len]
     print(f'Leaving {len(prompts)} validation prompts after removing those longer than {max_seq_len} tokens')
     dataset = Dataset.from_dict({'text': prompts})
@@ -336,7 +336,7 @@ def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, pr
 
 
 def random_prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, random_seed,
-                            remove_train_samples_to_fit_max_seq_len, 
+                            remove_train_samples_to_fit_max_seq_len,
                             log_prompt_length_every=1000):
     """
     """
@@ -347,7 +347,7 @@ def random_prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, rand
     np.random.seed(random_seed)
     while True:
         if len(prompt_lengths) > log_prompt_length_every:
-            print_prompt_length_percentiles(prompt_lengths)
+            print_prompt_length_percentiles(prompt_lengths, prefix='Training')
             #TODO: add security check for the case where all the prompts are longer than max_seq_len
             prompt_lengths = []
         random.shuffle(task_ids)
@@ -389,9 +389,9 @@ def remove_last_train_sample(task):
     return new_task
 
 
-def print_prompt_length_percentiles(prompt_lengths):
+def print_prompt_length_percentiles(prompt_lengths, prefix):
     for percentile in [50, 75, 90, 95, 97]:
-        print(f'Prompt length percentile {percentile}: {np.percentile(prompt_lengths, percentile)}')
+        print(f'{prefix} prompt length percentile {percentile}: {int(np.percentile(prompt_lengths, percentile))}')
 
 # Train
 def get_data_collator(model_path, tokenizer):
