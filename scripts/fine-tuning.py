@@ -39,7 +39,7 @@ class CFG:
     report_to: str = 'wandb'
     warmup_ratio: float = 0.05
     batch_size: int = 16 #16
-    random_seed: Optional[int] = 7
+    random_seed: Optional[int] = None # None, 7
     grid_encoder: str = 'GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))'
     # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
     per_device_train_batch_size = 1
