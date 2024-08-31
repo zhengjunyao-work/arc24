@@ -64,6 +64,7 @@ TODO: it's already running, maybe each experiment is going to take around 3 hour
 TODO: it looks very promising!
 
 ```
+# For a compute budget of 1k steps
 # Aggregated metrics:
 1 split?
 
@@ -83,9 +84,13 @@ accuracy: 11.7%	correct_pixels: 74.2%	max_correct_pixels: 78.2%	correct_size: 86
 accuracy: 10.2%	correct_pixels: 71.0%	max_correct_pixels: 84.1%	correct_size: 84.5%	any_correct_size: 89.0%	pass_n: 30.0%	unanswered: 3.5%
 accuracy: 11.2%	correct_pixels: 75.2%	max_correct_pixels: 80.8%	correct_size: 86.7%	any_correct_size: 88.8%	pass_n: 22.4%	unanswered: 0.5%
 
-50 splits
+50 splits, 4h12
+accuracy: 9.4%	correct_pixels: 71.2%	max_correct_pixels: 81.8%	correct_size: 85.4%	any_correct_size: 88.0%	pass_n: 27.0%	unanswered: 2.8%
+accuracy: 9.2%	correct_pixels: 75.7%	max_correct_pixels: 79.1%	correct_size: 88.3%	any_correct_size: 88.8%	pass_n: 18.4%	unanswered: 0.0%
 
-100 splits
+100 splits, 5h10
+accuracy: 8.9%	correct_pixels: 70.0%	max_correct_pixels: 82.4%	correct_size: 84.6%	any_correct_size: 88.0%	pass_n: 28.0%	unanswered: 3.1%
+accuracy: 9.7%	correct_pixels: 73.5%	max_correct_pixels: 76.9%	correct_size: 87.2%	any_correct_size: 87.8%	pass_n: 19.4%	unanswered: 0.0%
 ```
 
 ## Conclusion
