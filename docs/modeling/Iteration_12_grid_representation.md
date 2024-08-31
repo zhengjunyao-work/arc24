@@ -99,6 +99,22 @@ python fine-tuning.py \
 TODO: So far there is no sign of stopping improvement after increasing training duration to 12k steps from previous 6k
 TODO: plot of val loss, train loss vs val metrics
 
+#### Optimal learning rate
+
+I have tried increasing the default 1e-4 learning rate to see if I could get better results, without success.
+
+![optimal learning rate](res/2024-08-31-14-50-58.png)
+
+| model      | learning rate | train loss | val loss | accuracy | correct_pixels | correct_size | pass_n | unanswered |
+|------------|---------------|------------|----------|----------|----------------|--------------|--------|------------|
+| Qwen2-0.5B | 1.00E-04      | 0.03       | 0.175    | 3.40%    | 67.50%         | 85.00%       | 18.00% | 2.60%      |
+| Qwen2-0.5B | 2.00E-04      | 0.0319     | 0.175    | 2.90%    | 65.50%         | 82.70%       | 19.00% | 3.60%      |
+| Qwen2-0.5B | 4.00E-04      | 0.043      | 0.152    | 2.80%    | 65.40%         | 83.00%       | 12.50% | 3.10%      |
+
+#### Effect of lora rank
+
+
+
 ### Test time fine-tuning
 
 TODO: What is the best configuration? Show again that we cannot trust validation loss. Trying with higher learning rates and constant schedule
@@ -141,6 +157,8 @@ I believe the simplest hack is to modify the `self.create_scheduler` function to
 
 ## Conclusion
 
+The biggest finding of this iteration is that validation loss is only useful when it decreases, once it starts to diverge it is no longer useful.
+
 ## Next steps
 
 - I might have to reconsider the role of lora ranking now that I know that validation loss is not a good proxy.
@@ -156,7 +174,7 @@ I believe the simplest hack is to modify the `self.create_scheduler` function to
 - [x] How useful is the validation loss?
 - [ ] Train for longer, is validation loss really useful?
   - [ ] What is the optimal train steps?
-  - [ ] I'm using the best learning rate?
+  - [x] I'm using the best learning rate?
   - [ ] Can I get better results using a different lora rank?
 - [ ] Test time fine-tuning, train with different number of steps
   - [x] 1e-4 is the best learning rate

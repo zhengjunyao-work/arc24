@@ -75,9 +75,13 @@ accuracy: 7.0%	correct_pixels: 71.3%	max_correct_pixels: 74.7%	correct_size: 85.
 accuracy: 9.3%	correct_pixels: 70.9%	max_correct_pixels: 84.5%	correct_size: 84.7%	any_correct_size: 89.5%	pass_n: 27.5%	unanswered: 3.8%
 accuracy: 11.9%	correct_pixels: 73.3%	max_correct_pixels: 78.6%	correct_size: 85.9%	any_correct_size: 87.9%	pass_n: 23.7%	unanswered: 0.0%
 
-10 splits
+10 splits, 3h22
+accuracy: 9.9%	correct_pixels: 70.6%	max_correct_pixels: 82.1%	correct_size: 84.1%	any_correct_size: 87.0%	pass_n: 28.5%	unanswered: 2.9%
+accuracy: 11.7%	correct_pixels: 74.2%	max_correct_pixels: 78.2%	correct_size: 86.2%	any_correct_size: 86.7%	pass_n: 23.5%	unanswered: 0.5%
 
-20 splits
+20 splits, 3h34
+accuracy: 10.2%	correct_pixels: 71.0%	max_correct_pixels: 84.1%	correct_size: 84.5%	any_correct_size: 89.0%	pass_n: 30.0%	unanswered: 3.5%
+accuracy: 11.2%	correct_pixels: 75.2%	max_correct_pixels: 80.8%	correct_size: 86.7%	any_correct_size: 88.8%	pass_n: 22.4%	unanswered: 0.5%
 
 50 splits
 
