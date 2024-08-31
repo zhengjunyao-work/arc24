@@ -125,6 +125,9 @@ def main():
     #         trainer.optimizer.load_state_dict(torch.load(optimizer_path))
     #     else:
     #         print(f'Optimizer not found on adapter path: {optimizer_path}')
+    if cfg.lr_scheduler_type == 'cyclic':
+        replace_trainer_lr_scheduler_with_cyclic_lr(
+            trainer, cfg.warmup_ratio, cfg.learning_rate, cfg.lr_num_cycles)
     trainer.train()
     if cfg.report_to == 'wandb':
         w.finish()
@@ -441,6 +444,10 @@ def get_training_arguments(cfg):
         gradient_accumulation_steps=cfg.batch_size//cfg.per_device_train_batch_size,
         per_device_eval_batch_size=cfg.per_device_eval_batch_size,
     )
+    scheduler_type = cfg.lr_scheduler_type
+    if scheduler_type == 'cyclic':
+        print('Using cyclic learning rate scheduler (renaming to linear because it will be hacked later)')
+        scheduler_type = 'linear'
 
     lr_scheduler_kwargs = {}
     if cfg.lr_scheduler_type == 'cosine_with_restarts':
@@ -451,7 +458,7 @@ def get_training_arguments(cfg):
             max_steps=cfg.max_steps,
             warmup_ratio=cfg.warmup_ratio,
             learning_rate=cfg.learning_rate,
-            lr_scheduler_type=cfg.lr_scheduler_type, #constant_with_warmup, cosine, cosine_with_restarts
+            lr_scheduler_type=scheduler_type, #constant_with_warmup, cosine, cosine_with_restarts
             lr_scheduler_kwargs=lr_scheduler_kwargs,
             optim=cfg.optim,
             max_grad_norm=cfg.max_grad_norm,
@@ -474,6 +481,48 @@ def save_train_conf(cfg):
     os.makedirs(cfg.output_dir, exist_ok=True)
     with open(os.path.join(cfg.output_dir, 'cfg.json'), 'w') as f:
         json.dump({key:value for key, value in cfg.__dict__.items() if not key.startswith('__')}, f, indent=4)
+
+
+def replace_trainer_lr_scheduler_with_cyclic_lr(trainer, warmup_ratio, learning_rate, num_cycles):
+    def create_scheduler(self, num_training_steps: int, optimizer: torch.optim.Optimizer = None):
+        cycle_steps = num_training_steps//num_cycles
+        step_size_up = int(cycle_steps*warmup_ratio)
+        step_size_down = cycle_steps - step_size_up
+        # self.lr_scheduler = torch.optim.lr_scheduler.CyclicLR(
+        #     optimizer,
+        #     base_lr=learning_rate//100,  # minimum learning rate
+        #     max_lr=learning_rate,        # maximum learning rate
+        #     step_size_up=step_size_up,
+        #     step_size_down=step_size_down,
+        #     mode='triangular2'  # other modes include 'triangular', 'exp_range'
+        # )
+
+        # gamma = (1./num_cycles)**(1/(num_cycles-1)/(cycle_steps + step_size_up))
+        # self.lr_scheduler = torch.optim.lr_scheduler.CyclicLR(
+        #     optimizer,
+        #     base_lr=learning_rate//100,  # minimum learning rate
+        #     max_lr=learning_rate,        # maximum learning rate
+        #     step_size_up=step_size_up,
+        #     step_size_down=step_size_down,
+        #     gamma=gamma,
+        #     mode='exp_range'  # other modes include 'triangular', 'exp_range'
+        # )
+
+        self.lr_scheduler = torch.optim.lr_scheduler.CyclicLR(
+            optimizer,
+            base_lr=learning_rate//100,  # minimum learning rate
+            max_lr=learning_rate,        # maximum learning rate
+            step_size_up=step_size_up,
+            step_size_down=step_size_down,
+            scale_fn=lambda x: 1.0 - (x - 1.)/num_cycles,
+            scale_mode='cycle',
+        )
+
+        # self.lr_scheduler = get_linear_schedule_with_warmup(
+        #     optimizer, num_training_steps=num_training_steps,
+        #     num_warmup_steps=int(warmup_ratio*num_training_steps))
+        return self.lr_scheduler
+    trainer.create_scheduler = create_scheduler.__get__(trainer)
 
 
 if __name__ == '__main__':
