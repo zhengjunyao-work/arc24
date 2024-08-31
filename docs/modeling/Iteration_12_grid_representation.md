@@ -122,9 +122,22 @@ Maybe I could use another scheduler directly, that decreases the amplitude of th
 over the train duration. The experiment with cosine learning rate seems to be increasing the learning rate to a too high value.
 
 - https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.CyclicLR.html#torch.optim.lr_scheduler.CyclicLR
+- https://github.com/huggingface/transformers/blob/746104ba6f0514159d58dc2fb09c887d0e9d4863/src/transformers/trainer.py#L1249C22-L1249C34
+- https://github.com/bitsandbytes-foundation/bitsandbytes/blob/main/bitsandbytes/optim/adamw.py
 
 4 cycles, 0.707, warmup ratio in the cycle.
 It seems I would need to give both the optimizer and scheduler as input to the train function.
+
+Study of how the [Trainer](https://huggingface.co/docs/transformers/en/main_classes/trainer#trainer) works ([source code](https://github.com/huggingface/transformers/blob/746104ba6f0514159d58dc2fb09c887d0e9d4863/src/transformers/trainer.py#L289)). It has a method `self.create_optimizer_and_scheduler` that calls to `self.create_optimizer` and `self.create_scheduler`. This method is called from `self._inner_training_loop` that is itself called from the `self.train` method.
+
+- `self.train`
+  - `self._inner_training_loop`
+    - `self.create_optimizer_and_scheduler`
+      - `self.create_optimizer`
+      - `self.create_scheduler`
+        - `optimization.get_scheduler`
+
+I believe the simplest hack is to modify the `self.create_scheduler` function to return the scheduler I want.
 
 ## Conclusion
 
@@ -132,6 +145,7 @@ It seems I would need to give both the optimizer and scheduler as input to the t
 
 - I might have to reconsider the role of lora ranking now that I know that validation loss is not a good proxy.
   Run a series of experiments with different r. Maybe having a higher r could allow for faster ttft.
+- Trainings are becoming too long, could I speedup them using libraries such as [unsloth](https://github.com/unslothai/unsloth)?
 
 ## TODO
 
