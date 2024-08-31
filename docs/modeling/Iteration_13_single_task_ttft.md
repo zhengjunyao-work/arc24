@@ -58,6 +58,32 @@ No prompt smaller than 4096 tokens for task b9630600
 
 ## Results
 
+### Experiment about optimal number of splits
+
+TODO: it's already running, maybe each experiment is going to take around 3 hours.
+TODO: it looks very promising!
+
+```
+# Aggregated metrics:
+1 split?
+
+2 splits, 3h12
+accuracy: 7.7%	correct_pixels: 69.8%	max_correct_pixels: 82.5%	correct_size: 84.4%	any_correct_size: 87.0%	pass_n: 25.5%	unanswered: 3.0%
+accuracy: 7.0%	correct_pixels: 71.3%	max_correct_pixels: 74.7%	correct_size: 85.0%	any_correct_size: 86.0%	pass_n: 14.0%	unanswered: 1.0%
+
+4 splits, 3h18
+accuracy: 9.3%	correct_pixels: 70.9%	max_correct_pixels: 84.5%	correct_size: 84.7%	any_correct_size: 89.5%	pass_n: 27.5%	unanswered: 3.8%
+accuracy: 11.9%	correct_pixels: 73.3%	max_correct_pixels: 78.6%	correct_size: 85.9%	any_correct_size: 87.9%	pass_n: 23.7%	unanswered: 0.0%
+
+10 splits
+
+20 splits
+
+50 splits
+
+100 splits
+```
+
 ## Conclusion
 
 ## Next steps
