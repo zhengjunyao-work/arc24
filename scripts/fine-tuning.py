@@ -488,26 +488,6 @@ def replace_trainer_lr_scheduler_with_cyclic_lr(trainer, warmup_ratio, learning_
         cycle_steps = num_training_steps//num_cycles
         step_size_up = int(cycle_steps*warmup_ratio)
         step_size_down = cycle_steps - step_size_up
-        # self.lr_scheduler = torch.optim.lr_scheduler.CyclicLR(
-        #     optimizer,
-        #     base_lr=learning_rate//100,  # minimum learning rate
-        #     max_lr=learning_rate,        # maximum learning rate
-        #     step_size_up=step_size_up,
-        #     step_size_down=step_size_down,
-        #     mode='triangular2'  # other modes include 'triangular', 'exp_range'
-        # )
-
-        # gamma = (1./num_cycles)**(1/(num_cycles-1)/(cycle_steps + step_size_up))
-        # self.lr_scheduler = torch.optim.lr_scheduler.CyclicLR(
-        #     optimizer,
-        #     base_lr=learning_rate//100,  # minimum learning rate
-        #     max_lr=learning_rate,        # maximum learning rate
-        #     step_size_up=step_size_up,
-        #     step_size_down=step_size_down,
-        #     gamma=gamma,
-        #     mode='exp_range'  # other modes include 'triangular', 'exp_range'
-        # )
-
         self.lr_scheduler = torch.optim.lr_scheduler.CyclicLR(
             optimizer,
             base_lr=learning_rate//100,  # minimum learning rate
@@ -517,10 +497,6 @@ def replace_trainer_lr_scheduler_with_cyclic_lr(trainer, warmup_ratio, learning_
             scale_fn=lambda x: 1.0 - (x - 1.)/num_cycles,
             scale_mode='cycle',
         )
-
-        # self.lr_scheduler = get_linear_schedule_with_warmup(
-        #     optimizer, num_training_steps=num_training_steps,
-        #     num_warmup_steps=int(warmup_ratio*num_training_steps))
         return self.lr_scheduler
     trainer.create_scheduler = create_scheduler.__get__(trainer)
 
