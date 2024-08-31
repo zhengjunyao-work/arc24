@@ -71,6 +71,7 @@ def parse_args():
     parser.add_argument('--learning_rate', type=float, help='Learning rate for fine-tuning')
     parser.add_argument('--lr_scheduler_type', type=str, help='Learning rate scheduler type')
     parser.add_argument('--lr_num_cycles', type=int, help='Number of cycles for cosine_with_restarts scheduler')
+    parser.add_argument('--batch_size', type=int, help='Batch size for fine-tuning')
     parser.add_argument('--report_to', type=str, help="Set it to tensorboard to disable wandb")
     parser.add_argument('--torch_dtype', type=str, help="Which dtype to use with torch")
     parser.add_argument('--lora_r', type=int, help="Rank of the LoRA adapter")

@@ -110,6 +110,22 @@ Constant schedule was worse than linear.
 
 TODO: a plot of validation loss vs other metrics
 
+#### Cosine with restarts learning rate schedule
+
+I have updated the fine-tuning to support cosine with restarts learning rate scheduler.
+
+- https://huggingface.co/docs/transformers/en/main_classes/trainer
+- https://github.com/huggingface/transformers/blob/v4.44.2/src/transformers/trainer_utils.py#L410
+- https://huggingface.co/transformers/v4.2.2/_modules/transformers/optimization.html
+
+Maybe I could use another scheduler directly, that decreases the amplitude of the cosine restart
+over the train duration. The experiment with cosine learning rate seems to be increasing the learning rate to a too high value.
+
+- https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.CyclicLR.html#torch.optim.lr_scheduler.CyclicLR
+
+4 cycles, 0.707, warmup ratio in the cycle.
+It seems I would need to give both the optimizer and scheduler as input to the train function.
+
 ## Conclusion
 
 ## Next steps
@@ -134,4 +150,6 @@ TODO: a plot of validation loss vs other metrics
   - [ ] Do I get better results if I train for more than 4k steps?
   - [ ] Can the model learn faster using cyclic learning rates?
   - [ ] Does it help to to remove train samples to fit training sequence length? First experiment gives worse results, but not sure if the differences are significative.
+  - [ ] Could I train faster by changing the batch size?
 - [ ] Do we get improvements in submission?
+- [ ] If I make the same submission 3 times, what is the variability of the score? (Using a random seed)
