@@ -43,6 +43,8 @@ that I want to evaluate, and does all the job.
 
 ## Results
 
+All the presented results are the mean metrics of doing 64 predictions per task.
+
 ### Experiment with different grid encoders
 
 [Wandb](https://wandb.ai/guillermobarbadillo/20240826_grid_encoders?nw=nwuserguillermobarbadillo)
@@ -83,21 +85,13 @@ We see an almost monotonic improvement during training, however the validation l
 
 Thus I should probably evaluate the last and the best checkpoint, and launch longer trainings because there might be room for improvement.
 
+**Validation loss is useful when it decreases, but when it diverges it is no longer correlated with model accuracy**
+
 ### Longer trainings
 
-I'm going to train for 12k steps both Qwen models.
+Since I have found that the validation loss was not a good metric, I'm going to train the models for longer.
 
-```bash
-python fine-tuning.py \
---train_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1.json \
---adapter_path /mnt/hdd0/Kaggle/arc24/models/20240826_grid_encoders/04_row-number-and-grid-shape_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps/checkpoint-6000/ \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240828_grid_encoders_ttft/01_shape-and-number_Qwen2-0.5B-Instruct_lr1e-5_r32_1e3steps \
---learning_rate 1e-5 \
---max_steps 1000
-```
-TODO: So far there is no sign of stopping improvement after increasing training duration to 12k steps from previous 6k
-TODO: plot of val loss, train loss vs val metrics
+TODO: plot of val loss, train loss, val metrics vs number of training steps for both Qwen models
 
 #### Optimal learning rate
 
@@ -113,7 +107,19 @@ I have tried increasing the default 1e-4 learning rate to see if I could get bet
 
 #### Effect of lora rank
 
+![effect of lora](res/2024-09-01-09-26-44.png)
 
+- Train loss decreases as the lora rank increases, as expected. Given more capacity the loss is reduced more.
+- There seems to be a relation between accuracy and lora rank. We get higher accuracy by using higher ranks.
+- The relation with the other metrics is unclear
+
+| model      | lora_rank | train loss | val loss | accuracy | correct_pixels | correct_size | pass_n | unanswered |
+|------------|-----------|------------|----------|----------|----------------|--------------|--------|------------|
+| Qwen2-0.5B | 16        | 0.0385     | 0.175    | 3.10%    | 66.50%         | 85.00%       | 19.50% | 3.00%      |
+| Qwen2-0.5B | 32        | 0.0305     | 0.175    | 3.40%    | 67.50%         | 85.00%       | 18.00% | 2.60%      |
+| Qwen2-0.5B | 64        | 0.0249     | 0.189    | 3.20%    | 65.40%         | 82.80%       | 15.00% | 4.10%      |
+| Qwen2-0.5B | 128       | 0.021      | 0.1805   | 4%       | 67.30%         | 83.90%       | 18.00% | 3.10%      |
+| Qwen2-0.5B | 256       | 0.0194     | 0.1856   | 4.50%    | 67.90%         | 84.60%       | 21.00% | 2.90%      |
 
 ### Test time fine-tuning
 
