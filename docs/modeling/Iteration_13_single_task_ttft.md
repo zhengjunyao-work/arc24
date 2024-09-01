@@ -103,3 +103,4 @@ accuracy: 9.7%	correct_pixels: 73.5%	max_correct_pixels: 76.9%	correct_size: 87.
 - [ ] I have found that sometimes a task would not fit into max seq length. How to detect that case and what to do?
 - [ ] Measure the effect of using the feature above in a normal training
 - [ ] Optimize the parametrization of single task ttft (stttft) (learning rate and steps) Does it improve over the baseline?
+- [ ] Try with constant learning rate schedule, might be better for short fine-tunings.

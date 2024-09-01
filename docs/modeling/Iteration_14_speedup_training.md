@@ -64,4 +64,4 @@ that it works and it's faster I will look for the way of having a single script.
 
 ## TODO
 
-- [ ]
+- [ ] It only supports 1 gpu! https://github.com/unslothai/unsloth/issues/547
