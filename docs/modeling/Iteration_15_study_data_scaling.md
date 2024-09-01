@@ -21,6 +21,8 @@ the available training data.
 The idea is to compare trainings that use the same number of steps (same compute) but use different
 training data. I'm going to add an option to the fine-tuning script to subsample the train data.
 
+I already have baseline results without subsampling. I'm going to try the following values: `[0.8, 0.6, 0.4, 0.2, 0.1]`
+
 ## Results
 
 ## Conclusion
