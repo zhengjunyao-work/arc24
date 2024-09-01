@@ -41,6 +41,35 @@ to evaluate. That works if I only have to evaluate a single model, but does not 
 Thus I have to create either a script or a notebook that simply takes the path of the checkpoint
 that I want to evaluate, and does all the job.
 
+### Cosine with restarts learning rate schedule
+
+I have updated the fine-tuning to support cosine with restarts learning rate scheduler.
+
+- https://huggingface.co/docs/transformers/en/main_classes/trainer
+- https://github.com/huggingface/transformers/blob/v4.44.2/src/transformers/trainer_utils.py#L410
+- https://huggingface.co/transformers/v4.2.2/_modules/transformers/optimization.html
+
+Maybe I could use another scheduler directly, that decreases the amplitude of the cosine restart
+over the train duration. The experiment with cosine learning rate seems to be increasing the learning rate to a too high value.
+
+- https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.CyclicLR.html#torch.optim.lr_scheduler.CyclicLR
+- https://github.com/huggingface/transformers/blob/746104ba6f0514159d58dc2fb09c887d0e9d4863/src/transformers/trainer.py#L1249C22-L1249C34
+- https://github.com/bitsandbytes-foundation/bitsandbytes/blob/main/bitsandbytes/optim/adamw.py
+
+4 cycles, 0.707, warmup ratio in the cycle.
+It seems I would need to give both the optimizer and scheduler as input to the train function.
+
+Study of how the [Trainer](https://huggingface.co/docs/transformers/en/main_classes/trainer#trainer) works ([source code](https://github.com/huggingface/transformers/blob/746104ba6f0514159d58dc2fb09c887d0e9d4863/src/transformers/trainer.py#L289)). It has a method `self.create_optimizer_and_scheduler` that calls to `self.create_optimizer` and `self.create_scheduler`. This method is called from `self._inner_training_loop` that is itself called from the `self.train` method.
+
+- `self.train`
+  - `self._inner_training_loop`
+    - `self.create_optimizer_and_scheduler`
+      - `self.create_optimizer`
+      - `self.create_scheduler`
+        - `optimization.get_scheduler`
+
+I believe the simplest hack is to modify the `self.create_scheduler` function to return the scheduler I want.
+
 ## Results
 
 All the presented results are the mean metrics of doing 64 predictions per task.
@@ -87,7 +116,9 @@ Thus I should probably evaluate the last and the best checkpoint, and launch lon
 
 **Validation loss is useful when it decreases, but when it diverges it is no longer correlated with model accuracy**
 
-### Longer trainings
+### Experiments training on ARC tasks
+
+#### Longer trainings
 
 Since I have found that the validation loss was not a good metric, I'm going to train the models for longer.
 
@@ -123,47 +154,35 @@ I have tried increasing the default 1e-4 learning rate to see if I could get bet
 
 ### Test time fine-tuning
 
-TODO: What is the best configuration? Show again that we cannot trust validation loss. Trying with higher learning rates and constant schedule
+I have done a bunch of experiments with different learning rates and learning rate schedules. The best
+learning rate is the same as in training: 1e-4. And the best schedule is linear. I have tried also cosine with restarts, cyclic learning rate and constant learning rate but give worse results.
 
-Best result so far are obtained with lr=1e-4 and 4k steps. Maybe training for longer will yield better results.
-Cyclic learning rates might speedup training.
+#### Optimal training steps
 
-Constant schedule was worse than linear.
+![optimal steps](res/2024-09-01-09-55-10.png)
 
-TODO: a plot of validation loss vs other metrics
+We see that the accuracy increases when we fine-tune for longer with test-time fine-tuning. Train loss decreases and validation loss raises. The other metrics do not show a clear relation with the number of training steps.
 
-#### Cosine with restarts learning rate schedule
+| steps | train loss | val loss | accuracy | correct_pixels | correct_size | pass_n |
+|-------|------------|----------|----------|----------------|--------------|--------|
+| 1000  | 0.044      | 0.17     | 6.70%    | 67.90%         | 83.30%       | 28.00% |
+| 2000  | 0.0248     | 0.215    | 7.80%    | 67.00%         | 81.60%       | 26.50% |
+| 4000  | 0.0066     | 0.275    | 8.70%    | 69.00%         | 83.80%       | 29.50% |
+| 8000  | 0.00167    | 0.346    | 9.50%    | 68.10%         | 82.10%       | 25.50% |
 
-I have updated the fine-tuning to support cosine with restarts learning rate scheduler.
+Just by fine-tuning for longer we are able to increase accuracy by 3% (from 6% to 9%).
 
-- https://huggingface.co/docs/transformers/en/main_classes/trainer
-- https://github.com/huggingface/transformers/blob/v4.44.2/src/transformers/trainer_utils.py#L410
-- https://huggingface.co/transformers/v4.2.2/_modules/transformers/optimization.html
+#### Removing train samples to fit on max sequence length
 
-Maybe I could use another scheduler directly, that decreases the amplitude of the cosine restart
-over the train duration. The experiment with cosine learning rate seems to be increasing the learning rate to a too high value.
+### Qwen2-0.5B vs Qwen2-1.5B
 
-- https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.CyclicLR.html#torch.optim.lr_scheduler.CyclicLR
-- https://github.com/huggingface/transformers/blob/746104ba6f0514159d58dc2fb09c887d0e9d4863/src/transformers/trainer.py#L1249C22-L1249C34
-- https://github.com/bitsandbytes-foundation/bitsandbytes/blob/main/bitsandbytes/optim/adamw.py
-
-4 cycles, 0.707, warmup ratio in the cycle.
-It seems I would need to give both the optimizer and scheduler as input to the train function.
-
-Study of how the [Trainer](https://huggingface.co/docs/transformers/en/main_classes/trainer#trainer) works ([source code](https://github.com/huggingface/transformers/blob/746104ba6f0514159d58dc2fb09c887d0e9d4863/src/transformers/trainer.py#L289)). It has a method `self.create_optimizer_and_scheduler` that calls to `self.create_optimizer` and `self.create_scheduler`. This method is called from `self._inner_training_loop` that is itself called from the `self.train` method.
-
-- `self.train`
-  - `self._inner_training_loop`
-    - `self.create_optimizer_and_scheduler`
-      - `self.create_optimizer`
-      - `self.create_scheduler`
-        - `optimization.get_scheduler`
-
-I believe the simplest hack is to modify the `self.create_scheduler` function to return the scheduler I want.
+TODO: what is the effect of test-time fine-tuning?
 
 ## Conclusion
 
 The biggest finding of this iteration is that validation loss is only useful when it decreases, once it starts to diverge it is no longer useful.
+
+It seems that using higher lora ranks gives more accurate models.
 
 ## Next steps
 
@@ -181,12 +200,12 @@ The biggest finding of this iteration is that validation loss is only useful whe
 - [ ] Train for longer, is validation loss really useful?
   - [ ] What is the optimal train steps?
   - [x] I'm using the best learning rate?
-  - [ ] Can I get better results using a different lora rank?
+  - [x] Can I get better results using a different lora rank?
 - [ ] Test time fine-tuning, train with different number of steps
   - [x] 1e-4 is the best learning rate
   - [x] So far the best results are obtained training for longer, I have trained up to 4k steps
-  - [ ] Do I get better results if I train for more than 4k steps?
-  - [ ] Can the model learn faster using cyclic learning rates?
+  - [x] Do I get better results if I train for more than 4k steps?
+  - [x] Can the model learn faster using cyclic learning rates? No
   - [ ] Does it help to to remove train samples to fit training sequence length? First experiment gives worse results, but not sure if the differences are significative.
   - [ ] Could I train faster by changing the batch size?
 - [ ] Do we get improvements in submission?
