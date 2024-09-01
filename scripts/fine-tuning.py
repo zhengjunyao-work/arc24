@@ -28,9 +28,10 @@ class CFG:
     adapter_path: Optional[str] = None
     use_4bit_quantization: bool = False
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
+    remove_train_samples_to_fit_max_seq_len: bool = False
+    subsample_train_tasks_ratio: Optional[float] = None
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
     output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_grid_encoders/06_other-symbols-shape-and-number_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps'
-    remove_train_samples_to_fit_max_seq_len: bool = False
     n_gpus: int = 2
     max_seq_len: int = 4096
     epochs = 0
@@ -82,6 +83,7 @@ def parse_args():
     parser.add_argument('--grid_encoder', type=str, help="Name of the grid encoder")
     parser.add_argument('--remove_train_samples_to_fit_max_seq_len', action='store_true',
                         help="Whether to remove training samples to fit max_seq_len")
+    parser.add_argument('--subsample_train_tasks_ratio', type=float, help="Ratio of train tasks to subsample, 1 means no subsampling")
     parser.add_argument('--random_seed', type=int, help="Random seed for data generation")
     return parser.parse_args()
 
@@ -100,7 +102,8 @@ def main():
     train_dataset = IterableDataset.from_generator(
         random_prompt_generator,
         gen_kwargs=dict(filepath=cfg.train_dataset, random_seed=cfg.random_seed, **dataset_kwargs,
-                        remove_train_samples_to_fit_max_seq_len=cfg.remove_train_samples_to_fit_max_seq_len))
+                        remove_train_samples_to_fit_max_seq_len=cfg.remove_train_samples_to_fit_max_seq_len,
+                        subsample_tasks_ratio=cfg.subsample_train_tasks_ratio))
     val_dataset = create_validation_dataset(cfg.val_dataset, **dataset_kwargs)
 
     training_arguments = get_training_arguments(cfg)
@@ -363,7 +366,8 @@ def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, pr
 
 def random_prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, random_seed,
                             remove_train_samples_to_fit_max_seq_len,
-                            log_prompt_length_every=1000):
+                            log_prompt_length_every=1000,
+                            subsample_tasks_ratio=None):
     """
     """
     data = load_arc_data_with_solutions(filepath)
@@ -371,6 +375,9 @@ def random_prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, rand
     prompt_lengths = []
     random.seed(random_seed)
     np.random.seed(random_seed)
+    if subsample_tasks_ratio is not None:
+        task_ids = random.sample(task_ids, int(subsample_tasks_ratio*len(task_ids)))
+        print(f'Subsampled {len(task_ids)} tasks out of a total of {len(data)}')
     while True:
         if len(prompt_lengths) >= log_prompt_length_every:
             print_prompt_length_percentiles(prompt_lengths, prefix='Training')
