@@ -9,6 +9,8 @@ from typing import Optional
 import argparse
 from dataclasses import dataclass, asdict
 
+from unsloth import FastLanguageModel
+from unsloth import is_bfloat16_supported
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training, get_peft_model
@@ -87,8 +89,8 @@ def main():
     cfg = CFG(**{k: v for k, v in vars(parse_args()).items() if v is not None})
     save_train_conf(cfg)
 
-    model = get_model(cfg.model_path, cfg.n_gpus, cfg.torch_dtype)
-    tokenizer = get_tokenizer(cfg.model_path, model)
+    model, tokenizer = get_model(cfg.model_path, cfg.max_seq_len)
+    # tokenizer = get_tokenizer(cfg.model_path, model)
     model = get_lora_model(model, cfg.adapter_path, cfg.lora_r, cfg.use_rslora, cfg.use_dora)
 
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
@@ -270,18 +272,15 @@ def get_torch_dtype(torch_dtype):
         raise ValueError(f'Unknown torch dtype {torch_dtype}')
 
 
-def get_model(model_path, n_gpus, torch_dtype):
-    model = AutoModelForCausalLM.from_pretrained(
+def get_model(model_path, max_seq_length):
+    model, tokenizer = FastLanguageModel.from_pretrained(
         model_path,
-        #quantization_config=bnb_config,
-        device_map=get_device_map(n_gpus, model_path),
-        # max_memory={0: '9GB', 1: '8GB'},
-        trust_remote_code=True,
-        torch_dtype=get_torch_dtype(torch_dtype), #bfloat16 is 4 times slower on Kaggle than float16, on my computer they are the same speed
-        attn_implementation=get_flash_attention_implementation(),
+        max_seq_length = max_seq_length,
+        dtype = None,
+        load_in_4bit = False,
         )
     print_gpu_memory()
-    return model
+    return model, tokenizer
 
 
 def get_tokenizer(model_path, model):

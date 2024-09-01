@@ -22,16 +22,33 @@ Hopefully this will be a very fast iteration.
 
 I'm going to create a new local conda environment following [their instructions](https://github.com/unslothai/unsloth?tab=readme-ov-file#conda-installation)
 
+I have to decrease the python version to 3.10, with 3.11 could not find a compatible distribution of xformers.
+
 ```
-conda create --name unsloth \
-    python=3.11 \
+conda create --name arc-unsloth \
+    python=3.10 \
     pytorch-cuda=12.1 \
-    pytorch cudatoolkit xformers -c pytorch -c nvidia -c xformers \
-    -y
-conda activate unsloth
+    pytorch cudatoolkit xformers -c pytorch -c nvidia -c xformers
+conda activate arc-unsloth
+
+python -c "import torch; print(torch.cuda.is_available())"
+
 
 pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
 pip install --no-deps trl peft accelerate bitsandbytes
+pip install wandb termcolor
+```
+
+I have accidentally removed conda when trying to clean my base environment :(
+
+Regenerating the arc original environment:
+
+```
+conda create -n arc pytest rope pylint tqdm numpy pandas scikit-learn ipython ipykernel coverage ipywidgets matplotlib python=3.10 -y
+conda activate arc
+pip install -r requirements.txt
+pip install flash-attn --no-build-isolation
+pip install vllm
 ```
 
 ### Fine-tuning script
