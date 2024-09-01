@@ -10,7 +10,7 @@ import argparse
 from dataclasses import dataclass, asdict
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
+from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, BitsAndBytesConfig
 from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training, get_peft_model
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from datasets import Dataset, IterableDataset
@@ -26,6 +26,7 @@ from arc24.data import load_arc_data_with_solutions
 class CFG:
     model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
     adapter_path: Optional[str] = None
+    use_4bit_quantization: bool = False
     train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
     output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_grid_encoders/06_other-symbols-shape-and-number_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps'
@@ -60,6 +61,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Experiment Configuration")
     parser.add_argument('--model_path', type=str, help="Path to the model")
     parser.add_argument('--adapter_path', type=str, help="Path to the LoRA adapter for initialization")
+    parser.add_argument('--use_4bit_quantization', action='store_true', help="Whether to use 4-bit quantization")
     parser.add_argument('--output_dir', type=str, help="Path to the output LoRA")
     parser.add_argument('--train_dataset', type=str, help="Path to the dataset for training")
     parser.add_argument('--val_dataset', type=str, help="Path to the dataset for validation")
@@ -88,7 +90,7 @@ def main():
     cfg = CFG(**{k: v for k, v in vars(parse_args()).items() if v is not None})
     save_train_conf(cfg)
 
-    model = get_model(cfg.model_path, cfg.n_gpus, cfg.torch_dtype)
+    model = get_model(cfg.model_path, cfg.n_gpus, cfg.torch_dtype, cfg.use_4bit_quantization)
     tokenizer = get_tokenizer(cfg.model_path, model)
     model = get_lora_model(model, cfg.adapter_path, cfg.lora_r, cfg.use_rslora, cfg.use_dora)
 
@@ -271,10 +273,21 @@ def get_torch_dtype(torch_dtype):
         raise ValueError(f'Unknown torch dtype {torch_dtype}')
 
 
-def get_model(model_path, n_gpus, torch_dtype):
+def get_model(model_path, n_gpus, torch_dtype, use_4bit_quantization=False):
+    if use_4bit_quantization:
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit= True,
+            bnb_4bit_quant_type= "nf4",
+            bnb_4bit_compute_dtype= torch.float16,
+            bnb_4bit_use_double_quant= True,
+            llm_int8_enable_fp32_cpu_offload= True,
+            llm_int8_skip_modules=['gate', 'lm_head'],
+        )
+    else:
+        bnb_config = None
     model = AutoModelForCausalLM.from_pretrained(
         model_path,
-        #quantization_config=bnb_config,
+        quantization_config=bnb_config,
         device_map=get_device_map(n_gpus, model_path),
         # max_memory={0: '9GB', 1: '8GB'},
         trust_remote_code=True,
@@ -282,6 +295,8 @@ def get_model(model_path, n_gpus, torch_dtype):
         attn_implementation=get_flash_attention_implementation(),
         )
     print_gpu_memory()
+    if use_4bit_quantization:
+        model = prepare_model_for_kbit_training(model)
     return model
 
 
