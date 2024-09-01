@@ -4,7 +4,7 @@ _26-08-2024_
 
 ## Goal
 
-Can I improve the accuracy of the models by using a better grid representation and better prompts?
+Can I improve the accuracy of the models by using a better grid representation?
 
 ## Motivation
 
@@ -208,12 +208,13 @@ It seems that using higher lora ranks gives more accurate models.
 - I might have to reconsider the role of lora ranking now that I know that validation loss is not a good proxy.
   Run a series of experiments with different r. Maybe having a higher r could allow for faster ttft.
 - Trainings are becoming too long, could I speedup them using libraries such as [unsloth](https://github.com/unslothai/unsloth)?
+- Optimize the input prompt
+- Does it make sense to fine-tune bigger models such as Phi-3, Llama or the 7B Qwen2?
 
 ## TODO
 
 - [x] Does it help to predict the shape of the grid?
 - [x] Does it help to add row idx at the start of each line?
-- [ ] Is the system prompt helpful?
 - [x] Are the pixel symbols relevant? Or could I replace the number for other symbols?
 - [x] How useful is the validation loss?
 - [ ] Train for longer, is validation loss really useful?
@@ -227,5 +228,6 @@ It seems that using higher lora ranks gives more accurate models.
   - [x] Can the model learn faster using cyclic learning rates? No
   - [x] Does it help to to remove train samples to fit training sequence length? First experiment gives worse results, but not sure if the differences are significative.
   - [x] Could I train faster by changing the batch size?
+- [ ] Qwen2-0.5B vs Qwen2-1.5B
 - [ ] Do we get improvements in submission?
 - [ ] If I make the same submission 3 times, what is the variability of the score? (Using a random seed)
