@@ -79,6 +79,7 @@ def parse_args():
     parser.add_argument('--grid_encoder', type=str, help="Name of the grid encoder")
     parser.add_argument('--remove_train_samples_to_fit_max_seq_len', action='store_true',
                         help="Whether to remove training samples to fit max_seq_len")
+    parser.add_argument('--random_seed', type=int, help="Random seed for data generation")
     return parser.parse_args()
 
 
