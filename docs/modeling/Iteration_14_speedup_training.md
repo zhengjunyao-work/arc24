@@ -18,6 +18,27 @@ Hopefully this will be a very fast iteration.
 
 ## Development
 
+### Install unsloth
+
+I'm going to create a new local conda environment following [their instructions](https://github.com/unslothai/unsloth?tab=readme-ov-file#conda-installation)
+
+```
+conda create --name unsloth \
+    python=3.11 \
+    pytorch-cuda=12.1 \
+    pytorch cudatoolkit xformers -c pytorch -c nvidia -c xformers \
+    -y
+conda activate unsloth
+
+pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
+pip install --no-deps trl peft accelerate bitsandbytes
+```
+
+### Fine-tuning script
+
+On a first step I'm going to duplicate the fine-tuning script and adapt it to use unsloth. Once I validate
+that it works and it's faster I will look for the way of having a single script.
+
 ## Results
 
 ## Conclusion
