@@ -129,11 +129,11 @@ def get_sampling_params(best_of, temperature, n, max_output_tokens):
     # # https://docs.vllm.ai/en/latest/dev/sampling_params.html
     if best_of == 1:
         print('Using greedy search')
-        sampling_params = SamplingParams(n=n, temperature=temperature, max_tokens=max_output_tokens)
+        sampling_params = SamplingParams(n=n, temperature=temperature, max_tokens=max_output_tokens, logprobs=0)
     else:
         print(f'Using beam search with best_of={best_of}, temperature is set to 0.0')
         sampling_params = SamplingParams(n=n, temperature=0.0, max_tokens=max_output_tokens,
-                              use_beam_search=True, best_of=best_of)
+                              use_beam_search=True, best_of=best_of, logprobs=0)
     print(f'Sampling params: {sampling_params}')
     return sampling_params
 
