@@ -275,6 +275,7 @@ def get_torch_dtype(torch_dtype):
 
 def get_model(model_path, n_gpus, torch_dtype, use_4bit_quantization=False):
     if use_4bit_quantization:
+        print('Using 4-bit quantization')
         bnb_config = BitsAndBytesConfig(
             load_in_4bit= True,
             bnb_4bit_quant_type= "nf4",
