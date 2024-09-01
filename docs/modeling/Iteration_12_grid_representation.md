@@ -174,6 +174,25 @@ Just by fine-tuning for longer we are able to increase accuracy by 3% (from 6% t
 
 #### Removing train samples to fit on max sequence length
 
+As part of a following iteration I have implemented a feature that if a task is too long to fit into the `max_sequence_length`, it removes train samples until it is small enough.
+
+I wanted to find if it is helpful or not for fine-tuning the model. The effect is is unclear as the results below show. In one case it improves the results and in other it worsens them.
+Thus the effect is likely very small.
+
+```
+# Experiment 1
+/mnt/hdd0/Kaggle/arc24/evaluations/20240828_grid_encoders_ttft/05_shape-and-number-new-model_Qwen2-0.5B-Instruct_lr1e-4_r32_4e3steps/checkpoint-4000/inference_x64.json
+accuracy: 8.7%	correct_pixels: 69.0%	max_correct_pixels: 82.6%	correct_size: 83.8%	any_correct_size: 88.0%	pass_n: 29.5%	unanswered: 3.0%	
+/mnt/hdd0/Kaggle/arc24/evaluations/20240828_grid_encoders_ttft/06_shape-and-number-new-model-rtstfmsl_Qwen2-0.5B-Instruct_lr1e-4_r32_4e3steps/checkpoint-4000/inference_x64.json
+accuracy: 8.7%	correct_pixels: 68.4%	max_correct_pixels: 81.7%	correct_size: 82.7%	any_correct_size: 86.0%	pass_n: 27.0%	unanswered: 2.9%
+
+# Experiment 2
+/mnt/hdd0/Kaggle/arc24/evaluations/20240828_grid_encoders_ttft/11_bigger-lora_Qwen2-0.5B-Instruct_lr1e-4_r256_4e3steps/checkpoint-4000/inference_x64.json
+accuracy: 10.4%	correct_pixels: 71.0%	max_correct_pixels: 83.2%	correct_size: 84.1%	any_correct_size: 87.5%	pass_n: 28.0%	unanswered: 2.7%
+/mnt/hdd0/Kaggle/arc24/evaluations/20240828_grid_encoders_ttft/11_bigger-lora-remove-train-samples_Qwen2-0.5B-Instruct_lr1e-4_r256_4e3steps/checkpoint-4000/inference_x64.json
+accuracy: 10.8%	correct_pixels: 71.1%	max_correct_pixels: 83.4%	correct_size: 83.8%	any_correct_size: 87.5%	pass_n: 32.5%	unanswered: 2.1%	
+```
+
 ### Qwen2-0.5B vs Qwen2-1.5B
 
 TODO: what is the effect of test-time fine-tuning?
@@ -201,12 +220,12 @@ It seems that using higher lora ranks gives more accurate models.
   - [ ] What is the optimal train steps?
   - [x] I'm using the best learning rate?
   - [x] Can I get better results using a different lora rank?
-- [ ] Test time fine-tuning, train with different number of steps
+- [x] Test time fine-tuning, train with different number of steps
   - [x] 1e-4 is the best learning rate
   - [x] So far the best results are obtained training for longer, I have trained up to 4k steps
   - [x] Do I get better results if I train for more than 4k steps?
   - [x] Can the model learn faster using cyclic learning rates? No
-  - [ ] Does it help to to remove train samples to fit training sequence length? First experiment gives worse results, but not sure if the differences are significative.
-  - [ ] Could I train faster by changing the batch size?
+  - [x] Does it help to to remove train samples to fit training sequence length? First experiment gives worse results, but not sure if the differences are significative.
+  - [x] Could I train faster by changing the batch size?
 - [ ] Do we get improvements in submission?
 - [ ] If I make the same submission 3 times, what is the variability of the score? (Using a random seed)
