@@ -252,7 +252,7 @@ def get_device_map(n_gpus, model_path):
         else:
             device_map = 'balanced'
     else:
-        device_map = None
+        device_map = 'auto'
     return device_map
 
 
