@@ -60,12 +60,12 @@ No prompt smaller than 4096 tokens for task b9630600
 
 ### Experiment about optimal number of splits
 
-TODO: it's already running, maybe each experiment is going to take around 3 hours.
-TODO: it looks very promising!
-
 ![effect of the number of splits](res/2024-09-02-17-44-54.png)
 
 There is a clear positive relation between the number of splits and the accuracy of the model. However we see a decrease after 20 splits. My hypothesis is that if we were using a bigger compute budget we won't see that effect. The total number of training steps is 1000, so for 50 splits that means we will only change the model 20 times.
+
+<details>
+  <summary>Click to see all the metrics</summary>
 
 ```
 # For a compute budget of 1k steps
@@ -100,6 +100,8 @@ accuracy: 9.7%	correct_pixels: 73.5%	max_correct_pixels: 76.9%	correct_size: 87.
 accuracy: 10.4%	correct_pixels: 70.3%	max_correct_pixels: 82.9%	correct_size: 83.9%	any_correct_size: 87.0%	pass_64: 29.5%	unanswered: 4.0%
 accuracy: 10.0%	correct_pixels: 72.2%	max_correct_pixels: 76.3%	correct_size: 85.0%	any_correct_size: 87.0%	pass_2: 20.0%	unanswered: 1.0%
 ```
+
+</details>
 
 ### Optimization for 50 splits
 
