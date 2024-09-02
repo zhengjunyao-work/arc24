@@ -7,7 +7,7 @@ from tqdm.auto import tqdm
 import wandb
 from typing import Optional, List
 import argparse
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, BitsAndBytesConfig
@@ -27,7 +27,7 @@ class CFG:
     model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
     adapter_path: Optional[str] = None
     use_4bit_quantization: bool = False
-    train_datasets: List[str] = ['/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json']
+    train_datasets: List[str] = field(default_factory=lambda: ['/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'])
     remove_train_samples_to_fit_max_seq_len: bool = False
     subsample_train_tasks_ratio: Optional[float] = None
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
@@ -506,7 +506,7 @@ def get_training_arguments(cfg):
 
 
 def save_train_conf(cfg):
-    print(asdict(cfg))
+    print(f'Train configuration: {asdict(cfg)}')
     os.makedirs(cfg.output_dir, exist_ok=True)
     with open(os.path.join(cfg.output_dir, 'cfg.json'), 'w') as f:
         json.dump({key:value for key, value in cfg.__dict__.items() if not key.startswith('__')}, f, indent=4)
