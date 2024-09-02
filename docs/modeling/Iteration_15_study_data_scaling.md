@@ -25,6 +25,22 @@ I already have baseline results without subsampling. I'm going to try the follow
 
 ## Results
 
+![data-scaling](res/2024-09-02-16-02-17.png)
+
+Accuracy seems to improve linearly when scaling the data. F.e. having 1400 tasks for training should
+yield an accuracy of 5%.
+
+| training tasks | accuracy |
+|----------------|----------|
+| 700            | 2.80%    |
+| 1400           | 5.60%    |
+| 2800           | 11.20%   |
+| 5000           | 20.00%   |
+| 10000          | 40.00%   |
+| 21250          | 85.00%   |
+
+In the unlikely even that the trend continues, it would be enough to generate 21k tasks to achieve the 500k reward.
+
 ## Conclusion
 
 ## Next steps
