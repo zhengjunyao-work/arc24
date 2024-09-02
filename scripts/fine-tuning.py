@@ -5,7 +5,7 @@ import json
 import numpy as np
 from tqdm.auto import tqdm
 import wandb
-from typing import Optional
+from typing import Optional, List
 import argparse
 from dataclasses import dataclass, asdict
 
@@ -27,7 +27,7 @@ class CFG:
     model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
     adapter_path: Optional[str] = None
     use_4bit_quantization: bool = False
-    train_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json'
+    train_datasets: List[str] = ['/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json']
     remove_train_samples_to_fit_max_seq_len: bool = False
     subsample_train_tasks_ratio: Optional[float] = None
     val_dataset: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
@@ -64,7 +64,7 @@ def parse_args():
     parser.add_argument('--adapter_path', type=str, help="Path to the LoRA adapter for initialization")
     parser.add_argument('--use_4bit_quantization', action='store_true', help="Whether to use 4-bit quantization")
     parser.add_argument('--output_dir', type=str, help="Path to the output LoRA")
-    parser.add_argument('--train_dataset', type=str, help="Path to the dataset for training")
+    parser.add_argument('--train_datasets', nargs='+', help="Path to the datasets for training")
     parser.add_argument('--val_dataset', type=str, help="Path to the dataset for validation")
     parser.add_argument('--max_steps', type=int, help="Max steps to fine-tune")
     parser.add_argument('--warmup_ratio', type=float, help="Warmup ratio, relative to training steps")
@@ -101,7 +101,7 @@ def main():
     dataset_kwargs = {'grid_encoder': grid_encoder, 'tokenizer': tokenizer, 'max_seq_len': cfg.max_seq_len}
     train_dataset = IterableDataset.from_generator(
         random_prompt_generator,
-        gen_kwargs=dict(filepath=cfg.train_dataset, random_seed=cfg.random_seed, **dataset_kwargs,
+        gen_kwargs=dict(filepaths=cfg.train_datasets, random_seed=cfg.random_seed, **dataset_kwargs,
                         remove_train_samples_to_fit_max_seq_len=cfg.remove_train_samples_to_fit_max_seq_len,
                         subsample_tasks_ratio=cfg.subsample_train_tasks_ratio))
     val_dataset = create_validation_dataset(cfg.val_dataset, **dataset_kwargs)
@@ -364,20 +364,24 @@ def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, pr
     return dataset
 
 
-def random_prompt_generator(filepath, grid_encoder, tokenizer, max_seq_len, random_seed,
+def random_prompt_generator(filepaths, grid_encoder, tokenizer, max_seq_len, random_seed,
                             remove_train_samples_to_fit_max_seq_len,
                             log_prompt_length_every=1000,
                             subsample_tasks_ratio=None):
     """
     """
-    data = load_arc_data_with_solutions(filepath)
+    data = dict()
+    for filepath in tqdm(filepaths, desc='Loading training datasets'):
+        data.update(load_arc_data_with_solutions(filepath))
     task_ids = list(data.keys())
     prompt_lengths = []
     random.seed(random_seed)
     np.random.seed(random_seed)
     if subsample_tasks_ratio is not None:
         task_ids = random.sample(task_ids, int(subsample_tasks_ratio*len(task_ids)))
-        print(f'Subsampled {len(task_ids)} tasks out of a total of {len(data)}')
+        print(f'Subsampled {len(task_ids)} training tasks out of a total of {len(data)}')
+    else:
+        print(f'Using all {len(task_ids)} training tasks')
     while True:
         if len(prompt_lengths) >= log_prompt_length_every:
             print_prompt_length_percentiles(prompt_lengths, prefix='Training')
