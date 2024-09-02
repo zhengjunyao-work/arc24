@@ -7,6 +7,7 @@ from tqdm.auto import tqdm
 import wandb
 from typing import Optional, List
 import argparse
+from functools import partial
 from dataclasses import dataclass, asdict, field
 
 import torch
@@ -100,8 +101,8 @@ def main():
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
     dataset_kwargs = {'grid_encoder': grid_encoder, 'tokenizer': tokenizer, 'max_seq_len': cfg.max_seq_len}
     train_dataset = IterableDataset.from_generator(
-        random_prompt_generator,
-        gen_kwargs=dict(filepaths=cfg.train_datasets, random_seed=cfg.random_seed, **dataset_kwargs,
+        partial(random_prompt_generator, dataset_filepaths=cfg.train_datasets),
+        gen_kwargs=dict(random_seed=cfg.random_seed, **dataset_kwargs,
                         remove_train_samples_to_fit_max_seq_len=cfg.remove_train_samples_to_fit_max_seq_len,
                         subsample_tasks_ratio=cfg.subsample_train_tasks_ratio))
     val_dataset = create_validation_dataset(cfg.val_dataset, **dataset_kwargs)
@@ -364,14 +365,14 @@ def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, pr
     return dataset
 
 
-def random_prompt_generator(filepaths, grid_encoder, tokenizer, max_seq_len, random_seed,
+def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_len, random_seed,
                             remove_train_samples_to_fit_max_seq_len,
                             log_prompt_length_every=1000,
                             subsample_tasks_ratio=None):
     """
     """
     data = dict()
-    for filepath in tqdm(filepaths, desc='Loading training datasets'):
+    for filepath in tqdm(dataset_filepaths, desc='Loading training datasets'):
         data.update(load_arc_data_with_solutions(filepath))
     task_ids = list(data.keys())
     prompt_lengths = []
