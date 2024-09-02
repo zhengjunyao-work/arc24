@@ -130,7 +130,7 @@ I have tried increasing the default 1e-4 learning rate to see if I could get bet
 
 ![optimal learning rate](res/2024-08-31-14-50-58.png)
 
-| model      | learning rate | train loss | val loss | accuracy | correct_pixels | correct_size | pass_n | unanswered |
+| model      | learning rate | train loss | val loss | accuracy | correct_pixels | correct_size | pass_64 | unanswered |
 |------------|---------------|------------|----------|----------|----------------|--------------|--------|------------|
 | Qwen2-0.5B | 1.00E-04      | 0.03       | 0.175    | 3.40%    | 67.50%         | 85.00%       | 18.00% | 2.60%      |
 | Qwen2-0.5B | 2.00E-04      | 0.0319     | 0.175    | 2.90%    | 65.50%         | 82.70%       | 19.00% | 3.60%      |
@@ -144,7 +144,7 @@ I have tried increasing the default 1e-4 learning rate to see if I could get bet
 - There seems to be a relation between accuracy and lora rank. We get higher accuracy by using higher ranks.
 - The relation with the other metrics is unclear
 
-| model      | lora_rank | train loss | val loss | accuracy | correct_pixels | correct_size | pass_n | unanswered |
+| model      | lora_rank | train loss | val loss | accuracy | correct_pixels | correct_size | pass_64 | unanswered |
 |------------|-----------|------------|----------|----------|----------------|--------------|--------|------------|
 | Qwen2-0.5B | 16        | 0.0385     | 0.175    | 3.10%    | 66.50%         | 85.00%       | 19.50% | 3.00%      |
 | Qwen2-0.5B | 32        | 0.0305     | 0.175    | 3.40%    | 67.50%         | 85.00%       | 18.00% | 2.60%      |
@@ -163,7 +163,7 @@ learning rate is the same as in training: 1e-4. And the best schedule is linear.
 
 We see that the accuracy increases when we fine-tune for longer with test-time fine-tuning. Train loss decreases and validation loss raises. The other metrics do not show a clear relation with the number of training steps.
 
-| steps | train loss | val loss | accuracy | correct_pixels | correct_size | pass_n |
+| steps | train loss | val loss | accuracy | correct_pixels | correct_size | pass_64 |
 |-------|------------|----------|----------|----------------|--------------|--------|
 | 1000  | 0.044      | 0.17     | 6.70%    | 67.90%         | 83.30%       | 28.00% |
 | 2000  | 0.0248     | 0.215    | 7.80%    | 67.00%         | 81.60%       | 26.50% |
@@ -182,15 +182,15 @@ Thus the effect is likely very small.
 ```
 # Experiment 1
 /mnt/hdd0/Kaggle/arc24/evaluations/20240828_grid_encoders_ttft/05_shape-and-number-new-model_Qwen2-0.5B-Instruct_lr1e-4_r32_4e3steps/checkpoint-4000/inference_x64.json
-accuracy: 8.7%	correct_pixels: 69.0%	max_correct_pixels: 82.6%	correct_size: 83.8%	any_correct_size: 88.0%	pass_n: 29.5%	unanswered: 3.0%	
+accuracy: 8.7%	correct_pixels: 69.0%	max_correct_pixels: 82.6%	correct_size: 83.8%	any_correct_size: 88.0%	pass_64: 29.5%	unanswered: 3.0%	
 /mnt/hdd0/Kaggle/arc24/evaluations/20240828_grid_encoders_ttft/06_shape-and-number-new-model-rtstfmsl_Qwen2-0.5B-Instruct_lr1e-4_r32_4e3steps/checkpoint-4000/inference_x64.json
-accuracy: 8.7%	correct_pixels: 68.4%	max_correct_pixels: 81.7%	correct_size: 82.7%	any_correct_size: 86.0%	pass_n: 27.0%	unanswered: 2.9%
+accuracy: 8.7%	correct_pixels: 68.4%	max_correct_pixels: 81.7%	correct_size: 82.7%	any_correct_size: 86.0%	pass_64: 27.0%	unanswered: 2.9%
 
 # Experiment 2
 /mnt/hdd0/Kaggle/arc24/evaluations/20240828_grid_encoders_ttft/11_bigger-lora_Qwen2-0.5B-Instruct_lr1e-4_r256_4e3steps/checkpoint-4000/inference_x64.json
-accuracy: 10.4%	correct_pixels: 71.0%	max_correct_pixels: 83.2%	correct_size: 84.1%	any_correct_size: 87.5%	pass_n: 28.0%	unanswered: 2.7%
+accuracy: 10.4%	correct_pixels: 71.0%	max_correct_pixels: 83.2%	correct_size: 84.1%	any_correct_size: 87.5%	pass_64: 28.0%	unanswered: 2.7%
 /mnt/hdd0/Kaggle/arc24/evaluations/20240828_grid_encoders_ttft/11_bigger-lora-remove-train-samples_Qwen2-0.5B-Instruct_lr1e-4_r256_4e3steps/checkpoint-4000/inference_x64.json
-accuracy: 10.8%	correct_pixels: 71.1%	max_correct_pixels: 83.4%	correct_size: 83.8%	any_correct_size: 87.5%	pass_n: 32.5%	unanswered: 2.1%	
+accuracy: 10.8%	correct_pixels: 71.1%	max_correct_pixels: 83.4%	correct_size: 83.8%	any_correct_size: 87.5%	pass_64: 32.5%	unanswered: 2.1%	
 ```
 
 ### Qwen2-0.5B vs Qwen2-1.5B

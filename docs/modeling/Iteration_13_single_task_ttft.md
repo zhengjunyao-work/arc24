@@ -91,6 +91,10 @@ accuracy: 9.2%	correct_pixels: 75.7%	max_correct_pixels: 79.1%	correct_size: 88.
 100 splits, 5h10
 accuracy: 8.9%	correct_pixels: 70.0%	max_correct_pixels: 82.4%	correct_size: 84.6%	any_correct_size: 88.0%	pass_n: 28.0%	unanswered: 3.1%
 accuracy: 9.7%	correct_pixels: 73.5%	max_correct_pixels: 76.9%	correct_size: 87.2%	any_correct_size: 87.8%	pass_n: 19.4%	unanswered: 0.0%
+
+50 splits, constant lr, 4h5
+accuracy: 10.4%	correct_pixels: 70.3%	max_correct_pixels: 82.9%	correct_size: 83.9%	any_correct_size: 87.0%	pass_n: 29.5%	unanswered: 4.0%
+accuracy: 10.0%	correct_pixels: 72.2%	max_correct_pixels: 76.3%	correct_size: 85.0%	any_correct_size: 87.0%	pass_n: 20.0%	unanswered: 1.0%
 ```
 
 ## Conclusion
