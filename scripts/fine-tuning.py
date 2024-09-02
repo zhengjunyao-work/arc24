@@ -144,7 +144,7 @@ def main():
 # Model
 
 def get_device_map(n_gpus, model_path):
-    if n_gpus > 1:
+    if n_gpus == 2:
         if 'llama' in model_path.lower():
             device_map = {
                 'model.embed_tokens': 0,
