@@ -122,7 +122,9 @@ Thus I should probably evaluate the last and the best checkpoint, and launch lon
 
 Since I have found that the validation loss was not a good metric, I'm going to train the models for longer.
 
-TODO: plot of val loss, train loss, val metrics vs number of training steps for both Qwen models
+![longer trainings](res/2024-09-02-17-12-50.png)
+
+The plot shows a clear disconnection between validation loss and the other metrics.
 
 #### Optimal learning rate
 
@@ -195,13 +197,44 @@ accuracy: 10.8%	correct_pixels: 71.1%	max_correct_pixels: 83.4%	correct_size: 83
 
 ### Qwen2-0.5B vs Qwen2-1.5B
 
-TODO: what is the effect of test-time fine-tuning?
+#### Train on ARC tasks
+
+| model      | steps | train loss | val loss | accuracy | correct_pixels | correct_size | pass_64 | pass_2 |
+|------------|-------|------------|----------|----------|----------------|--------------|---------|--------|
+| Qwen2-0.5B | 24000 | 0.0157     | 0.217    | 4.00%    | 66.70%         | 84.10%       | 21.50%  | 11.20% |
+| Qwen2-1.5B | 12000 | 0.015      | 0.188    | 6.20%    | 70.50%         | 87.60%       | 22.00%  | 13.30% |
+
+#### Test-time fine-tuning
+
+| model      | steps | train loss | val loss | accuracy | correct_pixels | correct_size | pass_64 | pass_2 |
+|------------|-------|------------|----------|----------|----------------|--------------|---------|--------|
+| Qwen2-0.5B | 4000  | 0.0066     | 0.275    | 8.70%    | 69.00%         | 83.80%       | 29.50%  | 22.50% |
+| Qwen2-1.5B | 4000  | 0.0015     | 0.323    | 12.90%   | 72.60%         | 85.30%       | 33.00%  | 23.20% |
+
+#### Summary
+
+Qwen2-1.5B gets better results but the difference is small when we consider the pass_2 metric which is the most
+relevant for the challenge.
+
+When we train on ARC tasks we get a pass_2 of ~12% and this increases to 23% when doing test-time fine-tuning.
+
+### Submission results
+
+We have improved the score from 7 to 10. In addition we have been able to ensemble the model with the 2020 solution and achieve a score of 25 (24 + 1).
 
 ## Conclusion
 
 The biggest finding of this iteration is that validation loss is only useful when it decreases, once it starts to diverge it is no longer useful.
+I have found that I can train for longer both on normal training and test-time fine-tuning and improve the results.
+
+Predicting the grid shape and writing row numbers also helps to improve the predictions, this has a small cost in outputting more tokens.
 
 It seems that using higher lora ranks gives more accurate models.
+
+Qwen2-1.5B gets better results than Qwen2-0.5B, but the difference in pass_2 metric is too small. That might explain
+that we didn't see clear differences in the leaderboard.
+
+We have been able to increase the LB score to 10, and using an ensemble to 25. This implies that there is a gap of around 10% between validation and leaderboard.
 
 ## Next steps
 
@@ -217,8 +250,8 @@ It seems that using higher lora ranks gives more accurate models.
 - [x] Does it help to add row idx at the start of each line?
 - [x] Are the pixel symbols relevant? Or could I replace the number for other symbols?
 - [x] How useful is the validation loss?
-- [ ] Train for longer, is validation loss really useful?
-  - [ ] What is the optimal train steps?
+- [x] Train for longer, is validation loss really useful?
+  - [x] What is the optimal train steps?
   - [x] I'm using the best learning rate?
   - [x] Can I get better results using a different lora rank?
 - [x] Test time fine-tuning, train with different number of steps
@@ -228,6 +261,6 @@ It seems that using higher lora ranks gives more accurate models.
   - [x] Can the model learn faster using cyclic learning rates? No
   - [x] Does it help to to remove train samples to fit training sequence length? First experiment gives worse results, but not sure if the differences are significative.
   - [x] Could I train faster by changing the batch size?
-- [ ] Qwen2-0.5B vs Qwen2-1.5B
-- [ ] Do we get improvements in submission?
+- [x] Qwen2-0.5B vs Qwen2-1.5B
+- [x] Do we get improvements in submission?
 - [ ] If I make the same submission 3 times, what is the variability of the score? (Using a random seed)
