@@ -193,6 +193,12 @@ accuracy: 8.7%	correct_pixels: 68.4%	max_correct_pixels: 81.7%	correct_size: 82.
 accuracy: 10.4%	correct_pixels: 71.0%	max_correct_pixels: 83.2%	correct_size: 84.1%	any_correct_size: 87.5%	pass_64: 28.0%	unanswered: 2.7%
 /mnt/hdd0/Kaggle/arc24/evaluations/20240828_grid_encoders_ttft/11_bigger-lora-remove-train-samples_Qwen2-0.5B-Instruct_lr1e-4_r256_4e3steps/checkpoint-4000/inference_x64.json
 accuracy: 10.8%	correct_pixels: 71.1%	max_correct_pixels: 83.4%	correct_size: 83.8%	any_correct_size: 87.5%	pass_64: 32.5%	unanswered: 2.1%	
+
+# Experiment 3
+/mnt/hdd0/Kaggle/arc24/evaluations/20240826_grid_encoders/04_row-number-and-grid-shape_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps/checkpoint-6000/inference.json
+accuracy: 2.8%	correct_pixels: 66.3%	max_correct_pixels: 82.2%	correct_size: 84.2%	any_correct_size: 91.0%	pass_n: 18.5%	unanswered: 2.8%
+/mnt/hdd0/Kaggle/arc24/evaluations/20240826_grid_encoders/12_rtstfmsl_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps/checkpoint-6000/inference_x64.json
+accuracy: 3.0%	correct_pixels: 67.7%	max_correct_pixels: 83.1%	correct_size: 85.4%	any_correct_size: 91.0%	pass_n: 16.5%	unanswered: 3.0%
 ```
 
 ### Qwen2-0.5B vs Qwen2-1.5B

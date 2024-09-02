@@ -2,11 +2,6 @@
 
 _01-09-2024_
 
-<!---
-The work is done using short iterations. Each iteration needs to have a very
-clear goal. This allows to gain greater knowledge of the problem on each iteration.
---->
-
 ## Goal
 
 How the model accuracy scales with the number of training tasks?

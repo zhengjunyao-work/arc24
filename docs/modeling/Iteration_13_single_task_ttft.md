@@ -64,6 +64,10 @@ No prompt smaller than 4096 tokens for task b9630600
 
 There is a clear positive relation between the number of splits and the accuracy of the model. However we see a decrease after 20 splits. My hypothesis is that if we were using a bigger compute budget we won't see that effect. The total number of training steps is 1000, so for 50 splits that means we will only change the model 20 times.
 
+We are able to reach an accuracy of 10.2% and a pass_2 of 23.7%. On the previous iteration I could only reach 9.4% accuracy fine-tuning for 8k steps, the best experiment with 1k steps reached 7% accuracy.
+I could reach a pass_2 of 22.7% fine-tuning for 4k steps, and the best experiment with 1k steps reached just 15%.
+This comparison really validates this single task test-time fine-tuning approach.
+
 <details>
   <summary>Click to see all the metrics</summary>
 
@@ -131,3 +135,5 @@ TODO: what if I reduce the batch size? That way I will do more modifications to 
 - [x] Measure the effect of using the feature above in a normal training. Done on previous iteration, unclear effect.
 - [ ] Optimize the parametrization of single task ttft (stttft) (learning rate and steps) Does it improve over the baseline?
 - [x] Try with constant learning rate schedule, might be better for short fine-tunings.
+- [ ] Can I improve the leaderboard score?
+- [ ] Can I optimize the submission speed? Maybe reduce VLLM RAM usage.
