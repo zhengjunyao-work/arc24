@@ -34,12 +34,13 @@ yield an accuracy of 5%.
 | 10000          | 40.00%   |
 | 21250          | 85.00%   |
 
-In the unlikely even that the trend continues, it would be enough to generate 21k tasks to achieve the 500k reward.
+In the unlikely even that the trend continues "forever", it would be enough to generate 21k tasks to achieve the 500k reward.
 
 ## Conclusion
 
+If we had access to more data with the same quality as the ARC tasks, it is very likely that we could improve the accuracy of our model.
+
 ## Next steps
 
-## TODO
-
-- [ ]
+- Revisit the study about external data
+- Generate new data for training
