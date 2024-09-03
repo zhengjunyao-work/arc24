@@ -25,7 +25,7 @@ from arc24.data import load_arc_data_with_solutions
 # grid encoder experiments
 @dataclass
 class CFG:
-    resume_from_checkpoint: bool = False
+    resume_from_checkpoint: bool = True
     model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
     adapter_path: Optional[str] = None
     use_4bit_quantization: bool = False
@@ -87,7 +87,7 @@ def parse_args():
                         help="Whether to remove training samples to fit max_seq_len")
     parser.add_argument('--subsample_train_tasks_ratio', type=float, help="Ratio of train tasks to subsample, 1 means no subsampling")
     parser.add_argument('--random_seed', type=int, help="Random seed for data generation")
-    parser.add_argument('--resume_from_checkpoint', action='store_true', help="Whether to resume from checkpoint")
+    parser.add_argument('--resume_from_checkpoint', action=argparse.BooleanOptionalAction, help="Whether to resume from checkpoint")
     return parser.parse_args()
 
 
