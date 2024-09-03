@@ -26,7 +26,8 @@ tasks that could boost the leaderboard score. I will be adding new data once I v
 
 Using a higher lora rank than 32 might give better results, but I still have to verify it.
 
-Use the bigger `max_seq_len` possible, because there will be long problems in the test set.
+Use the bigger `max_seq_len` possible, because there will be long problems in the test set. I have found that I can use
+a `max_seq_len` of 10240 without any problem, and very little slowdown because each prompt is processed independently, so they are not padded.
 
 ## Results
 
