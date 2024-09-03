@@ -2,6 +2,7 @@
 import os
 import random
 import json
+import glob
 import numpy as np
 from tqdm.auto import tqdm
 import wandb
@@ -138,7 +139,7 @@ def main():
     if cfg.lr_scheduler_type == 'cyclic':
         replace_trainer_lr_scheduler_with_cyclic_lr(
             trainer, cfg.warmup_ratio, cfg.learning_rate, cfg.lr_num_cycles)
-    trainer.train(resume_from_checkpoint=cfg.resume_from_checkpoint)
+    trainer.train(resume_from_checkpoint=cfg.resume_from_checkpoint and is_checkpoint_available(cfg.output_dir))
     if cfg.report_to == 'wandb':
         w.finish()
 
@@ -540,6 +541,15 @@ def replace_trainer_lr_scheduler_with_cyclic_lr(trainer, warmup_ratio, learning_
         )
         return self.lr_scheduler
     trainer.create_scheduler = create_scheduler.__get__(trainer)
+
+
+def is_checkpoint_available(output_dir):
+    is_checkpoint_available = len(glob.glob(os.path.join(output_dir, 'checkpoint-*'))) > 0
+    if is_checkpoint_available:
+        print('Checkpoint found, resuming training')
+    else:
+        print('No checkpoint found, starting training from scratch')
+    return is_checkpoint_available
 
 
 if __name__ == '__main__':
