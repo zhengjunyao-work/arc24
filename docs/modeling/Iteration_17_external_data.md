@@ -26,3 +26,4 @@ adding different data and evaluate to see if there is improvement.
 ## TODO
 
 - [ ] Create a dataset with reverse ARC tasks. All tasks that are invertible could be reversed and used for training.
+- [ ] Implement a new option on training that uses a dataset without test tasks. It has a configuration with the number of train tasks and randomly makes new tasks selecting train and test samples.

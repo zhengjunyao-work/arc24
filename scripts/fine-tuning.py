@@ -391,6 +391,8 @@ def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_
         random.shuffle(task_ids)
         for task_id in task_ids:
             task = data[task_id]
+            if 'test' not in task and 'n_train' in task:
+                task = create_random_task_from_task_without_test(task)
             task = random_augment_task(task)
             if remove_train_samples_to_fit_max_seq_len:
                 while len(task['train']):
@@ -408,6 +410,13 @@ def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_
             else:
                 pass # commented the line above because it was becoming too verbose
                 # print(f'Prompt was {prompt_length}>{max_seq_len} tokens for task {task_id}, skipping task')
+
+
+def create_random_task_from_task_without_test(task):
+    """ This is useful to generate nearly infinite tasks from datasets such as RE-ARC """
+    samples = random.choice(task['train'], task['n_train'] + 1)
+    new_task = dict(train=samples[:-1], test=samples[-1:])
+    return new_task
 
 
 def _create_prompt_smaller_than_max_seq_len(task, grid_encoder, tokenizer, max_seq_len):
