@@ -126,6 +126,8 @@ TODO: what if I reduce the batch size? That way I will do more modifications to 
 
 ## Conclusion
 
+TODO: new best score of 28! using an ensemble
+
 ## Next steps
 
 ## TODO
@@ -135,5 +137,5 @@ TODO: what if I reduce the batch size? That way I will do more modifications to 
 - [x] Measure the effect of using the feature above in a normal training. Done on previous iteration, unclear effect.
 - [ ] Optimize the parametrization of single task ttft (stttft) (learning rate and steps) Does it improve over the baseline?
 - [x] Try with constant learning rate schedule, might be better for short fine-tunings.
-- [ ] Can I improve the leaderboard score?
-- [ ] Can I optimize the submission speed? Maybe reduce VLLM RAM usage.
+- [x] Can I improve the leaderboard score?
+- [ ] Can I optimize the submission speed? Maybe reduce VLLM RAM usage. https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html
