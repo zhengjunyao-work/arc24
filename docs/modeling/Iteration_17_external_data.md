@@ -17,6 +17,14 @@ we did with external data.
 The baseline will be the model trained for 6k steps just on the original ARC tasks. We will run experiments
 adding different data and evaluate to see if there is improvement.
 
+### Reverse ARC dataset
+
+Let's loop over all the ARC train tasks and collect the task ids of the tasks that could be reversed (going from the output to the input).
+
+One way to do that would be to use the website and manually copy the ids of the tasks that could be reversed.
+However that involves many manual steps. I would rather create a simple jupyter notebook interface
+to do that. That could be the base for future work in task generation.
+
 ## Results
 
 ## Conclusion
