@@ -414,7 +414,7 @@ def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_
 
 def create_random_task_from_task_without_test(task):
     """ This is useful to generate nearly infinite tasks from datasets such as RE-ARC """
-    samples = random.choice(task['train'], task['n_train'] + 1)
+    samples = np.random.choice(task['train'], task['n_train'] + 1, replace=False).tolist()
     new_task = dict(train=samples[:-1], test=samples[-1:])
     return new_task
 
