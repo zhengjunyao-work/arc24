@@ -37,4 +37,5 @@ a `max_seq_len` of 10240 without any problem, and very little slowdown because e
 
 ## TODO
 
-- [ ]
+- [ ] Do we see improvements in LB score when increasing the `max_seq_len`?
+- [ ] Do we see improvements when increasing LoRA rank?
