@@ -38,6 +38,12 @@ powerful solution than the LLM approach.
 But in essence both solutions need to build a good representation of the problem internally. That is only
 achieved by training in a big number of examples. It is possible that the same model could do both tasks.
 
+A stronger model, trained on more tasks, will likely benefit more from test-time fine-tuning because
+it has a better initial problem representation.
+
+The writing code approach seems more appealing and general, but it will involve more changes and I believe I should try at least a few weeks the strategy
+of creating synthetic data.
+
 ## Results
 
 ## Conclusion
