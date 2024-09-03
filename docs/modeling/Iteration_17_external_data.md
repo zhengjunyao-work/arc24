@@ -33,7 +33,7 @@ to do that. That could be the base for future work in task generation.
 
 ## TODO
 
-- [ ] Create a dataset with reverse ARC tasks. All tasks that are invertible could be reversed and used for training.
+- [x] Create a dataset with reverse ARC tasks. All tasks that are invertible could be reversed and used for training.
 - [x] Implement a new option on training that uses a dataset without test tasks. It has a configuration with the number of train tasks and randomly makes new tasks selecting train and test samples.
 - [x] Prepare RE-ARC dataset for the new format
 - [ ] Once we have the best configuration, try increasing `max_seq_len`. Some training samples do not fit in 4096
