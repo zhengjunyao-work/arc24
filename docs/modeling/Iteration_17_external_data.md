@@ -38,9 +38,14 @@ VLLM was setting the random seed when creating the LLM, thus I have made a small
 
 [External datasets are listed here](../02_Data_Understanding.md#external-data)
 
-
+- [ConceptARC](https://neoneye.github.io/arc/?dataset=ConceptARC) looks nice
 
 ## Results
+
+### Uncertainty in the evaluation
+
+The evaluation has some uncertainty, and the training process another. I need to characterize both of them
+so I can take informed decisions.
 
 ## Conclusion
 
@@ -53,4 +58,4 @@ VLLM was setting the random seed when creating the LLM, thus I have made a small
 - [x] Prepare RE-ARC dataset for the new format
 - [ ] Once we have the best configuration, try increasing `max_seq_len`. Some training samples do not fit in 4096
 - [ ] Are VLLM results deterministic? Why?
-- [ ] What is the uncertainty in my estimation of accuracy?
+- [ ] What is the uncertainty in my estimation of accuracy? I need to know which differences are significative and which aren't before drawing conclusions.
