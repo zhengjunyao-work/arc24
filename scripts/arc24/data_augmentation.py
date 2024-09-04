@@ -1,7 +1,6 @@
 import numpy as np
 import random
 from functools import partial
-from itertools import product
 
 
 def apply_data_augmentation(task, hflip, n_rot90, color_map=None):
@@ -100,6 +99,11 @@ def random_swap_train_and_test(task):
     augmented_task['train'] = task['train'][:train_idx] + [task['test'][test_idx]] + task['train'][train_idx+1:]
     augmented_task['test'] = task['test'][:test_idx] + [task['train'][train_idx]] + task['test'][test_idx+1:]
     return augmented_task
+
+
+def set_random_seed(random_seed):
+    random.seed(random_seed)
+    np.random.seed(random_seed)
 
 
 if __name__ == '__main__':

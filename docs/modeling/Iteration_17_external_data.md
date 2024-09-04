@@ -9,7 +9,7 @@ Add external data to the current training data and see if it improves.
 ## Motivation
 
 We have made an experiment showing that the model should scale very well when adding new tasks to training.
-Additionally we have discovered that validation loss is not a good proxy. Thus we have to revisit the experiments
+Additionally we have discovered that validation loss is not a good proxy. Thus we have to [revisit](Iteration_07_training_data.md) the experiments
 we did with external data.
 
 ## Development
@@ -25,6 +25,21 @@ One way to do that would be to use the website and manually copy the ids of the 
 However that involves many manual steps. I would rather create a simple jupyter notebook interface
 to do that. That could be the base for future work in task generation.
 
+### Is inference deterministic?
+
+I have the feeling that when running inference twice (due to errors or bugs) the results were exactly the same.
+That was not my intention, so I want to verify it and fix it.
+
+On a first step I'm going to run inference two times with the same number of predictions. I have verified that the predictions are exactly the same, thus I'm going to check if I'm fixing the random seed. Inference should be deterministic since the temperature is 0, but I'm doing data augmentation which I would like to be random.
+
+VLLM was setting the random seed when creating the LLM, thus I have made a small modification to manually set my seed after that.
+
+### More external datasets
+
+[External datasets are listed here](../02_Data_Understanding.md#external-data)
+
+
+
 ## Results
 
 ## Conclusion
@@ -37,3 +52,5 @@ to do that. That could be the base for future work in task generation.
 - [x] Implement a new option on training that uses a dataset without test tasks. It has a configuration with the number of train tasks and randomly makes new tasks selecting train and test samples.
 - [x] Prepare RE-ARC dataset for the new format
 - [ ] Once we have the best configuration, try increasing `max_seq_len`. Some training samples do not fit in 4096
+- [ ] Are VLLM results deterministic? Why?
+- [ ] What is the uncertainty in my estimation of accuracy?

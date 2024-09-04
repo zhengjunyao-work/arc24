@@ -21,6 +21,7 @@ class CFG:
     temperature: float = 0.0 # temperature for sampling, 0.0 for greedy search
     n: int = 1 # number of samples to generate
     batch_size: int = 512 # batch size for inference
+    random_seed: Optional[int] = None # random seed for data augmentation
 
 
 def parse_args():
@@ -37,6 +38,7 @@ def parse_args():
     parser.add_argument('--grid_encoder', type=str, help="Name of the grid encoder")
     parser.add_argument('--max_output_tokens', type=int, help="Maximum number of tokens to generate")
     parser.add_argument('--max_model_len', type=int, help="Maximum number of tokens in the model")
+    parser.add_argument('--random_seed', type=int, help="Random seed for data augmentation")
     return parser.parse_args()
 
 
@@ -48,7 +50,8 @@ from itertools import islice, product
 from vllm import LLM, SamplingParams
 from transformers import AutoTokenizer
 
-from arc24.data_augmentation import apply_data_augmentation, revert_data_augmentation, get_random_color_map
+from arc24.data_augmentation import (
+    apply_data_augmentation, revert_data_augmentation, get_random_color_map, set_random_seed)
 from arc24.prompting import SimplePromptCreator, print_smaller_prompt
 from arc24.encoders import create_grid_encoder
 
@@ -86,6 +89,7 @@ def main():
     for number in '0123456789':
         print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
 
+    set_random_seed(cfg.random_seed)
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
     prompt_creator = SimplePromptCreator(grid_encoder, tokenizer)
     prompts_conf = create_prompts(data, prompt_creator, cfg.predictions_per_task)

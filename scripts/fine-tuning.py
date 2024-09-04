@@ -18,7 +18,7 @@ from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from datasets import Dataset, IterableDataset
 
 from arc24.encoders import create_grid_encoder
-from arc24.data_augmentation import random_augment_task
+from arc24.data_augmentation import random_augment_task, set_random_seed
 from arc24.prompting import create_prompts_from_task, print_smaller_prompt
 from arc24.data import load_arc_data_with_solutions
 
@@ -379,8 +379,7 @@ def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_
         data.update(load_arc_data_with_solutions(filepath))
     task_ids = list(data.keys())
     prompt_lengths = []
-    random.seed(random_seed)
-    np.random.seed(random_seed)
+    set_random_seed(random_seed)
     if subsample_tasks_ratio is not None:
         task_ids = random.sample(task_ids, int(subsample_tasks_ratio*len(task_ids)))
         print(f'Subsampled {len(task_ids)} training tasks out of a total of {len(data)}')
