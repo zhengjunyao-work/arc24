@@ -28,6 +28,7 @@ with 20×20 images containing three distinct 3×3 objects. I only could find the
 - [arc-generative-DSL-infinite-data](https://github.com/arc-community/arc-generative-DSL-infinite-data) Jack Cole repo "Slowly building a collection of infinite riddle generators for benchmarking data-hungry methods"
 - [Abstract Reasoning Challenge - community resources](https://github.com/arc-community)
 - [arc-dataset-collection](https://github.com/neoneye/arc-dataset-collection) Multiple datasets for ARC (Abstraction and Reasoning Corpus)
+- [Vercel app to create new tasks](https://arc-agi-puzzle-maker.vercel.app/)
 
 ## Describe data
 
