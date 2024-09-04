@@ -44,6 +44,16 @@ it has a better initial problem representation.
 The writing code approach seems more appealing and general, but it will involve more changes and I believe I should try at least a few weeks the strategy
 of creating synthetic data.
 
+Maybe the approaches are complementary, some tasks are easy to solve with code, others aren't. Maybe
+a first pass will try to solve the tasks with code, then solve the remaining tasks directly.
+
+The work to generate synthetic data could be reused to generate data to train a model to write python code solutions.
+
+Ryan generates around 8k solutions. My guess is that I could generate 1k solutions in the most optimistic setup.
+Thus fine-tuning is critical to have a higher quality model that doesn't need so many predictions.
+He uses a 30k token prompt, fine-tuning will remove that necessity.
+Revision is very important, having access to the output of the program and updating the solution.
+
 ## Results
 
 ## Conclusion
