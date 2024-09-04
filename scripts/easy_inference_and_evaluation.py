@@ -47,7 +47,7 @@ def inference(model_path, output_folder, grid_encoder, predictions_per_task):
     print('-'*80)
     print(f'Inference with model {model_path}')
     os.makedirs(output_folder, exist_ok=True)
-    output_filepath = os.path.join(output_folder, f'inference_x{predictions_per_task}.json')
+    output_filepath = os.path.join(output_folder, f'inference_x{predictions_per_task:03d}.json')
     if os.path.exists(output_filepath):
         print('Output file already exists, skipping inference')
         return output_filepath
