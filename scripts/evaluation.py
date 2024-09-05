@@ -86,7 +86,10 @@ def save_metrics(metrics):
 def print_metrics(metrics, prefix=''):
     text = f'{prefix}'
     for key, value in metrics.items():
-        text += f'{key}: {value*100:.1f}%\t'
+        if key == 'n':
+            text += f'{key}: {value}\t'
+        else:
+            text += f'{key}: {value:.1%}\t'
     print(text)
 
 def evaluate_predicted_grids(correct_grid, predicted_grids):
