@@ -18,14 +18,15 @@ def main(args=None):
     output_filepath = inference(
         model_path, output_folder,
         cfg.get('grid_encoder', 'GridCodeBlockEncoder(MinimalGridEncoder())'),
-        args.predictions_per_task)
+        args.predictions_per_task,
+        args.dataset_path)
     copy_train_conf(train_conf_path)
-    evaluation(output_filepath)
-    voting_output_filepath = voting(output_filepath)
-    evaluation(voting_output_filepath)
+    evaluation(output_filepath, args.dataset_path)
+    # voting_output_filepath = voting(output_filepath)
+    # evaluation(voting_output_filepath, args.dataset_path)
     # v2 voting
     voting_output_filepath = voting(output_filepath.replace('.json', '_task_results.json'))
-    evaluation(voting_output_filepath)
+    evaluation(voting_output_filepath, args.dataset_path)
     print('-'*80)
     print('Done!\n\n\n')
 
@@ -43,7 +44,7 @@ def merge_lora_with_model(lora_path, model_path):
     return output_path
 
 
-def inference(model_path, output_folder, grid_encoder, predictions_per_task):
+def inference(model_path, output_folder, grid_encoder, predictions_per_task, dataset_path):
     print('-'*80)
     print(f'Inference with model {model_path}')
     os.makedirs(output_folder, exist_ok=True)
@@ -51,7 +52,9 @@ def inference(model_path, output_folder, grid_encoder, predictions_per_task):
     if os.path.exists(output_filepath):
         print('Output file already exists, skipping inference')
         return output_filepath
-    cmd = f'python inference.py --model_path {model_path} --output_filepath {output_filepath} --predictions_per_task {predictions_per_task} --grid_encoder "{grid_encoder}"'
+    cmd = f'python inference.py --model_path {model_path} --output_filepath {output_filepath}'
+    cmd += f' --predictions_per_task {predictions_per_task} --grid_encoder "{grid_encoder}"'
+    cmd += f' --dataset_path {dataset_path}'
     print(cmd)
     ret = os.system(cmd)
     if ret != 0:
@@ -63,10 +66,10 @@ def copy_train_conf(train_conf_path):
     shutil.copy(train_conf_path, train_conf_path.replace('arc24/models', 'arc24/evaluations'))
 
 
-def evaluation(filepath):
+def evaluation(filepath, dataset_path):
     print('-'*80)
     print(f'Evaluating {filepath}')
-    cmd = f'python evaluation.py {filepath}'
+    cmd = f'python evaluation.py {filepath} --dataset_path {dataset_path}'
     print(cmd)
     ret = os.system(cmd)
     if ret != 0:
@@ -87,9 +90,11 @@ def voting(filepath):
 
 def parse_args(args):
     epilog = """
+Alternative datasets for evaluation:
+
+--dataset_path /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json
     """
-    description = """
-    """
+    description = "Runs inference and evaluation on a given checkpoint"
     parser = argparse.ArgumentParser(
         description=description,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -97,6 +102,8 @@ def parse_args(args):
     parser.add_argument('checkpoint_path', help='Path to folder with the checkpoint that we want to evaluate')
     parser.add_argument('--predictions_per_task', type=int, default=64,
                         help="Number of predictions per task, use a multiple of 8")
+    parser.add_argument('--dataset_path', type=str, help="Path to the dataset to make inference and evaluation",
+                        default='/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json')
     args = parser.parse_args(args)
     print(args)
     return args
