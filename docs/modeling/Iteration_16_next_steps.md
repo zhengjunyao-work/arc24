@@ -124,6 +124,12 @@ to have the smallest domain language possible.
 The great advantage of using code is that we can verify the solutions. That is a huge advantage over
 the current approach that generates solutions that can't be verified.
 
+Ryan generates around 8k solutions. My guess is that I could generate 1k solutions in the most optimistic setup.
+Thus fine-tuning is critical to have a higher quality model that doesn't need so many predictions.
+He uses a 30k token prompt, fine-tuning will remove that necessity.
+Revision is very important, having access to the output of the program and updating the solution.
+He used GPT4-o, I don't have access to such a powerful model, but I have the power of fine-tuning an small model.
+
 ### Omni-ARC model
 
 The final step would be to train a model to do all the tasks. That would require writing also
@@ -132,56 +138,6 @@ of winning the ARC challenge.
 
 TODO: picture of Omniman
 
-## Development
-
-The current LLM approach that fine-tunes a LLM on ARC tasks and uses test-time fine-tuning is likely
-to scale if I create more training data. Currently we are only using 700 tasks for training.
-
-I could go task by task from the train set and create by hand similar but different tasks.
-
-Another way would be to think about the priors and build programatic tasks to learn the priors. Ideally
-the format would be the same as in the tasks to enable the better knowledge transfer.
-
-Adding some comments to the tasks could enable to create better representations and thus better generalization.
-Is there a way to create comments that would withstand the data augmentations?
-
-
-In the other hand there is the Ryan Greenblat approach. He used a much more powerful model and had to
-generate many programs, but I have the power of fine-tuning that he didn't had.
-This approach has the advantage of being able to use the python environment as a verifier of the solutions.
-The models can refine the solutions given the outputs.
-However I have doubts regarding the number of tokens that would be needed to generate the solution. Also
-the context length needed for training such a model.
-If I could come with a method that iteratively creates more training data this could be a much
-powerful solution than the LLM approach.
-
-But in essence both solutions need to build a **good representation** of the problem internally. That is only
-achieved by training in a big number of examples. It is possible that the same model could do both tasks.
-I still believe that the key to be able to learn from few examples is having learned the right representation of the data.
-
-A stronger model, trained on more tasks, will likely benefit more from test-time fine-tuning because
-it has a better initial problem representation.
-
-The writing code approach seems more appealing and general, but it will involve more changes and I believe I should try at least a few weeks the strategy
-of creating synthetic data.
-
-Maybe the approaches are complementary, some tasks are easy to solve with code, others aren't. Maybe
-a first pass will try to solve the tasks with code, then solve the remaining tasks directly.
-
-The work to generate synthetic data could be reused to generate data to train a model to write python code solutions.
-
-Ryan generates around 8k solutions. My guess is that I could generate 1k solutions in the most optimistic setup.
-Thus fine-tuning is critical to have a higher quality model that doesn't need so many predictions.
-He uses a 30k token prompt, fine-tuning will remove that necessity.
-Revision is very important, having access to the output of the program and updating the solution.
-
-## Results
-
-## Conclusion
-
-## Next steps
-
 ## TODO
 
-- [ ] Test the hypothesis that learning to do two tasks generalizes better than learning to do just one task.
-  The easiest way to do this is to generate new inputs or outputs because I already have the data.
+- [ ] Add images to make the understanding of the ideas easier
