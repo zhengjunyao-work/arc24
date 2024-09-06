@@ -25,7 +25,7 @@ def random_augment_task(task):
     return augmented_task
 
 
-def random_compose_new_task_by_adding_additional_transformation(task, augmentation_target):
+def random_compose_new_task_by_adding_additional_transformation(task, augmentation_target=None):
     """
     Creates a new task by randomly applying transformations to the inputs or the outputs
 
@@ -36,6 +36,8 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
     augmentation_target : str
         The target of the transformation. Either 'input' or 'output'
     """
+    if augmentation_target is None:
+        augmentation_target = random.choice(['input', 'output'])
     new_task = _apply_augmentation_to_task(
         task,
         partial(geometric_augmentation, **get_random_geometric_augmentation_params()),

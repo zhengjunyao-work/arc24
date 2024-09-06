@@ -18,7 +18,11 @@ from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from datasets import Dataset, IterableDataset
 
 from arc24.encoders import create_grid_encoder
-from arc24.data_augmentation import random_augment_task, set_random_seed
+from arc24.data_augmentation import (
+    random_augment_task,
+    set_random_seed,
+    random_compose_new_task_by_adding_additional_transformation
+)
 from arc24.prompting import create_prompts_from_task, print_smaller_prompt
 from arc24.data import load_arc_data_with_solutions
 
@@ -59,6 +63,8 @@ class CFG:
     use_rslora = True,
     use_dora = True,
     lora_r: int = 32
+    # Data augmentation
+    compose_new_task_probability: float = 0.5
 
 
 def parse_args():
@@ -89,6 +95,7 @@ def parse_args():
     parser.add_argument('--subsample_train_tasks_ratio', type=float, help="Ratio of train tasks to subsample, 1 means no subsampling")
     parser.add_argument('--random_seed', type=int, help="Random seed for data generation")
     parser.add_argument('--resume_from_checkpoint', action=argparse.BooleanOptionalAction, help="Whether to resume from checkpoint")
+    parser.add_argument('--compose_new_task_probability', type=float, help="Probability of composing a new task")
     return parser.parse_args()
 
 
@@ -371,7 +378,8 @@ def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, pr
 def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_len, random_seed,
                             remove_train_samples_to_fit_max_seq_len,
                             log_prompt_length_every=1000,
-                            subsample_tasks_ratio=None):
+                            subsample_tasks_ratio=None,
+                            compose_new_task_probability=0.5):
     """
     """
     data = dict()
@@ -396,6 +404,8 @@ def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_
             if 'test' not in task and 'n_train' in task:
                 task = create_random_task_from_task_without_test(task)
             task = random_augment_task(task)
+            if random.random() < compose_new_task_probability:
+                task = random_compose_new_task_by_adding_additional_transformation(task)
             if remove_train_samples_to_fit_max_seq_len:
                 while len(task['train']):
                     prompt, prompt_length = _create_prompt_smaller_than_max_seq_len(
