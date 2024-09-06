@@ -52,14 +52,14 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
         #     task,
         #     partial(add_padding, **get_random_padding_params(max_grid_shape)),
         #     augmentation_target=augmentation_target)
-        new_task = _apply_augmentation_to_task(
-            task,
-            partial(upscale, **get_random_upscale_params(max_grid_shape)),
-            augmentation_target=augmentation_target)
         # new_task = _apply_augmentation_to_task(
         #     task,
-        #     partial(mirror, **get_random_mirror_params()),
+        #     partial(upscale, **get_random_upscale_params(max_grid_shape)),
         #     augmentation_target=augmentation_target)
+        new_task = _apply_augmentation_to_task(
+            task,
+            partial(mirror, **get_random_mirror_params(max_grid_shape)),
+            augmentation_target=augmentation_target)
         # TODO: finish this function
     except GridTooBigToAugmentError:
         return task
@@ -179,6 +179,7 @@ def add_padding(grid, color, size):
 
 
 def get_random_padding_params(max_grid_shape, same_size_probability=0.3, max_padding=5):
+    # TODO: update function with better implementation (copy upscale)
     color = random.randint(0, 9)
     if random.random() < same_size_probability:
         max_padding_size = min(MAX_GRID_SIZE - max(max_grid_shape), max_padding)
@@ -240,9 +241,17 @@ def mirror(grid, axis, position):
         return new_grid
 
 
-def get_random_mirror_params():
-    # TODO: verify that the grid won't be too big
-    return dict(axis=random.randint(0, 1), position=random.randint(0, 1))
+def get_random_mirror_params(max_grid_shape):
+    if MAX_GRID_SIZE // max_grid_shape[0] < 2:
+        if MAX_GRID_SIZE // max_grid_shape[1] < 2:
+            raise GridTooBigToAugmentError(f"Grid is too big to mirror: {max_grid_shape}")
+        else:
+            axis = 1
+    elif MAX_GRID_SIZE // max_grid_shape[1] < 2:
+        axis = 0
+    else:
+        axis = random.randint(0, 1)
+    return dict(axis=axis, position=random.randint(0, 1))
 
 
 
