@@ -38,9 +38,13 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
     """
     if augmentation_target is None:
         augmentation_target = random.choice(['input', 'output'])
+    # new_task = _apply_augmentation_to_task(
+    #     task,
+    #     partial(geometric_augmentation, **get_random_geometric_augmentation_params()),
+    #     augmentation_target=augmentation_target)
     new_task = _apply_augmentation_to_task(
         task,
-        partial(geometric_augmentation, **get_random_geometric_augmentation_params()),
+        partial(add_padding, **get_random_padding_params()),
         augmentation_target=augmentation_target)
     # TODO: finish this function
     return new_task
@@ -134,6 +138,20 @@ def random_swap_train_and_test(task):
 def set_random_seed(random_seed):
     random.seed(random_seed)
     np.random.seed(random_seed)
+
+
+def add_padding(grid, color, size):
+    rows, cols = len(grid), len(grid[0])
+    padded_grid = [[color]*(cols + size*2) for _ in range(size)]
+    for row in grid:
+        padded_grid.append([color]*size + row + [color]*size)
+    padded_grid += [[color]*(cols + size*2) for _ in range(size)]
+    return padded_grid
+
+
+def get_random_padding_params():
+    # TODO: verify that the grid won't be too big
+    return dict(color=random.randint(0, 9), size=random.randint(1, 5))
 
 
 if __name__ == '__main__':
