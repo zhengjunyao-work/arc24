@@ -57,12 +57,17 @@ Which tasks can be useful to learn good representations?
 - `code + input -> output`. This is equivalent to the first task, but instead of giving examples as input, it gives the code definition of the problem.
 - `code -> inputs`. Each input to a task follows some distribution, given a description of the
   distribution the model should be able to generate samples of that distribution.
+- `inputs -> code`. We could also do the opposite task, given some inputs write code to generate that distribution.
 
 I have the intuition that if a model learns to do all the tasks in the list will generalize better
 than a model that only knows how to do one of the tasks. The representation of the ARC grids and problems
 could be shared among all the tasks.
 
-TODO: add images of all the tasks that can be solved
+| **examples + input -> output** | **examples -> code** | **code + input -> output** |
+|--------------------------------|----------------------|----------------------------|
+|         ![](res/2024-09-06-06-31-32.png)                       |         ![](res/2024-09-06-06-31-49.png)             |              ![](res/2024-09-06-06-32-08.png)              |
+| **inputs -> input**            | **code -> inputs**   | **inputs -> code**         |
+|              ![](res/2024-09-06-06-32-25.png)                  |   ![](res/2024-09-06-06-32-41.png)                   |        ![](res/2024-09-06-06-32-55.png)                    |
 
 Disentangling the inputs and the outputs is a good way to learn the correct representation, otherwise
 it's possible to simple memorize the task. This could be done by reusing the same input distribution
