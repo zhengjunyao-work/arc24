@@ -29,5 +29,5 @@ be helpful (at least when we have a small compute budget).
 ## TODO
 
 - [x] Implement new data transformations, visualize them on a notebook
-- [ ] Add parameters to train configuration to allow to control this new data augmentation
+- [x] Add parameters to train configuration to allow to control this new data augmentation
 - [ ] Run trainings and see if the accuracy improves
