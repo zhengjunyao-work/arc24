@@ -39,4 +39,5 @@ a `max_seq_len` of 10240 without any problem, and very little slowdown because e
 
 - [ ] Do we see improvements in LB score when increasing the `max_seq_len`?
 - [ ] Do we see improvements when increasing LoRA rank? 128 better than 32, 512 is better than 128? Whole model?
+- [ ] Verify that I can use a 512 lora model in the submission without additional changes
 - [ ] Do we see improvements when training with RE-ARC?
