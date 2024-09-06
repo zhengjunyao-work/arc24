@@ -48,14 +48,14 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
         #     task,
         #     partial(geometric_augmentation, **get_random_geometric_augmentation_params()),
         #     augmentation_target=augmentation_target)
-        new_task = _apply_augmentation_to_task(
-            task,
-            partial(add_padding, **get_random_padding_params(max_grid_shape)),
-            augmentation_target=augmentation_target)
         # new_task = _apply_augmentation_to_task(
         #     task,
-        #     partial(upscale, **get_random_upscale_params()),
+        #     partial(add_padding, **get_random_padding_params(max_grid_shape)),
         #     augmentation_target=augmentation_target)
+        new_task = _apply_augmentation_to_task(
+            task,
+            partial(upscale, **get_random_upscale_params(max_grid_shape)),
+            augmentation_target=augmentation_target)
         # new_task = _apply_augmentation_to_task(
         #     task,
         #     partial(mirror, **get_random_mirror_params()),
@@ -183,32 +183,45 @@ def get_random_padding_params(max_grid_shape, same_size_probability=0.3, max_pad
     if random.random() < same_size_probability:
         max_padding_size = min(MAX_GRID_SIZE - max(max_grid_shape), max_padding)
         if max_padding_size < 1:
-            raise GridTooBigToAugmentError(f"Grid is too big to augment: {max_grid_shape}")
+            raise GridTooBigToAugmentError(f"Grid is too big to pad: {max_grid_shape}")
         size = random.randint(1, max_padding_size)
         size = (size, size)
     else:
         max_padding_size = (min(MAX_GRID_SIZE - max_grid_shape[0], max_padding),
                             min(MAX_GRID_SIZE - max_grid_shape[1], max_padding))
         if min(max_padding_size) < 1:
-            raise GridTooBigToAugmentError(f"Grid is too big to augment: {max_grid_shape}")
+            raise GridTooBigToAugmentError(f"Grid is too big to pad: {max_grid_shape}")
         size = (random.randint(1, max_padding_size[0]), random.randint(1, max_padding_size[1]))
     return dict(color=color, size=size)
 
 
 def upscale(grid, scale):
-    if isinstance(scale, int):
-        scale = (scale, scale)
     grid = np.array(grid, dtype=int)
     for axis, scale in enumerate(scale):
         grid = np.repeat(grid, scale, axis=axis)
     return grid.tolist()
 
-def get_random_upscale_params():
-    # TODO: verify that the grid won't be too big
-    if random.random() < 0.5:
-        return dict(scale=random.randint(2, 4))
+
+def get_random_upscale_params(max_grid_shape, min_upscale=2, max_upscale=4,
+                              same_upscale_probability=0.5, n_tries=10):
+    safe_max_upscale = (min(MAX_GRID_SIZE // max_grid_shape[0], max_upscale),
+                        min(MAX_GRID_SIZE // max_grid_shape[1], max_upscale))
+    if random.random() < same_upscale_probability:
+        safe_max_upscale = min(safe_max_upscale)
+        if safe_max_upscale < 2:
+            raise GridTooBigToAugmentError(f"Grid is too big to upscale: {max_grid_shape}")
+        scale = random.randint(min_upscale, safe_max_upscale)
+        return dict(scale=(scale, scale))
     else:
-        return dict(scale=(random.randint(2, 4), random.randint(2, 4)))
+        if max(safe_max_upscale) < 2:
+            raise GridTooBigToAugmentError(f"Grid is too big to upscale: {max_grid_shape}")
+        min_upscale = 1
+        for _ in range(n_tries):
+            scale = (random.randint(min_upscale, safe_max_upscale[0]),
+                     random.randint(min_upscale, safe_max_upscale[1]))
+            if scale[0] != scale[1]:
+                break
+        return dict(scale=scale)
 
 
 def mirror(grid, axis, position):
