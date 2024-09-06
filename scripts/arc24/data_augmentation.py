@@ -43,23 +43,26 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
 
     max_grid_shape = get_max_grid_shape(task, augmentation_target)
 
-    # new_task = _apply_augmentation_to_task(
-    #     task,
-    #     partial(geometric_augmentation, **get_random_geometric_augmentation_params()),
-    #     augmentation_target=augmentation_target)
-    new_task = _apply_augmentation_to_task(
-        task,
-        partial(add_padding, **get_random_padding_params(max_grid_shape)),
-        augmentation_target=augmentation_target)
-    # new_task = _apply_augmentation_to_task(
-    #     task,
-    #     partial(upscale, **get_random_upscale_params()),
-    #     augmentation_target=augmentation_target)
-    # new_task = _apply_augmentation_to_task(
-    #     task,
-    #     partial(mirror, **get_random_mirror_params()),
-    #     augmentation_target=augmentation_target)
-    # TODO: finish this function
+    try:
+        # new_task = _apply_augmentation_to_task(
+        #     task,
+        #     partial(geometric_augmentation, **get_random_geometric_augmentation_params()),
+        #     augmentation_target=augmentation_target)
+        new_task = _apply_augmentation_to_task(
+            task,
+            partial(add_padding, **get_random_padding_params(max_grid_shape)),
+            augmentation_target=augmentation_target)
+        # new_task = _apply_augmentation_to_task(
+        #     task,
+        #     partial(upscale, **get_random_upscale_params()),
+        #     augmentation_target=augmentation_target)
+        # new_task = _apply_augmentation_to_task(
+        #     task,
+        #     partial(mirror, **get_random_mirror_params()),
+        #     augmentation_target=augmentation_target)
+        # TODO: finish this function
+    except GridTooBigToAugmentError:
+        return task
     return new_task
 
 
@@ -153,6 +156,10 @@ def set_random_seed(random_seed):
     np.random.seed(random_seed)
 
 
+class GridTooBigToAugmentError(Exception):
+    pass
+
+
 def get_max_grid_shape(task, augmentation_target):
     max_shape = (0, 0)
     for partition, samples in task.items():
@@ -163,7 +170,7 @@ def get_max_grid_shape(task, augmentation_target):
 
 
 def add_padding(grid, color, size):
-    rows, cols = len(grid), len(grid[0])
+    cols = len(grid[0])
     padded_grid = [[color]*(cols + size[1]*2) for _ in range(size[0])]
     for row in grid:
         padded_grid.append([color]*size[1] + row + [color]*size[1])
@@ -171,14 +178,20 @@ def add_padding(grid, color, size):
     return padded_grid
 
 
-def get_random_padding_params(max_grid_shape, same_size_probability=0.0):
-    # TODO: verify that the grid won't be too big
+def get_random_padding_params(max_grid_shape, same_size_probability=0.3, max_padding=5):
     color = random.randint(0, 9)
     if random.random() < same_size_probability:
-        size = random.randint(1, 5)
+        max_padding_size = min(MAX_GRID_SIZE - max(max_grid_shape), max_padding)
+        if max_padding_size < 1:
+            raise GridTooBigToAugmentError(f"Grid is too big to augment: {max_grid_shape}")
+        size = random.randint(1, max_padding_size)
         size = (size, size)
     else:
-        size = (random.randint(1, 5), random.randint(1, 5))
+        max_padding_size = (min(MAX_GRID_SIZE - max_grid_shape[0], max_padding),
+                            min(MAX_GRID_SIZE - max_grid_shape[1], max_padding))
+        if min(max_padding_size) < 1:
+            raise GridTooBigToAugmentError(f"Grid is too big to augment: {max_grid_shape}")
+        size = (random.randint(1, max_padding_size[0]), random.randint(1, max_padding_size[1]))
     return dict(color=color, size=size)
 
 
