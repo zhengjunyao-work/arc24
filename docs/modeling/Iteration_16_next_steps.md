@@ -40,7 +40,9 @@ to find the right representation, f.e. humans typically have to search the right
 to be able to solve a problem. But I will make the hypothesis that finding the right perspective is a
 simpler problem, or that we could sample the model to find that perspective.
 
-TODO: analogy with 1d data
+![fitting a curve](res/2024-09-06-05-54-28.png)
+
+_If the data has 1 dimension, it is possible to learn (fit a curve) on it_
 
 ### How can we learn a good representation of the ARC problems?
 
@@ -136,7 +138,7 @@ The final step would be to train a model to do all the tasks. That would require
 code to generate the input distributions to the tasks. I believe this approach has a great chance
 of winning the ARC challenge.
 
-![Omni-ARC](res/2024-09-06-05-49-15.png)
+![](res/omni-arc.png)
 
 ## TODO
 
