@@ -118,7 +118,7 @@ def swap_task_colors(task, color_map=None, change_background_probability=0.1):
 
     new_task = dict()
     for key in task.keys():
-        new_task[key] = [{name:vectorized_mapping(grid) for name, grid in sample.items()} for sample in task[key]]
+        new_task[key] = [{name:vectorized_mapping(grid).tolist() for name, grid in sample.items()} for sample in task[key]]
     return new_task
 
 
