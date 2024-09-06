@@ -25,11 +25,39 @@ def random_augment_task(task):
     return augmented_task
 
 
-def _apply_augmentation_to_task(task, augmentation):
+def random_compose_new_task_by_adding_additional_transformation(task, augmentation_target):
+    """
+    Creates a new task by randomly applying transformations to the inputs or the outputs
+
+    Parameters
+    ----------
+    task : dict
+        The task to be transformed
+    augmentation_target : str
+        The target of the transformation. Either 'input' or 'output'
+    """
+    new_task = _apply_augmentation_to_task(
+        task,
+        partial(geometric_augmentation, **get_random_geometric_augmentation_params()),
+        augmentation_target=augmentation_target)
+    # TODO: finish this function
+    return new_task
+
+
+def _apply_augmentation_to_task(task, augmentation, augmentation_target=None):
     augmented_task = dict()
     for partition, samples in task.items():
-        augmented_task[partition] = [{name:augmentation(grid) for name,grid in sample.items()} for sample in samples]
+        augmented_task[partition] = [_augment_sample(sample, augmentation, augmentation_target) for sample in samples]
     return augmented_task
+
+
+def _augment_sample(sample, augmentation, augmentation_target=None):
+    if augmentation_target is None:
+        return {name:augmentation(grid) for name, grid in sample.items()}
+    else:
+        if augmentation_target not in sample:
+            raise ValueError(f"augmentation_target {augmentation_target} not found in sample")
+        return {name:augmentation(grid) if name == augmentation_target else grid for name, grid in sample.items()}
 
 
 def get_random_geometric_augmentation_params():
