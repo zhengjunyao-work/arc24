@@ -43,36 +43,35 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
     if augmentation_target is None:
         augmentation_target = random.choice(['input', 'output'])
 
-    max_grid_shape = get_max_grid_shape(task, augmentation_target)
+    augmentation_map = {
+        'geometric': (geometric_augmentation, get_random_geometric_augmentation_params),
+        'padding': (add_padding, get_random_padding_params),
+        'upscale': (upscale, get_random_upscale_params),
+        'mirror': (mirror, get_random_mirror_params),
+        # TODO: does it have sense to add also color swap? I believe it might make the tasks too hard
+    }
+    if weights is not None and len(weights) != len(augmentation_map):
+        raise ValueError("weights must have the same length as the number of augmentations")
 
     try:
-        augmentation = random.choices(['geometric', 'padding', 'upscale', 'mirror'], weights=weights)[0]
+        augmentation = random.choices(list(augmentation_map.keys()), weights=weights)[0]
         if verbose: print(f"Applying {augmentation} augmentation to {augmentation_target}")
+
+        aug_func, param_func = augmentation_map[augmentation]
         if augmentation == 'geometric':
-            new_task = _apply_augmentation_to_task(
-                task,
-                partial(geometric_augmentation, **get_random_geometric_augmentation_params()),
-                augmentation_target=augmentation_target)
-        elif augmentation == 'padding':
-            new_task = _apply_augmentation_to_task(
-                task,
-                partial(add_padding, **get_random_padding_params(max_grid_shape)),
-                augmentation_target=augmentation_target)
-        elif augmentation == 'upscale':
-            new_task = _apply_augmentation_to_task(
-                task,
-                partial(upscale, **get_random_upscale_params(max_grid_shape)),
-                augmentation_target=augmentation_target)
-        elif augmentation == 'mirror':
-            new_task = _apply_augmentation_to_task(
-                task,
-                partial(mirror, **get_random_mirror_params(max_grid_shape)),
-                augmentation_target=augmentation_target)
+            kwargs = param_func()
         else:
-            raise ValueError(f"Unknown augmentation: {augmentation}")
+            max_grid_shape = get_max_grid_shape(task, augmentation_target)
+            kwargs = param_func(max_grid_shape)
+        new_task = _apply_augmentation_to_task(
+            task,
+            partial(aug_func, **kwargs),
+            augmentation_target=augmentation_target
+        )
     except GridTooBigToAugmentError as e:
         if verbose: print(e)
         return task
+
     return new_task
 
 
