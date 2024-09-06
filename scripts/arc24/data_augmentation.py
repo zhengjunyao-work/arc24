@@ -46,9 +46,13 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
     #     task,
     #     partial(add_padding, **get_random_padding_params()),
     #     augmentation_target=augmentation_target)
+    # new_task = _apply_augmentation_to_task(
+    #     task,
+    #     partial(upscale, **get_random_upscale_params()),
+    #     augmentation_target=augmentation_target)
     new_task = _apply_augmentation_to_task(
         task,
-        partial(upscale, **get_random_upscale_params()),
+        partial(mirror, **get_random_mirror_params()),
         augmentation_target=augmentation_target)
     # TODO: finish this function
     return new_task
@@ -172,6 +176,28 @@ def get_random_upscale_params():
         return dict(scale=random.randint(2, 4))
     else:
         return dict(scale=(random.randint(2, 4), random.randint(2, 4)))
+
+
+def mirror(grid, axis, position):
+    if axis == 0:
+        if position == 0:
+            return grid[::-1] + grid
+        else:
+            return grid + grid[::-1]
+    elif axis == 1:
+        new_grid = []
+        for row in grid:
+            if position == 0:
+                new_grid.append(row[::-1] + row)
+            else:
+                new_grid.append(row + row[::-1])
+        return new_grid
+
+
+def get_random_mirror_params():
+    # TODO: verify that the grid won't be too big
+    return dict(axis=random.randint(0, 1), position=random.randint(0, 1))
+
 
 
 if __name__ == '__main__':
