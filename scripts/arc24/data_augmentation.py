@@ -51,7 +51,7 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
         # TODO: does it have sense to add also color swap? I believe it might make the tasks too hard
     }
     if weights is not None and len(weights) != len(augmentation_map):
-        raise ValueError("weights must have the same length as the number of augmentations")
+        raise ValueError(f"weights must have the same length as the number of augmentations {len(augmentation_map)} but has {len(weights)}")
 
     try:
         augmentation = random.choices(list(augmentation_map.keys()), weights=weights)[0]

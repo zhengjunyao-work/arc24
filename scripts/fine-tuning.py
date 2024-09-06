@@ -65,6 +65,7 @@ class CFG:
     lora_r: int = 32
     # Data augmentation
     compose_new_task_probability: float = 0.5
+    compose_new_task_weights: Optional[List[float]] = None
 
 
 def parse_args():
@@ -96,6 +97,7 @@ def parse_args():
     parser.add_argument('--random_seed', type=int, help="Random seed for data generation")
     parser.add_argument('--resume_from_checkpoint', action=argparse.BooleanOptionalAction, help="Whether to resume from checkpoint")
     parser.add_argument('--compose_new_task_probability', type=float, help="Probability of composing a new task")
+    parser.add_argument('--compose_new_task_weights', nargs='+', type=float, help="Weights for composing a new task")
     return parser.parse_args()
 
 
@@ -111,10 +113,13 @@ def main():
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
     dataset_kwargs = {'grid_encoder': grid_encoder, 'tokenizer': tokenizer, 'max_seq_len': cfg.max_seq_len}
     train_dataset = IterableDataset.from_generator(
-        partial(random_prompt_generator, dataset_filepaths=cfg.train_datasets),
+        # for some weird reason, it does not work correctly with lists and I have to use partial with the lists
+        partial(random_prompt_generator, dataset_filepaths=cfg.train_datasets,
+                compose_new_task_weights=cfg.compose_new_task_weights),
         gen_kwargs=dict(random_seed=cfg.random_seed, **dataset_kwargs,
                         remove_train_samples_to_fit_max_seq_len=cfg.remove_train_samples_to_fit_max_seq_len,
-                        subsample_tasks_ratio=cfg.subsample_train_tasks_ratio))
+                        subsample_tasks_ratio=cfg.subsample_train_tasks_ratio,
+                        compose_new_task_probability=cfg.compose_new_task_probability))
     val_dataset = create_validation_dataset(cfg.val_dataset, **dataset_kwargs)
 
     training_arguments = get_training_arguments(cfg)
@@ -379,7 +384,8 @@ def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_
                             remove_train_samples_to_fit_max_seq_len,
                             log_prompt_length_every=1000,
                             subsample_tasks_ratio=None,
-                            compose_new_task_probability=0.5):
+                            compose_new_task_probability=0.5,
+                            compose_new_task_weights=None):
     """
     """
     data = dict()
@@ -405,7 +411,8 @@ def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_
                 task = create_random_task_from_task_without_test(task)
             task = random_augment_task(task)
             if random.random() < compose_new_task_probability:
-                task = random_compose_new_task_by_adding_additional_transformation(task)
+                task = random_compose_new_task_by_adding_additional_transformation(
+                    task, weights=compose_new_task_weights)
             if remove_train_samples_to_fit_max_seq_len:
                 while len(task['train']):
                     prompt, prompt_length = _create_prompt_smaller_than_max_seq_len(
