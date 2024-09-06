@@ -136,7 +136,7 @@ The final step would be to train a model to do all the tasks. That would require
 code to generate the input distributions to the tasks. I believe this approach has a great chance
 of winning the ARC challenge.
 
-TODO: picture of Omniman
+![Omni-ARC](res/2024-09-06-05-49-15.png)
 
 ## TODO
 
