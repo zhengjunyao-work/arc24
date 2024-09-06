@@ -48,18 +48,18 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
         #     task,
         #     partial(geometric_augmentation, **get_random_geometric_augmentation_params()),
         #     augmentation_target=augmentation_target)
-        # new_task = _apply_augmentation_to_task(
-        #     task,
-        #     partial(add_padding, **get_random_padding_params(max_grid_shape)),
-        #     augmentation_target=augmentation_target)
+        new_task = _apply_augmentation_to_task(
+            task,
+            partial(add_padding, **get_random_padding_params(max_grid_shape)),
+            augmentation_target=augmentation_target)
         # new_task = _apply_augmentation_to_task(
         #     task,
         #     partial(upscale, **get_random_upscale_params(max_grid_shape)),
         #     augmentation_target=augmentation_target)
-        new_task = _apply_augmentation_to_task(
-            task,
-            partial(mirror, **get_random_mirror_params(max_grid_shape)),
-            augmentation_target=augmentation_target)
+        # new_task = _apply_augmentation_to_task(
+        #     task,
+        #     partial(mirror, **get_random_mirror_params(max_grid_shape)),
+        #     augmentation_target=augmentation_target)
         # TODO: finish this function
     except GridTooBigToAugmentError:
         return task
@@ -178,21 +178,23 @@ def add_padding(grid, color, size):
     return padded_grid
 
 
-def get_random_padding_params(max_grid_shape, same_size_probability=0.3, max_padding=5):
-    # TODO: update function with better implementation (copy upscale)
-    color = random.randint(0, 9)
+def get_random_padding_params(max_grid_shape, same_size_probability=0.5, max_padding=5, n_tries=10):
+    safe_max_padding = (min(MAX_GRID_SIZE - max_grid_shape[0], max_padding),
+                        min(MAX_GRID_SIZE - max_grid_shape[1], max_padding))
     if random.random() < same_size_probability:
-        max_padding_size = min(MAX_GRID_SIZE - max(max_grid_shape), max_padding)
-        if max_padding_size < 1:
+        safe_max_padding = min(safe_max_padding)
+        if safe_max_padding < 1:
             raise GridTooBigToAugmentError(f"Grid is too big to pad: {max_grid_shape}")
-        size = random.randint(1, max_padding_size)
+        size = random.randint(1, safe_max_padding)
         size = (size, size)
     else:
-        max_padding_size = (min(MAX_GRID_SIZE - max_grid_shape[0], max_padding),
-                            min(MAX_GRID_SIZE - max_grid_shape[1], max_padding))
-        if min(max_padding_size) < 1:
+        if min(safe_max_padding) < 1:
             raise GridTooBigToAugmentError(f"Grid is too big to pad: {max_grid_shape}")
-        size = (random.randint(1, max_padding_size[0]), random.randint(1, max_padding_size[1]))
+        for _ in range(n_tries):
+            size = (random.randint(1, safe_max_padding[0]), random.randint(1, safe_max_padding[1]))
+            if size[0] != size[1]:
+                break
+    color = random.randint(0, 9)
     return dict(color=color, size=size)
 
 
