@@ -84,7 +84,7 @@ to expand the size of the training data.
 ### How can we represent a task
 
 - Examples. This is the format of the ARC challenge.
-- Code. We can use python code to implement the task. Code represents an unambiguous way to represent the task.
+- Code. We can use python code to implement the task. Code is an unambiguous way to represent the task.
 - Natural language. We can also use natural language to represent the task, but natural language is ambiguous
   and I don't feel is a good approach.
 
@@ -105,7 +105,8 @@ create new tasks. They will be different tasks but totally valid.
 
 This work because we can create new tasks by concatenating different transformations. If we create code
 to synthesize new tasks, one way to generate a great number of tasks quickly is to compose different
-transformations to create new tasks.
+transformations to create new tasks. So given an existing ARC task we can create a new one by applying
+a new transformation.
 
 We could apply reversible augmentations on the inputs or in the outputs. F.e. we could apply:
 
@@ -121,7 +122,8 @@ on the tasks randomly.
 ### Multi-task approach
 
 I would like to test the hypothesis that learning multiple tasks results in a better model. The easiest
-way to test that is to train a model to both do the ARC challenges and to generate new inputs.
+way to test that is to train a model to both do the ARC challenges and to generate new inputs. This
+experiment doesn't need new data, so we could test the hypothesis quickly.
 
 ### Examples to code approach
 
@@ -147,4 +149,4 @@ of winning the ARC challenge.
 
 ## TODO
 
-- [ ] Add images to make the understanding of the ideas easier
+- [x] Add images to make the understanding of the ideas easier
