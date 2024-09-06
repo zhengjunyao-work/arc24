@@ -27,7 +27,7 @@ def random_augment_task(task):
     return augmented_task
 
 
-def random_compose_new_task_by_adding_additional_transformation(task, augmentation_target=None):
+def random_compose_new_task_by_adding_additional_transformation(task, augmentation_target=None, weights=None, verbose=False):
     """
     Creates a new task by randomly applying transformations to the inputs or the outputs
 
@@ -37,6 +37,8 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
         The task to be transformed
     augmentation_target : str
         The target of the transformation. Either 'input' or 'output'
+    weights: list
+        The weights for the different transformations. The order is ['geometric', 'padding', 'upscale', 'mirror']
     """
     if augmentation_target is None:
         augmentation_target = random.choice(['input', 'output'])
@@ -44,24 +46,32 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
     max_grid_shape = get_max_grid_shape(task, augmentation_target)
 
     try:
-        # new_task = _apply_augmentation_to_task(
-        #     task,
-        #     partial(geometric_augmentation, **get_random_geometric_augmentation_params()),
-        #     augmentation_target=augmentation_target)
-        new_task = _apply_augmentation_to_task(
-            task,
-            partial(add_padding, **get_random_padding_params(max_grid_shape)),
-            augmentation_target=augmentation_target)
-        # new_task = _apply_augmentation_to_task(
-        #     task,
-        #     partial(upscale, **get_random_upscale_params(max_grid_shape)),
-        #     augmentation_target=augmentation_target)
-        # new_task = _apply_augmentation_to_task(
-        #     task,
-        #     partial(mirror, **get_random_mirror_params(max_grid_shape)),
-        #     augmentation_target=augmentation_target)
-        # TODO: finish this function
-    except GridTooBigToAugmentError:
+        augmentation = random.choices(['geometric', 'padding', 'upscale', 'mirror'], weights=weights)[0]
+        if verbose: print(f"Applying {augmentation} augmentation to {augmentation_target}")
+        if augmentation == 'geometric':
+            new_task = _apply_augmentation_to_task(
+                task,
+                partial(geometric_augmentation, **get_random_geometric_augmentation_params()),
+                augmentation_target=augmentation_target)
+        elif augmentation == 'padding':
+            new_task = _apply_augmentation_to_task(
+                task,
+                partial(add_padding, **get_random_padding_params(max_grid_shape)),
+                augmentation_target=augmentation_target)
+        elif augmentation == 'upscale':
+            new_task = _apply_augmentation_to_task(
+                task,
+                partial(upscale, **get_random_upscale_params(max_grid_shape)),
+                augmentation_target=augmentation_target)
+        elif augmentation == 'mirror':
+            new_task = _apply_augmentation_to_task(
+                task,
+                partial(mirror, **get_random_mirror_params(max_grid_shape)),
+                augmentation_target=augmentation_target)
+        else:
+            raise ValueError(f"Unknown augmentation: {augmentation}")
+    except GridTooBigToAugmentError as e:
+        if verbose: print(e)
         return task
     return new_task
 
