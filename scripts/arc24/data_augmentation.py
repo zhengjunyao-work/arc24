@@ -42,9 +42,13 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
     #     task,
     #     partial(geometric_augmentation, **get_random_geometric_augmentation_params()),
     #     augmentation_target=augmentation_target)
+    # new_task = _apply_augmentation_to_task(
+    #     task,
+    #     partial(add_padding, **get_random_padding_params()),
+    #     augmentation_target=augmentation_target)
     new_task = _apply_augmentation_to_task(
         task,
-        partial(add_padding, **get_random_padding_params()),
+        partial(upscale, **get_random_upscale_params()),
         augmentation_target=augmentation_target)
     # TODO: finish this function
     return new_task
@@ -152,6 +156,22 @@ def add_padding(grid, color, size):
 def get_random_padding_params():
     # TODO: verify that the grid won't be too big
     return dict(color=random.randint(0, 9), size=random.randint(1, 5))
+
+
+def upscale(grid, scale):
+    if isinstance(scale, int):
+        scale = (scale, scale)
+    grid = np.array(grid, dtype=int)
+    for axis, scale in enumerate(scale):
+        grid = np.repeat(grid, scale, axis=axis)
+    return grid.tolist()
+
+def get_random_upscale_params():
+    # TODO: verify that the grid won't be too big
+    if random.random() < 0.5:
+        return dict(scale=random.randint(2, 4))
+    else:
+        return dict(scale=(random.randint(2, 4), random.randint(2, 4)))
 
 
 if __name__ == '__main__':
