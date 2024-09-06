@@ -2,6 +2,8 @@ import numpy as np
 import random
 from functools import partial
 
+MAX_GRID_SIZE = 30
+
 
 def apply_data_augmentation(task, hflip, n_rot90, color_map=None):
     augmented_task = _apply_augmentation_to_task(task, partial(geometric_augmentation, hflip=hflip, n_rot90=n_rot90))
@@ -38,22 +40,25 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
     """
     if augmentation_target is None:
         augmentation_target = random.choice(['input', 'output'])
+
+    max_grid_shape = get_max_grid_shape(task, augmentation_target)
+
     # new_task = _apply_augmentation_to_task(
     #     task,
     #     partial(geometric_augmentation, **get_random_geometric_augmentation_params()),
     #     augmentation_target=augmentation_target)
-    # new_task = _apply_augmentation_to_task(
-    #     task,
-    #     partial(add_padding, **get_random_padding_params()),
-    #     augmentation_target=augmentation_target)
+    new_task = _apply_augmentation_to_task(
+        task,
+        partial(add_padding, **get_random_padding_params(max_grid_shape)),
+        augmentation_target=augmentation_target)
     # new_task = _apply_augmentation_to_task(
     #     task,
     #     partial(upscale, **get_random_upscale_params()),
     #     augmentation_target=augmentation_target)
-    new_task = _apply_augmentation_to_task(
-        task,
-        partial(mirror, **get_random_mirror_params()),
-        augmentation_target=augmentation_target)
+    # new_task = _apply_augmentation_to_task(
+    #     task,
+    #     partial(mirror, **get_random_mirror_params()),
+    #     augmentation_target=augmentation_target)
     # TODO: finish this function
     return new_task
 
@@ -148,18 +153,33 @@ def set_random_seed(random_seed):
     np.random.seed(random_seed)
 
 
+def get_max_grid_shape(task, augmentation_target):
+    max_shape = (0, 0)
+    for partition, samples in task.items():
+        for sample in samples:
+            grid = sample[augmentation_target]
+            max_shape = (max(max_shape[0], len(grid)), max(max_shape[1], len(grid[0])))
+    return max_shape
+
+
 def add_padding(grid, color, size):
     rows, cols = len(grid), len(grid[0])
-    padded_grid = [[color]*(cols + size*2) for _ in range(size)]
+    padded_grid = [[color]*(cols + size[1]*2) for _ in range(size[0])]
     for row in grid:
-        padded_grid.append([color]*size + row + [color]*size)
-    padded_grid += [[color]*(cols + size*2) for _ in range(size)]
+        padded_grid.append([color]*size[1] + row + [color]*size[1])
+    padded_grid += [[color]*(cols + size[1]*2) for _ in range(size[0])]
     return padded_grid
 
 
-def get_random_padding_params():
+def get_random_padding_params(max_grid_shape, same_size_probability=0.0):
     # TODO: verify that the grid won't be too big
-    return dict(color=random.randint(0, 9), size=random.randint(1, 5))
+    color = random.randint(0, 9)
+    if random.random() < same_size_probability:
+        size = random.randint(1, 5)
+        size = (size, size)
+    else:
+        size = (random.randint(1, 5), random.randint(1, 5))
+    return dict(color=color, size=size)
 
 
 def upscale(grid, scale):
