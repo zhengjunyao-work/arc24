@@ -110,19 +110,25 @@ accuracy: 10.0%	correct_pixels: 72.2%	max_correct_pixels: 76.3%	correct_size: 85
 ### Optimization for 50 splits
 
 ```
-50 splits, 4h12
+qwen2-0.5b-instruct/5
+
+50 splits, 1000 steps, linear lr 1e-4, 4h12
+https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=194795197
 accuracy: 9.4%	correct_pixels: 71.2%	max_correct_pixels: 81.8%	correct_size: 85.4%	any_correct_size: 88.0%	pass_64: 27.0%	unanswered: 2.8%
 accuracy: 9.2%	correct_pixels: 75.7%	max_correct_pixels: 79.1%	correct_size: 88.3%	any_correct_size: 88.8%	pass_2: 18.4%	unanswered: 0.0%
 
-50 splits, constant lr, 4h5
+50 splits, 1000 steps, constant lr 1e-4 bs16, 4h5
+https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=194876119
 accuracy: 10.4%	correct_pixels: 70.3%	max_correct_pixels: 82.9%	correct_size: 83.9%	any_correct_size: 87.0%	pass_64: 29.5%	unanswered: 4.0%
 accuracy: 10.0%	correct_pixels: 72.2%	max_correct_pixels: 76.3%	correct_size: 85.0%	any_correct_size: 87.0%	pass_2: 20.0%	unanswered: 1.0%
+
+val qwen2-0.5b/5 50split 2k_step_bs8 1e-4_lr_cte (halve batch size to 8 and duplicate steps to 2000)
 ```
 
 Using a constant learning rate seems to have a positive effect.
 
+TODO: what if I reduce the batch size? That way I will do more modifications to the model Ideally go down to 1, (with lower learning rate)
 TODO: increase the budget to 2k or 3k steps
-TODO: what if I reduce the batch size? That way I will do more modifications to the model
 
 ## Conclusion
 
@@ -138,4 +144,6 @@ TODO: new best score of 28! using an ensemble
 - [ ] Optimize the parametrization of single task ttft (stttft) (learning rate and steps) Does it improve over the baseline?
 - [x] Try with constant learning rate schedule, might be better for short fine-tunings.
 - [x] Can I improve the leaderboard score?
-- [ ] Can I optimize the submission speed? Maybe reduce VLLM RAM usage. https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html
+- [ ] Can I optimize the submission speed?
+  - [ ] Maybe reduce VLLM RAM usage. https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html
+  - [ ] Maybe use unsloth and change to single P100 GPU.
