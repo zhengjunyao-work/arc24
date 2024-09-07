@@ -225,7 +225,7 @@ def get_random_upscale_params(max_grid_shape, min_upscale=2, max_upscale=4,
         scale = random.randint(min_upscale, safe_max_upscale)
         return dict(scale=(scale, scale))
     else:
-        if max(safe_max_upscale) < 2:
+        if max(safe_max_upscale) < 2 or min(safe_max_upscale) < 1:
             raise GridTooBigToAugmentError(f"Grid is too big to upscale: {max_grid_shape}")
         min_upscale = 1
         for _ in range(n_tries):
