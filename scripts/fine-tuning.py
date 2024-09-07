@@ -64,7 +64,7 @@ class CFG:
     use_dora = True,
     lora_r: int = 32
     # Data augmentation
-    compose_new_task_probability: float = 0.5
+    compose_new_task_probability: float = 0.0
     compose_new_task_weights: Optional[List[float]] = None
 
 
