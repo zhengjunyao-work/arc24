@@ -6,7 +6,7 @@ from functools import wraps
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-logger = logging.getLogger("ExecutionTimeLogger")
+logger = logging.getLogger(__name__)
 
 def log_execution_time(func):
     @wraps(func)
