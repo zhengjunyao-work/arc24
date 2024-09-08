@@ -56,27 +56,26 @@ from arc24.data_augmentation import (
     apply_data_augmentation, revert_data_augmentation, get_random_color_map, set_random_seed)
 from arc24.prompting import SimplePromptCreator, print_smaller_prompt
 from arc24.encoders import create_grid_encoder
+from arc24.logging import log_execution_time, logging
 
-import logging
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-logging.info('Started logging')
+logger = logging.getLogger(__name__)
 
 
-def main():
+@log_execution_time
+def inference_main():
     # Override default configuration using arguments
     args = parse_args()
     cfg = CFG(**{k: v for k, v in vars(args).items() if v is not None})
-    print(asdict(cfg))
+    logger.info(f'Inference configuration: {asdict(cfg)}')
 
     with open(cfg.dataset_path) as f:
         data = json.load(f)
     if cfg.n_tasks is not None and cfg.n_tasks > 0:
         data = dict(islice(data.items(), cfg.n_tasks))
-    print(f'There are {len(data)} tasks to solve.')
+    logger.info(f'There are {len(data)} tasks to solve in {cfg.dataset_path}')
 
 
-    print(f'Loading {cfg.model_path}')
+    logger.info(f'Loading {cfg.model_path}')
     llm = LLM(model=cfg.model_path,
                 trust_remote_code=True,
                 dtype='half',
@@ -131,19 +130,17 @@ def create_prompts(data, prompt_creator, predictions_per_task):
 def get_sampling_params(best_of, temperature, n, max_output_tokens):
     # # https://docs.vllm.ai/en/latest/dev/sampling_params.html
     if best_of == 1:
-        print('Using greedy search')
         sampling_params = SamplingParams(n=n, temperature=temperature, max_tokens=max_output_tokens, logprobs=0)
     else:
-        print(f'Using beam search with best_of={best_of}, temperature is set to 0.0')
         sampling_params = SamplingParams(n=n, temperature=0.0, max_tokens=max_output_tokens,
                               use_beam_search=True, best_of=best_of, logprobs=0)
-    print(f'Sampling params: {sampling_params}')
+    logger.info(f'VLLM Sampling params: {sampling_params}')
     return sampling_params
 
 
 def generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=512):
     outputs = []
-    print(f'Generating outputs with batch_size={batch_size}, there are {len(prompts)} prompts')
+    logger.info(f'Generating outputs with batch_size={batch_size}, there are {len(prompts)} prompts')
     for i in tqdm(range(0, len(prompts), batch_size), desc='Generating outputs with batches', smoothing=0):
         batch = prompts[i:i+batch_size]
         if batch:
@@ -215,4 +212,4 @@ def clear_vllm_gpu_memory():
 
 
 if __name__ == '__main__':
-    main()
+    inference_main()

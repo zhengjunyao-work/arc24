@@ -166,6 +166,7 @@ TODO: new best score of 28! using an ensemble
 - [x] Try with constant learning rate schedule, might be better for short fine-tunings.
 - [x] Can I improve the leaderboard score?
 - [ ] Add logging to better analyze the problems, reduce verbosity
+  - [ ] Can I hide VLLM loggings? Try on a notebook
 - [ ] Better think of the timeout feature.
 - [ ] Can I optimize the submission speed?
   - [ ] Maybe reduce VLLM RAM usage. https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html
