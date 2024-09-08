@@ -22,6 +22,7 @@ class CFG:
     n: int = 1 # number of samples to generate
     batch_size: int = 512 # batch size for inference
     random_seed: Optional[int] = None # random seed for data augmentation
+    verbose: bool = False
 
 
 def parse_args():
@@ -39,6 +40,7 @@ def parse_args():
     parser.add_argument('--max_output_tokens', type=int, help="Maximum number of tokens to generate")
     parser.add_argument('--max_model_len', type=int, help="Maximum number of tokens in the model")
     parser.add_argument('--random_seed', type=int, help="Random seed for data augmentation")
+    parser.add_argument('--verbose', action='store_true', help="Print verbose output")
     return parser.parse_args()
 
 
@@ -86,19 +88,16 @@ def main():
                 max_num_seqs=255, # default is supposed to be 256 I have used it to solve some weird illegal memory error
                 )
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_path)
-    for number in '0123456789':
-        print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
-
     set_random_seed(cfg.random_seed)
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
     prompt_creator = SimplePromptCreator(grid_encoder, tokenizer)
     prompts_conf = create_prompts(data, prompt_creator, cfg.predictions_per_task)
     prompts = [conf['prompt'] for conf in prompts_conf]
-    print_smaller_prompt(prompts)
+    if cfg.verbose: print_smaller_prompt(prompts)
 
     sampling_params = get_sampling_params(cfg.best_of, cfg.temperature, cfg.n, cfg.max_output_tokens)
     outputs = generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=cfg.batch_size)
-    task_results = create_tasks_results(outputs, prompts_conf, prompt_creator)
+    task_results = create_tasks_results(outputs, prompts_conf, prompt_creator, cfg.verbose)
     solutions = create_solutions(task_results, data)
 
     with open(cfg.output_filepath, 'w') as f:
@@ -152,7 +151,7 @@ def generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=512)
     return outputs
 
 
-def create_tasks_results(outputs, prompts_conf, prompt_creator):
+def create_tasks_results(outputs, prompts_conf, prompt_creator, verbose=False):
     task_results = prompts_conf.copy()
     for idx, output in tqdm(enumerate(outputs), total=len(outputs), desc='Parsing outputs'):
         task_id = prompts_conf[idx]['task_id']
@@ -164,7 +163,7 @@ def create_tasks_results(outputs, prompts_conf, prompt_creator):
             grid = revert_data_augmentation(grid, **data_augmentation_kwargs)
         except Exception as e:
             # TODO: better exception printing (shape of the grid)
-            print(f'Exception when parsing response from {task_id}_{sample_idx}: {e} \n{response}')
+            if verbose: print(f'Exception when parsing response from {task_id}_{sample_idx}: {e} \n{response}')
             grid = []
         task_results[idx]['grid'] = grid
         task_results[idx]['response'] = response

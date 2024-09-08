@@ -56,6 +56,19 @@ No prompt smaller than 4096 tokens for task f9d67f8b
 No prompt smaller than 4096 tokens for task 981571dc
 No prompt smaller than 4096 tokens for task b9630600
 
+### VLLM freezes randomly
+
+On some submissions I have observed some timeouts that did not have sense, the configuration and model
+were the same as in other successful submissions that only took around 9 hours.
+
+When doing one of the experiments for this iteration I have finally see that the notebook was stuck at inference.
+[Link to notebook run](https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=195657392)
+
+There is no message in the logs, it simply stops writing logs after 3.5 hours.
+
+To try to solve this I have added a timeout when running inference. If the execution takes more than
+the timeout it is stopped. I have set it to 5 minutes, but it seems it was too low and 3 submissions have timeout.
+
 ## Results
 
 ### Experiment about optimal number of splits
@@ -122,7 +135,15 @@ https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?
 accuracy: 10.4%	correct_pixels: 70.3%	max_correct_pixels: 82.9%	correct_size: 83.9%	any_correct_size: 87.0%	pass_64: 29.5%	unanswered: 4.0%
 accuracy: 10.0%	correct_pixels: 72.2%	max_correct_pixels: 76.3%	correct_size: 85.0%	any_correct_size: 87.0%	pass_2: 20.0%	unanswered: 1.0%
 
-val qwen2-0.5b/5 50split 2k_step_bs8 1e-4_lr_cte (halve batch size to 8 and duplicate steps to 2000)
+val qwen2-0.5b/5 50split 2k_step_bs8 1e-4_lr_cte (halve batch size to 8 and duplicate steps to 2000), 4h14, 3h8 fine-tuning (1h inference, so around 1-2 minutes per split)
+accuracy: 9.9%	correct_pixels: 69.0%	max_correct_pixels: 80.8%	correct_size: 82.0%	any_correct_size: 84.5%	pass_n: 33.5%	unanswered: 3.2%
+accuracy: 8.9%	correct_pixels: 72.8%	max_correct_pixels: 76.1%	correct_size: 85.2%	any_correct_size: 85.7%	pass_n: 17.9%	unanswered: 0.0%
+
+halve again batch size and learning rate, 80 steps per training
+val qwen2-0.5b/5 50split 4k_step_bs4 5e-5_lr_cte
+
+
+val qwen2-0.5b/5 50split 8k_step_bs2 2e-5_lr_cte
 ```
 
 Using a constant learning rate seems to have a positive effect.
@@ -144,6 +165,8 @@ TODO: new best score of 28! using an ensemble
 - [ ] Optimize the parametrization of single task ttft (stttft) (learning rate and steps) Does it improve over the baseline?
 - [x] Try with constant learning rate schedule, might be better for short fine-tunings.
 - [x] Can I improve the leaderboard score?
+- [ ] Add logging to better analyze the problems, reduce verbosity
+- [ ] Better think of the timeout feature.
 - [ ] Can I optimize the submission speed?
   - [ ] Maybe reduce VLLM RAM usage. https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html
   - [ ] Maybe use unsloth and change to single P100 GPU.
