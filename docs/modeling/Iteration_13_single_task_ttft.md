@@ -69,6 +69,8 @@ There is no message in the logs, it simply stops writing logs after 3.5 hours.
 To try to solve this I have added a timeout when running inference. If the execution takes more than
 the timeout it is stopped. I have set it to 5 minutes, but it seems it was too low and 3 submissions have timeout.
 
+I can hide VLLM logs with `export VLLM_LOGGING_LEVEL=ERROR`
+
 ## Results
 
 ### Experiment about optimal number of splits
@@ -166,7 +168,7 @@ TODO: new best score of 28! using an ensemble
 - [x] Try with constant learning rate schedule, might be better for short fine-tunings.
 - [x] Can I improve the leaderboard score?
 - [ ] Add logging to better analyze the problems, reduce verbosity
-  - [ ] Can I hide VLLM loggings? Try on a notebook
+  - [ ] Can I hide VLLM loggings? Yes: export VLLM_LOGGING_LEVEL=ERROR
 - [ ] Better think of the timeout feature.
 - [ ] Can I optimize the submission speed?
   - [ ] Maybe reduce VLLM RAM usage. https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html
