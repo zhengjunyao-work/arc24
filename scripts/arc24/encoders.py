@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def create_grid_encoder(encoder_name):
@@ -15,7 +18,7 @@ def create_grid_encoder(encoder_name):
     """
     grid_encoder = eval(encoder_name)
     if isinstance(grid_encoder, GridEncoder):
-        print(f'Created `{encoder_name}` as grid encoder')
+        logger.info(f'Created `{encoder_name}` as grid encoder')
         return grid_encoder
     else:
         raise ValueError(f'{encoder_name} is not a GridEncoder subclass')
