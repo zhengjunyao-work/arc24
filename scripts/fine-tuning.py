@@ -12,9 +12,9 @@ from functools import partial
 from dataclasses import dataclass, asdict, field
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, BitsAndBytesConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training, get_peft_model
-from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
+from trl import SFTTrainer, DataCollatorForCompletionOnlyLM, SFTConfig
 from datasets import Dataset, IterableDataset
 
 from arc24.encoders import create_grid_encoder
@@ -137,8 +137,6 @@ def fine_tuning_main():
         model=model,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
-        dataset_text_field="text",
-        max_seq_length=cfg.max_seq_len,
         data_collator=data_collator,
         args=training_arguments,
         # optimizers=(torch.load(os.path.join(cfg.adapter_path, 'optimizer.pt')), None)
@@ -514,7 +512,7 @@ def get_training_arguments(cfg):
     lr_scheduler_kwargs = {}
     if cfg.lr_scheduler_type == 'cosine_with_restarts':
         lr_scheduler_kwargs['num_cycles'] = cfg.lr_num_cycles
-    training_arguments = TrainingArguments(
+    training_arguments = SFTConfig(
             output_dir=cfg.output_dir,
             num_train_epochs=cfg.epochs,
             max_steps=cfg.max_steps,
@@ -525,8 +523,11 @@ def get_training_arguments(cfg):
             optim=cfg.optim,
             max_grad_norm=cfg.max_grad_norm,
 
+            dataset_text_field="text",
+            max_seq_length=cfg.max_seq_len,
+
             do_eval=True,
-            evaluation_strategy="steps",
+            eval_strategy="steps",
             save_steps=cfg.eval_steps,
             logging_steps=cfg.logging_steps, #50,
             eval_steps=cfg.eval_steps,
