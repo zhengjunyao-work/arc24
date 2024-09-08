@@ -330,7 +330,7 @@ def get_tokenizer(model_path, model):
         model_path,
         trust_remote_code=True)
     if 'llama' in model_path:
-        print('Adding <|pad|> token to tokenizer')
+        logger.info('Adding <|pad|> token to tokenizer')
         tokenizer.add_special_tokens({'pad_token': '<|pad|>'})
         model.resize_token_embeddings(len(tokenizer))
         tokenizer.padding_side = 'right'
@@ -379,7 +379,7 @@ def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, ve
     prompt_lengths = [len(tokenizer.encode(prompt)) for prompt in tqdm(prompts, desc='Calculating prompt lengths')]
     if verbose: print_prompt_length_percentiles(prompt_lengths, prefix='Validation')
     prompts = [prompt for prompt, prompt_length in zip(prompts, prompt_lengths) if prompt_length < max_seq_len]
-    print(f'Leaving {len(prompts)} validation prompts after removing those longer than {max_seq_len} tokens')
+    logging.info(f'Leaving {len(prompts)} validation prompts after removing those longer than {max_seq_len} tokens')
     dataset = Dataset.from_dict({'text': prompts})
     return dataset
 
