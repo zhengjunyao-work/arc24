@@ -68,6 +68,8 @@ There is no message in the logs, it simply stops writing logs after 3.5 hours.
 
 To try to solve this I have added a timeout when running inference. If the execution takes more than
 the timeout it is stopped. I have set it to 5 minutes, but it seems it was too low and 3 submissions have timeout.
+I have inspected the inference times when doing 64 predictions, and just generating the output tokens took 3m for the worst case. So it makes sense that
+generating 128 predictions takes more than 5 minutes.
 
 I can hide VLLM logs with `export VLLM_LOGGING_LEVEL=ERROR`
 
@@ -139,16 +141,34 @@ accuracy: 10.0%	correct_pixels: 72.2%	max_correct_pixels: 76.3%	correct_size: 85
 
 val qwen2-0.5b/5 50split 2k_step_bs8 1e-4_lr_cte (halve batch size to 8 and duplicate steps to 2000), 4h14, 3h8 fine-tuning (1h inference, so around 1-2 minutes per split)
 accuracy: 9.9%	correct_pixels: 69.0%	max_correct_pixels: 80.8%	correct_size: 82.0%	any_correct_size: 84.5%	pass_n: 33.5%	unanswered: 3.2%
-accuracy: 8.9%	correct_pixels: 72.8%	max_correct_pixels: 76.1%	correct_size: 85.2%	any_correct_size: 85.7%	pass_n: 17.9%	unanswered: 0.0%
+accuracy: 8.9%	correct_pixels: 72.8%	max_correct_pixels: 76.1%	correct_size: 85.2%	any_correct_size: 85.7%	pass_2: 17.9%	unanswered: 0.0%
 
 halve again batch size and learning rate, 80 steps per training
-val qwen2-0.5b/5 50split 4k_step_bs4 5e-5_lr_cte
+val qwen2-0.5b/5 50split 4k_step_bs4 5e-5_lr_cte, 4h20, 3h11 fine-tuning
+accuracy: 11.9%	correct_pixels: 70.4%	max_correct_pixels: 83.7%	correct_size: 83.2%	any_correct_size: 87.5%	pass_n: 32.5%	unanswered: 3.5%	
+accuracy: 10.7%	correct_pixels: 73.4%	max_correct_pixels: 78.9%	correct_size: 85.5%	any_correct_size: 87.8%	pass_2: 21.4%	unanswered: 0.8%
 
+160 steps per training
+val qwen2-0.5b/5 50split 8k_step_bs2 2e-5_lr_cte, 4h23, 3h15 fine-tuning
+https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=195770629
+accuracy: 11.1%	correct_pixels: 71.4%	max_correct_pixels: 84.5%	correct_size: 85.0%	any_correct_size: 88.0%	pass_n: 33.5%	unanswered: 3.3%
+accuracy: 11.2%	correct_pixels: 74.9%	max_correct_pixels: 79.7%	correct_size: 86.7%	any_correct_size: 88.8%	pass_2: 22.4%	unanswered: 0.5%
 
-val qwen2-0.5b/5 50split 8k_step_bs2 2e-5_lr_cte
+val qwen2-0.5b/5 50split 8k_step_bs2 2e-5_lr_lin, 4h24, 3h16 fine-tuning
+https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=195800246
+accuracy: 10.9%	correct_pixels: 71.2%	max_correct_pixels: 84.1%	correct_size: 84.9%	any_correct_size: 88.0%	pass_n: 35.0%	unanswered: 3.1%
+accuracy: 12.1%	correct_pixels: 73.7%	max_correct_pixels: 79.4%	correct_size: 85.6%	any_correct_size: 87.9%	pass_2: 24.2%	unanswered: 1.3%
+
+val qwen2-0.5b/5 50split 8k_step_bs2 4e-5_lr_lin
+TODO: launch it tomorrow, it should take 4h24
+
+# Go down to batch size 1, and use 100 splits
+val qwen2-0.5b/5 100split 16k_step_bs1 2e-5_lr_lin
+
+# TODO: if it improves play with the learning rate
 ```
 
-Using a constant learning rate seems to have a positive effect.
+Using a constant learning rate seems to have a positive effect when using batch size 16.
 
 TODO: what if I reduce the batch size? That way I will do more modifications to the model Ideally go down to 1, (with lower learning rate)
 TODO: increase the budget to 2k or 3k steps
@@ -167,9 +187,10 @@ TODO: new best score of 28! using an ensemble
 - [ ] Optimize the parametrization of single task ttft (stttft) (learning rate and steps) Does it improve over the baseline?
 - [x] Try with constant learning rate schedule, might be better for short fine-tunings.
 - [x] Can I improve the leaderboard score?
-- [ ] Add logging to better analyze the problems, reduce verbosity
-  - [ ] Can I hide VLLM loggings? Yes: export VLLM_LOGGING_LEVEL=ERROR
+- [x] Add logging to better analyze the problems, reduce verbosity
+  - [x] Can I hide VLLM loggings? Yes: export VLLM_LOGGING_LEVEL=ERROR
 - [ ] Better think of the timeout feature.
 - [ ] Can I optimize the submission speed?
   - [ ] Maybe reduce VLLM RAM usage. https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html
   - [ ] Maybe use unsloth and change to single P100 GPU.
+- [ ] Can I increase the max_seq_len?
