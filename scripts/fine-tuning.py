@@ -25,11 +25,14 @@ from arc24.data_augmentation import (
 )
 from arc24.prompting import create_prompts_from_task, print_smaller_prompt
 from arc24.data import load_arc_data_with_solutions
+from arc24.logging import log_execution_time, logging
 
+logger = logging.getLogger(__name__)
 
 # grid encoder experiments
 @dataclass
 class CFG:
+    verbose: bool = True
     resume_from_checkpoint: bool = True
     model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
     adapter_path: Optional[str] = None
@@ -98,10 +101,11 @@ def parse_args():
     parser.add_argument('--resume_from_checkpoint', action=argparse.BooleanOptionalAction, help="Whether to resume from checkpoint")
     parser.add_argument('--compose_new_task_probability', type=float, help="Probability of composing a new task")
     parser.add_argument('--compose_new_task_weights', nargs='+', type=float, help="Weights for composing a new task")
+    parser.add_argument('--verbose', action=argparse.BooleanOptionalAction, help="Whether to print verbose information")
     return parser.parse_args()
 
-
-def main():
+@log_execution_time
+def fine_tuning_main():
     # Override default configuration using arguments
     cfg = CFG(**{k: v for k, v in vars(parse_args()).items() if v is not None})
     save_train_conf(cfg)
@@ -111,7 +115,7 @@ def main():
     model = get_lora_model(model, cfg.adapter_path, cfg.lora_r, cfg.use_rslora, cfg.use_dora)
 
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
-    dataset_kwargs = {'grid_encoder': grid_encoder, 'tokenizer': tokenizer, 'max_seq_len': cfg.max_seq_len}
+    dataset_kwargs = {'grid_encoder': grid_encoder, 'tokenizer': tokenizer, 'max_seq_len': cfg.max_seq_len, 'verbose': cfg.verbose}
     train_dataset = IterableDataset.from_generator(
         # for some weird reason, it does not work correctly with lists and I have to use partial with the lists
         partial(random_prompt_generator, dataset_filepaths=cfg.train_datasets,
@@ -201,7 +205,7 @@ def get_device_map(n_gpus, model_path):
                 'lm_head': 1,
             }
         elif 'qwen2-0.5b-instruct' in model_path.lower():
-            print('Using qwen2-0.5b-instruct device map')
+            logger.info('Using qwen2-0.5b-instruct device map')
             device_map = {
                 'model.embed_tokens': 0,
                 'lm_head': 0,
@@ -232,7 +236,7 @@ def get_device_map(n_gpus, model_path):
                 'model.norm': 1
             }
         elif 'qwen2-1.5b-instruct' in model_path.lower():
-            print('Using qwen2-1.5b-instruct device map')
+            logger.info('Using qwen2-1.5b-instruct device map')
             device_map = {
                 'model.embed_tokens': 0,
                 'lm_head': 0,
@@ -278,16 +282,16 @@ def get_flash_attention_implementation():
         attn_implementation = "flash_attention_2"
     except ImportError:
         attn_implementation = None
-    print(f'Using {attn_implementation} attention implementation')
+    logger.info(f'Using {attn_implementation} attention implementation')
     return attn_implementation
 
 
 def get_torch_dtype(torch_dtype):
     if torch_dtype == 'float16':
-        print('Using float16 torch dtype')
+        logger.info('Using float16 torch dtype')
         return torch.float16
     elif torch_dtype == 'bfloat16':
-        print('Using bfloat16 torch dtype')
+        logger.info('Using bfloat16 torch dtype')
         return torch.bfloat16
     else:
         raise ValueError(f'Unknown torch dtype {torch_dtype}')
@@ -295,7 +299,7 @@ def get_torch_dtype(torch_dtype):
 
 def get_model(model_path, n_gpus, torch_dtype, use_4bit_quantization=False):
     if use_4bit_quantization:
-        print('Using 4-bit quantization')
+        logger.info('Using 4-bit quantization')
         bnb_config = BitsAndBytesConfig(
             load_in_4bit= True,
             bnb_4bit_quant_type= "nf4",
@@ -330,10 +334,10 @@ def get_tokenizer(model_path, model):
         tokenizer.add_special_tokens({'pad_token': '<|pad|>'})
         model.resize_token_embeddings(len(tokenizer))
         tokenizer.padding_side = 'right'
-    print(tokenizer.special_tokens_map)
-    print('Verification of number tokens')
-    for number in '0123456789':
-            print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
+    # print(tokenizer.special_tokens_map)
+    # print('Verification of number tokens')
+    # for number in '0123456789':
+    #         print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
     return tokenizer
 
 
@@ -352,28 +356,28 @@ def get_lora_model(model, adapter_path, r, use_rslora, use_dora):
             use_rslora=use_rslora,
             use_dora=use_dora,
         )
-        print(f'Creating LoRA with the following config: {peft_config}')
+        logger.info(f'Creating LoRA with the following config: {peft_config}')
         model = get_peft_model(model, peft_config)
     else:
-        print(f'Loading adapter from {adapter_path}')
+        logger.info(f'Loading adapter from {adapter_path}')
         model = PeftModel.from_pretrained(model, adapter_path, is_trainable=True)
     return model
 
 
 def print_gpu_memory():
     for device in range(torch.cuda.device_count()):
-        print(f'GPU {device} memory allocated: {torch.cuda.memory_allocated(device)/1024**3:.1f} GB, max memory allocated: {torch.cuda.max_memory_allocated(device)/1024**3:.1f} GB')
+        logger.info(f'GPU {device} memory allocated: {torch.cuda.memory_allocated(device)/1024**3:.1f} GB, max memory allocated: {torch.cuda.max_memory_allocated(device)/1024**3:.1f} GB')
 
 # Data
-def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, print_sample_prompt=True):
+def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, verbose=False):
     data = load_arc_data_with_solutions(filepath)
     tasks = list(data.values())
     prompts = []
     for task in tqdm(tasks, desc='create prompts'):
         prompts.extend(create_prompts_from_task(task, grid_encoder, tokenizer))
-    if print_sample_prompt: print_smaller_prompt(prompts)
+    if verbose: print_smaller_prompt(prompts)
     prompt_lengths = [len(tokenizer.encode(prompt)) for prompt in tqdm(prompts, desc='Calculating prompt lengths')]
-    print_prompt_length_percentiles(prompt_lengths, prefix='Validation')
+    if verbose: print_prompt_length_percentiles(prompt_lengths, prefix='Validation')
     prompts = [prompt for prompt, prompt_length in zip(prompts, prompt_lengths) if prompt_length < max_seq_len]
     print(f'Leaving {len(prompts)} validation prompts after removing those longer than {max_seq_len} tokens')
     dataset = Dataset.from_dict({'text': prompts})
@@ -385,7 +389,8 @@ def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_
                             log_prompt_length_every=1000,
                             subsample_tasks_ratio=None,
                             compose_new_task_probability=0.5,
-                            compose_new_task_weights=None):
+                            compose_new_task_weights=None,
+                            verbose=False):
     """
     """
     data = dict()
@@ -396,12 +401,12 @@ def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_
     set_random_seed(random_seed)
     if subsample_tasks_ratio is not None:
         task_ids = random.sample(task_ids, int(subsample_tasks_ratio*len(task_ids)))
-        print(f'Subsampled {len(task_ids)} training tasks out of a total of {len(data)}')
+        logger.info(f'Subsampled {len(task_ids)} training tasks out of a total of {len(data)}')
     else:
-        print(f'Using all {len(task_ids)} training tasks')
+        logger.info(f'Using all {len(task_ids)} training tasks')
     while True:
         if len(prompt_lengths) >= log_prompt_length_every:
-            print_prompt_length_percentiles(prompt_lengths, prefix='Training')
+            if verbose: print_prompt_length_percentiles(prompt_lengths, prefix='Training')
             check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len)
             prompt_lengths = []
         random.shuffle(task_ids)
@@ -427,8 +432,7 @@ def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_
             if prompt is not None:
                 yield {'text': prompt}
             else:
-                pass # commented the line above because it was becoming too verbose
-                # print(f'Prompt was {prompt_length}>{max_seq_len} tokens for task {task_id}, skipping task')
+                logger.debug(f'Prompt was {prompt_length}>{max_seq_len} tokens for task {task_id}, skipping task')
 
 
 def create_random_task_from_task_without_test(task):
@@ -464,7 +468,7 @@ def print_prompt_length_percentiles(prompt_lengths, prefix):
 
 def check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len, max_allowed_ratio=0.5):
     ratio = np.mean(np.array(prompt_lengths) > max_seq_len)
-    print(f'Ratio of prompts above max_seq_len: {ratio:.1%}')
+    logger.info(f'Ratio of prompts above max_seq_len: {ratio:.1%}')
     if ratio > max_allowed_ratio:
         raise ValueError(f'Too many prompts above max_seq_len: {ratio:.1%}')
 
@@ -472,21 +476,21 @@ def check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len, max_al
 def get_data_collator(model_path, tokenizer):
     # TODO: create a function that returns model type from model path
     if 'llama' in model_path.lower():
-        print('Using llama template for collator')
+        logger.info('Using llama template for collator')
         data_collator = DataCollatorForCompletionOnlyLM(
             tokenizer=tokenizer,
             instruction_template='<|start_header_id|>user<|end_header_id|>',
             response_template='<|start_header_id|>assistant<|end_header_id|>',
         )
     elif 'SmolLM' in model_path.lower() or 'qwen' in model_path.lower():
-        print('Using SmolLM template for collator')
+        logger.info('Using SmolLM template for collator')
         data_collator = DataCollatorForCompletionOnlyLM(
             tokenizer=tokenizer,
             instruction_template='<|im_start|>user',
             response_template='<|im_start|>assistant',
         )
     else:
-        print('Using Phi-3 template for collator')
+        logger.info('Using Phi-3 template for collator')
         data_collator = DataCollatorForCompletionOnlyLM(
             tokenizer=tokenizer,
             instruction_template='<|user|>',
@@ -504,7 +508,7 @@ def get_training_arguments(cfg):
     )
     scheduler_type = cfg.lr_scheduler_type
     if scheduler_type == 'cyclic':
-        print('Using cyclic learning rate scheduler (renaming to linear because it will be hacked later)')
+        logger.info('Using cyclic learning rate scheduler (renaming to linear because it will be hacked later)')
         scheduler_type = 'linear'
 
     lr_scheduler_kwargs = {}
@@ -535,7 +539,7 @@ def get_training_arguments(cfg):
 
 
 def save_train_conf(cfg):
-    print(f'Train configuration: {asdict(cfg)}')
+    logger.info(f'Train configuration: {asdict(cfg)}')
     os.makedirs(cfg.output_dir, exist_ok=True)
     with open(os.path.join(cfg.output_dir, 'cfg.json'), 'w') as f:
         json.dump({key:value for key, value in cfg.__dict__.items() if not key.startswith('__')}, f, indent=4)
@@ -562,11 +566,11 @@ def replace_trainer_lr_scheduler_with_cyclic_lr(trainer, warmup_ratio, learning_
 def is_checkpoint_available(output_dir):
     is_checkpoint_available = len(glob.glob(os.path.join(output_dir, 'checkpoint-*'))) > 0
     if is_checkpoint_available:
-        print('Checkpoint found, resuming training')
+        logger.info('Checkpoint found, resuming training')
     else:
-        print('No checkpoint found, starting training from scratch')
+        logger.info('No checkpoint found, starting training from scratch')
     return is_checkpoint_available
 
 
 if __name__ == '__main__':
-    main()
+    fine_tuning_main()
