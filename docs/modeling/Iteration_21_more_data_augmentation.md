@@ -22,6 +22,39 @@ be helpful (at least when we have a small compute budget).
 
 ## Results
 
+### General results
+
+| task data augmentation probability | accuracy | correct_pixels | correct_size | pass_n | vote_2 |
+|------------------------------------|----------|----------------|--------------|--------|--------|
+| 0%                                 | 5.93%    | 69.74%         | 87.60%       | 21.00% | 14.02% |
+| 25%                                | 6.96%    | 70.46%         | 88.27%       | 21.50% | 15.15% |
+| 50%                                | 7.02%    | 70.87%         | 88.77%       | 21.62% | 13.51% |
+| 75%                                | 6.49%    | 69.82%         | 88.96%       | 20.50% | 15.03% |
+| 100%                               | 6.37%    | 69.21%         | 89.06%       | 20.88% | 13.32% |
+
+All experiments that use task data augmentation improve accuracy over the baseline that does not use it.
+Probably the best configuration is to use it 50% of the time.
+
+![train metrics](res/2024-09-09-17-57-28.png)
+
+Train and validation metrics show very clearly the effect of using this new data augmentation: train loss gets worse and validation loss improves.
+
+### Ablation study
+
+I used 4 types of task data augmentation: geometric, padding, upscale and mirror.
+Let's remove them one by one and measure the effect.
+
+| removed data augmentation | accuracy | correct_pixels | correct_size | pass_n | vote_2 |
+|---------------------------|----------|----------------|--------------|--------|--------|
+| -                         | 6.37%    | 69.21%         | 89.06%       | 20.88% | 13.32% |
+| geometric                 | 6.91%    | 69.88%         | 88.32%       | 22.88% | 15.15% |
+| padding                   | 6.43%    | 69.22%         | 88.30%       | 18.62% | 12.34% |
+| upscale                   | 6.01%    | 68.54%         | 88.67%       | 18.62% | 13.01% |
+| mirror                    | 5.82%    | 68.34%         | 88.75%       | 18.75% | 13.01% |
+
+Removing mirror and upscale have the greatest drop in performance, while removing geometric transformation
+results on improved accuracy. I can try new configurations using this knowledge to try to improve the results (`1244`)`
+
 ## Conclusion
 
 ## Next steps
