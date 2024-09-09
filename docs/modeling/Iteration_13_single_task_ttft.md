@@ -139,6 +139,8 @@ https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?
 accuracy: 10.4%	correct_pixels: 70.3%	max_correct_pixels: 82.9%	correct_size: 83.9%	any_correct_size: 87.0%	pass_64: 29.5%	unanswered: 4.0%
 accuracy: 10.0%	correct_pixels: 72.2%	max_correct_pixels: 76.3%	correct_size: 85.0%	any_correct_size: 87.0%	pass_2: 20.0%	unanswered: 1.0%
 
+
+
 val qwen2-0.5b/5 50split 2k_step_bs8 1e-4_lr_cte (halve batch size to 8 and duplicate steps to 2000), 4h14, 3h8 fine-tuning (1h inference, so around 1-2 minutes per split)
 accuracy: 9.9%	correct_pixels: 69.0%	max_correct_pixels: 80.8%	correct_size: 82.0%	any_correct_size: 84.5%	pass_n: 33.5%	unanswered: 3.2%
 accuracy: 8.9%	correct_pixels: 72.8%	max_correct_pixels: 76.1%	correct_size: 85.2%	any_correct_size: 85.7%	pass_2: 17.9%	unanswered: 0.0%
@@ -154,16 +156,18 @@ https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?
 accuracy: 11.1%	correct_pixels: 71.4%	max_correct_pixels: 84.5%	correct_size: 85.0%	any_correct_size: 88.0%	pass_n: 33.5%	unanswered: 3.3%
 accuracy: 11.2%	correct_pixels: 74.9%	max_correct_pixels: 79.7%	correct_size: 86.7%	any_correct_size: 88.8%	pass_2: 22.4%	unanswered: 0.5%
 
+
 val qwen2-0.5b/5 50split 8k_step_bs2 2e-5_lr_lin, 4h24, 3h16 fine-tuning
 https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=195800246
 accuracy: 10.9%	correct_pixels: 71.2%	max_correct_pixels: 84.1%	correct_size: 84.9%	any_correct_size: 88.0%	pass_n: 35.0%	unanswered: 3.1%
 accuracy: 12.1%	correct_pixels: 73.7%	max_correct_pixels: 79.4%	correct_size: 85.6%	any_correct_size: 87.9%	pass_2: 24.2%	unanswered: 1.3%
 
-val qwen2-0.5b/5 50split 8k_step_bs2 4e-5_lr_lin
-TODO: launch it tomorrow, it should take 4h24
+val qwen2-0.5b/5 50split 8k_step_bs2 4e-5_lr_lin, 4h22
+accuracy: 11.9%	correct_pixels: 71.5%	max_correct_pixels: 83.1%	correct_size: 84.7%	any_correct_size: 87.0%	pass_n: 38.0%	unanswered: 3.3%
+accuracy: 11.7%	correct_pixels: 73.2%	max_correct_pixels: 78.5%	correct_size: 85.2%	any_correct_size: 87.8%	pass_2: 23.5%	unanswered: 1.0%
 
 # Go down to batch size 1, and use 100 splits
-val qwen2-0.5b/5 100split 16k_step_bs1 2e-5_lr_lin
+val qwen2-0.5b/5 100split 16k_step_bs1 4e-5_lr_lin
 
 # TODO: if it improves play with the learning rate
 ```
