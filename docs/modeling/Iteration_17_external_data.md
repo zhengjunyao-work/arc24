@@ -77,7 +77,7 @@ experiment with two different models.
 
 #### Using new partition (700 train, 100 val)
 
-| experiment | accuracy | correct_pixels | correct_size | pass_64 | unanswered | pass_2 |
+| experiment | accuracy | correct_pixels | correct_size | pass_64 | unanswered | vote_2 |
 |------------|----------|----------------|--------------|---------|------------|--------|
 | 1          | 2.69%    | 69.17%         | 87.58%       | 19.00%  | 2.23%      | 6.63%  |
 | 2          | 2.77%    | 68.72%         | 86.72%       | 20.50%  | 2.21%      | 8.16%  |
@@ -85,7 +85,7 @@ experiment with two different models.
 | mean       | 3.00%    | 69.24%         | 87.85%       | 19.00%  | 2.24%      | 9.18%  |
 | std        | 0.48%    | 0.55%          | 1.30%        | 1.50%   | 0.03%      | 3.19%  |
 
-| experiment | accuracy | correct_pixels | correct_size | pass_64 | unanswered | pass_2 |
+| experiment | accuracy | correct_pixels | correct_size | pass_64 | unanswered | vote_2 |
 |------------|----------|----------------|--------------|---------|------------|--------|
 | 1          | 2.98%    | 67.67%         | 85.41%       | 16.50%  | 3.05%      | 1.02%  |
 | 2          | 2.50%    | 68.42%         | 86.36%       | 15.50%  | 2.36%      | 7.65%  |
@@ -111,15 +111,65 @@ between training and validation, it is a generalization issue.
 
 I'm going to run multiple trainings with the original partition and measure the variability of the evaluation.
 
+The following table shows the std of 3 runs for different experiments. 32 predictions were made for each task for evaluation.
+
+| experiment                                                     | accuracy | correct_pixels | correct_size | pass_n | unanswered | n     | vote_1 | vote_2 |
+|----------------------------------------------------------------|----------|----------------|--------------|--------|------------|-------|--------|--------|
+| 01_baseline_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps_10240msl   | 0.16%    | 0.17%          | 0.17%        | 0.56%  | 0.20%      | 0.00% | 0.76%  | 0.24%  |
+| 02_RE-ARC_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps_10240msl     | 0.06%    | 0.10%          | 0.07%        | 0.45%  | 0.09%      | 0.00% | 0.57%  | 0.44%  |
+| 03_MINI-ARC_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps_10240msl   | 0.12%    | 0.22%          | 0.39%        | 1.23%  | 0.13%      | 0.00% | 0.13%  | 0.29%  |
+| 04_ConceptARC_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps_10240msl | 0.21%    | 0.35%          | 0.29%        | 0.89%  | 0.06%      | 0.00% | 0.32%  | 0.77%  |
+| 05_all_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps_10240msl        | 0.17%    | 0.25%          | 0.45%        | 0.26%  | 0.02%      | 0.00% | 0.60%  | 0.38%  |
+
+On average the std for accuracy is 0.14%, it was 0.41% when using the new train-val partition. Thus
+by changing the validation strategy we have reduced the variability 3 times.
+
+### What is the best data for training?
+
+| external dataset               | accuracy | correct_pixels | correct_size | pass_n | vote_2 |
+|--------------------------------|----------|----------------|--------------|--------|--------|
+| reversed-ARC                   | 2.53%    | 65.67%         | 84.65%       | 12.62% | 7.32%  |
+| ConceptARC                     | 3.36%    | 66.01%         | 85.01%       | 14.29% | 8.33%  |
+| all                            | 3.45%    | 67.11%         | 86.29%       | 14.75% | 10.45% |
+| -                              | 3.82%    | 66.21%         | 84.85%       | 15.33% | 9.70%  |
+| MINI-ARC                       | 4.02%    | 66.81%         | 85.46%       | 15.29% | 10.19% |
+| RE-ARC + MINI-ARC + ConceptARC | 4.21%    | 68.09%         | 87.07%       | 16.12% | 10.61% |
+| RE-ARC                         | 4.89%    | 69.07%         | 87.99%       | 18.25% | 12.62% |
+| RE-ARC + MINI-ARC              | 5.16%    | 69.21%         | 87.72%       | 18.12% | 11.74% |
+
+- Using this datasets is beneficial: RE-ARC, MINI-ARC
+- Using this datasets worsens the accuracy: ConceptARC, reversed-ARC
+
+When I was creating reversed-ARC I noticed that the difficulty was lower than the original ARC dataset.
+There were more trivial tasks and the tasks were easier.
+
+I find more intriguing that using ConceptARC is not helpful. I should investigate this in the future
+before creating my own data.
+
+### Submission results
+
+Adding RE-ARC to the training datasets improved LB score of a single model from 11 to 14. If I train
+for longer I get to a score of 16.
+
+TODO: what if I add MINI-ARC
+
 ## Conclusion
 
+To reduce validation metrics variability is better to use the whole evaluation set (instead of using the new partitions that used 700 examples for training and 100 for validation).
+
+Using RE-ARC and MINI-ARC improve validation accuracy.
+
 ## Next steps
+
+- Try to understand why using ConceptARC for training is not helpful.
 
 ## TODO
 
 - [x] Create a dataset with reverse ARC tasks. All tasks that are invertible could be reversed and used for training.
 - [x] Implement a new option on training that uses a dataset without test tasks. It has a configuration with the number of train tasks and randomly makes new tasks selecting train and test samples.
 - [x] Prepare RE-ARC dataset for the new format
-- [ ] Once we have the best configuration, try increasing `max_seq_len`. Some training samples do not fit in 4096
+- [x] Once we have the best configuration, try increasing `max_seq_len`. Some training samples do not fit in 4096
 - [x] Are VLLM results deterministic? Why?
 - [x] What is the uncertainty in my estimation of accuracy? I need to know which differences are significative and which aren't before drawing conclusions.
+- [ ] Does the submission improve whe adding MINI-ARC
+- [ ] Add submission results to conclusions
