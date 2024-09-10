@@ -90,12 +90,12 @@ llama 3.1
 ```grid<|eot_id|><|start_header_id|>assistant<|end_header_id|>
 ```
     """
-    if '<|eot_id|>' in text:
+    if '<|eot_id|>' in text: # llama
         split_text = '<|eot_id|>'
-    elif '<|im_end|>' in text:
+    elif '<|im_end|>' in text: # qwen
         split_text = '<|im_end|>'
     else:
-        split_text = '<|end|>'
+        split_text = '<|end|>' # phi-3
     return split_text.join(text.split(split_text)[:-1])
 
 
