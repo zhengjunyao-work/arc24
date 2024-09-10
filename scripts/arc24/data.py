@@ -18,7 +18,9 @@ def load_arc_data_with_solutions(filepath):
 
 def verify_that_all_samples_have_output(data):
     for task in data.values():
-        for samples in task.values():
+        for partition, samples in task.items():
+            if partition not in ['train', 'test']:
+                continue
             for sample in samples:
                 if 'output' not in sample:
                     raise ValueError('Not all samples have output')
