@@ -109,7 +109,7 @@ def get_prompt_templates(prompt_version):
     elif prompt_version == 'output-from-examples-v1':
         return system_prompt_v1, prompt_template_v1, answer_template_v0
     elif prompt_version == 'input-from-inputs-v0':
-        return system_prompt_v1, prompt_template_v2, answer_template_v1
+        return system_prompt_v1, prompt_template_input_from_inputs_v0, answer_template_input_from_inputs_v0
     else:
         raise ValueError(f'Unknown prompt version {prompt_version}')
 
@@ -177,7 +177,8 @@ The transformations are always based on the following priors: objectness, goal-d
 {{ test_input }}
 """)
 
-prompt_template_v2 = Template("""Your task is to create a new grid that follows the same distribution as the input grids from the Abstraction and Reasoning Challenge (ARC).
+# input-from-inputs-v0
+prompt_template_input_from_inputs_v0 = Template("""Your task is to create a new grid that follows the same distribution as the input grids from the Abstraction and Reasoning Challenge (ARC).
 Below there are some grid examples, please create a new and different grid that follows the same distribution.
 {% for sample in train_samples %}
 ## Grid example {{ loop.index }}
@@ -186,6 +187,6 @@ Below there are some grid examples, please create a new and different grid that 
 {% endfor %}
 """)
 
-answer_template_v1 = Template("""## New grid
+answer_template_input_from_inputs_v0 = Template("""## New grid
 
 {{ output }}""")

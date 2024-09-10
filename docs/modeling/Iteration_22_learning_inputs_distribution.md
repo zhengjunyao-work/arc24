@@ -74,13 +74,13 @@ python fine-tuning.py \
 --model_path=Qwen/Qwen2-0.5B-Instruct \
 --train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json output-from-examples-v1 \
 --train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/MINI-ARC.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json predict-input-v0 \
 --grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
 --output_dir /mnt/hdd0/Kaggle/arc24/models/20240910_debug_prompt/03_v2 \
 --max_steps=1 \
 --logging_steps=1 \
 --verbose \
---no-resume_from_checkpoint
+--no-resume_from_checkpoint \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json input-from-inputs-v0
 ```
 
 ## Results
