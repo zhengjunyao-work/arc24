@@ -55,6 +55,21 @@ Let's remove them one by one and measure the effect.
 Removing mirror and upscale have the greatest drop in performance, while removing geometric transformation
 results on improved accuracy. I can try new configurations using this knowledge to try to improve the results (`1244`)`
 
+### Tune augmentation weights
+
+| task data augmentation probability | accuracy | correct_pixels | correct_size | pass_n | vote_2 |
+|------------------------------------|----------|----------------|--------------|--------|--------|
+| 0%                                 | 5.93%    | 69.74%         | 87.60%       | 21.00% | 14.02% |
+| 50% weights=1111                   | 7.02%    | 70.87%         | 88.77%       | 21.62% | 13.51% |
+| 50% weights=1244                   | 7.09%    | 71.12%         | 89.22%       | 22.38% | 15.03% |
+
+If I tune the weights of the different augmentations it seems that I can update slightly the accuracy of the
+model. However the improvement is small, maybe the difference is not significative.
+
+### Submission results
+
+TODO: do I get better LB score when using task data augmentation
+
 ## Conclusion
 
 ## Next steps
@@ -63,4 +78,5 @@ results on improved accuracy. I can try new configurations using this knowledge 
 
 - [x] Implement new data transformations, visualize them on a notebook
 - [x] Add parameters to train configuration to allow to control this new data augmentation
-- [ ] Run trainings and see if the accuracy improves
+- [x] Run trainings and see if the accuracy improves
+- [ ] Submission
