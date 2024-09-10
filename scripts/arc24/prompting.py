@@ -15,10 +15,12 @@ def create_prompts_from_task(task, grid_encoder, tokenizer,
         user_message = prompt_template.render(train_samples=train_samples,
                                                 test_input=grid_encoder.to_text(test_sample['input']))
         if is_train_prompt:
-            if prompt_version.startswith('output-from-examples'):
+            if prompt_version.startswith('output-from-examples') or prompt_version.startswith('output-from-outputs'):
                 output = grid_encoder.to_text(test_sample['output'])
             elif prompt_version.startswith('input-from-inputs'):
                 output = grid_encoder.to_text(test_sample['input'])
+            else:
+                raise ValueError(f'Unknown prompt version {prompt_version}')
         else:
             output = '```grid'
         messages = [{"role": "system", "content": system_prompt},
@@ -110,6 +112,8 @@ def get_prompt_templates(prompt_version):
         return system_prompt_v1, prompt_template_v1, answer_template_v0
     elif prompt_version == 'input-from-inputs-v0':
         return system_prompt_v1, prompt_template_input_from_inputs_v0, answer_template_input_from_inputs_v0
+    elif prompt_version == 'output-from-outputs-v0':
+        return system_prompt_v1, prompt_template_output_from_outputs_v0, answer_template_input_from_inputs_v0
     else:
         raise ValueError(f'Unknown prompt version {prompt_version}')
 
@@ -190,3 +194,13 @@ Below there are some grid examples, please create a new and different grid that 
 answer_template_input_from_inputs_v0 = Template("""## New grid
 
 {{ output }}""")
+
+# output-from-outputs-v0
+prompt_template_output_from_outputs_v0 = Template("""Your task is to create a new grid that follows the same distribution as the input grids from the Abstraction and Reasoning Challenge (ARC).
+Below there are some grid examples, please create a new and different grid that follows the same distribution.
+{% for sample in train_samples %}
+## Grid example {{ loop.index }}
+
+{{ sample.output }}
+{% endfor %}
+""")

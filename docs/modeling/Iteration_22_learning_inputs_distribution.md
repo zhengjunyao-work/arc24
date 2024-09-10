@@ -94,6 +94,19 @@ python fine-tuning.py \
 --verbose \
 --remove_train_samples_to_fit_max_seq_len \
 --max_seq_len 8192
+
+python fine-tuning.py \
+--model_path Qwen/Qwen2-0.5B-Instruct \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json output-from-outputs-v0 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json output-from-outputs-v0 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240910_debug_input_from_inputs/02_output-from-outputs \
+--max_steps 1000 \
+--eval_steps 100 \
+--logging_steps 10 \
+--verbose \
+--remove_train_samples_to_fit_max_seq_len \
+--max_seq_len 8192
 ```
 
 ### Weighted loss function
@@ -120,7 +133,7 @@ I have done a quick experiments with a model trained for 1k steps. It seemed tha
 - [x] Refactor the code to allow using different prompts
 - [x] Update fine-tune script to support a more complex configuration for train data (filepath and prompt)
 - [x] Create prompt template for input prediction
-- [ ] Create prompt template for output prediction
+- [x] Create prompt template for output prediction
 - [ ] Quick experiments to validate implementation
 - [ ] Long experiments to see if the model improves
 - [ ] Visualize some of the new inputs for the typical first training tasks
