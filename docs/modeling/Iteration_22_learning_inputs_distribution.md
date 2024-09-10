@@ -80,8 +80,9 @@ python fine-tuning.py \
 ## TODO
 
 - [x] Refactor prompt code to remove duplications, verify that inference results do not change.
-- [ ] Refactor the code to allow using different prompts
-- [ ] Update fine-tune script to support a more complex configuration for train data (filepath and prompt)
+- [x] Refactor the code to allow using different prompts
+- [x] Update fine-tune script to support a more complex configuration for train data (filepath and prompt)
+- [ ] Create prompt template for input prediction `predict-input-v0`
 - [ ] Quick experiments to validate implementation
 - [ ] Long experiments to see if the model improves
 - [ ] Visualize some of the new inputs for the typical first training tasks
