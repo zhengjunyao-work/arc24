@@ -26,6 +26,10 @@ accuracy: 3.8%  correct_pixels: 69.7%   max_correct_pixels: 74.7%       correct_
 # Fix tiny difference between train and inference
 accuracy: 3.3%  correct_pixels: 68.9%   max_correct_pixels: 78.2%       correct_size: 90.2%     any_correct_size: 92.0% pass_n: 10.5%   unanswered: 2.0%
 accuracy: 3.8%  correct_pixels: 69.7%   max_correct_pixels: 74.5%       correct_size: 90.8%     any_correct_size: 92.3% pass_n: 7.7%    unanswered: 1.5%
+
+# try with prompts v1 (the improvement is very likely chance, but shows we could train with these shorter prompts)
+accuracy: 3.2%  correct_pixels: 69.0%   max_correct_pixels: 78.2%       correct_size: 90.3%     any_correct_size: 92.0% pass_n: 10.5%   unanswered: 2.0%
+accuracy: 4.3%  correct_pixels: 69.1%   max_correct_pixels: 74.5%       correct_size: 90.3%     any_correct_size: 92.3% pass_n: 8.7%    unanswered: 2.0%
 ```
 
 ## Results

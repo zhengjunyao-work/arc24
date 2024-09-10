@@ -89,6 +89,8 @@ def pretty_print_prompt(text, default_color='black'):
 def get_prompt_templates(prompt_version):
     if prompt_version == 'predict-output-v0':
         return system_prompt_v0, prompt_template_v0, answer_template_v0
+    elif prompt_version == 'predict-output-v1':
+        return system_prompt_v1, prompt_template_v1, answer_template_v0
     else:
         raise ValueError(f'Unknown prompt version {prompt_version}')
 
@@ -130,3 +132,29 @@ prompt_template_v0 = Template("""Let's see if you can solve this simple ARC task
 answer_template_v0 = Template("""### Output
 
 {{ test_output }}""")
+
+# v1 reduce the number of prompt tokens from 292 to 88, freeing 200 tokens
+system_prompt_v1 = "You are a helpful assistant."
+
+prompt_template_v1 = Template("""Let's see if you can solve this simple Abstraction and Reasoning Challenge (ARC) task.
+Below there are some input-output grid examples that define the task.
+Your job is to understand the transformation between the input and the output and apply it to the test input grid.
+The transformations are always based on the following priors: objectness, goal-directed, numbers & counting, and basic geometry & topology.
+
+{% for sample in train_samples %}
+## Example {{ loop.index }}
+
+### Input
+
+{{ sample.input }}
+
+### Output
+
+{{ sample.output }}
+{% endfor %}
+## Test case
+
+### Input
+
+{{ test_input }}
+""")
