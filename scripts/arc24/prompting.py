@@ -42,30 +42,9 @@ answer_template = Template("""### Output
 
 {{ test_output }}""")
 
-class PromptCreator(ABC):
-    def __init__(self, grid_encoder: GridEncoder):
-        self.grid_encoder = grid_encoder
 
-    @abstractmethod
-    def create_task_prompts(self, task):
-        pass
-
-    @abstractmethod
-    def parse_response(self, text):
-        pass
-
-class SimplePromptCreator(PromptCreator):
-    def __init__(self, grid_encoder, tokenizer):
-        super().__init__(grid_encoder)
-        self.tokenizer = tokenizer
-
-    def create_task_prompts(self, task):
-        prompts = create_prompts_from_task(task, self.grid_encoder, self.tokenizer, is_train_prompt=False)
-        prompts = [remove_assistant_ending(prompt) for prompt in prompts]
-        return prompts
-
-    def parse_response(self, text):
-        return self.grid_encoder.to_grid('```grid' + text)
+def parse_grid_from_response(text, grid_encoder):
+    return grid_encoder.to_grid('```grid' + text)
 
 
 def create_prompts_from_task(task, grid_encoder, tokenizer, is_train_prompt=True):
@@ -84,6 +63,8 @@ def create_prompts_from_task(task, grid_encoder, tokenizer, is_train_prompt=True
         prompt = tokenizer.apply_chat_template(messages,
                                                 tokenize=False,
                                                 add_generation_prompt=False)
+        if not is_train_prompt:
+            prompt = remove_assistant_ending(prompt)
         prompts.append(prompt)
     return prompts
 

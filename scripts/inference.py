@@ -54,7 +54,7 @@ from transformers import AutoTokenizer
 
 from arc24.data_augmentation import (
     apply_data_augmentation, revert_data_augmentation, get_random_color_map, set_random_seed)
-from arc24.prompting import SimplePromptCreator, print_smaller_prompt
+from arc24.prompting import parse_grid_from_response, print_smaller_prompt, create_prompts_from_task
 from arc24.encoders import create_grid_encoder
 from arc24.logging import log_execution_time, logging
 
@@ -89,14 +89,13 @@ def inference_main():
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_path)
     set_random_seed(cfg.random_seed)
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
-    prompt_creator = SimplePromptCreator(grid_encoder, tokenizer)
-    prompts_conf = create_prompts(data, prompt_creator, cfg.predictions_per_task)
+    prompts_conf = create_prompts(data, grid_encoder, tokenizer, cfg.predictions_per_task)
     prompts = [conf['prompt'] for conf in prompts_conf]
     if cfg.verbose: print_smaller_prompt(prompts)
 
     sampling_params = get_sampling_params(cfg.best_of, cfg.temperature, cfg.n, cfg.max_output_tokens)
     outputs = generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=cfg.batch_size)
-    task_results = create_tasks_results(outputs, prompts_conf, prompt_creator, cfg.verbose)
+    task_results = create_tasks_results(outputs, prompts_conf, grid_encoder, cfg.verbose)
     solutions = create_solutions(task_results, data)
 
     with open(cfg.output_filepath, 'w') as f:
@@ -109,7 +108,7 @@ def inference_main():
     clear_vllm_gpu_memory()
 
 
-def create_prompts(data, prompt_creator, predictions_per_task):
+def create_prompts(data, grid_encoder, tokenizer, predictions_per_task):
     prompts = []
     for task_id, task in tqdm(data.items(), total=len(data), desc='Creating prompts'):
         data_augmentation_params = list(product([False, True], [0, 1, 2, 3]))
@@ -118,7 +117,8 @@ def create_prompts(data, prompt_creator, predictions_per_task):
                 color_map = get_random_color_map(change_background_probability=0.1)
                 data_augmentation_kwargs = dict(hflip=hflip, n_rot90=n_rot90, color_map=color_map)
                 augmented_task = apply_data_augmentation(task, **data_augmentation_kwargs)
-                task_prompts = prompt_creator.create_task_prompts(augmented_task)
+                task_prompts = create_prompts_from_task(
+                    augmented_task, grid_encoder=grid_encoder, tokenizer=tokenizer, is_train_prompt=False)
                 for idx, prompt in enumerate(task_prompts):
                     prompts.append(dict(task_id=task_id,
                                         data_augmentation_kwargs=data_augmentation_kwargs,
@@ -148,7 +148,7 @@ def generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=512)
     return outputs
 
 
-def create_tasks_results(outputs, prompts_conf, prompt_creator, verbose=False):
+def create_tasks_results(outputs, prompts_conf, grid_encoder, verbose=False):
     task_results = prompts_conf.copy()
     for idx, output in tqdm(enumerate(outputs), total=len(outputs), desc='Parsing outputs'):
         task_id = prompts_conf[idx]['task_id']
@@ -156,7 +156,7 @@ def create_tasks_results(outputs, prompts_conf, prompt_creator, verbose=False):
         sample_idx = prompts_conf[idx]['idx']
         response = output.outputs[0].text
         try:
-            grid = prompt_creator.parse_response(response)
+            grid = parse_grid_from_response(response, grid_encoder)
             grid = revert_data_augmentation(grid, **data_augmentation_kwargs)
         except Exception as e:
             # TODO: better exception printing (shape of the grid)
