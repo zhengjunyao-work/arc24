@@ -89,13 +89,11 @@ def create_prompts_from_task(task, grid_encoder, tokenizer):
         messages = [{"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_message},
                     {"role": "assistant", "content": f"### Output\n\n{grid_encoder.to_text(test_sample['output'])}\n"}]
-                    # {"role": "assistant", "content": """### Output\n```grid\n"""}]
         prompt = tokenizer.apply_chat_template(messages,
                                                 tokenize=False,
                                                 add_generation_prompt=False)
         prompts.append(prompt)
     return prompts
-
 
 
 def remove_assistant_ending(text):
@@ -133,12 +131,6 @@ def print_smaller_prompt(prompts):
     print('\n\nSmaller prompt:')
     pretty_print_prompt(smaller_prompt)
     print('\n\n')
-
-
-def print_sample_prompt(data, prompt_creator):
-    prompts = [prompt_creator.create_task_prompts(task)[0] for task in data.values()]
-    prompts = sorted(prompts, key=lambda x: len(x))
-    pretty_print_prompt(prompts[0])
 
 
 def pretty_print_prompt(text, default_color='black'):

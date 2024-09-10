@@ -24,6 +24,7 @@ better use of it.
 
 ## TODO
 
+- [ ] Refactor prompt code to remove duplications, verify that inference results do not change.
 - [ ] Refactor the code to allow using different prompts
 - [ ] Update fine-tune script to support a more complex configuration for train data (filepath and prompt)
 - [ ] Quick experiments to validate implementation
