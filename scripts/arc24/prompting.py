@@ -60,35 +60,27 @@ class SimplePromptCreator(PromptCreator):
         self.tokenizer = tokenizer
 
     def create_task_prompts(self, task):
-        train_samples = [{key: self.grid_encoder.to_text(grid) for key, grid in sample.items()} for sample in task['train']]
-        prompts = []
-        for test_sample in task['test']:
-            user_message = prompt_template.render(train_samples=train_samples,
-                                                  test_input=self.grid_encoder.to_text(test_sample['input']))
-            messages = [{"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_message},
-                        {"role": "assistant", "content": """### Output\n```grid"""}]
-            # TODO: add start of assistant reply
-            prompt = self.tokenizer.apply_chat_template(messages,
-                                                   tokenize=False,
-                                                   add_generation_prompt=False)
-            prompts.append(remove_assistant_ending(prompt))
+        prompts = create_prompts_from_task(task, self.grid_encoder, self.tokenizer, is_train_prompt=False)
+        prompts = [remove_assistant_ending(prompt) for prompt in prompts]
         return prompts
 
     def parse_response(self, text):
         return self.grid_encoder.to_grid('```grid' + text)
 
 
-def create_prompts_from_task(task, grid_encoder, tokenizer):
-    # TODO: unify functions and check remove_assistant_ending
+def create_prompts_from_task(task, grid_encoder, tokenizer, is_train_prompt=True):
     train_samples = [{key: grid_encoder.to_text(grid) for key, grid in sample.items()} for sample in task['train']]
     prompts = []
     for test_sample in task['test']:
         user_message = prompt_template.render(train_samples=train_samples,
                                                 test_input=grid_encoder.to_text(test_sample['input']))
+        if is_train_prompt:
+            assistant_reply = f"### Output\n\n{grid_encoder.to_text(test_sample['output'])}\n"
+        else:
+            assistant_reply = """### Output\n```grid"""
         messages = [{"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_message},
-                    {"role": "assistant", "content": f"### Output\n\n{grid_encoder.to_text(test_sample['output'])}\n"}]
+                    {"role": "assistant", "content": assistant_reply}]
         prompt = tokenizer.apply_chat_template(messages,
                                                 tokenize=False,
                                                 add_generation_prompt=False)

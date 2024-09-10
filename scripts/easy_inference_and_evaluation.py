@@ -55,6 +55,7 @@ def inference(model_path, output_folder, grid_encoder, predictions_per_task, dat
     cmd = f'python inference.py --model_path {model_path} --output_filepath {output_filepath}'
     cmd += f' --predictions_per_task {predictions_per_task} --grid_encoder "{grid_encoder}"'
     cmd += f' --dataset_path {dataset_path}'
+    cmd += ' --random_seed 7'
     print(cmd)
     ret = os.system(cmd)
     if ret != 0:
