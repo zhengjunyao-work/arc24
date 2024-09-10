@@ -17,6 +17,7 @@ better use of it.
 ## Development
 
 ```bash
+# Verify that inference does not change
 reset; rm -r /mnt/hdd0/Kaggle/arc24/evaluations/20240907_more_data_augmentation/04_100-augmentation-1110_Qwen2-0.5B-Instruct_lr1e-4_r32_12e3steps_10240msl/checkpoint-12000/inference_x008*; python easy_inference_and_evaluation.py /mnt/hdd0/Kaggle/arc24/models/20240907_more_data_augmentation/04_100-augmentation-1110_Qwen2-0.5B-Instruct_lr1e-4_r32_12e3steps_10240msl/checkpoint-12000 --predictions_per_task 8
 
 # Baseline results
@@ -30,6 +31,18 @@ accuracy: 3.8%  correct_pixels: 69.7%   max_correct_pixels: 74.5%       correct_
 # try with prompts v1 (the improvement is very likely chance, but shows we could train with these shorter prompts)
 accuracy: 3.2%  correct_pixels: 69.0%   max_correct_pixels: 78.2%       correct_size: 90.3%     any_correct_size: 92.0% pass_n: 10.5%   unanswered: 2.0%
 accuracy: 4.3%  correct_pixels: 69.1%   max_correct_pixels: 74.5%       correct_size: 90.3%     any_correct_size: 92.3% pass_n: 8.7%    unanswered: 2.0%
+
+# Verify that fine-tuning works
+python fine-tuning.py \
+--model_path=Qwen/Qwen2-0.5B-Instruct \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json predict-output-v0 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/MINI-ARC.json predict-output-v0 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json predict-output-v0 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240910_debug_prompt/01_v0 \
+--max_steps=1 \
+--logging_steps=1 \
+--no-resume_from_checkpoint
 ```
 
 ## Results

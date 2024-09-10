@@ -77,8 +77,10 @@ def parse_args():
     parser.add_argument('--adapter_path', type=str, help="Path to the LoRA adapter for initialization")
     parser.add_argument('--use_4bit_quantization', action='store_true', help="Whether to use 4-bit quantization")
     parser.add_argument('--output_dir', type=str, help="Path to the output LoRA")
-    parser.add_argument('--train_datasets', nargs='+', help="Path to the datasets for training")
-    parser.add_argument('--val_dataset', type=str, help="Path to the dataset for validation")
+    parser.add_argument('--train_datasets', nargs='+', action='append',
+                        metavar=('filepath', 'prompt_version'), help="Path to the datasets for training")
+    parser.add_argument('--val_dataset', type=str, nargs=2,
+                        metavar=('filepath', 'prompt_version'), help="Path to the dataset for validation")
     parser.add_argument('--max_steps', type=int, help="Max steps to fine-tune")
     parser.add_argument('--warmup_ratio', type=float, help="Warmup ratio, relative to training steps")
     parser.add_argument('--max_seq_len', type=int, help="Max sequence length in tokens")
@@ -118,13 +120,13 @@ def fine_tuning_main():
     dataset_kwargs = {'grid_encoder': grid_encoder, 'tokenizer': tokenizer, 'max_seq_len': cfg.max_seq_len, 'verbose': cfg.verbose}
     train_dataset = IterableDataset.from_generator(
         # for some weird reason, it does not work correctly with lists and I have to use partial with the lists
-        partial(random_prompt_generator, dataset_filepaths=cfg.train_datasets,
-                compose_new_task_weights=cfg.compose_new_task_weights),
-        gen_kwargs=dict(random_seed=cfg.random_seed, **dataset_kwargs,
-                        remove_train_samples_to_fit_max_seq_len=cfg.remove_train_samples_to_fit_max_seq_len,
-                        subsample_tasks_ratio=cfg.subsample_train_tasks_ratio,
-                        compose_new_task_probability=cfg.compose_new_task_probability))
-    val_dataset = create_validation_dataset(cfg.val_dataset, **dataset_kwargs)
+        partial(random_prompt_generator, train_datasets=cfg.train_datasets,
+                compose_new_task_weights=cfg.compose_new_task_weights,
+                random_seed=cfg.random_seed, **dataset_kwargs,
+                remove_train_samples_to_fit_max_seq_len=cfg.remove_train_samples_to_fit_max_seq_len,
+                subsample_tasks_ratio=cfg.subsample_train_tasks_ratio,
+                compose_new_task_probability=cfg.compose_new_task_probability))
+    val_dataset = create_validation_dataset(*cfg.val_dataset, **dataset_kwargs)
 
     training_arguments = get_training_arguments(cfg)
     data_collator = get_data_collator(cfg.model_path, tokenizer)
@@ -367,12 +369,12 @@ def print_gpu_memory():
         logger.info(f'GPU {device} memory allocated: {torch.cuda.memory_allocated(device)/1024**3:.1f} GB, max memory allocated: {torch.cuda.max_memory_allocated(device)/1024**3:.1f} GB')
 
 # Data
-def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, verbose=False):
+def create_validation_dataset(filepath, prompt_version, grid_encoder, tokenizer, max_seq_len, verbose=False):
     data = load_arc_data_with_solutions(filepath)
     tasks = list(data.values())
     prompts = []
     for task in tqdm(tasks, desc='create prompts'):
-        prompts.extend(create_prompts_from_task(task, grid_encoder, tokenizer))
+        prompts.extend(create_prompts_from_task(task, grid_encoder, tokenizer, prompt_version=prompt_version))
     if verbose: print_smaller_prompt(prompts)
     prompt_lengths = [len(tokenizer.encode(prompt)) for prompt in tqdm(prompts, desc='Calculating prompt lengths')]
     if verbose: print_prompt_length_percentiles(prompt_lengths, prefix='Validation')
@@ -382,7 +384,7 @@ def create_validation_dataset(filepath, grid_encoder, tokenizer, max_seq_len, ve
     return dataset
 
 
-def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_len, random_seed,
+def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len, random_seed,
                             remove_train_samples_to_fit_max_seq_len,
                             log_prompt_length_every=1000,
                             subsample_tasks_ratio=None,
@@ -392,7 +394,8 @@ def random_prompt_generator(dataset_filepaths, grid_encoder, tokenizer, max_seq_
     """
     """
     data = dict()
-    for filepath in tqdm(dataset_filepaths, desc='Loading training datasets'):
+    for filepath, prompt_version in tqdm(train_datasets, desc='Loading training datasets'):
+        # TODO: use the prompt version
         data.update(load_arc_data_with_solutions(filepath))
     task_ids = list(data.keys())
     prompt_lengths = []
