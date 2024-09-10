@@ -428,6 +428,8 @@ TODO:
 ## Other links
 
 - <https://lab42.global/community-2023-july-arc-sota/>
+- [Large Language Model Agents](https://rdi.berkeley.edu/llm-agents/f24v)
+- [Monte Carlo - Abstract Reasoning with Graph Abstractions](https://github.com/richemslie/McARGA)
 
 ## TODO
 
