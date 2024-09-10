@@ -107,6 +107,20 @@ python fine-tuning.py \
 --verbose \
 --remove_train_samples_to_fit_max_seq_len \
 --max_seq_len 8192
+
+python fine-tuning.py \
+--model_path Qwen/Qwen2-0.5B-Instruct \
+--adapter_path /mnt/hdd0/Kaggle/arc24/models/20240910_debug_input_from_inputs/01_baseline/checkpoint-1000 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json input-from-inputs-v0 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json input-from-inputs-v0 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240910_debug_input_from_inputs/03_input-from-inputs-continuation \
+--max_steps 3000 \
+--eval_steps 100 \
+--logging_steps 10 \
+--verbose \
+--remove_train_samples_to_fit_max_seq_len \
+--max_seq_len 8192
 ```
 
 ### Weighted loss function
@@ -148,3 +162,4 @@ TODO: train and evaluate
 - [ ] Long experiments to see if the model improves
 - [ ] Visualize some of the new inputs for the typical first training tasks
 - [ ] My biggest concern is that the loss might be higher for this task, since it is an open problem. In the other hand predicting the output was deterministic.
+- [ ] Update notebook code source with the new code
