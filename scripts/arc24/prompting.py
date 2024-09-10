@@ -1,53 +1,14 @@
-from abc import ABC, abstractmethod
 from jinja2 import Template
 from termcolor import colored
-
-from .encoders import GridEncoder
-
-system_prompt = """You are a helpful AI assistant. Your job is to solve tasks from the Abstraction and Reasoning Challenge (ARC). 
-The user will present you with sample input and output grids for each task. 
-Your job will be to understand the transformation between the input and the output and apply it to the last input grid given by the user. 
-The puzzle-like inputs and outputs present a grid where each square can be one of ten colors. A grid can be any height or width between 1x1 and 30x30.
-The background of the grid is typically colored with 0.
-The tasks from ARC are based on the following priors:
-
-- Objectness: Objects persist and cannot appear or disappear without reason. Objects can interact or not depending on the circumstances.
-- Goal-directed: Objects can be animate or inanimate. Some objects are "agents" - they have intentions and they pursue goals.
-- Numbers & counting: Objects can be counted or sorted by their shape, appearance, or movement using basic mathematics like addition, subtraction, and comparison.
-- Basic geometry & topology: Objects can be shapes like rectangles, triangles, and circles which can be mirrored, rotated, translated, deformed, combined, repeated, etc. Differences in distances can be detected.
-
-The transformations between input and output should be based on these priors.
-"""
-
-prompt_template = Template("""Let's see if you can solve this simple ARC task. These are some input-output grid examples that define the task.
-{% for sample in train_samples %}
-## Example {{ loop.index }}
-
-### Input
-
-{{ sample.input }}
-
-### Output
-
-{{ sample.output }}
-{% endfor %}
-## Test case
-
-### Input
-
-{{ test_input }}
-""")
-
-answer_template = Template("""### Output
-
-{{ test_output }}""")
 
 
 def parse_grid_from_response(text, grid_encoder):
     return grid_encoder.to_grid('```grid' + text)
 
 
-def create_prompts_from_task(task, grid_encoder, tokenizer, is_train_prompt=True):
+def create_prompts_from_task(task, grid_encoder, tokenizer,
+                             is_train_prompt=True, prompt_version='predict-output-v0'):
+    system_prompt, prompt_template, answer_template = get_prompt_templates(prompt_version)
     train_samples = [{key: grid_encoder.to_text(grid) for key, grid in sample.items()} for sample in task['train']]
     prompts = []
     for test_sample in task['test']:
@@ -123,3 +84,49 @@ def pretty_print_prompt(text, default_color='black'):
             attrs = None
         print(colored(line, color, attrs=attrs))
     print('-'*80)
+
+
+def get_prompt_templates(prompt_version):
+    if prompt_version == 'predict-output-v0':
+        return system_prompt_v0, prompt_template_v0, answer_template_v0
+    else:
+        raise ValueError(f'Unknown prompt version {prompt_version}')
+
+
+system_prompt_v0 = """You are a helpful AI assistant. Your job is to solve tasks from the Abstraction and Reasoning Challenge (ARC). 
+The user will present you with sample input and output grids for each task. 
+Your job will be to understand the transformation between the input and the output and apply it to the last input grid given by the user. 
+The puzzle-like inputs and outputs present a grid where each square can be one of ten colors. A grid can be any height or width between 1x1 and 30x30.
+The background of the grid is typically colored with 0.
+The tasks from ARC are based on the following priors:
+
+- Objectness: Objects persist and cannot appear or disappear without reason. Objects can interact or not depending on the circumstances.
+- Goal-directed: Objects can be animate or inanimate. Some objects are "agents" - they have intentions and they pursue goals.
+- Numbers & counting: Objects can be counted or sorted by their shape, appearance, or movement using basic mathematics like addition, subtraction, and comparison.
+- Basic geometry & topology: Objects can be shapes like rectangles, triangles, and circles which can be mirrored, rotated, translated, deformed, combined, repeated, etc. Differences in distances can be detected.
+
+The transformations between input and output should be based on these priors.
+"""
+
+prompt_template_v0 = Template("""Let's see if you can solve this simple ARC task. These are some input-output grid examples that define the task.
+{% for sample in train_samples %}
+## Example {{ loop.index }}
+
+### Input
+
+{{ sample.input }}
+
+### Output
+
+{{ sample.output }}
+{% endfor %}
+## Test case
+
+### Input
+
+{{ test_input }}
+""")
+
+answer_template_v0 = Template("""### Output
+
+{{ test_output }}""")

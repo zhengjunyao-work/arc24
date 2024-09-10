@@ -36,7 +36,7 @@ accuracy: 3.8%  correct_pixels: 69.7%   max_correct_pixels: 74.5%       correct_
 
 ## TODO
 
-- [ ] Refactor prompt code to remove duplications, verify that inference results do not change.
+- [x] Refactor prompt code to remove duplications, verify that inference results do not change.
 - [ ] Refactor the code to allow using different prompts
 - [ ] Update fine-tune script to support a more complex configuration for train data (filepath and prompt)
 - [ ] Quick experiments to validate implementation
