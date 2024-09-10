@@ -106,6 +106,10 @@ python fine-tuning.py \
 
 ## Results
 
+### Newly generated inputs
+
+I have done a quick experiments with a model trained for 1k steps. It seemed that need more training time.
+
 ## Conclusion
 
 ## Next steps
@@ -116,6 +120,7 @@ python fine-tuning.py \
 - [x] Refactor the code to allow using different prompts
 - [x] Update fine-tune script to support a more complex configuration for train data (filepath and prompt)
 - [x] Create prompt template for input prediction
+- [ ] Create prompt template for output prediction
 - [ ] Quick experiments to validate implementation
 - [ ] Long experiments to see if the model improves
 - [ ] Visualize some of the new inputs for the typical first training tasks
