@@ -10,6 +10,7 @@ class CFG:
     model_path: str = "/home/gbarbadillo/data/Qwen2-0.5B-arc"
     max_model_len: int = 10240 #61000 for phi-3
     grid_encoder: str = 'GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))'
+    prompt_version: str = 'predict-output-v0'
     # Dataset
     #dataset_path: str = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
     dataset_path: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'
@@ -28,6 +29,9 @@ class CFG:
 def parse_args():
     parser = argparse.ArgumentParser(description="Experiment Configuration")
     parser.add_argument('--model_path', type=str, help="Path to the model")
+    parser.add_argument('--max_model_len', type=int, help="Maximum number of tokens in the model")
+    parser.add_argument('--grid_encoder', type=str, help="Name of the grid encoder")
+    parser.add_argument('--prompt_version', type=str, help="Prompt version")
     parser.add_argument('--dataset_path', type=str, help="Path to the dataset to make inference")
     parser.add_argument('--n_tasks', type=int, help="If given only the first n tasks will be evaluated")
     parser.add_argument('--output_filepath', type=str, help="Path to the json file with the predictions")
@@ -36,9 +40,7 @@ def parse_args():
     parser.add_argument('--temperature', type=float, help="temperature for sampling, 0.0 for greedy search")
     parser.add_argument('--n', type=int, help="number of samples to generate")
     parser.add_argument('--batch_size', type=int, help="batch size for inference")
-    parser.add_argument('--grid_encoder', type=str, help="Name of the grid encoder")
     parser.add_argument('--max_output_tokens', type=int, help="Maximum number of tokens to generate")
-    parser.add_argument('--max_model_len', type=int, help="Maximum number of tokens in the model")
     parser.add_argument('--random_seed', type=int, help="Random seed for data augmentation")
     parser.add_argument('--verbose', action='store_true', help="Print verbose output")
     return parser.parse_args()
@@ -89,7 +91,8 @@ def inference_main():
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_path)
     set_random_seed(cfg.random_seed)
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
-    prompts_conf = create_prompts(data, grid_encoder, tokenizer, cfg.predictions_per_task)
+    prompts_conf = create_prompts(
+        data, grid_encoder, tokenizer, cfg.prompt_version, cfg.predictions_per_task)
     prompts = [conf['prompt'] for conf in prompts_conf]
     if cfg.verbose: print_smaller_prompt(prompts)
 
@@ -108,7 +111,7 @@ def inference_main():
     clear_vllm_gpu_memory()
 
 
-def create_prompts(data, grid_encoder, tokenizer, predictions_per_task):
+def create_prompts(data, grid_encoder, tokenizer, prompt_version, predictions_per_task):
     prompts = []
     for task_id, task in tqdm(data.items(), total=len(data), desc='Creating prompts'):
         data_augmentation_params = list(product([False, True], [0, 1, 2, 3]))
@@ -118,7 +121,8 @@ def create_prompts(data, grid_encoder, tokenizer, predictions_per_task):
                 data_augmentation_kwargs = dict(hflip=hflip, n_rot90=n_rot90, color_map=color_map)
                 augmented_task = apply_data_augmentation(task, **data_augmentation_kwargs)
                 task_prompts = create_prompts_from_task(
-                    augmented_task, grid_encoder=grid_encoder, tokenizer=tokenizer, is_train_prompt=False)
+                    augmented_task, grid_encoder=grid_encoder, tokenizer=tokenizer,
+                    is_train_prompt=False, prompt_version=prompt_version)
                 for idx, prompt in enumerate(task_prompts):
                     prompts.append(dict(task_id=task_id,
                                         data_augmentation_kwargs=data_augmentation_kwargs,

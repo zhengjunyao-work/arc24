@@ -17,9 +17,11 @@ def main(args=None):
     output_folder = args.checkpoint_path.replace('arc24/models', 'arc24/evaluations')
     output_filepath = inference(
         model_path, output_folder,
-        cfg.get('grid_encoder', 'GridCodeBlockEncoder(MinimalGridEncoder())'),
-        args.predictions_per_task,
-        args.dataset_path)
+        grid_encoder=cfg.get('grid_encoder', 'GridCodeBlockEncoder(MinimalGridEncoder())'),
+        predictions_per_task=args.predictions_per_task,
+        dataset_path=args.dataset_path,
+        # TODO: this should probably be updated once the train configuration is updated
+        prompt_version=cfg.get('prompt_version', 'predict-output-v0'))
     copy_train_conf(train_conf_path)
     evaluation(output_filepath, args.dataset_path)
     # voting_output_filepath = voting(output_filepath)
@@ -44,7 +46,8 @@ def merge_lora_with_model(lora_path, model_path):
     return output_path
 
 
-def inference(model_path, output_folder, grid_encoder, predictions_per_task, dataset_path):
+def inference(model_path, output_folder, grid_encoder, predictions_per_task,
+              dataset_path, prompt_version):
     print('-'*80)
     print(f'Inference with model {model_path}')
     os.makedirs(output_folder, exist_ok=True)
@@ -54,8 +57,8 @@ def inference(model_path, output_folder, grid_encoder, predictions_per_task, dat
         return output_filepath
     cmd = f'python inference.py --model_path {model_path} --output_filepath {output_filepath}'
     cmd += f' --predictions_per_task {predictions_per_task} --grid_encoder "{grid_encoder}"'
-    cmd += f' --dataset_path {dataset_path}'
-    cmd += ' --random_seed 7'
+    cmd += f' --dataset_path {dataset_path} --prompt_version {prompt_version}'
+    cmd += ' --random_seed 7' # TODO: remove the random seed
     print(cmd)
     ret = os.system(cmd)
     if ret != 0:
