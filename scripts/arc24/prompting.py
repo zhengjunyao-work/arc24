@@ -75,12 +75,12 @@ def create_prompts_from_task(task, grid_encoder, tokenizer, is_train_prompt=True
         user_message = prompt_template.render(train_samples=train_samples,
                                                 test_input=grid_encoder.to_text(test_sample['input']))
         if is_train_prompt:
-            assistant_reply = f"### Output\n\n{grid_encoder.to_text(test_sample['output'])}\n"
+            test_output = grid_encoder.to_text(test_sample['output'])
         else:
-            assistant_reply =  "### Output\n\n```grid"
+            test_output = '```grid'
         messages = [{"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_message},
-                    {"role": "assistant", "content": assistant_reply}]
+                    {"role": "assistant", "content": answer_template.render(test_output=test_output)}]
         prompt = tokenizer.apply_chat_template(messages,
                                                 tokenize=False,
                                                 add_generation_prompt=False)
