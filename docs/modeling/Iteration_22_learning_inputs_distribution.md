@@ -35,9 +35,9 @@ accuracy: 4.3%  correct_pixels: 69.1%   max_correct_pixels: 74.5%       correct_
 # Verify that fine-tuning works
 python fine-tuning.py \
 --model_path=Qwen/Qwen2-0.5B-Instruct \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json predict-output-v0 \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/MINI-ARC.json predict-output-v0 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json predict-output-v0 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json output-from-examples-v0 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/MINI-ARC.json output-from-examples-v0 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json output-from-examples-v0 \
 --grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
 --output_dir /mnt/hdd0/Kaggle/arc24/models/20240910_debug_prompt/01_v0 \
 --max_steps=1 \
@@ -47,9 +47,9 @@ python fine-tuning.py \
 
 python fine-tuning.py \
 --model_path=Qwen/Qwen2-0.5B-Instruct \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json predict-output-v1 \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/MINI-ARC.json predict-output-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json predict-output-v1 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json output-from-examples-v1 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/MINI-ARC.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json output-from-examples-v1 \
 --grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
 --output_dir /mnt/hdd0/Kaggle/arc24/models/20240910_debug_prompt/02_v1 \
 --max_steps=1 \
@@ -63,6 +63,18 @@ python fine-tuning.py \
 --train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json predict-output-v2 \
 --train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/MINI-ARC.json predict-output-v2 \
 --val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json predict-output-v2 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240910_debug_prompt/03_v2 \
+--max_steps=1 \
+--logging_steps=1 \
+--verbose \
+--no-resume_from_checkpoint
+
+python fine-tuning.py \
+--model_path=Qwen/Qwen2-0.5B-Instruct \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json output-from-examples-v1 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-like_datasets/MINI-ARC.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json predict-input-v0 \
 --grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
 --output_dir /mnt/hdd0/Kaggle/arc24/models/20240910_debug_prompt/03_v2 \
 --max_steps=1 \

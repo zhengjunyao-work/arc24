@@ -21,7 +21,7 @@ def main(args=None):
         predictions_per_task=args.predictions_per_task,
         dataset_path=args.dataset_path,
         # TODO: this should probably be updated once the train configuration is updated
-        prompt_version=cfg.get('prompt_version', 'predict-output-v0'))
+        prompt_version=cfg.get('prompt_version', 'output-from-examples-v0'))
     copy_train_conf(train_conf_path)
     evaluation(output_filepath, args.dataset_path)
     # voting_output_filepath = voting(output_filepath)

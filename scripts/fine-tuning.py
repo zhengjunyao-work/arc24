@@ -37,10 +37,10 @@ class CFG:
     model_path: str = 'Qwen/Qwen2-0.5B-Instruct'
     adapter_path: Optional[str] = None
     use_4bit_quantization: bool = False
-    train_datasets: List[List[str]] = field(default_factory=lambda: [['/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json', 'predict-output-v0']])
+    train_datasets: List[List[str]] = field(default_factory=lambda: [['/mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json', 'output-from-examples-v0']])
     remove_train_samples_to_fit_max_seq_len: bool = False
     subsample_train_tasks_ratio: Optional[float] = None
-    val_dataset: List[str] = field(default_factory=lambda: ['/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json', 'predict-output-v0'])
+    val_dataset: List[str] = field(default_factory=lambda: ['/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json', 'output-from-examples-v0'])
     output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_grid_encoders/06_other-symbols-shape-and-number_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps'
     n_gpus: int = 2
     max_seq_len: int = 4096

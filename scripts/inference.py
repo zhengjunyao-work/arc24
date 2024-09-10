@@ -10,7 +10,7 @@ class CFG:
     model_path: str = "/home/gbarbadillo/data/Qwen2-0.5B-arc"
     max_model_len: int = 10240 #61000 for phi-3
     grid_encoder: str = 'GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))'
-    prompt_version: str = 'predict-output-v0'
+    prompt_version: str = 'output-from-examples-v0'
     # Dataset
     #dataset_path: str = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
     dataset_path: str = '/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json'

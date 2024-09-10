@@ -7,7 +7,7 @@ def parse_grid_from_response(text, grid_encoder):
 
 
 def create_prompts_from_task(task, grid_encoder, tokenizer,
-                             is_train_prompt=True, prompt_version='predict-output-v0'):
+                             is_train_prompt=True, prompt_version='output-from-examples-v0'):
     system_prompt, prompt_template, answer_template = get_prompt_templates(prompt_version)
     train_samples = [{key: grid_encoder.to_text(grid) for key, grid in sample.items()} for sample in task['train']]
     prompts = []
@@ -87,10 +87,26 @@ def pretty_print_prompt(text, default_color='black'):
 
 
 def get_prompt_templates(prompt_version):
-    if prompt_version == 'predict-output-v0':
+    """
+    Given a string defining the prompt version returns the system, prompt and answer templates.
+
+    This are the planned prompt versions to release:
+
+    output-from-examples
+    input-from-inputs
+    output-from-outputs
+    code-from-examples
+    output-from-code
+    input-from-code
+    code-from-inputs
+    """
+    # TODO: rethink the naming of the templates, make room for future versions
+    if prompt_version == 'output-from-examples-v0':
         return system_prompt_v0, prompt_template_v0, answer_template_v0
-    elif prompt_version == 'predict-output-v1':
+    elif prompt_version == 'output-from-examples-v1':
         return system_prompt_v1, prompt_template_v1, answer_template_v0
+    elif prompt_version == 'input-from-inputs-v0':
+        return system_prompt_v1, prompt_template_v2, answer_template_v1
     else:
         raise ValueError(f'Unknown prompt version {prompt_version}')
 
@@ -157,3 +173,16 @@ The transformations are always based on the following priors: objectness, goal-d
 
 {{ test_input }}
 """)
+
+prompt_template_v2 = Template("""Your task is to create a new grid that follows the same distribution as the input grids from the Abstraction and Reasoning Challenge (ARC).
+Below there are some grid examples, please create a new and different grid that follows the same distribution.
+{% for sample in train_samples %}
+## Grid example {{ loop.index }}
+
+{{ sample.input }}
+{% endfor %}
+""")
+
+answer_template_v1 = Template("""## New grid
+
+{{ test_output }}""")
