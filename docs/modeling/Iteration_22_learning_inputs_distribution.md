@@ -28,3 +28,4 @@ better use of it.
 - [ ] Update fine-tune script to support a more complex configuration for train data (filepath and prompt)
 - [ ] Quick experiments to validate implementation
 - [ ] Long experiments to see if the model improves
+- [ ] Visualize some of the new inputs for the typical first training tasks
