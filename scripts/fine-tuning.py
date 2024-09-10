@@ -394,7 +394,7 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
     """
     """
     data = dict()
-    for idx, filepath, prompt_version in tqdm(enumerate(train_datasets), desc='Loading training datasets'):
+    for idx, (filepath, prompt_version) in tqdm(enumerate(train_datasets), desc='Loading training datasets'):
         dataset = load_arc_data_with_solutions(filepath)
         dataset = {f'{idx}|{key}|{prompt_version}': value for key, value in dataset.items()}
         data.update(dataset)
