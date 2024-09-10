@@ -77,7 +77,7 @@ def create_prompts_from_task(task, grid_encoder, tokenizer, is_train_prompt=True
         if is_train_prompt:
             assistant_reply = f"### Output\n\n{grid_encoder.to_text(test_sample['output'])}\n"
         else:
-            assistant_reply = """### Output\n```grid"""
+            assistant_reply =  "### Output\n\n```grid"
         messages = [{"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_message},
                     {"role": "assistant", "content": assistant_reply}]
