@@ -123,6 +123,16 @@ python fine-tuning.py \
 
 I have done a quick experiments with a model trained for 1k steps. It seemed that need more training time.
 
+TODO: train a model for longer, starting from the short model weights.
+
+### Generate inputs vs generate outputs
+
+TODO: is it more difficult to generate inputs?
+
+### Is it helpful to learn to predict inputs?
+
+TODO: train and evaluate
+
 ## Conclusion
 
 ## Next steps
