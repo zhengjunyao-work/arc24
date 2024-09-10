@@ -198,3 +198,4 @@ TODO: new best score of 28! using an ensemble
   - [ ] Maybe reduce VLLM RAM usage. https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html
   - [ ] Maybe use unsloth and change to single P100 GPU.
 - [ ] Can I increase the max_seq_len?
+- [ ] Parallelize all 2020 solution so it does not add any extra time, how much RAM uses the second approach?
