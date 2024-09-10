@@ -105,7 +105,6 @@ def get_prompt_templates(prompt_version):
     input-from-code
     code-from-inputs
     """
-    # TODO: rethink the naming of the templates, make room for future versions
     if prompt_version == 'output-from-examples-v0':
         return system_prompt_v0, prompt_template_v0, answer_template_v0
     elif prompt_version == 'output-from-examples-v1':
