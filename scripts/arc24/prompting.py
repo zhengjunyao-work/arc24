@@ -15,12 +15,15 @@ def create_prompts_from_task(task, grid_encoder, tokenizer,
         user_message = prompt_template.render(train_samples=train_samples,
                                                 test_input=grid_encoder.to_text(test_sample['input']))
         if is_train_prompt:
-            test_output = grid_encoder.to_text(test_sample['output'])
+            if prompt_version.startswith('output-from-examples'):
+                output = grid_encoder.to_text(test_sample['output'])
+            elif prompt_version.startswith('input-from-inputs'):
+                output = grid_encoder.to_text(test_sample['input'])
         else:
-            test_output = '```grid'
+            output = '```grid'
         messages = [{"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_message},
-                    {"role": "assistant", "content": answer_template.render(test_output=test_output)}]
+                    {"role": "assistant", "content": answer_template.render(output=output)}]
         prompt = tokenizer.apply_chat_template(messages,
                                                 tokenize=False,
                                                 add_generation_prompt=False)
@@ -147,7 +150,7 @@ prompt_template_v0 = Template("""Let's see if you can solve this simple ARC task
 
 answer_template_v0 = Template("""### Output
 
-{{ test_output }}""")
+{{ output }}""")
 
 # v1 reduce the number of prompt tokens from 292 to 88, freeing 200 tokens
 system_prompt_v1 = "You are a helpful assistant."
@@ -185,4 +188,4 @@ Below there are some grid examples, please create a new and different grid that 
 
 answer_template_v1 = Template("""## New grid
 
-{{ test_output }}""")
+{{ output }}""")
