@@ -81,7 +81,28 @@ python fine-tuning.py \
 --verbose \
 --no-resume_from_checkpoint \
 --val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json input-from-inputs-v0
+
+
+python fine-tuning.py \
+--model_path Qwen/Qwen2-0.5B-Instruct \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json input-from-inputs-v0 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json input-from-inputs-v0 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240910_debug_input_from_inputs/01_baseline \
+--max_steps 1000 \
+--logging_steps 10 \
+--verbose \
+--remove_train_samples_to_fit_max_seq_len \
+--max_seq_len 8192
 ```
+
+### Weighted loss function
+
+- https://stackoverflow.com/questions/71581197/what-is-the-loss-function-used-in-trainer-from-the-transformers-library-of-huggi
+- https://chatgpt.com/c/66e022b7-731c-8012-ab70-646a31741fe2
+- https://huggingface.co/docs/transformers/en/main_classes/trainer
+- https://huggingface.co/docs/trl/en/sft_trainer
+- https://github.com/huggingface/transformers/blob/v4.44.2/src/transformers/trainer.py#L3353
 
 ## Results
 
@@ -94,7 +115,8 @@ python fine-tuning.py \
 - [x] Refactor prompt code to remove duplications, verify that inference results do not change.
 - [x] Refactor the code to allow using different prompts
 - [x] Update fine-tune script to support a more complex configuration for train data (filepath and prompt)
-- [ ] Create prompt template for input prediction `predict-input-v0`
+- [x] Create prompt template for input prediction
 - [ ] Quick experiments to validate implementation
 - [ ] Long experiments to see if the model improves
 - [ ] Visualize some of the new inputs for the typical first training tasks
+- [ ] My biggest concern is that the loss might be higher for this task, since it is an open problem. In the other hand predicting the output was deterministic.

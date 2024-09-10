@@ -12,13 +12,14 @@ def load_arc_data_with_solutions(filepath):
         for sample_id, task in data.items():
             for idx, sample in enumerate(task['test']):
                 sample['output'] = solutions[sample_id][idx]
-    verify_that_all_test_samples_have_output(data)
+    verify_that_all_samples_have_output(data)
     return data
 
 
-def verify_that_all_test_samples_have_output(data):
+def verify_that_all_samples_have_output(data):
     for task in data.values():
-        for sample in task['test']:
-            if 'output' not in sample:
-                raise ValueError('Not all test samples have output')
+        for samples in task.values():
+            for sample in samples:
+                if 'output' not in sample:
+                    raise ValueError('Not all samples have output')
 
