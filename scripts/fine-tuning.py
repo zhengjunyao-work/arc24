@@ -395,8 +395,9 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
     """
     data = dict()
     for filepath, prompt_version in tqdm(train_datasets, desc='Loading training datasets'):
-        # TODO: use the prompt version
-        data.update(load_arc_data_with_solutions(filepath))
+        dataset = load_arc_data_with_solutions(filepath)
+        dataset = {f'{key}|{prompt_version}': value for key, value in dataset.items()}
+        data.update(dataset)
     task_ids = list(data.keys())
     prompt_lengths = []
     set_random_seed(random_seed)
@@ -413,6 +414,7 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
         random.shuffle(task_ids)
         for task_id in task_ids:
             task = data[task_id]
+            prompt_version = task_id.split('|')[-1]
             if 'test' not in task and 'n_train' in task:
                 task = create_random_task_from_task_without_test(task)
             task = random_augment_task(task)
@@ -422,13 +424,13 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
             if remove_train_samples_to_fit_max_seq_len:
                 while len(task['train']):
                     prompt, prompt_length = _create_prompt_smaller_than_max_seq_len(
-                        task, grid_encoder, tokenizer, max_seq_len)
+                        task, grid_encoder, tokenizer, max_seq_len, prompt_version=prompt_version)
                     if prompt is not None:
                         break
                     task = remove_last_train_sample(task)
             else:
                 prompt, prompt_length = _create_prompt_smaller_than_max_seq_len(
-                    task, grid_encoder, tokenizer, max_seq_len)
+                    task, grid_encoder, tokenizer, max_seq_len, prompt_version=prompt_version)
             prompt_lengths.append(prompt_length)
             if prompt is not None:
                 yield {'text': prompt}
@@ -443,8 +445,8 @@ def create_random_task_from_task_without_test(task):
     return new_task
 
 
-def _create_prompt_smaller_than_max_seq_len(task, grid_encoder, tokenizer, max_seq_len):
-    prompts = create_prompts_from_task(task, grid_encoder, tokenizer)
+def _create_prompt_smaller_than_max_seq_len(task, grid_encoder, tokenizer, max_seq_len, prompt_version):
+    prompts = create_prompts_from_task(task, grid_encoder, tokenizer, prompt_version=prompt_version)
     # TODO: is this the better way to deal with multi-output tasks?
     # Should I give more weight to tasks with multiple outputs?
     prompt = random.choice(prompts)

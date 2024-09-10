@@ -140,7 +140,6 @@ prompt_template_v1 = Template("""Let's see if you can solve this simple Abstract
 Below there are some input-output grid examples that define the task.
 Your job is to understand the transformation between the input and the output and apply it to the test input grid.
 The transformations are always based on the following priors: objectness, goal-directed, numbers & counting, and basic geometry & topology.
-
 {% for sample in train_samples %}
 ## Example {{ loop.index }}
 
