@@ -16,7 +16,7 @@ def main(args=None):
     os.system(cmd)
 
     logging.info('Running dsl solution')
-    cmd = f'python {script_folder}/dsl_solution.py --dataset_filepath {args.dataset_filepath} --output_filepath {args.dsl_output_filepath}'
+    cmd = f'python {script_folder}/program_search_dsl.py --dataset_filepath {args.dataset_filepath} --output_filepath {args.dsl_output_filepath}'
     os.system(cmd)
 
 
