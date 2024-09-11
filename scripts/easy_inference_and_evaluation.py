@@ -3,7 +3,8 @@ import os
 import json
 import shutil
 import argparse
-import logging
+
+from arc24.logging import logging
 
 logger = logging.getLogger(__name__)
 
@@ -49,8 +50,8 @@ def merge_lora_with_model(lora_path, model_path):
 
 
 def _get_prompt_version_from_conf(cfg):
-    if len(cfg.val_dataset) == 2:
-        prompt_version = cfg.val_dataset[1]
+    if len(cfg['val_dataset']) == 2:
+        prompt_version = cfg['val_dataset'][1]
         logger.info(f'Using prompt version from configuration: {prompt_version}')
     else:
         prompt_version = 'output-from-examples-v0'
