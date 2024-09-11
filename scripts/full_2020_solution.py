@@ -9,12 +9,14 @@ def main(args=None):
     if args is None:
         args = sys.argv[1:]
     args = parse_args(args)
+    script_folder = os.path.realpath(os.path.dirname(__file__))
+
     logging.info('Running icecuber solution')
-    cmd = f'python icecuber_solution.py --dataset_filepath {args.dataset_filepath} --output_filepath {args.icecuber_output_filepath}'
+    cmd = f'python {script_folder}/icecuber_solution.py --dataset_filepath {args.dataset_filepath} --output_filepath {args.icecuber_output_filepath}'
     os.system(cmd)
 
     logging.info('Running dsl solution')
-    cmd = f'python dsl_solution.py --dataset_filepath {args.dataset_filepath} --output_filepath {args.dsl_output_filepath}'
+    cmd = f'python {script_folder}/dsl_solution.py --dataset_filepath {args.dataset_filepath} --output_filepath {args.dsl_output_filepath}'
     os.system(cmd)
 
 
