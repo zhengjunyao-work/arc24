@@ -73,6 +73,17 @@ generating 128 predictions takes more than 5 minutes.
 
 I can hide VLLM logs with `export VLLM_LOGGING_LEVEL=ERROR`
 
+### Parallelize all 2020 solution
+
+Currently I'm running icecuber solution alongside test-time fine-tuning. I cannot run at the same time
+icecuber and inference because they require more than 50% of RAM and there are crashes.
+
+I have prepared a [notebook to measure dsl search resources usage](https://www.kaggle.com/code/ironbar/measure-dsl-resources?scriptVersionId=196153438)
+and it turns out that sometimes it more than 60% of RAM. Thus we cannot parallelize with inference either.
+
+TODO: measure also resources from icecuber to verify ram usage [icecuber notebook](https://www.kaggle.com/code/ironbar/measure-icecuber-resources?scriptVersionId=196154032)
+TODO: maybe run dsl search at the same time as fine-tuning.
+
 ## Results
 
 ### Experiment about optimal number of splits
