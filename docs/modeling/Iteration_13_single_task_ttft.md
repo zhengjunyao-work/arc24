@@ -81,7 +81,21 @@ icecuber and inference because they require more than 50% of RAM and there are c
 I have prepared a [notebook to measure dsl search resources usage](https://www.kaggle.com/code/ironbar/measure-dsl-resources?scriptVersionId=196153438)
 and it turns out that sometimes it more than 60% of RAM. Thus we cannot parallelize with inference either.
 
-TODO: measure also resources from icecuber to verify ram usage [icecuber notebook](https://www.kaggle.com/code/ironbar/measure-icecuber-resources?scriptVersionId=196154032)
+![dsl search resources](res/2024-09-11-14-15-49.png)
+
+I have also measured resources from icecuber to verify ram usage [icecuber notebook](https://www.kaggle.com/code/ironbar/measure-icecuber-resources?scriptVersionId=196154032)
+It uses 80% of RAM sometimes in the execution.
+
+![icecuber resources](res/2024-09-11-14-14-29.png)
+
+In the other hand my solution has the following resource usage, this is an experiment with the validation set. For 3 hours it is doing the test-time fine-tuning and for 1 hour it makes inference.
+
+![my solution resources](res/2024-09-11-14-17-13.png)
+
+It seems that the best solution would be to do all the 2020 solution while the test-time fine-tuning step.
+
+The easiest way would be to create a script that does both 2020 solution parts. Otherwise I should be waiting
+for one part to stop to run the other part and that would make the code more complex.
 TODO: maybe run dsl search at the same time as fine-tuning.
 
 ## Results
