@@ -159,6 +159,16 @@ TODO: is it more difficult to generate inputs?
 
 ### Is it helpful to learn to predict inputs?
 
+This experiment is different than training different datasets. Here we are training the model to do new tasks.
+We can think of the new tasks as some sort of regularization. Thus I believe that the fair comparison
+is comparing models that have been trained for the same number of steps on the task of interest (predict the output given examples).
+This implies that models that were trained on multiple tasks will be trained for a higher number of steps, because some
+of the steps will be used to learn the other tasks.
+
+#### 5k steps results
+
+#### 10k steps results
+
 TODO: train and evaluate
 
 ## Conclusion
