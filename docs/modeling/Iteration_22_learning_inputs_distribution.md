@@ -176,5 +176,5 @@ TODO: train and evaluate
 - [ ] Long experiments to see if the model improves
 - [ ] Visualize some of the new inputs for the typical first training tasks
 - [ ] My biggest concern is that the loss might be higher for this task, since it is an open problem. In the other hand predicting the output was deterministic.
-- [ ] Update notebook code source with the new code
+- [x] Update notebook code source with the new code
 - [ ] Is it helpful to use the weights of a model trained to predict inputs as a start point
