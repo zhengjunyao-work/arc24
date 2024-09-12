@@ -34,6 +34,12 @@ So far I have used RE-ARC, ConceptARC, 1D-ARC and MINI-ARC. Only RE-ARC and MINI
   - [nosound's 9 hand crafted ARC tasks](https://www.kaggle.com/datasets/zaharch/arc-nosound-tasks)
   - [Andy Penrose's 5 tasks](https://www.kaggle.com/datasets/andypenrose/extra-arc-tasks-for-testing)
 - [ARC Public resources Google Sheet](https://docs.google.com/spreadsheets/d/1fR4cgjY1kNKN_dxiidBQbyT6Gv7_Ko7daKOjlYojwTY/edit?gid=167693902#gid=167693902)
+  - [Language-complete Abstraction and Reasoning Corpus (LARC)](https://github.com/samacqua/LARC) I could use this
+    dataset to test if using language definition of the tasks is useful. A following step would be
+    to use code.
+  - [ARC gym](https://github.com/SimonOuellette35/ARC_gym): a data generation framework for the Abstraction & Reasoning Corpus
+
+There is one weird thing, why simon does not have its own data on the viewer?
 
 ## Results
 
@@ -43,4 +49,8 @@ So far I have used RE-ARC, ConceptARC, 1D-ARC and MINI-ARC. Only RE-ARC and MINI
 
 ## TODO
 
-- [ ]
+- [ ] [PQA: Perceptual Question Answering](https://github.com/neoneye/arc-dataset-collection/tree/main/dataset/PQA)
+- [ ] Visualize Simon datasets https://github.com/neoneye/simon-arc-lab
+- [ ] Create a small dataset combining the 2 existing small kaggle datasets
+- [ ] [Language-complete Abstraction and Reasoning Corpus (LARC)](https://github.com/samacqua/LARC)
+- [ ] [ARC gym](https://github.com/SimonOuellette35/ARC_gym)
