@@ -153,10 +153,6 @@ I have done a quick experiments with a model trained for 1k steps. It seemed tha
 
 TODO: train a model for longer, starting from the short model weights.
 
-### Generate inputs vs generate outputs
-
-TODO: is it more difficult to generate inputs?
-
 ### Is it helpful to learn to predict inputs?
 
 This experiment is different than training different datasets. Here we are training the model to do new tasks.
@@ -167,9 +163,42 @@ of the steps will be used to learn the other tasks.
 
 #### 5k steps results
 
+| new tasks                | accuracy  | correct_pixels | correct_size | pass_n     | vote_2     |
+|--------------------------|-----------|----------------|--------------|------------|------------|
+| -                        | 4.61%     | 68.54%         | 87.34%       | 17.25%     | 10.73%     |
+| 5k inputs                | **5.36%** | **69.40%**     | **88.38%**   | **19.75%** | **13.13%** |
+| 5k inputs, 5k outputs    | 5.13%     | 68.34%         | 87.18%       | **19.75%** | 12.37%     |
+| 2.5k inputs 2.5k outputs | 4.68%     | 68.55%         | 87.66%       | 17.38%     | 11.99%     |
+
+We see a clear improvement when trained for 5k additional steps learning the inputs distribution. Learning
+the output distribution does not seem to be as helpful as learning the inputs.
+
 #### 10k steps results
 
-TODO: train and evaluate
+| new tasks            | accuracy  | correct_pixels | correct_size | pass_n     | vote_2     |
+|----------------------|-----------|----------------|--------------|------------|------------|
+| -                    | 5.71%     | **69.61%**     | **88.11%**   | 20.00%     | 13.51%     |
+| pretrained on inputs | 5.82%     | 69.46%         | 87.66%       | 20.12%     | 13.89%     |
+| 10k inputs           | **6.44%** | **69.60%**     | 87.25%       | **22.25%** | **15.40%** |
+
+When training for 10k steps we see again that using additional 10k steps learning the input distribution is helpful.
+Using a model pretrained on inputs does not give significative improvements, train metrics show that it
+learns faster but it seems that the previous knowledge is forget during the training.
+
+### Comparison with task augmentation
+
+We don't have a direct apples to apples comparison because one experiment was done for 12k steps and the other for 10k steps.
+
+| training steps (k) | new tasks         | accuracy | correct_pixels | correct_size | pass_n | vote_2 |
+|--------------------|-------------------|----------|----------------|--------------|--------|--------|
+| 10                 | -                 | 5.71%    | 69.61%         | 88.11%       | 20.00% | 13.51% |
+| 12                 | -                 | 5.93%    | 69.74%         | 87.60%       | 21.00% | 14.02% |
+| 10                 | 10k inputs        | 6.44%    | 69.60%         | 87.25%       | 22.25% | 15.40% |
+| 12                 | task augmentation | 7.02%    | 70.87%         | 88.77%       | 21.62% | 13.51% |
+
+But it seems that task augmentation had a bigger effect on accuracy than learning the inputs.
+
+TODO: what if we do both?
 
 ## Conclusion
 
@@ -183,8 +212,11 @@ TODO: train and evaluate
 - [x] Create prompt template for input prediction
 - [x] Create prompt template for output prediction
 - [x] Quick experiments to validate implementation
-- [ ] Long experiments to see if the model improves
+- [x] Long experiments to see if the model improves
 - [ ] Visualize some of the new inputs for the typical first training tasks
-- [ ] My biggest concern is that the loss might be higher for this task, since it is an open problem. In the other hand predicting the output was deterministic.
+- [x] My biggest concern is that the loss might be higher for this task, since it is an open problem.
+  In the other hand predicting the output was deterministic. The concern had sense, but the results
+  do not suggest it is a real problem.
 - [x] Update notebook code source with the new code
-- [ ] Is it helpful to use the weights of a model trained to predict inputs as a start point
+- [x] Is it helpful to use the weights of a model trained to predict inputs as a start point
+- [ ] Submission results
