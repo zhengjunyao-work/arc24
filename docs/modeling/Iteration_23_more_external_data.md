@@ -47,10 +47,16 @@ There is one weird thing, why simon does not have its own data on the viewer?
 
 ## Next steps
 
+- [ ] [Language-complete Abstraction and Reasoning Corpus (LARC)](https://github.com/samacqua/LARC)
+
 ## TODO
 
-- [ ] [PQA: Perceptual Question Answering](https://github.com/neoneye/arc-dataset-collection/tree/main/dataset/PQA)
-- [ ] Visualize Simon datasets https://github.com/neoneye/simon-arc-lab
-- [ ] Create a small dataset combining the 2 existing small kaggle datasets
-- [ ] [Language-complete Abstraction and Reasoning Corpus (LARC)](https://github.com/samacqua/LARC)
+- [x] [PQA: Perceptual Question Answering](https://github.com/neoneye/arc-dataset-collection/tree/main/dataset/PQA)
+  - [x] Read the paper
+  - [x] The dataset is big, how to deal with it? Can I group all the common tasks together?
+  - [x] Check the colors
+- [ ] Visualize Simon datasets https://github.com/neoneye/simon-arc-lab. I have been looking at the code, but I don't see how to decode the datasets. I believe he only works with RLE encoded data.
+  - [ ] https://github.com/neoneye/simon-arc-lab/blob/main/simon_arc_lab/rle/deserialize.py
+- [x] Create a small dataset combining the 2 existing small kaggle datasets
 - [ ] [ARC gym](https://github.com/SimonOuellette35/ARC_gym)
+- [ ] Could it have sense to pretrain only on the datasets that have a lot of variation like RE-ARC and PQA?
