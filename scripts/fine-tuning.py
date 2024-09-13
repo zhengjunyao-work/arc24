@@ -467,6 +467,7 @@ def print_prompt_length_percentiles(prompt_lengths, prefix):
     print(f'\t{prefix} prompt length percentiles, number of prompts: {len(prompt_lengths)}')
     for percentile in [50, 75, 90, 95, 97]:
         print(f'{prefix} prompt length percentile {percentile}: {int(np.percentile(prompt_lengths, percentile))}')
+    print(f'{prefix} prompt length max: {max(prompt_lengths)}')
 
 
 def check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len, max_allowed_ratio=0.5):
