@@ -149,9 +149,25 @@ python fine-tuning.py \
 
 ### Newly generated inputs
 
-I have done a quick experiments with a model trained for 1k steps. It seemed that need more training time.
+I have done a quick experiments with a model trained for 1k steps. It seemed that need more training time. The images below
+are from a model trained for 40k steps both to learn the input distribution and to generate outputs.
 
-TODO: train a model for longer, starting from the short model weights.
+![](res/2024-09-14-08-34-47.png)
+
+![](res/2024-09-14-08-35-16.png)
+
+![](res/2024-09-14-08-36-04.png)
+
+![](res/2024-09-14-08-39-28.png)
+
+![](res/2024-09-14-08-39-44.png)
+
+![](res/2024-09-14-08-40-01.png)
+
+![](res/2024-09-14-08-40-23.png)
+
+The generations are not perfect, but they are promising. It might be possible to expand the evaluation
+set in a similar fashion to RE-ARC but without the need to write new python code.
 
 ### Is it helpful to learn to predict inputs?
 
@@ -200,9 +216,16 @@ But it seems that task augmentation had a bigger effect on accuracy than learnin
 
 TODO: what if we do both?
 
+### Submission results
+
+TODO:
+
 ## Conclusion
 
 ## Next steps
+
+- Create a expanded version of the evaluation set, similar to RE-ARC, but using my model instead of
+  writing new python code.
 
 ## TODO
 
@@ -213,7 +236,7 @@ TODO: what if we do both?
 - [x] Create prompt template for output prediction
 - [x] Quick experiments to validate implementation
 - [x] Long experiments to see if the model improves
-- [ ] Visualize some of the new inputs for the typical first training tasks
+- [x] Visualize some of the new inputs for the typical first training tasks
 - [x] My biggest concern is that the loss might be higher for this task, since it is an open problem.
   In the other hand predicting the output was deterministic. The concern had sense, but the results
   do not suggest it is a real problem.

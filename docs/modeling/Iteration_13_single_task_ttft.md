@@ -192,7 +192,7 @@ accuracy: 11.9%	correct_pixels: 71.5%	max_correct_pixels: 83.1%	correct_size: 84
 accuracy: 11.7%	correct_pixels: 73.2%	max_correct_pixels: 78.5%	correct_size: 85.2%	any_correct_size: 87.8%	pass_2: 23.5%	unanswered: 1.0%
 
 # Go down to batch size 1, and use 100 splits
-val qwen2-0.5b/5 100split 16k_step_bs1 4e-5_lr_lin
+val qwen2-0.5b/5 100split 16k_step_bs1 2e-5_lr_lin
 
 # TODO: if it improves play with the learning rate
 ```
@@ -201,6 +201,7 @@ Using a constant learning rate seems to have a positive effect when using batch 
 
 TODO: what if I reduce the batch size? That way I will do more modifications to the model Ideally go down to 1, (with lower learning rate)
 TODO: increase the budget to 2k or 3k steps
+TODO: increase max_seq_len to 5120
 
 ## Conclusion
 
