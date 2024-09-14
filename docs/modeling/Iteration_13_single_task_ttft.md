@@ -182,7 +182,7 @@ accuracy: 11.1%	correct_pixels: 71.4%	max_correct_pixels: 84.5%	correct_size: 85
 accuracy: 11.2%	correct_pixels: 74.9%	max_correct_pixels: 79.7%	correct_size: 86.7%	any_correct_size: 88.8%	pass_2: 22.4%	unanswered: 0.5%
 
 
-val qwen2-0.5b/5 50split 8k_step_bs2 2e-5_lr_lin, 4h24, 3h16 fine-tuning
+val qwen2-0.5b/5 50split 8k_step_bs2 2e-5_lr_lin, 4h24, 3h16 fine-tuning, 1h10 inference
 https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=195800246
 accuracy: 10.9%	correct_pixels: 71.2%	max_correct_pixels: 84.1%	correct_size: 84.9%	any_correct_size: 88.0%	pass_n: 35.0%	unanswered: 3.1%
 accuracy: 12.1%	correct_pixels: 73.7%	max_correct_pixels: 79.4%	correct_size: 85.6%	any_correct_size: 87.9%	pass_2: 24.2%	unanswered: 1.3%
@@ -192,9 +192,17 @@ accuracy: 11.9%	correct_pixels: 71.5%	max_correct_pixels: 83.1%	correct_size: 84
 accuracy: 11.7%	correct_pixels: 73.2%	max_correct_pixels: 78.5%	correct_size: 85.2%	any_correct_size: 87.8%	pass_2: 23.5%	unanswered: 1.0%
 
 # Go down to batch size 1, and use 100 splits
-val qwen2-0.5b/5 100split 16k_step_bs1 2e-5_lr_lin
+val qwen2-0.5b/5 100split 16k_step_bs1 2e-5_lr_lin, 5h44, 3h55 fine-tuning 1h50 inference
+https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=196574355
+accuracy: 11.8%	correct_pixels: 71.6%	max_correct_pixels: 84.6%	correct_size: 84.9%	any_correct_size: 89.5%	pass_n: 36.0%	unanswered: 3.0%
+accuracy: 11.5%	correct_pixels: 75.9%	max_correct_pixels: 81.2%	correct_size: 87.2%	any_correct_size: 88.8%	pass_n: 23.0%	unanswered: 1.0%
 
-# TODO: if it improves play with the learning rate
+# Increase max_seq_len to 5120, 5h42
+https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=196575579
+accuracy: 12.2%	correct_pixels: 72.1%	max_correct_pixels: 84.9%	correct_size: 85.2%	any_correct_size: 88.5%	pass_n: 34.0%	unanswered: 2.9%
+accuracy: 12.2%	correct_pixels: 74.7%	max_correct_pixels: 81.8%	correct_size: 87.0%	any_correct_size: 89.8%	pass_n: 24.5%	unanswered: 1.3%
+
+val qwen2-0.5b/5 100split step16k_bs1 4e-5lr_lin
 ```
 
 Using a constant learning rate seems to have a positive effect when using batch size 16.
