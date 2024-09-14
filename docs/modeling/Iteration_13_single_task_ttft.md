@@ -203,6 +203,9 @@ accuracy: 12.2%	correct_pixels: 72.1%	max_correct_pixels: 84.9%	correct_size: 85
 accuracy: 12.2%	correct_pixels: 74.7%	max_correct_pixels: 81.8%	correct_size: 87.0%	any_correct_size: 89.8%	pass_n: 24.5%	unanswered: 1.3%
 
 val qwen2-0.5b/5 100split step16k_bs1 4e-5lr_lin
+https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=196610194
+accuracy: 12.5%	correct_pixels: 72.0%	max_correct_pixels: 84.1%	correct_size: 84.6%	any_correct_size: 88.5%	pass_n: 37.0%	unanswered: 3.0%
+accuracy: 11.0%	correct_pixels: 75.3%	max_correct_pixels: 79.4%	correct_size: 86.7%	any_correct_size: 87.8%	pass_n: 21.9%	unanswered: 0.5%37
 ```
 
 Using a constant learning rate seems to have a positive effect when using batch size 16.
@@ -210,6 +213,17 @@ Using a constant learning rate seems to have a positive effect when using batch 
 TODO: what if I reduce the batch size? That way I will do more modifications to the model Ideally go down to 1, (with lower learning rate)
 TODO: increase the budget to 2k or 3k steps
 TODO: increase max_seq_len to 5120
+
+### Decoupling fine-tuning and test-time fine-tuning
+
+If I want to adapt to each task, maybe it has more sense to train a small LoRA for each task instead
+of retraining the whole LoRA with r=128.
+
+- https://huggingface.co/docs/peft/main/en/developer_guides/lora#pissa
+- https://huggingface.co/docs/peft/main/en/package_reference/lora#peft.LoraConfig Maybe `pissa_niter_16` is a good option?
+- https://www.kaggle.com/code/ironbar/v2-single-task-test-time-fine-tuning-for-arc24?scriptVersionId=196655009
+
+TODO: I would like to visualize the training loss in a plot
 
 ## Conclusion
 
