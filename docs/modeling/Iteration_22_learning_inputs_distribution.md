@@ -205,16 +205,17 @@ learns faster but it seems that the previous knowledge is forget during the trai
 
 We don't have a direct apples to apples comparison because one experiment was done for 12k steps and the other for 10k steps.
 
-| training steps (k) | new tasks         | accuracy | correct_pixels | correct_size | pass_n | vote_2 |
-|--------------------|-------------------|----------|----------------|--------------|--------|--------|
-| 10                 | -                 | 5.71%    | 69.61%         | 88.11%       | 20.00% | 13.51% |
-| 12                 | -                 | 5.93%    | 69.74%         | 87.60%       | 21.00% | 14.02% |
-| 10                 | 10k inputs        | 6.44%    | 69.60%         | 87.25%       | 22.25% | 15.40% |
-| 12                 | task augmentation | 7.02%    | 70.87%         | 88.77%       | 21.62% | 13.51% |
+| training steps (k) | lora rank | task augmentation | train on inputs | accuracy | correct_pixels | correct_size | pass_n | vote_2 |
+|--------------------|-----------|-------------------|-----------------|----------|----------------|--------------|--------|--------|
+| 10                 | 32        | FALSE             | FALSE           | 5.71%    | 69.61%         | 88.11%       | 20.00% | 13.51% |
+| 12                 | 32        | FALSE             | FALSE           | 5.93%    | 69.74%         | 87.60%       | 21.00% | 14.02% |
+| 10                 | 32        | FALSE             | TRUE            | 6.44%    | 69.60%         | 87.25%       | 22.25% | 15.40% |
+| 12                 | 32        | TRUE              | FALSE           | 7.02%    | 70.87%         | 88.77%       | 21.62% | 13.51% |
+| 10                 | 32        | TRUE              | TRUE            | 7.10%    | 70.52%         | 88.58%       | 21.88% | 14.52% |
+| 10                 | 128       | TRUE              | TRUE            | 8.46%    | 71.40%         | 88.55%       | 25.50% | 16.92% |
 
-But it seems that task augmentation had a bigger effect on accuracy than learning the inputs.
-
-TODO: what if we do both?
+But it seems that task augmentation had a bigger effect on accuracy than learning the inputs. Combining
+both is beneficial, and using a higher lora rank also improves the results.
 
 ### Submission results
 
