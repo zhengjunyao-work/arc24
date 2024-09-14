@@ -271,7 +271,7 @@ def parse_args(args):
         epilog=epilog)
     parser.add_argument('inference_path', help='Path to json file with the inference results')
     parser.add_argument('--dataset_path', type=str, help="Path to the dataset to make inference",
-                        default='/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json')
+                        default='/mnt/hdd0/Kaggle/arc24/data/new_partitions/arc-agi_all_challenges.json')
     args = parser.parse_args(args)
     print(args)
     return args

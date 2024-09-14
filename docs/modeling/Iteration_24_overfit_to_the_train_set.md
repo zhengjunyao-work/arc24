@@ -29,6 +29,8 @@ the RE-ARC dataset.
 
 ## Next steps
 
+- Maybe I should train a smaller lora when doing test-time fine-tuning
+
 ## TODO
 
 - [ ] Modify the evaluation script to give better names for the output files. This will allow me to evaluate
