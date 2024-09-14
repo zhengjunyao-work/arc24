@@ -64,7 +64,7 @@ def inference(model_path, output_folder, grid_encoder, predictions_per_task,
     print('-'*80)
     print(f'Inference with model {model_path}')
     os.makedirs(output_folder, exist_ok=True)
-    output_filepath = os.path.join(output_folder, f'inference_x{predictions_per_task:03d}.json')
+    output_filepath = _get_output_filepath(output_folder, predictions_per_task, dataset_path)
     if os.path.exists(output_filepath):
         print('Output file already exists, skipping inference')
         return output_filepath
@@ -76,6 +76,20 @@ def inference(model_path, output_folder, grid_encoder, predictions_per_task,
     ret = os.system(cmd)
     if ret != 0:
         raise Exception('Error running inference')
+    return output_filepath
+
+
+def _get_output_filepath(output_folder, predictions_per_task, dataset_path):
+    if dataset_path.endswith('val_rs7.json'):
+        name = 'val-rs7'
+    elif dataset_path.endswith('arc-agi_evaluation_challenges.json'):
+        name = 'evaluation'
+    elif dataset_path.endswith('arc-agi_training_challenges.json'):
+        name = 'training'
+    else:
+        raise Exception(f'Unknown dataset path: {dataset_path}')
+
+    output_filepath = os.path.join(output_folder, f'inference_{name}_x{predictions_per_task:03d}.json')
     return output_filepath
 
 
