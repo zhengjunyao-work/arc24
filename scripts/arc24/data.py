@@ -18,10 +18,17 @@ def load_arc_data_with_solutions(filepath):
 
 def verify_that_all_samples_have_output(data):
     for task in data.values():
-        for partition, samples in task.items():
-            if partition not in ['train', 'test']:
-                continue
-            for sample in samples:
-                if 'output' not in sample:
-                    raise ValueError('Not all samples have output')
+        if isinstance(task, dict):
+            verify_that_task_has_outputs(task)
+        elif isinstance(task, list):
+            for subtask in task:
+                verify_that_task_has_outputs(subtask)
+
+def verify_that_task_has_outputs(task):
+    for partition, samples in task.items():
+        if partition not in ['train', 'test']:
+            continue
+        for sample in samples:
+            if 'output' not in sample:
+                raise ValueError('Not all samples have output')
 

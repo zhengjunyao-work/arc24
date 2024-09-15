@@ -427,6 +427,8 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
         for task_id in task_ids:
             task = data[task_id]
             prompt_version = task_id.split('|')[-1]
+            if isinstance(task, list): # some datasets such as neoeye's tama have different variations of the same task
+                task = random.choice(task)
             if 'test' not in task and 'n_train' in task:
                 task = create_random_task_from_task_without_test(task)
             task = random_augment_task(task)

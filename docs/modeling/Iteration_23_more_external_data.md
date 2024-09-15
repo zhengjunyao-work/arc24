@@ -20,6 +20,7 @@ So far I have used RE-ARC, ConceptARC, 1D-ARC and MINI-ARC. Only RE-ARC and MINI
 ### Sources of information
 
 - [Simon ARC lab (neoeye)](https://github.com/neoneye/simon-arc-lab), apparently host the code to generate datasets for ARC tasks.
+  - [Neoeye tama dataset](https://github.com/neoneye/arc-dataset-tama)
   - [Simon datasets on huggingface](https://huggingface.co/neoneye)
   - [Dataset viewer](https://neoneye.github.io/arc/)
   - [Multiple datasets for ARC](https://github.com/neoneye/arc-dataset-collection/tree/main)
