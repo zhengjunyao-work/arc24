@@ -17,6 +17,38 @@ the RE-ARC dataset.
 
 ## Development
 
+### Implement the option to do full-model fine-tuning
+
+```bash
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--no-use_lora \
+--learning_rate 1e-4 \
+--warmup_ratio 0.1 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_full_fine-tuning/01_baseline-no-lora \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5
+
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 32 \
+--learning_rate 1e-4 \
+--warmup_ratio 0.1 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_full_fine-tuning/02_lora-r-32 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5
+```
+
 ## Results
 
 ### Start point: what is the accuracy of my best models on the train dataset?

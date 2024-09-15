@@ -63,6 +63,7 @@ class CFG:
     optim: str = "paged_adamw_8bit" # "paged_adamw_8bit"
     torch_dtype: str = "bfloat16" # "bfloat16" or "float16", float16 causes divergence when training on my PC, but it is 4x faster on Kaggle
     # LoRA
+    use_lora: bool = True
     use_rslora = True,
     use_dora = True,
     lora_r: int = 32
@@ -106,23 +107,29 @@ def parse_args():
     parser.add_argument('--compose_new_task_probability', type=float, help="Probability of composing a new task")
     parser.add_argument('--compose_new_task_weights', nargs='+', type=float, help="Weights for composing a new task")
     parser.add_argument('--verbose', action=argparse.BooleanOptionalAction, help="Whether to print verbose information")
+    parser.add_argument('--use_lora', action=argparse.BooleanOptionalAction, help="Whether to use LoRA")
     return parser.parse_args()
+
 
 @log_execution_time
 def fine_tuning_main():
     # Override default configuration using arguments
     cfg = CFG(**{k: v for k, v in vars(parse_args()).items() if v is not None})
+    save_train_conf(cfg)
     if cfg.report_to == 'wandb':
         w = wandb.init(reinit=True,
                 dir=cfg.output_dir,
                 project=os.path.basename(os.path.dirname(cfg.output_dir)),
                 name=os.path.basename(cfg.output_dir))
-    save_train_conf(cfg)
+    logger.info(f'Train configuration: {asdict(cfg)}')
 
     model = get_model(cfg.model_path, cfg.n_gpus, cfg.torch_dtype, cfg.use_4bit_quantization)
     tokenizer = get_tokenizer(cfg.model_path, model)
-    model = get_lora_model(model, cfg.adapter_path, cfg.lora_r, cfg.use_rslora,
-                           cfg.use_dora, cfg.lora_weight_initialization)
+    if cfg.use_lora:
+        model = get_lora_model(model, cfg.adapter_path, cfg.lora_r, cfg.use_rslora,
+                               cfg.use_dora, cfg.lora_weight_initialization)
+    else:
+        logger.info('Not using LoRA, full model will be fine-tuned')
 
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
     dataset_kwargs = {'grid_encoder': grid_encoder, 'tokenizer': tokenizer, 'max_seq_len': cfg.max_seq_len, 'verbose': cfg.verbose}
@@ -551,7 +558,6 @@ def get_training_arguments(cfg):
 
 
 def save_train_conf(cfg):
-    logger.info(f'Train configuration: {asdict(cfg)}')
     os.makedirs(cfg.output_dir, exist_ok=True)
     with open(os.path.join(cfg.output_dir, 'cfg.json'), 'w') as f:
         json.dump({key:value for key, value in cfg.__dict__.items() if not key.startswith('__')}, f, indent=4)
