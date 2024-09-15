@@ -53,7 +53,7 @@ Let's remove them one by one and measure the effect.
 | mirror                    | 5.82%    | 68.34%         | 88.75%       | 18.75% | 13.01% |
 
 Removing mirror and upscale have the greatest drop in performance, while removing geometric transformation
-results on improved accuracy. I can try new configurations using this knowledge to try to improve the results (`1244`)`
+results on improved accuracy. I can try new configurations using this knowledge to try to improve the results (`1244`).
 
 ### Tune augmentation weights
 
@@ -68,9 +68,13 @@ model. However the improvement is small, maybe the difference is not significati
 
 ### Submission results
 
-TODO: do I get better LB score when using task data augmentation
+The same training with task augmentation scored 19 on LB and without just 14 (v15 vs v17). There is uncertainty on
+this scores but it seems that the improvement is clear.
 
 ## Conclusion
+
+We observed an improvement in model accuracy on validation and also an improvement in leaderboard score
+when using more data augmentation.
 
 ## Next steps
 
@@ -79,4 +83,4 @@ TODO: do I get better LB score when using task data augmentation
 - [x] Implement new data transformations, visualize them on a notebook
 - [x] Add parameters to train configuration to allow to control this new data augmentation
 - [x] Run trainings and see if the accuracy improves
-- [ ] Submission
+- [x] Submission
