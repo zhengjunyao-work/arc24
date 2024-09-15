@@ -66,6 +66,7 @@ class CFG:
     use_rslora = True,
     use_dora = True,
     lora_r: int = 32
+    lora_weight_initialization: str = 'default' # 'gaussian', 'olora', 'pissa', 'pissa_niter_[number of iters]', 'loftq', 'default'
     # Data augmentation
     compose_new_task_probability: float = 0.0
     compose_new_task_weights: Optional[List[float]] = None
@@ -94,6 +95,7 @@ def parse_args():
     parser.add_argument('--report_to', type=str, help="Set it to tensorboard to disable wandb")
     parser.add_argument('--torch_dtype', type=str, help="Which dtype to use with torch")
     parser.add_argument('--lora_r', type=int, help="Rank of the LoRA adapter")
+    parser.add_argument('--lora_weight_initialization', type=str, help="Weight initialization for LoRA")
     parser.add_argument('--n_gpus', type=int, help="Number of gpus to use")
     parser.add_argument('--grid_encoder', type=str, help="Name of the grid encoder")
     parser.add_argument('--remove_train_samples_to_fit_max_seq_len', action='store_true',
@@ -114,7 +116,8 @@ def fine_tuning_main():
 
     model = get_model(cfg.model_path, cfg.n_gpus, cfg.torch_dtype, cfg.use_4bit_quantization)
     tokenizer = get_tokenizer(cfg.model_path, model)
-    model = get_lora_model(model, cfg.adapter_path, cfg.lora_r, cfg.use_rslora, cfg.use_dora)
+    model = get_lora_model(model, cfg.adapter_path, cfg.lora_r, cfg.use_rslora,
+                           cfg.use_dora, cfg.lora_weight_initialization)
 
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
     dataset_kwargs = {'grid_encoder': grid_encoder, 'tokenizer': tokenizer, 'max_seq_len': cfg.max_seq_len, 'verbose': cfg.verbose}
@@ -341,8 +344,9 @@ def get_tokenizer(model_path, model):
     return tokenizer
 
 
-def get_lora_model(model, adapter_path, r, use_rslora, use_dora):
+def get_lora_model(model, adapter_path, r, use_rslora, use_dora, weight_initalization):
     if adapter_path is None:
+        if weight_initalization == 'default': weight_initalization = True
         peft_config = LoraConfig(
             # lora_alpha: LoRA scaling factor.
             lora_alpha=64, #64,
@@ -355,6 +359,7 @@ def get_lora_model(model, adapter_path, r, use_rslora, use_dora):
             target_modules= ['k_proj', 'q_proj', 'v_proj', 'o_proj'],
             use_rslora=use_rslora,
             use_dora=use_dora,
+            init_lora_weights=weight_initalization # bool | Literal['gaussian', 'olora', 'pissa', 'pissa_niter_[number of iters]', 'loftq'] = True,
         )
         logger.info(f'Creating LoRA with the following config: {peft_config}')
         model = get_peft_model(model, peft_config)

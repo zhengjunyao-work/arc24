@@ -1,0 +1,116 @@
+# Iteration 25. Decouple fine-tuning and test-time fine-tuning
+
+_15-09-2024_
+
+## Goal
+
+Can I improve the LB score by decoupling fine-tuning and test-time fine-tuning
+
+## Motivation
+
+My current approach uses LoRA to fine-tune an LLM to do ARC tasks. Then at test-time I fine-tune the same
+LoRA to adapt to the test tasks.
+
+It might be the case that using the same lora rank for both stages is not optimal. On the first
+training we use around 1k tasks and the training is very long. On the second step we have just 100
+tasks and the training is very short. Moreover it seems that fine-tuning the model for each task independently
+might be the better option. It is unlikely that we need the same capacity to learn 1k tasks as to learn 1 task.
+
+Moreover I might try to do a full fine-tuning of the model, and in that case I would need to do a different
+test-time fine-tuning. That makes worth to investigate the option of decoupling fine-tuning and test-time fine-tuning.
+
+## Development
+
+### LoRA documentation
+
+If I want to adapt to each task, maybe it has more sense to train a small LoRA for each task instead
+of retraining the whole LoRA with r=128.
+
+- https://huggingface.co/docs/peft/main/en/developer_guides/lora#pissa
+- https://huggingface.co/docs/peft/main/en/package_reference/lora#peft.LoraConfig Maybe `pissa_niter_16` is a good option?
+
+### Local experiment design
+
+I'm going to fine-tune a model on a single task or a few tasks. I will try different LoRa initializations
+to see the effect.
+
+```
+python merge_lora.py --base_model_path /home/gbarbadillo/data/Qwen2-0.5B-Instruct --lora_path /mnt/hdd0/Kaggle/arc24/models/20240910_predict_inputs/10_task-augmentation-and-input-from-inputs-v0_Qwen2-0.5B-Instruct_lr1e-4_r128_2e4steps_10240msl/checkpoint-20000 --output_path /home/gbarbadillo/data/Qwen2-0.5B-arc
+
+jq 'to_entries | .[:5] | from_entries' /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1.json > /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json
+
+python fine-tuning.py \
+--model_path=Qwen/Qwen2-0.5B-Instruct \
+--adapter_path /mnt/hdd0/Kaggle/arc24/models/20240910_predict_inputs/10_task-augmentation-and-input-from-inputs-v0_Qwen2-0.5B-Instruct_lr1e-4_r128_2e4steps_10240msl/checkpoint-20000 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_LoRA_initialization/01_baseline-from-adapter \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5 \
+--learning_rate 4e-5
+
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 32 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_LoRA_initialization/02_LoRA-32-default-initialization \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5 \
+--learning_rate 4e-5
+
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 32 \
+--lora_weight_initialization pissa \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_LoRA_initialization/03_LoRA-32-pissa \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5 \
+--learning_rate 4e-5
+
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 32 \
+--lora_weight_initialization default \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_LoRA_initialization/03_LoRA-32-default \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5 \
+--learning_rate 4e-5
+```
+
+### Kaggle experiment design
+
+My idea is to run a few trainings in a few validation tasks with different LoRA configurations. All
+the trainings will use batch size 1 by default. I will have a look at the training metrics and also
+to the evaluation.
+
+TODO: I would like to visualize the training loss in a plot
+
+## Results
+
+## Conclusion
+
+## Next steps
+
+## TODO
+
+- [ ] Create a notebook to do experiments: https://www.kaggle.com/code/ironbar/v2-single-task-test-time-fine-tuning-for-arc24?scriptVersionId=196655009
+  - [ ] Add functionality to visualize training loss, that will allow to compare the different configurations
+- [ ] Add functionality to train script to select LoRA initialization
+- [ ] Run local experiments to understand the effect of LoRA initialization

@@ -214,17 +214,6 @@ TODO: what if I reduce the batch size? That way I will do more modifications to 
 TODO: increase the budget to 2k or 3k steps
 TODO: increase max_seq_len to 5120
 
-### Decoupling fine-tuning and test-time fine-tuning
-
-If I want to adapt to each task, maybe it has more sense to train a small LoRA for each task instead
-of retraining the whole LoRA with r=128.
-
-- https://huggingface.co/docs/peft/main/en/developer_guides/lora#pissa
-- https://huggingface.co/docs/peft/main/en/package_reference/lora#peft.LoraConfig Maybe `pissa_niter_16` is a good option?
-- https://www.kaggle.com/code/ironbar/v2-single-task-test-time-fine-tuning-for-arc24?scriptVersionId=196655009
-
-TODO: I would like to visualize the training loss in a plot
-
 ## Conclusion
 
 TODO: new best score of 28! using an ensemble
