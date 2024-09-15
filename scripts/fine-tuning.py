@@ -112,6 +112,11 @@ def parse_args():
 def fine_tuning_main():
     # Override default configuration using arguments
     cfg = CFG(**{k: v for k, v in vars(parse_args()).items() if v is not None})
+    if cfg.report_to == 'wandb':
+        w = wandb.init(reinit=True,
+                dir=cfg.output_dir,
+                project=os.path.basename(os.path.dirname(cfg.output_dir)),
+                name=os.path.basename(cfg.output_dir))
     save_train_conf(cfg)
 
     model = get_model(cfg.model_path, cfg.n_gpus, cfg.torch_dtype, cfg.use_4bit_quantization)
@@ -133,11 +138,6 @@ def fine_tuning_main():
 
     training_arguments = get_training_arguments(cfg)
     data_collator = get_data_collator(cfg.model_path, tokenizer)
-    if cfg.report_to == 'wandb':
-        w = wandb.init(reinit=True,
-                dir=cfg.output_dir,
-                project=os.path.basename(os.path.dirname(cfg.output_dir)),
-                name=os.path.basename(cfg.output_dir))
     trainer = SFTTrainer(
         model=model,
         train_dataset=train_dataset,
