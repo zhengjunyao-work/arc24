@@ -16,6 +16,9 @@ better use of it.
 
 ## Development
 
+<details>
+  <summary>Click to see all the metrics</summary>
+
 ```bash
 # Verify that inference does not change
 reset; rm -r /mnt/hdd0/Kaggle/arc24/evaluations/20240907_more_data_augmentation/04_100-augmentation-1110_Qwen2-0.5B-Instruct_lr1e-4_r32_12e3steps_10240msl/checkpoint-12000/inference_x008*; python easy_inference_and_evaluation.py /mnt/hdd0/Kaggle/arc24/models/20240907_more_data_augmentation/04_100-augmentation-1110_Qwen2-0.5B-Instruct_lr1e-4_r32_12e3steps_10240msl/checkpoint-12000 --predictions_per_task 8
@@ -136,6 +139,7 @@ python fine-tuning.py \
 --remove_train_samples_to_fit_max_seq_len \
 --max_seq_len 8192
 ```
+</details>
 
 ### Weighted loss function
 
@@ -219,9 +223,15 @@ both is beneficial, and using a higher lora rank also improves the results.
 
 ### Submission results
 
+Submission v18 that didn't learn input distribution scored 15, while submission v19 that learned input
+distribution scored 18. There is uncertainty in the leaderboard scores but it seems that it improves.
 TODO:
 
 ## Conclusion
+
+We have probed that the model can learn to generate new inputs and that this helps in the
+main task of solving the ARC puzzles. However the effect seems to be smaller than using
+task augmentation (see previous iteration).
 
 ## Next steps
 
@@ -243,4 +253,4 @@ TODO:
   do not suggest it is a real problem.
 - [x] Update notebook code source with the new code
 - [x] Is it helpful to use the weights of a model trained to predict inputs as a start point
-- [ ] Submission results
+- [x] Submission results
