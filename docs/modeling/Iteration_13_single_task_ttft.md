@@ -230,7 +230,7 @@ TODO: new best score of 28! using an ensemble
 - [x] Can I improve the leaderboard score?
 - [x] Add logging to better analyze the problems, reduce verbosity
   - [x] Can I hide VLLM loggings? Yes: export VLLM_LOGGING_LEVEL=ERROR
-- [ ] Better think of the timeout feature.
+- [ ] Better think of the timeout feature. Example of the feature working successfully: https://www.kaggle.com/code/ironbar/v2-single-task-test-time-fine-tuning-for-arc24?scriptVersionId=196707552
 - [ ] Can I optimize the submission speed?
   - [ ] Maybe reduce VLLM RAM usage. https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html
   - [ ] Maybe use unsloth and change to single P100 GPU.

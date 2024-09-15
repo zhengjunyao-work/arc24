@@ -34,7 +34,7 @@ of retraining the whole LoRA with r=128.
 I'm going to fine-tune a model on a single task or a few tasks. I will try different LoRa initializations
 to see the effect.
 
-```
+```bash
 python merge_lora.py --base_model_path /home/gbarbadillo/data/Qwen2-0.5B-Instruct --lora_path /mnt/hdd0/Kaggle/arc24/models/20240910_predict_inputs/10_task-augmentation-and-input-from-inputs-v0_Qwen2-0.5B-Instruct_lr1e-4_r128_2e4steps_10240msl/checkpoint-20000 --output_path /home/gbarbadillo/data/Qwen2-0.5B-arc
 
 jq 'to_entries | .[:5] | from_entries' /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1.json > /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json
@@ -92,6 +92,120 @@ python fine-tuning.py \
 --random_seed=7 \
 --batch_size=5 \
 --learning_rate 4e-5
+
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 8 \
+--lora_weight_initialization default \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_LoRA_initialization/03_LoRA-08-default \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5 \
+--learning_rate 4e-5
+
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 2 \
+--lora_weight_initialization default \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_LoRA_initialization/03_LoRA-02-default \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5 \
+--learning_rate 4e-5
+
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 2 \
+--lora_weight_initialization default \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_LoRA_initialization/04_LoRA-02-default_lr1e-4 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5 \
+--learning_rate 1e-4
+
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 2 \
+--lora_weight_initialization default \
+--learning_rate 2e-4 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_LoRA_initialization/04_LoRA-02-default_lr2e-4 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5
+
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 1 \
+--lora_weight_initialization default \
+--learning_rate 2e-4 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_LoRA_initialization/04_LoRA-01-default_lr2e-4 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5
+
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 1 \
+--lora_weight_initialization default \
+--learning_rate 4e-4 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_LoRA_initialization/04_LoRA-01-default_lr4e-4 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5
+
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 1 \
+--lora_weight_initialization pissa \
+--learning_rate 4e-4 \
+--warmup_ratio 0.1 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_LoRA_initialization/05_LoRA-01-pissa_lr4e-4 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5
+
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 1 \
+--lora_weight_initialization olora \
+--learning_rate 4e-4 \
+--warmup_ratio 0.1 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_LoRA_initialization/05_LoRA-01-olora_lr4e-4 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=500 \
+--logging_steps=10 \
+--random_seed=7 \
+--batch_size=5
 ```
 
 ### Kaggle experiment design
@@ -104,13 +218,29 @@ TODO: I would like to visualize the training loss in a plot
 
 ## Results
 
+### Weight initialization
+
+I have tried `olora` and `pissa` weight initializations and I haven't observed improvements in training
+convergence over the default initialization. In fact I have seen gradient explosions. Thus I recommend
+to keep using the default initialization.
+
+[Wandb experiments](https://wandb.ai/guillermobarbadillo/20240915_debug_LoRA_initialization?nw=nwuserguillermobarbadillo)
+
+### Using a new LoRA
+
+I have verified both locally and on Kaggle that I can reach the same training loss with a new LoRA than
+simply retraining the base LoRA. Moreover I have been able to reach similar losses using a much smaller LoRA rank (1 vs 32).
+
+TODO: how does the accuracy changes?
+
 ## Conclusion
 
 ## Next steps
 
 ## TODO
 
-- [ ] Create a notebook to do experiments: https://www.kaggle.com/code/ironbar/v2-single-task-test-time-fine-tuning-for-arc24?scriptVersionId=196655009
-  - [ ] Add functionality to visualize training loss, that will allow to compare the different configurations
-- [ ] Add functionality to train script to select LoRA initialization
-- [ ] Run local experiments to understand the effect of LoRA initialization
+- [x] Create a notebook to do experiments: https://www.kaggle.com/code/ironbar/v2-single-task-test-time-fine-tuning-for-arc24?scriptVersionId=196655009
+  - [x] Add functionality to visualize training loss, that will allow to compare the different configurations
+- [x] Add functionality to train script to select LoRA initialization
+- [x] Run local experiments to understand the effect of LoRA initialization
+- [ ] Can I get the same or better results when using a new LoRA for test-time fine-tuning?
