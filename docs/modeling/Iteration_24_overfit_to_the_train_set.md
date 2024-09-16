@@ -23,9 +23,9 @@ the RE-ARC dataset.
 python fine-tuning.py \
 --model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
 --no-use_lora \
---learning_rate 1e-4 \
+--learning_rate 2e-5 \
 --warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_full_fine-tuning/01_baseline-no-lora \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240915_debug_full_fine-tuning/01_baseline-no-lora_lr2e-5 \
 --train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
 --val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
 --grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \

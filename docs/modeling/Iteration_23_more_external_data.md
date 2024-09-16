@@ -61,3 +61,4 @@ There is one weird thing, why simon does not have its own data on the viewer?
 - [x] Create a small dataset combining the 2 existing small kaggle datasets
 - [ ] [ARC gym](https://github.com/SimonOuellette35/ARC_gym)
 - [ ] Could it have sense to pretrain only on the datasets that have a lot of variation like RE-ARC and PQA?
+- [ ] Does neoeye tama improve accuracy?
