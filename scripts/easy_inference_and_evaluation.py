@@ -17,15 +17,20 @@ def main(args=None):
     with open(train_conf_path, 'r') as f:
         cfg = json.load(f)
     print(cfg)
-    model_path = merge_lora_with_model(args.checkpoint_path, cfg['model_path'])
     output_folder = args.checkpoint_path.replace('arc24/models', 'arc24/evaluations')
-    output_filepath = inference(
-        model_path, output_folder,
-        grid_encoder=cfg.get('grid_encoder', 'GridCodeBlockEncoder(MinimalGridEncoder())'),
-        predictions_per_task=args.predictions_per_task,
-        dataset_path=args.dataset_path,
-        prompt_version=_get_prompt_version_from_conf(cfg))
-    copy_train_conf(train_conf_path)
+    output_filepath = get_output_filepath(output_folder, args.predictions_per_task, args.dataset_path)
+    if not os.path.exists(output_filepath):
+        os.makedirs(output_folder, exist_ok=True)
+        model_path = merge_lora_with_model(args.checkpoint_path, cfg['model_path'])
+        inference(
+            model_path, output_filepath,
+            grid_encoder=cfg.get('grid_encoder', 'GridCodeBlockEncoder(MinimalGridEncoder())'),
+            predictions_per_task=args.predictions_per_task,
+            dataset_path=args.dataset_path,
+            prompt_version=_get_prompt_version_from_conf(cfg))
+        copy_train_conf(train_conf_path)
+    else:
+        print('Output file already exists, skipping inference')
     evaluation(output_filepath, args.dataset_path)
     # voting_output_filepath = voting(output_filepath)
     # evaluation(voting_output_filepath, args.dataset_path)
@@ -59,15 +64,10 @@ def _get_prompt_version_from_conf(cfg):
     return prompt_version
 
 
-def inference(model_path, output_folder, grid_encoder, predictions_per_task,
+def inference(model_path, output_filepath, grid_encoder, predictions_per_task,
               dataset_path, prompt_version):
     print('-'*80)
     print(f'Inference with model {model_path}')
-    os.makedirs(output_folder, exist_ok=True)
-    output_filepath = _get_output_filepath(output_folder, predictions_per_task, dataset_path)
-    if os.path.exists(output_filepath):
-        print('Output file already exists, skipping inference')
-        return output_filepath
     cmd = f'python inference.py --model_path {model_path} --output_filepath {output_filepath}'
     cmd += f' --predictions_per_task {predictions_per_task} --grid_encoder "{grid_encoder}"'
     cmd += f' --dataset_path {dataset_path} --prompt_version {prompt_version}'
@@ -76,10 +76,9 @@ def inference(model_path, output_folder, grid_encoder, predictions_per_task,
     ret = os.system(cmd)
     if ret != 0:
         raise Exception('Error running inference')
-    return output_filepath
 
 
-def _get_output_filepath(output_folder, predictions_per_task, dataset_path):
+def get_output_filepath(output_folder, predictions_per_task, dataset_path):
     if dataset_path.endswith('val_rs7.json'):
         name = 'val-rs7'
     elif dataset_path.endswith('arc-agi_evaluation_challenges.json'):
