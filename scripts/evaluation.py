@@ -185,7 +185,7 @@ def plot_grids(grids):
         plt.subplot(1, len(grids), plot_idx + 1)
         plot_grid(grid)
 
-def plot_grid(grid):
+def plot_grid(grid, write_numbers=False):
     grid = np.array(grid)
     cmap = colors.ListedColormap(
         ['#000000', '#0074D9','#FF4136','#2ECC40','#FFDC00',
@@ -196,6 +196,10 @@ def plot_grid(grid):
     plt.xticks(np.arange(-0.5, grid.shape[1]), [])
     plt.yticks(np.arange(-0.5, grid.shape[0]), [])
     plt.xlim(-0.5, grid.shape[1]-0.5)
+    if write_numbers:
+        for i in range(grid.shape[0]):
+            for j in range(grid.shape[1]):
+                plt.text(j, i, str(grid[i, j]), ha='center', va='center')
 
 def visualize_tasks_and_predictions(solutions, ground_truth, only_correct=False):
     _, task_metrics = evaluate(ground_truth, solutions, verbose=False)
