@@ -31,6 +31,9 @@ will be the optimal approach to do this.
 - After visualizing 50 tasks it seems that I can write easily code for 30 of them, so 60%
 - There are many growing patterns that are probably better defined by example than by code.
 - Many tasks involve grids
+- If I make the assumption that grids are numpy arrays code will be simpler, I would simply have to write a wrapper around the tasks to be convert to list again
+- Applying data augmentation to the source code might be more difficult than I believe. For example on `task_007bbfb7` there are some axis used that should not change. However `task_0520fde` uses axis and should be changed if there are rotations. Maybe I can solve it simply by adding some special comments that will be removed afterwards.
+- Some implementations like `task_05269061` are hard to modify for geometric augmentation
 
 ## Results
 
@@ -41,3 +44,4 @@ will be the optimal approach to do this.
 ## TODO
 
 - [ ] Have a look at RE-ARC, maybe I can reuse it.
+- [ ] How difficult is to be data augmentation resistant? If it is difficult I should better concentrate on creating new tasks.

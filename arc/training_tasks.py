@@ -2,10 +2,8 @@ import numpy as np
 from primitives import *
 
 def task_007bbfb7(grid):
-    output = []
-    output = np.repeat(grid, len(grid), axis=0)
-    output = np.repeat(output, len(grid[0]), axis=1)
-
+    output = np.repeat(grid, len(grid), axis=0) # skip-augmentation
+    output = np.repeat(output, len(grid[0]), axis=1) # skip-augmentation
     mask = np.tile(grid, np.array(grid).shape) > 0
     output = output * mask
     return output
@@ -17,12 +15,12 @@ def task_00d62c1b(grid):
     return output
 
 
-def task_017c7c7b(grid):
-    output = apply_color_map(grid, color_map={1: 2})
-    output = np.vstack((output, output[:3]))
-    # output = np.tile(output, (2, 1))
-    # TODO: each column is a series with a different period, we have to continue each series
-    return output
+# def task_017c7c7b(grid):
+#     output = apply_color_map(grid, color_map={1: 2})
+#     output = np.vstack((output, output[:3]))
+#     # output = np.tile(output, (2, 1))
+#     # TODO: each column is a series with a different period, we have to continue each series
+#     return output
 
 def task_025d127b(grid):
     objects = detect_objects(grid)
@@ -64,7 +62,7 @@ def task_05f2a901(grid):
     objects = detect_objects(grid)
     moving_object_color = 2
     moving_object = [object for object in objects if object.color == moving_object_color][0]
-    still_object_color = 1
+    still_object_color = 8
     still_object = [object for object in objects if object.color == still_object_color][0]
     moving_object = move_object_until_collision(moving_object, still_object)
     output = draw_objects(np.zeros_like(grid), [moving_object, still_object])
