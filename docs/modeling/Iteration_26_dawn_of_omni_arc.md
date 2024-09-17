@@ -29,6 +29,8 @@ will be the optimal approach to do this.
 - Sometimes we need to ignore the colors when dealing with objects, other times we have to
   consider that different colors implies different objects
 - After visualizing 50 tasks it seems that I can write easily code for 30 of them, so 60%
+- There are many growing patterns that are probably better defined by example than by code.
+- Many tasks involve grids
 
 ## Results
 

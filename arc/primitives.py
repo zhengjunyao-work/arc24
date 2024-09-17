@@ -1,10 +1,12 @@
 import numpy as np
 
+
 def apply_color_map(grid, color_map):
     output, grid = np.array(grid), np.array(grid)
     for previous_color, new_color in color_map.items():
         output[grid == previous_color] = new_color
     return output.tolist()
+
 
 def split_grid(grid, axis):
     grid = np.array(grid)
@@ -14,3 +16,7 @@ def split_grid(grid, axis):
     else:
         semiside = len(grid[0]) // 2
         return grid[:, :semiside].tolist(), grid[:, -semiside:].tolist()
+
+
+def fill_the_gaps_of_symmetry_pattern(grid):
+    raise NotImplementedError()

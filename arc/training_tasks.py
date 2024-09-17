@@ -332,3 +332,149 @@ def task_253bf280(grid):
             if object.y == other_object.y or object.x == other_object.x:
                 output = draw_line_between_points(output, object, other_object, color=new_line_color)
     return output
+
+# def task_25d487eb(grid):
+#     # growing pattern
+
+def task_25d8a9c8(grid):
+    output = np.zeros_like(grid)
+    color = 5
+    for object in detect_objects(grid):
+        if object.isline() and object.size == 3:
+            object.color = color
+            output = draw_objects(output, [object])
+    return output
+
+def task_25ff71a9(grid):
+    output = np.zeros_like(grid)
+    movement = (-1, 0)
+    for object in detect_objects(grid):
+        object.move(movement)
+        output = draw_objects(output, [object])
+    return output
+
+# def task_264363fd(grid):
+#     # not easy to implement in code
+
+def task_272f95fa(grid):
+    cells = np.concatenate(detect_cells(grid))
+    cell_index_to_color = {1: 2, 3:4, 4:6, 5:3, 7:1}
+    new_cells = [np.ones_like(cell)*cell_index_to_color.get(idx, 0) for idx, cell in enumerate(cells)]
+    output = create_grid(new_cells, grid_shape=(3, 3), grid_color=8, grid_width=1)
+    return output
+
+# def task_27a28665(grid):
+#     # maps the pattern to the color, best explained by example
+
+def task_28bf18c6(grid):
+    object = detect_objects(grid)[0]
+    output = crop_object(grid, object)
+    output = np.tile(output, (1, 2))
+    return output
+
+# def task_28e73c20(grid):
+#     # draw an spiral
+#     color = 3
+#     output = grid.copy()
+#     directions = [(0, 1), (-1, 0), (0, -1), (1, 0)]
+#     position = (0, 0)
+#     for direction in directions:
+#         while True:
+#             new_position = (position[0] + direction[0], position[1] + direction[1])
+#             if output[new_position[0]][new_position[1]] != color:
+#                 output[position[0]][position[1]] = color
+#                 position = new_position
+#             else:
+#                 break
+#     return output
+
+def task_29623171(grid):
+    cells = np.concatenate(detect_cells(grid))
+    max_objects_in_cell = max([len(detect_objects(cell)) for cell in cells])
+    new_cells = []
+    for cell in cells:
+        objects = detect_objects(cell)
+        if len(objects) == max_objects_in_cell:
+            new_cells.append(np.ones_like(cell)*objects[0].color)
+        else:
+            new_cells.append(np.zeros_like(cell))
+    output = create_grid(new_cells, grid_shape=(3, 3), grid_color=5, grid_width=1)
+    return output
+
+def task_29c11459(grid):
+    objects = detect_objects(grid)
+    output = grid.copy()
+    new_point_color = 5
+    for idx, point_1 in enumerate(objects):
+        for point_2 in objects[idx + 1:]:
+            if point_1.y == point_2.y:
+                middle_position = (point_1.position + point_2.position)/2
+                output = draw_line_between_points(grid, point_1, middle_position, color=point_1.color)
+                output = draw_line_between_points(grid, middle_position, point_2, color=point_2.color)
+                output[middle_position.x][middle_position.y] = new_point_color
+    return output
+
+def task_29ec7d0e(grid):
+    output = fill_the_gaps_of_symmetry_pattern(grid)
+    return output
+
+# def task_2bcee788(grid):
+#     #this requires some symmetry and changing background color
+#     objects = detect_objects(grid)
+#     biggest_object = sorted(objects, key=lambda x: x.size)[-1]
+#     # how to choose the simmetry axis?
+
+# def task_2bee17df(grid):
+#     # some kind of painting the maximum space between objects in two axis
+
+def task_2c608aff(grid):
+    objects = detect_objects(grid)
+    objects = sorted(objects, key=lambda x: x.size)
+    biggest_object = objects[-1]
+    output = grid.copy()
+    for object in objects[:-1]:
+        distance = get_distance_between_objects(object, biggest_object)
+        if min(distance) == 0:
+            output = draw_line_between_points(output, object, biggest_object)
+    return output
+
+def task_2dc579da(grid):
+    cells = np.concatenate(detect_cells(grid))
+    for cell in cells:
+        if np.unique(cell) == 2:
+            output = cell
+            return output
+
+def task_2dd70a9a(grid):
+    objects = detect_objects(grid)
+    start_color = 3
+    goal_color = 2
+    start_object = [object for object in objects if object.color == start_color][0]
+    goal_object = [object for object in objects if object.color == goal_color][0]
+    output = grid.copy()
+    output = draw_path_between_objects(output, start_object, goal_object, color=start_color)
+    return output
+
+# def task_2dee498d(grid):
+#     # this requires to detect what is the biggest repeating element
+
+def task_31aa019c(grid):
+    objects = detect_objects(grid)
+    colors, counts = np.unique([object.color for object in objects], return_counts=True)
+    less_common_color = colors[np.argmin(counts)]
+    chosen_object = [object for object in objects if object.color == less_common_color][0]
+    output = draw_objects(np.zeros_like(grid), [chosen_object])
+    output = draw_enclosing_rectangle(output, chosen_object, color=2)
+    return output
+
+def task_321b1fc6(grid):
+    objects = detect_objects(grid, ignore_colors=True)
+    chosen_object = [object for object in objects if len(object.colors) > 1][0]
+    output = grid.copy()
+    for object in objects:
+        if len(object.colors) == 1:
+            output = draw_objects(output, chosen_object.move(object.position))
+    return output
+
+# def task_32597951(grid):
+#     # this requires non trivial dealing with objects
