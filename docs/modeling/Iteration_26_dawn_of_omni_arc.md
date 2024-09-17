@@ -23,6 +23,13 @@ will be the optimal approach to do this.
 - The code should be able to cope with data augmentation, and I should test that
 - I'm going to create new modules to store the code. The library `inspect` is useful to retrieve the source code.
 
+### Thoughts when implementing the tasks
+
+- I need to implement an object class with properties such as size, position and methods such as is_line, is_rectangle, move...
+- Sometimes we need to ignore the colors when dealing with objects, other times we have to
+  consider that different colors implies different objects
+- After visualizing 50 tasks it seems that I can write easily code for 30 of them, so 60%
+
 ## Results
 
 ## Conclusion

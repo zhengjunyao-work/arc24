@@ -169,3 +169,166 @@ def task_1a07d186(grid):
                 break
     return output
 
+def task_1b2d62fb(grid):
+    side_1, side_2 = split_grid(grid, axis=1)
+    output = np.maximum(side_1, side_2)
+    output = apply_color_map(output, color_map={9: 0, 0:8})
+    return output
+
+# def task_1b60fb0c(grid):
+#     # this requires the ability to divide an object in parts based on simmetry
+
+# def task_1bfc4729(grid):
+#     objects = detect_objects(grid)
+
+def task_1c786137(grid):
+    objects = detect_objects(grid)
+    for object in objects:
+        if object.is_rectangle() and object.size > 4:
+            output = crop_object(grid, object)
+            return output
+
+def task_1caeab9d(grid):
+    reference_object_color = 1
+    objects = detect_objects(grid)
+    reference_object = [object for object in objects if object.color == reference_object_color][0]
+    output = draw_objects(np.zeros_like(grid), [reference_object])
+    for object in objects:
+        if object.color != reference_object_color:
+            new_object = move_object(object, axis=1,
+                                     amount=reference_object.y - new_object.y)
+            output = draw_objects(output, [new_object])
+    return output
+
+def task_1cf80156(grid):
+    object = detect_objects(grid)[0]
+    output = crop_object(grid, object)
+    return output
+
+def task_1e0a9b12(grid):
+    output = np.sort(grid, axis=0)
+    return output.tolist()
+
+# def task_1e32b0e9(grid):
+#     cells = detect_cells(grid)
+
+# def task_1f0c79e5(grid):
+#     # repeat the object in the direction of the red pixels
+
+def task_1f642eb9(grid):
+    objects = detect_objects(grid)
+    still_object = [object for object in objects if object.size > 1][0]
+    output = grid.copy()
+    for object in objects:
+        if object.size == 1:
+            distance = get_distance_between_objects(object, still_object)
+            object.move(distance + np.sign(distance))
+            output = draw_objects(output, [object])
+    return output
+
+def task_1f85a75f(grid):
+    objects = detect_objects(grid)
+    objects = sort_objects_by_size(objects, ascending=False)
+    biggest_object = objects[0]
+    output = crop_object(grid, biggest_object)
+    return output
+
+def task_1f876c06(grid):
+    objects = detect_objects(grid)
+    objects = sorted(objects, key=lambda x: x.color)
+    output = grid.copy()
+    for point1, point2 in zip(objects[::2], objects[1::2]):
+        output = draw_line_between_points(output, point1, point2)
+    return output
+
+def task_1fad071e(grid):
+    objects = detect_objects(grid)
+    relevant_color = 1
+    n_squares_with_size_4 = 0
+    for object in objects:
+        if object.color == relevant_color and object.size == 4:
+            n_squares_with_size_4 += 1
+    output = np.zeros(shape=(1, 5))
+    output[:, :n_squares_with_size_4] = relevant_color
+    return output
+
+# def task_2013d3e2(grid):
+
+def task_2204b7a8(grid):
+    objects = detect_objects(grid)
+    lines = [object for object in objects if object.is_line()]
+    output = grid.copy()
+    for object in objects:
+        if object.is_line():
+            continue
+        min_distance = np.inf
+        new_color = object.color
+        for line in lines:
+            if get_distance_between_objects(object, line) < min_distance:
+                min_distance = get_distance_between_objects(object, line)
+                new_color = line.color
+        object.color = new_color
+        output = draw_objects(output, [object])
+    return output
+
+# def task_22168020(grid):
+#     # this requires some kind of filling function, it could be consider some growing pattern
+
+# def task_22233c11(grid):
+#     # another growing pattern
+
+def task_2281f1f4(grid):
+    reference_color = 5
+    new_color = 2
+    cols = np.where(np.array(grid[0]) == reference_color)[0]
+    rows = np.where(np.array(grid)[:, -1] == reference_color)[0]
+    output = grid.copy()
+    for col in cols:
+        for row in rows:
+            output[row][col] = new_color
+    return output
+
+# def task_228f6490(grid):
+#     # this requires some kind of puzzle solving
+
+def task_22eb0ac0(grid):
+    objects = detect_objects(grid)
+    objects = sorted(objects, key=lambda x: x.color)
+    output = grid.copy()
+    for point1, point2 in zip(objects[::2], objects[1::2]):
+        if point1.y == point2.y:
+            output = draw_line_between_points(output, point1, point2, color=point1.color)
+    return output
+
+# def task_234bbc79(grid):
+#     # this requires non trivial puzzle solving
+
+def task_23581191(grid):
+    objects = detect_objects(grid)
+    output = grid.copy()
+    for object in objects:
+        output = draw_line(object, axis=0, color=object.color)
+        output = draw_line(object, axis=1, color=object.color)
+    new_color = 2
+    output[objects[0].y][objects[0].x] = new_color
+    output[objects[1].y][objects[1].x] = new_color
+    return output
+
+# def task_239be575(grid):
+#     # check if the red squares are connected
+
+def task_23b5c85d(grid):
+    objects = detect_objects(grid)
+    smallest_object = sorted(objects, key=lambda x: x.size)[0]
+    output = crop_object(grid, smallest_object)
+    return output
+
+def task_253bf280(grid):
+    objects = detect_objects(grid)
+    new_line_color = 3
+    output = grid.copy()
+    for idx, object in enumerate(objects):
+        for other_object in objects[idx + 1:]:
+            if object.y == other_object.y or object.x == other_object.x:
+                output = draw_line_between_points(output, object, other_object, color=new_line_color)
+    return output
