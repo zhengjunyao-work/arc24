@@ -44,7 +44,39 @@ There is one weird thing, why simon does not have its own data on the viewer?
 
 ## Results
 
+### Add more external datasets
+
+| experiment          | accuracy | correct_pixels | correct_size | pass_32 | vote_2 |
+|---------------------|----------|----------------|--------------|---------|--------|
+| baseline            | 7.62%    | 70.89%         | 88.64%       | 23.25%  | 15.91% |
+| add new datasets    | 7.86%    | 71.21%         | 88.74%       | 23.00%  | 15.66% |
+| add neoneye tama    | 7.46%    | 71.33%         | 89.12%       | 22.50%  | 15.66% |
+| add MINI-ARC        | 7.62%    | 71.41%         | 89.21%       | 26.62%  | 17.05% |
+| remove neoneye tama | 7.38%    | 71.22%         | 88.86%       | 24.75%  | 16.92% |
+
+The differences between experiments are small and probably not significative, let's make a brief summary of the added datasets:
+
+- neoneye's tama: 50 tasks with 100 variations each
+- PQA: 7 different tasks with lots of variations
+- MINI-ARC: 149 tasks with 4.5 samples per task
+- Kaggle: 14 tasks with 3.8 samples per task
+
+### Pretrain on datasets with more samples per task
+
+Some of the datasets such as RE-ARC, PQA or neoneye's tama have a lot of samples for each task. Thus it might
+have sense to first pre-train the model on those datasets and on a second stage use all the available data.
+
+| experiment                              | accuracy | correct_pixels | correct_size | pass_32 | vote_2 |
+|-----------------------------------------|----------|----------------|--------------|---------|--------|
+| pretrain on big datasets + normal train | 10.11%   | 72.79%         | 89.06%       | 28.25%  | 20.20% |
+| double length train                     | 9.93%    | 71.73%         | 87.80%       | 26.88%  | 17.30% |
+
+We see a small improvement, it might not be significative.
+
 ## Conclusion
+
+We have tried adding new external datasets to train. Results are not conclusive, it is not clear if adding
+this new datasets improves the validation scores.
 
 ## Next steps
 
@@ -56,9 +88,9 @@ There is one weird thing, why simon does not have its own data on the viewer?
   - [x] Read the paper
   - [x] The dataset is big, how to deal with it? Can I group all the common tasks together?
   - [x] Check the colors
-- [ ] Visualize Simon datasets https://github.com/neoneye/simon-arc-lab. I have been looking at the code, but I don't see how to decode the datasets. I believe he only works with RLE encoded data.
-  - [ ] https://github.com/neoneye/simon-arc-lab/blob/main/simon_arc_lab/rle/deserialize.py
+- [x] Visualize Simon datasets https://github.com/neoneye/simon-arc-lab. I have been looking at the code, but I don't see how to decode the datasets. I believe he only works with RLE encoded data.
+  - [x] https://github.com/neoneye/simon-arc-lab/blob/main/simon_arc_lab/rle/deserialize.py
 - [x] Create a small dataset combining the 2 existing small kaggle datasets
 - [ ] [ARC gym](https://github.com/SimonOuellette35/ARC_gym)
-- [ ] Could it have sense to pretrain only on the datasets that have a lot of variation like RE-ARC and PQA?
-- [ ] Does neoeye tama improve accuracy?
+- [x] Could it have sense to pretrain only on the datasets that have a lot of variation like RE-ARC and PQA?
+- [x] Does neoneye tama improve accuracy?
