@@ -51,6 +51,8 @@ python fine-tuning.py \
 
 ### Multi-gpu training
 
+#### Local experiments
+
 I'm training models for 100k steps and it seems it's going to take around 100 hours. If I can speedup
 this time using multiple gpus it would be very helpful to enable faster experimentation.
 
@@ -70,238 +72,9 @@ python fine-tuning.py \
 --max_steps=50 \
 --logging_steps=5 \
 --random_seed=7 \
---batch_size=16
-
-export CUDA_VISIBLE_DEVICES=0
-python fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/01_baseline-1-gpu-b \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---n_gpus=1 \
---batch_size=16
-
-export CUDA_VISIBLE_DEVICES=0,1
-python fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/02_baseline-2-gpu \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---batch_size=16
-
-export CUDA_VISIBLE_DEVICES=0,1
-python fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/03_2-gpu-trick \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---n_gpus=1 \
---batch_size=16
-
-accelerate launch fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/04_2-gpu-accelerate \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---n_gpus=1 \
---batch_size=16
-
-# this experiment gets same results as when using a single gpu but much faster
-accelerate launch fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/04_2-gpu-accelerate-bs8 \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---n_gpus=1 \
---batch_size=8
-
-
-export CUDA_VISIBLE_DEVICES=0
-python fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/05_repeat-baseline-1-gpu \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---n_gpus=1 \
---batch_size=16
-
-export CUDA_VISIBLE_DEVICES=0,1
-accelerate launch fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/05_2-gpu-accelerate-bs8-fix-logging \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---n_gpus=1 \
---batch_size=8
-
-export CUDA_VISIBLE_DEVICES=0,1
-accelerate launch fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/06_2-gpu-accelerate-bs8-log-with-wandb \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---n_gpus=1 \
---batch_size=8
-
-export CUDA_VISIBLE_DEVICES=0,1
-accelerate launch fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/07_2-gpu-init-trackers_b \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---n_gpus=1 \
---no-verbose \
---batch_size=8
-
-export CUDA_VISIBLE_DEVICES=0,1
-accelerate launch fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/08_2-gpu-find-unused-parameters-false \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---n_gpus=1 \
---no-verbose \
---batch_size=8
-
-# this does not work
-export CUDA_VISIBLE_DEVICES=0,1
-unset CUDA_VISIBLE_DEVICES
-accelerate launch --accelerator_config {'dispatch_batches':False}  fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/09_2-gpu-accelerator-config \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---n_gpus=1 \
---no-verbose \
---batch_size=8
-
-unset CUDA_VISIBLE_DEVICES
-accelerate launch fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/09_2-gpu-unset-cuda \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---n_gpus=1 \
---no-verbose \
---batch_size=8
-
-# verify that it still can work with normal python
-export CUDA_VISIBLE_DEVICES=0
-python fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/10_repeat-baseline-1-gpu \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---n_gpus=1 \
---batch_size=16
-
-# verify again that it works
-export CUDA_VISIBLE_DEVICES=0
-python fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/11_repeat-baseline-1-gpu \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
 --n_gpus=1 \
 --device_map None \
+--no-verbose \
 --batch_size=16
 
 unset CUDA_VISIBLE_DEVICES
@@ -310,7 +83,7 @@ accelerate launch fine-tuning.py \
 --lora_r 32 \
 --learning_rate 1e-4 \
 --warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/12_2-gpu \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/02-2-gpus-accelerate \
 --train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
 --val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
 --grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
@@ -321,34 +94,24 @@ accelerate launch fine-tuning.py \
 --device_map None \
 --no-verbose \
 --batch_size=16
-
-export CUDA_VISIBLE_DEVICES=0
-python fine-tuning.py \
---model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
---lora_r 32 \
---learning_rate 1e-4 \
---warmup_ratio 0.1 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/13_repeat-baseline-device-map-None \
---train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
---max_steps=50 \
---logging_steps=5 \
---random_seed=7 \
---n_gpus=1 \
---device_map None \
---no-verbose \
---batch_size=16
 ```
 
-89s vs 154
+The training loss is exactly the same, but the training time is 89s when using 2 gpus vs 154 seconds
+when using a single gpu.
 
-TODO: double logging and wandb when using accelerate, read documentation
+There were some problems with doble logging when using accelerate that have been solved by updating the code.
+The same code can still be used with a single gpu without any problem.
 
 - There is a logger by accelerate, https://huggingface.co/docs/accelerate/en/package_reference/logging
 - And the problem with wandb is likely my restart implementation. I don't remember why I did that.
 - https://docs.wandb.ai/guides/integrations/accelerate/
-- Can I still have a single training script after this accelerate changes?
+
+#### Cluster experiments
+
+I have to:
+
+- update the submit script to allow using accelerate
+- see how to configure accelerate (if needed)
 
 ## Results
 
