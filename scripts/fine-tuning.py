@@ -57,7 +57,7 @@ class CFG:
     warmup_ratio: float = 0.05
     batch_size: int = 16 #16
     random_seed: Optional[int] = None # None, 7
-    grid_encoder: str = 'GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))'
+    grid_encoder: str = 'GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))'
     # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
     per_device_train_batch_size: int = 1
     per_device_eval_batch_size = 1 # if using 2 the validation loss is not correctly computed

@@ -431,6 +431,7 @@ TODO:
 - [Large Language Model Agents](https://rdi.berkeley.edu/llm-agents/f24v)
 - [Monte Carlo - Abstract Reasoning with Graph Abstractions](https://github.com/richemslie/McARGA)
 - [Simon ARC Lab](https://github.com/neoneye/simon-arc-lab)
+- [Simon notes](https://github.com/neoneye/arc-notes/tree/main)
 
 ## TODO
 
