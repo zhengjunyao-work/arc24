@@ -61,6 +61,7 @@ class CFG:
     # SmolLM-135M-Instruct: (4, 4); Qwen/Qwen2-0.5B-Instruct: (1, 2)
     per_device_train_batch_size: int = 1
     per_device_eval_batch_size = 1 # if using 2 the validation loss is not correctly computed
+    gradient_checkpointing: bool = False
     learning_rate: float = 1e-4
     lr_scheduler_type: str = "linear" #linear, constant_with_warmup, cosine, cosine_with_restarts
     lr_num_cycles: int = 4 # only applicable for cosine_with_restarts
@@ -96,6 +97,7 @@ def parse_args():
     parser.add_argument('--learning_rate', type=float, help='Learning rate for fine-tuning')
     parser.add_argument('--lr_scheduler_type', type=str, help='Learning rate scheduler type')
     parser.add_argument('--lr_num_cycles', type=int, help='Number of cycles for cosine_with_restarts scheduler')
+    parser.add_argument('--gradient_checkpointing', action=argparse.BooleanOptionalAction, help='Whether to use gradient checkpointing')
     parser.add_argument('--batch_size', type=int, help='Batch size for fine-tuning')
     parser.add_argument('--per_device_train_batch_size', type=int, help='Batch size per device for fine-tuning')
     parser.add_argument('--report_to', type=str, help="Set it to tensorboard to disable wandb")
@@ -549,6 +551,7 @@ def get_training_arguments(cfg):
             learning_rate=cfg.learning_rate,
             lr_scheduler_type=scheduler_type, #constant_with_warmup, cosine, cosine_with_restarts
             lr_scheduler_kwargs=lr_scheduler_kwargs,
+            gradient_checkpointing=cfg.gradient_checkpointing,
             optim=cfg.optim,
             max_grad_norm=cfg.max_grad_norm,
 
