@@ -113,6 +113,9 @@ I have to:
 - update the submit script to allow using accelerate
 - see how to configure accelerate (if needed)
 
+I have been unable to train with 4 gpus, it seemed that VRAM memory is not enough. Even when using gradient checkpointing I get OOM errors.
+[Link that says that accelerate uses more VRAM](https://github.com/huggingface/accelerate/issues/1677)
+
 ## Results
 
 ### Start point: what is the accuracy of my best models on the train dataset?
