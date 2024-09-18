@@ -285,6 +285,60 @@ python fine-tuning.py \
 --random_seed=7 \
 --n_gpus=1 \
 --batch_size=16
+
+# verify again that it works
+export CUDA_VISIBLE_DEVICES=0
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 32 \
+--learning_rate 1e-4 \
+--warmup_ratio 0.1 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/11_repeat-baseline-1-gpu \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=50 \
+--logging_steps=5 \
+--random_seed=7 \
+--n_gpus=1 \
+--device_map None \
+--batch_size=16
+
+unset CUDA_VISIBLE_DEVICES
+accelerate launch fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 32 \
+--learning_rate 1e-4 \
+--warmup_ratio 0.1 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/12_2-gpu \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=50 \
+--logging_steps=5 \
+--random_seed=7 \
+--n_gpus=2 \
+--device_map None \
+--no-verbose \
+--batch_size=16
+
+export CUDA_VISIBLE_DEVICES=0
+python fine-tuning.py \
+--model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
+--lora_r 32 \
+--learning_rate 1e-4 \
+--warmup_ratio 0.1 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240918_debug_multi-gpu/13_repeat-baseline-device-map-None \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7_n-1_small.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps=50 \
+--logging_steps=5 \
+--random_seed=7 \
+--n_gpus=1 \
+--device_map None \
+--no-verbose \
+--batch_size=16
 ```
 
 89s vs 154

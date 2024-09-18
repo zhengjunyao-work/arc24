@@ -47,6 +47,7 @@ class CFG:
     val_dataset: List[str] = field(default_factory=lambda: ['/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json', 'output-from-examples-v0'])
     output_dir: str = '/mnt/hdd0/Kaggle/arc24/models/20240826_grid_encoders/06_other-symbols-shape-and-number_Qwen2-0.5B-Instruct_lr1e-4_r32_6e3steps'
     n_gpus: int = 2
+    device_map: str = 'custom' # 'custom', 'balanced', 'auto', 'None'
     max_seq_len: int = 4096
     epochs = 0
     max_steps : Optional[int] =  6000
@@ -102,6 +103,7 @@ def parse_args():
     parser.add_argument('--lora_r', type=int, help="Rank of the LoRA adapter")
     parser.add_argument('--lora_weight_initialization', type=str, help="Weight initialization for LoRA")
     parser.add_argument('--n_gpus', type=int, help="Number of gpus to use")
+    parser.add_argument('--device_map', type=str, help="Device map for the model, could be 'balanced', 'auto', 'custom', or 'None'")
     parser.add_argument('--grid_encoder', type=str, help="Name of the grid encoder")
     parser.add_argument('--remove_train_samples_to_fit_max_seq_len', action='store_true',
                         help="Whether to remove training samples to fit max_seq_len")
@@ -130,7 +132,8 @@ def fine_tuning_main():
         )
     logger.info(f'Train configuration: {asdict(cfg)}')
 
-    model = get_model(cfg.model_path, cfg.n_gpus, cfg.torch_dtype, cfg.use_4bit_quantization)
+    model = get_model(cfg.model_path, n_gpus=cfg.n_gpus, torch_dtype=cfg.torch_dtype,
+                      use_4bit_quantization=cfg.use_4bit_quantization, device_map=cfg.device_map)
     tokenizer = get_tokenizer(cfg.model_path, model)
     if cfg.use_lora:
         model = get_lora_model(model, cfg.adapter_path, cfg.lora_r, cfg.use_rslora,
@@ -167,10 +170,10 @@ def fine_tuning_main():
 
 
 # Model
-
-def get_device_map(n_gpus, model_path):
-    if n_gpus == 2:
+def get_device_map(n_gpus, model_path, device_map):
+    if n_gpus == 2 and device_map == 'custom':
         if 'llama' in model_path.lower():
+            logger.info('Using llama custom device map')
             device_map = {
                 'model.embed_tokens': 0,
                 'model.layers.0': 0,
@@ -210,7 +213,7 @@ def get_device_map(n_gpus, model_path):
                 'lm_head': 1,
             }
         elif 'qwen2-0.5b-instruct' in model_path.lower():
-            logger.info('Using qwen2-0.5b-instruct device map')
+            logger.info('Using qwen2-0.5b-instruct custom device map')
             device_map = {
                 'model.embed_tokens': 0,
                 'lm_head': 0,
@@ -241,7 +244,7 @@ def get_device_map(n_gpus, model_path):
                 'model.norm': 1
             }
         elif 'qwen2-1.5b-instruct' in model_path.lower():
-            logger.info('Using qwen2-1.5b-instruct device map')
+            logger.info('Using qwen2-1.5b-instruct custom device map')
             device_map = {
                 'model.embed_tokens': 0,
                 'lm_head': 0,
@@ -275,10 +278,18 @@ def get_device_map(n_gpus, model_path):
                 'model.layers.27': 1,
                 'model.norm': 1}
         else:
-            device_map = 'balanced'
+            raise NotImplementedError(f'Custom device map not implemented for {model_path}')
     else:
-        # device_map = 'auto'
-        device_map = None # TODO: make this better
+        if device_map == 'None':
+            logger.info('Using None device map')
+            device_map = None
+        elif device_map in ['balanced', 'auto']:
+            logger.info(f'Using {device_map} device map')
+        elif device_map == 'custom':
+            logger.warning('Custom device map is not implemented for n_gpus != 2, using auto device map instead')
+            device_map = 'auto'
+        else:
+            raise ValueError(f'Unknown device map {device_map}')
     return device_map
 
 
@@ -303,7 +314,7 @@ def get_torch_dtype(torch_dtype):
         raise ValueError(f'Unknown torch dtype {torch_dtype}')
 
 
-def get_model(model_path, n_gpus, torch_dtype, use_4bit_quantization=False):
+def get_model(model_path, n_gpus, torch_dtype, device_map, use_4bit_quantization=False):
     if use_4bit_quantization:
         logger.info('Using 4-bit quantization')
         bnb_config = BitsAndBytesConfig(
@@ -319,7 +330,7 @@ def get_model(model_path, n_gpus, torch_dtype, use_4bit_quantization=False):
     model = AutoModelForCausalLM.from_pretrained(
         model_path,
         quantization_config=bnb_config,
-        device_map=get_device_map(n_gpus, model_path),
+        device_map=get_device_map(n_gpus, model_path, device_map),
         # max_memory={0: '9GB', 1: '8GB'},
         trust_remote_code=True,
         torch_dtype=get_torch_dtype(torch_dtype), #bfloat16 is 4 times slower on Kaggle than float16, on my computer they are the same speed
@@ -514,10 +525,12 @@ def get_data_collator(model_path, tokenizer):
 
 
 def get_training_arguments(cfg):
+    gradient_accumulation_steps = get_gradient_accumulation_steps(
+        cfg.batch_size, cfg.per_device_train_batch_size, cfg.n_gpus, cfg.device_map)
     batch_size_kwargs = dict(
         # 4-16 batch size should be fine for lora.
         per_device_train_batch_size=cfg.per_device_train_batch_size,
-        gradient_accumulation_steps=cfg.batch_size//cfg.per_device_train_batch_size,
+        gradient_accumulation_steps=gradient_accumulation_steps,
         per_device_eval_batch_size=cfg.per_device_eval_batch_size,
     )
     scheduler_type = cfg.lr_scheduler_type
@@ -558,6 +571,16 @@ def get_training_arguments(cfg):
             **batch_size_kwargs
     )
     return training_arguments
+
+
+def get_gradient_accumulation_steps(batch_size, per_device_train_batch_size, n_gpus, device_map):
+    if n_gpus > 1 and device_map == 'None': # multi-gpu accelerate training
+        accumulation_steps = batch_size//per_device_train_batch_size//n_gpus
+    else:
+        accumulation_steps = batch_size//per_device_train_batch_size
+    logger.info(f'Using {accumulation_steps} gradient accumulation steps')
+    return accumulation_steps
+
 
 
 def save_train_conf(cfg):
