@@ -244,3 +244,4 @@ TODO: how does the accuracy changes?
 - [x] Add functionality to train script to select LoRA initialization
 - [x] Run local experiments to understand the effect of LoRA initialization
 - [ ] Can I get the same or better results when using a new LoRA for test-time fine-tuning?
+- [ ] Maybe warming up the adapter by training in all the tasks could be useful. F.e. train with bs=16 for 100 steps.

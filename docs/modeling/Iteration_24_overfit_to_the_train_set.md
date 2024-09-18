@@ -72,6 +72,8 @@ python fine-tuning.py \
 
 TODO: if we want to overfit to the train set, we have to train for longer, use more model capacity or both.
 
+We are exploring two new axis in this experiment: increase the model capacity and train for much longer.
+
 ## Conclusion
 
 ## Next steps
