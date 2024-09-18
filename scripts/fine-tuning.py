@@ -27,7 +27,11 @@ from arc24.prompting import create_prompts_from_task, print_smaller_prompt
 from arc24.data import load_arc_data_with_solutions
 from arc24.logging import log_execution_time, logging
 
-logger = logging.getLogger(__name__)
+from accelerate.logging import get_logger
+from accelerate import Accelerator
+
+logger = get_logger(__name__)
+# logger = logging.getLogger(__name__)
 
 # grid encoder experiments
 @dataclass
@@ -116,11 +120,14 @@ def fine_tuning_main():
     # Override default configuration using arguments
     cfg = CFG(**{k: v for k, v in vars(parse_args()).items() if v is not None})
     save_train_conf(cfg)
+    accelerator = Accelerator(log_with=cfg.report_to)
     if cfg.report_to == 'wandb':
-        w = wandb.init(reinit=True,
-                dir=cfg.output_dir,
-                project=os.path.basename(os.path.dirname(cfg.output_dir)),
-                name=os.path.basename(cfg.output_dir))
+        accelerator.init_trackers(
+            project_name=os.path.basename(os.path.dirname(cfg.output_dir)),
+            config=cfg,
+            init_kwargs={"wandb": dict(dir=cfg.output_dir,
+                                       name=os.path.basename(cfg.output_dir))}
+        )
     logger.info(f'Train configuration: {asdict(cfg)}')
 
     model = get_model(cfg.model_path, cfg.n_gpus, cfg.torch_dtype, cfg.use_4bit_quantization)
@@ -151,23 +158,11 @@ def fine_tuning_main():
         eval_dataset=val_dataset,
         data_collator=data_collator,
         args=training_arguments,
-        # optimizers=(torch.load(os.path.join(cfg.adapter_path, 'optimizer.pt')), None)
-        # packing=True, # ValueError: You passed a `DataCollatorForCompletionOnlyLM` to the SFTTrainer. This is not compatible with the `packing` argument.
     )
-    # if cfg.load_optimizer_state and cfg.adapter_path is not None:
-    #     optimizer_path = os.path.join(cfg.adapter_path, 'optimizer.pt')
-    #     if os.path.exists(optimizer_path):
-    #         print(f'Loading optimizer from {optimizer_path}')
-    #         trainer.create_optimizer()
-    #         trainer.optimizer.load_state_dict(torch.load(optimizer_path))
-    #     else:
-    #         print(f'Optimizer not found on adapter path: {optimizer_path}')
     if cfg.lr_scheduler_type == 'cyclic':
         replace_trainer_lr_scheduler_with_cyclic_lr(
             trainer, cfg.warmup_ratio, cfg.learning_rate, cfg.lr_num_cycles)
     trainer.train(resume_from_checkpoint=cfg.resume_from_checkpoint and is_checkpoint_available(cfg.output_dir))
-    if cfg.report_to == 'wandb':
-        w.finish()
 
 
 
@@ -282,7 +277,8 @@ def get_device_map(n_gpus, model_path):
         else:
             device_map = 'balanced'
     else:
-        device_map = 'auto'
+        # device_map = 'auto'
+        device_map = None # TODO: make this better
     return device_map
 
 
@@ -553,6 +549,11 @@ def get_training_arguments(cfg):
             eval_steps=cfg.eval_steps,
             log_level="info",
             report_to=cfg.report_to,
+
+            # parameters added to make the code work with accelerate
+            dispatch_batches=False,
+            # https://huggingface.co/transformers/v4.9.1/main_classes/trainer.html#trainingarguments
+            ddp_find_unused_parameters=False, # only used with accelerate, got a warning saying that it slows down if True
 
             **batch_size_kwargs
     )
