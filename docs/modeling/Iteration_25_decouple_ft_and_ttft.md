@@ -238,18 +238,18 @@ independently.
 
 All the submissions shown below use linear learning rate schedule, batch size 1 and `qwen2-0.5b/19`.
 
-| new_lora | lora_r | learning rate | LB score |
-|----------|--------|---------------|----------|
-| FALSE    | 128    | 2E-05         | **20**   |
-| TRUE     | 32     | 2E-05         | 17       |
-| TRUE     | 32     | 4E-05         | 18       |
-| TRUE     | 32     | 8E-05         | 14       |
-| TRUE     | 1      | 5E-05         | 16       |
-| TRUE     | 1      | 1E-04         | 17       |
-| TRUE     | 1      | 2E-04         | 16       |
-| TRUE     | 128    | 1E-05         | 19       |
-| TRUE     | 128    | 2E-05         | 18       |
-| TRUE     | 128    | 4E-05         | 16       |
+| lora_r | batch size | learning rate | LB score |
+|--------|------------|---------------|----------|
+| 128    | 1          | 2E-05         | **20**   |
+| 1      | 1          | 5E-05         | 16       |
+| 1      | 1          | 1E-04         | 17       |
+| 1      | 1          | 2E-04         | 16       |
+| 32     | 1          | 2E-05         | 17       |
+| 32     | 1          | 4E-05         | 18       |
+| 32     | 1          | 8E-05         | 14       |
+| 128    | 1          | 1E-05         | 19       |
+| 128    | 1          | 2E-05         | 18       |
+| 128    | 1          | 4E-05         | 16       |
 
 ### Using a new LoRA with warmup
 
