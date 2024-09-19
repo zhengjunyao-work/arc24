@@ -35,6 +35,69 @@ will be the optimal approach to do this.
 - Applying data augmentation to the source code might be more difficult than I believe. For example on `task_007bbfb7` there are some axis used that should not change. However `task_0520fde` uses axis and should be changed if there are rotations. Maybe I can solve it simply by adding some special comments that will be removed afterwards.
 - Some implementations like `task_05269061` are hard to modify for geometric augmentation
 
+### Specification
+
+I want to write a python library that generates Abstraction and Reasoning Corpus (ARC) tasks. A task
+will have some input grids, the python code that does the transformation of the task and some output grids.
+Given this data a model could learn to generate the code given the inputs and the outputs.
+
+This are the main ideas behind the library:
+
+- **Focus on running code**. At first I thought about writing pseudocode and using non-implemented functions.
+  But now I realize that the greatest value from this approach is being able solve the tasks using python
+  code. Thus I need running code. Moreover having running code enables to do automated testing, and
+  we don't have to deal with data augmentation issues. The data augmentation will be applied just
+  to the inputs, not to the function.
+- **As many different tasks as possible**. Experiments suggest that is better to have many different tasks
+  than to have many samples from the same task.
+- **High quality tested code**. Having clean code with the right level of abstraction will be crucial
+  to be agile and speedup the writing of new tasks. Using automated tests will enable refactoring and
+  agile development.
+- **Small but flexible domain specific language**. This is much easier to maintain and expand that having
+  a ton of specific functions. Moreover it will be easier to learn for the model if the number of
+  primitive functions is small.
+
+#### Task components
+
+A task will always have the following components:
+
+- Input grids
+- Output grids
+- Code
+
+There are infinite ways to implement the task generator, but the output should follow the definition above.
+
+The tasks are implemented using python dict. The grids are lists and the code will simply be a string.
+
+#### Implementation requirements
+
+The input grids for a task could come from an already created dataset, or there could be a function
+that generates new input grids. When defining/implementing a new task we should specify what the
+input is.
+
+The input grids might undergo some data augmentation until they become the final inputs for the task.
+This should also be specified when defining the task. This is more likely to happen when we are not
+using a generator function, if the inputs come from a dataset using data augmentation will increase
+the variability of the samples.
+
+There might be some python function that implements the core task, but we can create new tasks by composing
+multiple tasks. This should be specified when defining the task, some kind of pipeline of functions.
+But to train the model we need to have all the code combined in a single function. So we need some
+method to take a pipeline of functions and create a single function with all the code from those functions.
+Ideally we could create multiple tasks very fast by specifying some core task and listing all the possible
+tasks that could be used to compose new tasks.
+
+There would be some task register where I store all the created tasks, that can be used later
+to generate training data.
+
+Internally I will work with numpy arrays, that makes the code easier. A wrapper will convert the list
+to array at start and viceversa at the end.
+
+### New repo
+
+I have decided that I have to create a new repo to host all the code to generate tasks with code. A
+good name for the repo would be omni-arc, since it will enable the training of the omni-arc models.
+
 ## Results
 
 ## Conclusion
