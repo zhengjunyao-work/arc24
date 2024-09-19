@@ -231,6 +231,28 @@ to keep using the default initialization.
 I have verified both locally and on Kaggle that I can reach the same training loss with a new LoRA than
 simply retraining the base LoRA. Moreover I have been able to reach similar losses using a much smaller LoRA rank (1 vs 32).
 
+I have made 9 submissions with different lora ranks and learning rates without being able to reach
+the same LB score as the baseline. Maybe when using a new LoRA we need to train for longer, one way
+of achieving that would be to do a common warmup using all the data, then fine-tune for each task
+independently.
+
+All the submissions shown below use linear learning rate schedule, batch size 1 and `qwen2-0.5b/19`.
+
+| new_lora | lora_r | learning rate | LB score |
+|----------|--------|---------------|----------|
+| FALSE    | 128    | 2E-05         | **20**   |
+| TRUE     | 32     | 2E-05         | 17       |
+| TRUE     | 32     | 4E-05         | 18       |
+| TRUE     | 32     | 8E-05         | 14       |
+| TRUE     | 1      | 5E-05         | 16       |
+| TRUE     | 1      | 1E-04         | 17       |
+| TRUE     | 1      | 2E-04         | 16       |
+| TRUE     | 128    | 1E-05         | 19       |
+| TRUE     | 128    | 2E-05         | 18       |
+| TRUE     | 128    | 4E-05         | 16       |
+
+### Using a new LoRA with warmup
+
 TODO: how does the accuracy changes?
 
 ## Conclusion
