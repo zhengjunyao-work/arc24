@@ -118,7 +118,7 @@ I have been unable to train with 4 gpus, it seemed that VRAM memory is not enoug
 
 ## Results
 
-### Start point: what is the accuracy of my best models on the train dataset?
+### Start point: what is the accuracy of my best models on the train datasets?
 
 | model | dataset    | accuracy | correct_pixels | correct_size | pass_32 | vote_2 |
 |-------|------------|----------|----------------|--------------|---------|--------|
@@ -141,6 +141,73 @@ TODO: if we want to overfit to the train set, we have to train for longer, use m
 
 We are exploring two new axis in this experiment: increase the model capacity and train for much longer.
 
+After increasing the model capacity and training 5 times longer, still the model does not overfit to the train dataset.
+
+TODO: plot evolution, how long will it take to learn it?
+TODO: why the validation loss diverges?
+TODO: document silly errors
+TODO: study temperature effect
+TODO: sequences are long, and a single mistake ruins them
+
+Let's try to enumerate the facts:
+
+- Training the model for longer improves the accuracy on the training data, but the rate of improvement
+  is surprisingly slow.
+- We have trained a model for 100k steps on a dataset of 1221 tasks. We used batch size 16 so the model
+  saw a total of 1.6M of samples during training. Each task was seen 1300 times, but considering that
+  we use task augmentation each original task was seen 650 times. During training we randomly swap
+  between the 
+
+
+#### Fails on very simple tasks
+
+F.e. on 1cf80156, 0b148d64, 1f85a75f... Maybe what they have in common is that the input is "big".
+
+##### 1cf80156
+
+This tasks is really simple, just crop the object. But it does not do it correctly.
+
+![1cf80156](res/2024-09-20-07-58-49.png)
+
+##### 0b148d64
+
+Surprisingly it adds an extra black line, or removes part of the object...
+
+![0b148d64](res/2024-09-20-07-59-38.png)
+
+##### 1f85a75f
+
+Another pretty simple crop task where it fails to recreate the object.
+
+![1f85a75f](res/2024-09-20-08-03-15.png)
+
+### Does changing the temperature improve the accuracy?
+
+Maybe using temperature 0 could be preventing to find the right solution, I'm going to try using different
+temperatures.
+
+| temperature | accuracy | pass_32 | vote_2 |
+|-------------|----------|---------|--------|
+| 0.0         | 47.53%   | 76.00%  | 68.42% |
+| 0.1         | 47.64%   | 75.50%  | 67.92% |
+| 0.2         | 47.48%   | 76.25%  | 67.42% |
+| 0.5         | 47.25%   | 76.50%  | 68.92% |
+| 1.0         | 46.17%   | 76.50%  | 69.92% |
+
+The temperature almost does not affect the predictions on the training set. So clearly this is not the problem.
+
+### Check prompts
+
+Let's check some sample prompts of the easy tasks that the model is failing: 1cf80156, 0b148d64, 1f85a75f
+
+I don't see any problem with the prompts or the responses. My guess is that the model has trouble
+when working with big inputs, f.e. a 15x17 grid. It consistently fails to predict the correct output
+shape, and then it does what it can to create an output with the wrong shape.
+
+I could go back to a simpler encoder that did not predict the output shape, but the model has to make
+the decision of what the output shape is. Delaying that decision to the drawing of the grid does not
+seem like a better option, because in that case it has to draw the correct pixels and the shape at the same time.
+
 ## Conclusion
 
 ## Next steps
@@ -152,4 +219,5 @@ We are exploring two new axis in this experiment: increase the model capacity an
 - [ ] Modify the evaluation script to give better names for the output files. This will allow me to evaluate
   both the train and evaluation datasets without overwriting the files.
 - [ ] Check if I can do a full fine-tuning instead of LoRA
-- [ ] Can I speedup the training by using multiple gpus or unsloth?
+- [x] Can I speedup the training by using multiple gpus or unsloth? Yes, with multiple gpus
+- [ ] Verify the data augmentation bug: it seems I was never using the test sample as test!! If that is true relaunch all training duration experiments.
