@@ -58,9 +58,9 @@ def print_sorted_task_metrics(metrics):
     for task_id in task_ids:
         print_metrics(metrics[task_id], f'Task {task_id} ')
 
-def get_sorted_task_ids(metrics):
+def get_sorted_task_ids(metrics, ascending=False):
     task_ids = list(metrics.keys())
-    task_ids = sorted(task_ids, key=lambda x: (metrics[x]['accuracy'], metrics[x]['correct_pixels'], metrics[x]['correct_size']), reverse=True)
+    task_ids = sorted(task_ids, key=lambda x: (metrics[x]['accuracy'], metrics[x]['correct_pixels'], metrics[x]['correct_size']), reverse=not ascending)
     return task_ids
 
 def plot_metrics_distribution(metrics):
@@ -201,9 +201,9 @@ def plot_grid(grid, write_numbers=False):
             for j in range(grid.shape[1]):
                 plt.text(j, i, str(grid[i, j]), ha='center', va='center')
 
-def visualize_tasks_and_predictions(solutions, ground_truth, only_correct=False):
+def visualize_tasks_and_predictions(solutions, ground_truth, only_correct=False, ascending=False, max_predictions=4):
     _, task_metrics = evaluate(ground_truth, solutions, verbose=False)
-    for task_id in get_sorted_task_ids(task_metrics):
+    for task_id in get_sorted_task_ids(task_metrics, ascending=ascending):
         if only_correct and task_metrics[task_id]['pass_n'] < 1:
             continue
         plot_task(ground_truth[task_id]); plt.suptitle(f'{task_id}'); plt.show()
@@ -211,7 +211,7 @@ def visualize_tasks_and_predictions(solutions, ground_truth, only_correct=False)
             predicted_grids = list(solutions[task_id][test_idx].values())
             predicted_grids = [grid for grid in predicted_grids if grid]
             print_metrics(task_metrics[task_id], f'{task_id}_{test_idx}')
-            plot_predictions(test_sample['output'], predicted_grids)
+            plot_predictions(test_sample['output'], predicted_grids, max_grids=max_predictions)
             plt.suptitle(f'{task_id}_{test_idx}')
             plt.show()
 
@@ -239,8 +239,14 @@ def plot_predictions(correct_grid, predicted_grids, max_grids=5):
     if max_grids:
         if len(unique_predicted_grids) > max_grids:
             print(f'Too many unique grids: {len(unique_predicted_grids)}, leaving just {max_grids}')
-        unique_predicted_grids = unique_predicted_grids[:max_grids]
-        counts = counts[:max_grids]
+        correct_grid_idx = [idx for idx, grid in enumerate(unique_predicted_grids) if grid == correct_grid]
+        if correct_grid_idx and correct_grid_idx[0] >= max_grids:
+            correct_grid_idx = correct_grid_idx[0]
+            unique_predicted_grids = unique_predicted_grids[:max_grids - 1] + [correct_grid]
+            counts = counts[:max_grids - 1] + [counts[correct_grid_idx]]
+        else:
+            unique_predicted_grids = unique_predicted_grids[:max_grids]
+            counts = counts[:max_grids]
     plt.subplot(1, len(unique_predicted_grids) + 1, 1)
     plot_grid(correct_grid)
     plt.xlabel('Ground truth')
