@@ -124,14 +124,16 @@ def fine_tuning_main():
     # Override default configuration using arguments
     cfg = CFG(**{k: v for k, v in vars(parse_args()).items() if v is not None})
     save_train_conf(cfg)
-    accelerator = Accelerator(log_with=cfg.report_to)
     if cfg.report_to == 'wandb':
+        accelerator = Accelerator(log_with=cfg.report_to)
         accelerator.init_trackers(
             project_name=os.path.basename(os.path.dirname(cfg.output_dir)),
             config=cfg,
             init_kwargs={"wandb": dict(dir=cfg.output_dir,
                                        name=os.path.basename(cfg.output_dir))}
         )
+    else:
+        accelerator = Accelerator()
     logger.info(f'Train configuration: {asdict(cfg)}')
 
     model = get_model(cfg.model_path, n_gpus=cfg.n_gpus, torch_dtype=cfg.torch_dtype,
