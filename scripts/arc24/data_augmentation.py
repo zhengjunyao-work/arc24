@@ -153,10 +153,11 @@ def permute_train_samples(task):
 
 def random_swap_train_and_test(task):
     augmented_task = task.copy()
-    train_idx = np.random.randint(len(task['train']))
-    test_idx = np.random.randint(len(task['test']))
-    augmented_task['train'] = task['train'][:train_idx] + [task['test'][test_idx]] + task['train'][train_idx+1:]
-    augmented_task['test'] = task['test'][:test_idx] + [task['train'][train_idx]] + task['test'][test_idx+1:]
+    all_samples = task['train'] + task['test']
+    random.shuffle(all_samples)
+    train_size = len(task['train'])
+    augmented_task['train'] = all_samples[:train_size]
+    augmented_task['test'] = all_samples[train_size:]
     return augmented_task
 
 
