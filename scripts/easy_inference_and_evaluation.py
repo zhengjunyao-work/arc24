@@ -18,7 +18,8 @@ def main(args=None):
         cfg = json.load(f)
     print(cfg)
     output_folder = args.checkpoint_path.replace('arc24/models', 'arc24/evaluations')
-    output_filepath = get_output_filepath(output_folder, args.predictions_per_task, args.dataset_path)
+    output_filepath = get_output_filepath(
+        output_folder, args.predictions_per_task, args.dataset_path, args.temperature)
     if not os.path.exists(output_filepath):
         os.makedirs(output_folder, exist_ok=True)
         model_path = merge_lora_with_model(args.checkpoint_path, cfg['model_path'])
@@ -27,7 +28,8 @@ def main(args=None):
             grid_encoder=cfg.get('grid_encoder', 'GridCodeBlockEncoder(MinimalGridEncoder())'),
             predictions_per_task=args.predictions_per_task,
             dataset_path=args.dataset_path,
-            prompt_version=_get_prompt_version_from_conf(cfg))
+            prompt_version=_get_prompt_version_from_conf(cfg),
+            temperature=args.temperature)
         copy_train_conf(train_conf_path)
     else:
         print('Output file already exists, skipping inference')
@@ -65,12 +67,13 @@ def _get_prompt_version_from_conf(cfg):
 
 
 def inference(model_path, output_filepath, grid_encoder, predictions_per_task,
-              dataset_path, prompt_version):
+              dataset_path, prompt_version, temperature):
     print('-'*80)
     print(f'Inference with model {model_path}')
     cmd = f'python inference.py --model_path {model_path} --output_filepath {output_filepath}'
     cmd += f' --predictions_per_task {predictions_per_task} --grid_encoder "{grid_encoder}"'
     cmd += f' --dataset_path {dataset_path} --prompt_version {prompt_version}'
+    cmd += f' --temperature {temperature}'
     # cmd += ' --random_seed 7' # TODO: remove the random seed
     print(cmd)
     ret = os.system(cmd)
@@ -78,7 +81,7 @@ def inference(model_path, output_filepath, grid_encoder, predictions_per_task,
         raise Exception('Error running inference')
 
 
-def get_output_filepath(output_folder, predictions_per_task, dataset_path):
+def get_output_filepath(output_folder, predictions_per_task, dataset_path, temperature):
     if dataset_path.endswith('val_rs7.json'):
         name = 'val-rs7'
     elif dataset_path.endswith('arc-agi_evaluation_challenges.json'):
@@ -88,7 +91,10 @@ def get_output_filepath(output_folder, predictions_per_task, dataset_path):
     else:
         raise Exception(f'Unknown dataset path: {dataset_path}')
 
-    output_filepath = os.path.join(output_folder, f'inference_{name}_x{predictions_per_task:03d}.json')
+    if temperature == 0.0:
+        output_filepath = os.path.join(output_folder, f'inference_{name}_x{predictions_per_task:03d}.json')
+    else:
+        output_filepath = os.path.join(output_folder, f'inference_{name}_x{predictions_per_task:03d}_t{temperature:.0e}.json')
     return output_filepath
 
 
@@ -134,6 +140,8 @@ Alternative datasets for evaluation:
                         help="Number of predictions per task, use a multiple of 8")
     parser.add_argument('--dataset_path', type=str, help="Path to the dataset to make inference and evaluation",
                         default='/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json')
+    parser.add_argument('--temperature', type=float, default=0.0,
+                        help="temperature for sampling, 0.0 for greedy search")
     args = parser.parse_args(args)
     print(args)
     return args
