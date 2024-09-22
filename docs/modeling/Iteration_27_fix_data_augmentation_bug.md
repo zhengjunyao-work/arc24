@@ -33,6 +33,8 @@ TODO: show results
 
 I have to repeat some test-time fine-tuning experiments and see if the validation score improves.
 
+TODO:
+
 ### Submission results
 
 | submission   | Single LB score | Ensemble LB score |
@@ -49,3 +51,4 @@ Great improvement after fixing the bug on the submission, which uses test-time f
 ## TODO
 
 - [ ] Can I overfit to the train set and still learn the inputs distribution?
+- [ ] Design an experiment to verify the improvement on test-time fine-tuning
