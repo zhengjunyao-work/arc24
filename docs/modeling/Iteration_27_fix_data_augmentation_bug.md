@@ -35,7 +35,12 @@ I have to repeat some test-time fine-tuning experiments and see if the validatio
 
 ### Submission results
 
-TODO: already submitted
+| submission   | Single LB score | Ensemble LB score |
+|--------------|-----------------|-------------------|
+| with bug     | 21              | 33                |
+| after bugfix | **25**          | **35**            |
+
+Great improvement after fixing the bug on the submission, which uses test-time fine-tuning.
 
 ## Conclusion
 
@@ -43,4 +48,4 @@ TODO: already submitted
 
 ## TODO
 
-- [ ]
+- [ ] Can I overfit to the train set and still learn the inputs distribution?

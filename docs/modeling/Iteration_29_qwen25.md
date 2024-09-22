@@ -28,4 +28,4 @@ Whe looking at benchmarks we see a noticeable improvement between Qwen 2 and 2.5
 
 ## TODO
 
-- [ ]
+- [ ] Do the same experiment just changing the base model and compare the validation results
