@@ -201,19 +201,22 @@ def plot_grid(grid, write_numbers=False):
             for j in range(grid.shape[1]):
                 plt.text(j, i, str(grid[i, j]), ha='center', va='center')
 
-def visualize_tasks_and_predictions(solutions, ground_truth, only_correct=False, ascending=False, max_predictions=4):
+def visualize_tasks_and_predictions(solutions, ground_truth, only_correct=False,
+                                    ascending=False, max_predictions=4, figsize=(25, 4)):
     _, task_metrics = evaluate(ground_truth, solutions, verbose=False)
     for task_id in get_sorted_task_ids(task_metrics, ascending=ascending):
         if only_correct and task_metrics[task_id]['pass_n'] < 1:
             continue
-        plot_task(ground_truth[task_id]); plt.suptitle(f'{task_id}'); plt.show()
+        plt.figure(figsize=figsize); plot_task(ground_truth[task_id]); plt.suptitle(f'{task_id}'); plt.show()
         for test_idx, test_sample in enumerate(ground_truth[task_id]['test']):
             predicted_grids = list(solutions[task_id][test_idx].values())
             predicted_grids = [grid for grid in predicted_grids if grid]
             print_metrics(task_metrics[task_id], f'{task_id}_{test_idx}')
+            plt.figure(figsize=(figsize[0], figsize[1]/2))
             plot_predictions(test_sample['output'], predicted_grids, max_grids=max_predictions)
             plt.suptitle(f'{task_id}_{test_idx}')
             plt.show()
+
 
 def get_unique_matrices_and_counts_sorted(matrices):
     # TODO: move this function to a common place
@@ -233,6 +236,7 @@ def get_unique_matrices_and_counts_sorted(matrices):
     counts = [count for _, count in sorted_matrices]
 
     return unique_matrices, counts
+
 
 def plot_predictions(correct_grid, predicted_grids, max_grids=5):
     unique_predicted_grids, counts = get_unique_matrices_and_counts_sorted(predicted_grids)
