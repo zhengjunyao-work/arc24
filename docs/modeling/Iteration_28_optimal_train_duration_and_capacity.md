@@ -12,6 +12,14 @@ What is the optimal train duration and capacity to improve the validation score?
 
 ## Results
 
+### Optimal train duration for full fine-tune
+
+TODO:
+
+### Does LoRA achieve better generalization?
+
+TODO:
+
 ## Conclusion
 
 ## Next steps
