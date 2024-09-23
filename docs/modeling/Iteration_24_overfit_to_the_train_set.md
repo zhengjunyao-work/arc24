@@ -149,7 +149,7 @@ We are exploring two new axis in this experiment: increase the model capacity an
 
 After increasing the model capacity and training 5 times longer, still the model does not overfit to the train dataset.
 
-![training metrics](res/2024-09-23-06-46-00.png)
+![training metrics](res/2024-09-23-06-56-43.png)
 
 We can see that the metrics improve when increasing the training duration, but the rate of improvement is slow. There is no sign of stopping, so it is possible that training for 1e6 steps will bring additional improvements.
 
