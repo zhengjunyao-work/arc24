@@ -27,7 +27,9 @@ test-time fine-tuned model.
 
 I have repeated the experiments to overfit to the train set.
 
-TODO: show results
+![train metrics](res/2024-09-23-16-33-09.png)
+
+These results are much better after fixing the bug in data augmentation. It is likely that training for 200k steps would result in completely learning the training data.
 
 ### Test-time fine-tuning results
 
