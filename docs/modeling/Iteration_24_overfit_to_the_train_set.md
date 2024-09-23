@@ -19,6 +19,9 @@ the RE-ARC dataset.
 
 ### Implement the option to do full-model fine-tuning
 
+<details>
+  <summary>Click to see bash commands</summary>
+
 ```bash
 python fine-tuning.py \
 --model_path=/home/gbarbadillo/data/Qwen2-0.5B-arc \
@@ -48,6 +51,7 @@ python fine-tuning.py \
 --random_seed=7 \
 --batch_size=5
 ```
+</details>
 
 ### Multi-gpu training
 
@@ -57,6 +61,9 @@ I'm training models for 100k steps and it seems it's going to take around 100 ho
 this time using multiple gpus it would be very helpful to enable faster experimentation.
 
 I'm going to do local experiments with one and two gpus to see if I can benefit from faster training.
+
+<details>
+  <summary>Click to see bash commands</summary>
 
 ```bash
 export CUDA_VISIBLE_DEVICES=0
@@ -95,6 +102,7 @@ accelerate launch fine-tuning.py \
 --no-verbose \
 --batch_size=16
 ```
+</details> 
 
 The training loss is exactly the same, but the training time is 89s when using 2 gpus vs 154 seconds
 when using a single gpu.
@@ -137,17 +145,15 @@ I have been unable to train with 4 gpus, it seemed that VRAM memory is not enoug
 
 ### Increase model capacity and train duration
 
-TODO: if we want to overfit to the train set, we have to train for longer, use more model capacity or both.
-
 We are exploring two new axis in this experiment: increase the model capacity and train for much longer.
 
 After increasing the model capacity and training 5 times longer, still the model does not overfit to the train dataset.
 
-TODO: plot evolution, how long will it take to learn it?
-TODO: why the validation loss diverges?
-TODO: document silly errors
-TODO: study temperature effect
-TODO: sequences are long, and a single mistake ruins them
+![training metrics](res/2024-09-23-06-46-00.png)
+
+We can see that the metrics improve when increasing the training duration, but the rate of improvement is slow. There is no sign of stopping, so it is possible that training for 1e6 steps will bring additional improvements.
+
+Also it is unclear if using full fine-tune is better than using LoRA, depends on the train duration.
 
 Let's try to enumerate the facts:
 
@@ -156,8 +162,7 @@ Let's try to enumerate the facts:
 - We have trained a model for 100k steps on a dataset of 1221 tasks. We used batch size 16 so the model
   saw a total of 1.6M of samples during training. Each task was seen 1300 times, but considering that
   we use task augmentation each original task was seen 650 times. During training we randomly swap
-  between the 
-
+  between the... **Aha moment where I discovered the bug, go down to conclusions**
 
 #### Fails on very simple tasks
 
@@ -210,14 +215,21 @@ seem like a better option, because in that case it has to draw the correct pixel
 
 ## Conclusion
 
+I have found a bug in data augmentation that resulted on not using any of the test samples for training. The surprisingly low accuracy on the training datasets arises because we evaluate on the test samples from the train
+dataset but we were not training on those samples. So the model was not able to generalize to new samples from the task, or the model could not learn the correct task from fewer samples.
+
+This also explains why the validation loss diverged despite training on the validation dataset.
+
+Training for longer improves the results, there is no sign of stopping in this trend.
+
 ## Next steps
 
 - Maybe I should train a smaller lora when doing test-time fine-tuning
 
 ## TODO
 
-- [ ] Modify the evaluation script to give better names for the output files. This will allow me to evaluate
+- [x] Modify the evaluation script to give better names for the output files. This will allow me to evaluate
   both the train and evaluation datasets without overwriting the files.
-- [ ] Check if I can do a full fine-tuning instead of LoRA
+- [x] Check if I can do a full fine-tuning instead of LoRA
 - [x] Can I speedup the training by using multiple gpus or unsloth? Yes, with multiple gpus
-- [ ] Verify the data augmentation bug: it seems I was never using the test sample as test!! If that is true relaunch all training duration experiments.
+- [x] Verify the data augmentation bug: it seems I was never using the test sample as test!! If that is true relaunch all training duration experiments.
