@@ -151,6 +151,9 @@ accuracy: 10.0%	correct_pixels: 72.2%	max_correct_pixels: 76.3%	correct_size: 85
 
 ### Optimization for 50 splits
 
+<details>
+  <summary>Click to see all the metrics</summary>
+
 ```
 qwen2-0.5b-instruct/5
 
@@ -208,15 +211,33 @@ accuracy: 12.5%	correct_pixels: 72.0%	max_correct_pixels: 84.1%	correct_size: 84
 accuracy: 11.0%	correct_pixels: 75.3%	max_correct_pixels: 79.4%	correct_size: 86.7%	any_correct_size: 87.8%	pass_n: 21.9%	unanswered: 0.5%37
 ```
 
-Using a constant learning rate seems to have a positive effect when using batch size 16.
+</details>
 
-TODO: what if I reduce the batch size? That way I will do more modifications to the model Ideally go down to 1, (with lower learning rate)
-TODO: increase the budget to 2k or 3k steps
-TODO: increase max_seq_len to 5120
+![table with results](res/2024-09-23-09-24-44.png)
+
+| splits | steps | batch size | lr       | lr schedule | accuracy | pass_64 | vote_2 | runtime |
+|--------|-------|------------|----------|-------------|----------|---------|--------|---------|
+| 2      | 1000  | 16         | 1.00E-04 | linear      | 7.70%    | 25.50%  | 14.0%  | 3h12    |
+| 4      | 1000  | 16         | 1.00E-04 | linear      | 9.30%    | 27.50%  | 23.7%  | 3h18    |
+| 10     | 1000  | 16         | 1.00E-04 | linear      | 9.90%    | 28.50%  | 23.5%  | 3h22    |
+| 20     | 1000  | 16         | 1.00E-04 | linear      | 10.20%   | 30.00%  | 22.4%  | 3h34    |
+| 50     | 1000  | 16         | 1.00E-04 | linear      | 9.40%    | 27.00%  | 18.4%  | 4h12    |
+| 100    | 1000  | 16         | 1.00E-04 | linear      | 8.90%    | 28.00%  | 19.4%  | 5h10    |
+| 50     | 1000  | 16         | 1.00E-04 | constant    | 10.40%   | 29.50%  | 20.0%  | 4h5     |
+| 50     | 2000  | 8          | 1.00E-04 | constant    | 9.90%    | 33.50%  | 17.9%  | 4h14    |
+| 50     | 4000  | 4          | 5.00E-05 | constant    | 11.90%   | 32.50%  | 21.4%  | 4h20    |
+| 50     | 8000  | 2          | 2.00E-05 | constant    | 11.10%   | 33.50%  | 22.4%  | 4h23    |
+| 50     | 8000  | 2          | 2.00E-05 | linear      | 10.90%   | 35.00%  | 24.2%  | 4h24    |
+| 50     | 8000  | 2          | 4.00E-05 | linear      | 11.90%   | 38.00%  | 23.5%  | 4h22    |
+| 100    | 16000 | 1          | 2.00E-05 | linear      | 11.80%   | 36.00%  | 23.0%  | 5h44    |
+| 100    | 16000 | 1          | 2.00E-05 | linear      | 12.20%   | 34.00%  | 24.5%  | 5h42    |
+| 100    | 16000 | 1          | 4.00E-05 | linear      | 12.50%   | 37.00%  | 21.9%  | 5h46    |
+
+Using 100 splits, batch size 1 and linear learning rate schedule we have improved the accuracy from 7.7% to 12.5% and vote_2 from 14% to 21.9%.
 
 ## Conclusion
 
-TODO: new best score of 28! using an ensemble
+New best score of 28! using an ensemble
 
 ## Next steps
 
@@ -234,5 +255,5 @@ TODO: new best score of 28! using an ensemble
 - [ ] Can I optimize the submission speed?
   - [ ] Maybe reduce VLLM RAM usage. https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html
   - [ ] Maybe use unsloth and change to single P100 GPU.
-- [ ] Can I increase the max_seq_len? That might preventing me from training on some tasks.
+- [x] Can I increase the max_seq_len? That might preventing me from training on some tasks.
 - [x] Parallelize all 2020 solution so it does not add any extra time, how much RAM uses the second approach?
