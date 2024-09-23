@@ -206,8 +206,8 @@ The temperature almost does not affect the predictions on the training set. So c
 Let's check some sample prompts of the easy tasks that the model is failing: 1cf80156, 0b148d64, 1f85a75f
 
 I don't see any problem with the prompts or the responses. My guess is that the model has trouble
-when working with big inputs, f.e. a 15x17 grid. It consistently fails to predict the correct output
-shape, and then it does what it can to create an output with the wrong shape.
+when working with big inputs, f.e. a 15x17 grid. **It consistently fails to predict the correct output shape**,
+and then it does what it can to create an output with the wrong shape.
 
 I could go back to a simpler encoder that did not predict the output shape, but the model has to make
 the decision of what the output shape is. Delaying that decision to the drawing of the grid does not
@@ -225,6 +225,7 @@ Training for longer improves the results, there is no sign of stopping in this t
 ## Next steps
 
 - Maybe I should train a smaller lora when doing test-time fine-tuning
+- Fix the data augmentation bug
 
 ## TODO
 
