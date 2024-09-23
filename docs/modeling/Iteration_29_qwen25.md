@@ -24,9 +24,47 @@ Whe looking at benchmarks we see a noticeable improvement between Qwen 2 and 2.5
 
 ### Validation results when training different models for 10k steps
 
-TODO:
+| model                 | accuracy  | pass_32    | vote_2     |
+|-----------------------|-----------|------------|------------|
+| Qwen2-0.5B            | 8.24%     | 26.50%     | 15.91%     |
+| Qwen2-0.5B-Instruct   | 8.25%     | **26.75%** | 15.91%     |
+| Qwen2.5-0.5B          | **9.37%** | **26.75%** | **18.31%** |
+| Qwen2.5-0.5B-Instruct | 8.98%     | 26.00%     | 17.93%     |
 
-Inference with Qwen2.5B took 4920.6132 seconds, compared to the typical 1809.6193.  Why? Analyze responses, maybe longer?
+Both versions of `Qwen2.5` achieve better results than `Qwen2-0.5B-Instruct`.
+
+### Why models that aren't instruct are slower?
+
+Inference with Qwen2.5B took 4920.6132 seconds, compared to the typical 1809.6193.  Why?
+
+Inspecting the responses I have found that the non-instruct versions do repeat the prediction multiple times.
+E.g.
+
+    <|im_start|>assistant
+    ### Output
+
+    ```grid shape: 6x6
+    1 595959
+    2 181818
+    3 959595
+    4 818181
+    5 595959
+    6 181818
+    ```
+    Assistant
+    ### Output
+
+    ```grid shape: 6x6
+    1 595959
+    2 181818
+    3 959595
+    4 818181
+    5 595959
+    6 181818
+    ```
+    Assistant
+    ...
+
 
 ## Conclusion
 
