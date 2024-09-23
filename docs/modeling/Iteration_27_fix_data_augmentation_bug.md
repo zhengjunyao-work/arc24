@@ -52,6 +52,10 @@ between pass_64 and vote_2 is very small.
 
 Great improvement after fixing the bug on the submission, which uses test-time fine-tuning.
 
+### Overfit to train and learn the input distribution
+
+TODO: can I learn two tasks and still overfit to train?
+
 ## Conclusion
 
 ## Next steps
