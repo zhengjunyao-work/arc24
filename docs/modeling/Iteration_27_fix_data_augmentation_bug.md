@@ -31,9 +31,15 @@ TODO: show results
 
 ### Test-time fine-tuning results
 
-I have to repeat some test-time fine-tuning experiments and see if the validation score improves.
+I have to repeat some test-time fine-tuning experiments and see if the validation score improves. This is the [baseline experiment](https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=196610194) and this is the [repetition after the bugfix](https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=197889382).
 
-TODO:
+| bugfix | accuracy   | pass_64    | vote_2     |
+|--------|------------|------------|------------|
+| FALSE  | 12.50%     | **37.00%** | 21.9%      |
+| TRUE   | **13.70%** | 35.50%     | **32.10%** |
+
+We see an improvement in accuracy and a dramatic improvement in vote_2 metric. After the bugfix the drop
+between pass_64 and vote_2 is very small.
 
 ### Submission results
 
@@ -51,4 +57,4 @@ Great improvement after fixing the bug on the submission, which uses test-time f
 ## TODO
 
 - [ ] Can I overfit to the train set and still learn the inputs distribution?
-- [ ] Design an experiment to verify the improvement on test-time fine-tuning
+- [x] Design an experiment to verify the improvement on test-time fine-tuning

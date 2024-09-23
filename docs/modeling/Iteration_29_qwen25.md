@@ -26,6 +26,8 @@ Whe looking at benchmarks we see a noticeable improvement between Qwen 2 and 2.5
 
 TODO:
 
+Inference with Qwen2.5B took 4920.6132 seconds, compared to the typical 1809.6193.  Why? Analyze responses, maybe longer?
+
 ## Conclusion
 
 ## Next steps
