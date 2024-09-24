@@ -72,4 +72,9 @@ E.g.
 
 ## TODO
 
-- [ ] Do the same experiment just changing the base model and compare the validation results
+- [x] Do the same experiment just changing the base model and compare the validation results
+- [ ] Could I use Qwen-2.5-0.5B and avoid having repetitions in the prediction?
+  - [ ] Check the training data.
+  - [ ] Check the tokenizer
+  - [ ] Local experiments
+  - [ ] Maybe adding some new stopword to VLLM could be a quick fix
