@@ -4,7 +4,7 @@ _15-09-2024_
 
 ## Goal
 
-Can I improve the LB score by decoupling fine-tuning and test-time fine-tuning
+Can I improve the LB score by decoupling fine-tuning and test-time fine-tuning?
 
 ## Motivation
 
@@ -14,7 +14,7 @@ LoRA to adapt to the test tasks.
 It might be the case that using the same lora rank for both stages is not optimal. On the first
 training we use around 1k tasks and the training is very long. On the second step we have just 100
 tasks and the training is very short. Moreover it seems that fine-tuning the model for each task independently
-might be the better option. It is unlikely that we need the same capacity to learn 1k tasks as to learn 1 task.
+might be the better option. It is unlikely that we need the same capacity to learn 1k tasks (training) as to learn 1 task (test).
 
 Moreover I might try to do a full fine-tuning of the model, and in that case I would need to do a different
 test-time fine-tuning. That makes worth to investigate the option of decoupling fine-tuning and test-time fine-tuning.
@@ -33,6 +33,9 @@ of retraining the whole LoRA with r=128.
 
 I'm going to fine-tune a model on a single task or a few tasks. I will try different LoRa initializations
 to see the effect.
+
+<details>
+  <summary>Click to see bash commands</summary>
 
 ```bash
 python merge_lora.py --base_model_path /home/gbarbadillo/data/Qwen2-0.5B-Instruct --lora_path /mnt/hdd0/Kaggle/arc24/models/20240910_predict_inputs/10_task-augmentation-and-input-from-inputs-v0_Qwen2-0.5B-Instruct_lr1e-4_r128_2e4steps_10240msl/checkpoint-20000 --output_path /home/gbarbadillo/data/Qwen2-0.5B-arc
@@ -207,6 +210,7 @@ python fine-tuning.py \
 --random_seed=7 \
 --batch_size=5
 ```
+</details>
 
 ### Kaggle experiment design
 
@@ -236,7 +240,7 @@ the same LB score as the baseline. Maybe when using a new LoRA we need to train 
 of achieving that would be to do a common warmup using all the data, then fine-tune for each task
 independently.
 
-All the submissions shown below use linear learning rate schedule, batch size 1 and `qwen2-0.5b/19`.
+All the submissions shown below use linear learning rate schedule, batch size 1 and `qwen2-0.5b/19` (this model uses a LoRA rank of 128).
 
 | lora_r | batch size | learning rate | LB score |
 |--------|------------|---------------|----------|
@@ -251,9 +255,21 @@ All the submissions shown below use linear learning rate schedule, batch size 1 
 | 128    | 1          | 2E-05         | 18       |
 | 128    | 1          | 4E-05         | 16       |
 
+None of the experiments achieves the same LB score as the baseline that directly modifies the original LoRA. Results are close but not equal.
+
 ### Using a new LoRA with warmup
 
-TODO: how does the accuracy changes?
+I made two submissions that scored 15 on leaderboard. [Link1](https://www.kaggle.com/code/ironbar/v3-single-task-test-time-fine-tuning-for-a?scriptVersionId=197238246) [Link2](https://www.kaggle.com/code/ironbar/v3-single-task-test-time-fine-tuning-for-a?scriptVersionId=197318823)
+
+### Validation results
+
+TODO: can I reach the same results as the [baseline](https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=197889382)?
+
+TODO: what if I use my best model instead of the old `qwen2-0.5b-instruct/5`?
+
+### Submission results
+
+The best results so far have been obtained using a full fine-tuned model and training new LoRAs for each test task.
 
 ## Conclusion
 
