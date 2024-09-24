@@ -26,6 +26,8 @@ the mean tendency line. For `vote_2` it seems that increasing the number of pred
 
 TODO: we need to add more points to be able to take a conclusion
 
+Idea: we don't want to generalize, we want to maximize LB score. A smaller number of predictions will increase volatility and the chance of a lucky submission.
+
 ## Conclusion
 
 ## Next steps
