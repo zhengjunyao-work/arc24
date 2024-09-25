@@ -51,6 +51,8 @@ between pass_64 and vote_2 is very small.
 | after bugfix | **25**          | **35**            |
 
 Great improvement after fixing the bug on the submission, which uses test-time fine-tuning.
+Those experiments were done with [v2-single-task-test-time-fine-tuning](https://www.kaggle.com/code/ironbar/v2-single-task-test-time-fine-tuning-for-arc24?scriptVersionId=197730835).
+It is possible that in the case of fine-tuning the LoRA directly the results are better.
 
 ### Overfit to train and learn the input distribution
 
@@ -61,9 +63,15 @@ Thus this probes that we can learn the two tasks without any problem, even when 
 
 ## Conclusion
 
+After fixing the data augmentation bug I can completely learn the train dataset. I have also probed
+that I can learn at the same time the input distribution and to solve ARC tasks.
+
+Moreover I observed huge improvements in validation score when doing test-time fine-tuning.
+
 ## Next steps
 
 ## TODO
 
-- [ ] Can I overfit to the train set and still learn the inputs distribution?
+- [x] Can I overfit to the train set and still learn the inputs distribution? Yes
 - [x] Design an experiment to verify the improvement on test-time fine-tuning
+- [ ] Update with the results of the fine-tuned LoRA.
