@@ -14,6 +14,7 @@ from matplotlib import colors
 from collections import defaultdict
 
 from arc24.data import load_arc_data_with_solutions
+from voting import select_most_voted_solutions
 
 # Evaluation
 def analyze_number_of_predictions_per_task(data, texts):
@@ -26,6 +27,7 @@ def analyze_number_of_predictions_per_task(data, texts):
     plt.xlabel('number of predictions')
     plt.ylabel('count')
     return number_of_predictions
+
 
 def evaluate(ground_truth, solutions, verbose=True):
     """
@@ -53,15 +55,18 @@ def evaluate(ground_truth, solutions, verbose=True):
         print_metrics(global_metrics)
     return global_metrics, metrics
 
+
 def print_sorted_task_metrics(metrics):
     task_ids = get_sorted_task_ids(metrics)
     for task_id in task_ids:
         print_metrics(metrics[task_id], f'Task {task_id} ')
 
+
 def get_sorted_task_ids(metrics, ascending=False):
     task_ids = list(metrics.keys())
     task_ids = sorted(task_ids, key=lambda x: (metrics[x]['accuracy'], metrics[x]['correct_pixels'], metrics[x]['correct_size']), reverse=not ascending)
     return task_ids
+
 
 def plot_metrics_distribution(metrics):
     for key in metrics[0]:
@@ -72,16 +77,19 @@ def plot_metrics_distribution(metrics):
         plt.ylabel('count')
         plt.show()
 
+
 def average_metrics(metrics):
     averaged_metrics = dict()
     for key in metrics[0]:
         averaged_metrics[key] = np.mean([x[key] for x in metrics])
     return averaged_metrics
 
+
 def save_metrics(metrics):
     metrics['global_metrics'] = average_metrics(list(metrics.values()))
     with open('metrics.json', 'w') as f:
         json.dump(metrics, f)
+
 
 def print_metrics(metrics, prefix=''):
     text = f'{prefix}'
@@ -91,6 +99,7 @@ def print_metrics(metrics, prefix=''):
         else:
             text += f'{key}: {value:.1%}\t'
     print(text)
+
 
 def evaluate_predicted_grids(correct_grid, predicted_grids):
     correct_grid = np.array(correct_grid, dtype=int)
@@ -113,19 +122,29 @@ def evaluate_predicted_grids(correct_grid, predicted_grids):
             metrics['any_correct_size'] = 1
     return metrics
 
-def study_effect_of_the_number_of_solutions(solutions, data, n_tries=40):
+
+def study_effect_of_the_number_of_solutions(solutions, data, n_tries=40,
+                                            ignore_metrics = ['unanswered', 'accuracy', 'correct_pixels', 'max_correct_pixels', 'accuracy', 'correct_size', 'any_correct_size'],
+                                            title='',
+                                            min_predictions=8):
     max_predictions = max([len(x[0]) for x in solutions.values()])
     print(f'Maximum number of predictions: {max_predictions}')
-    n_predictions_range = 2**np.arange(0, int(np.log2(max_predictions) + 1))
+    n_predictions_range = 2**np.arange(int(np.log2(min_predictions)), int(np.log2(max_predictions) + 1))
     mean_metrics, all_metrics = [], []
     for n_predictions in n_predictions_range:
         metrics = []
         if n_predictions == max_predictions:
             metrics = [evaluate(data, solutions, verbose=False)[0]]*n_tries
+            # TODO: add additional metrics vote_1 and vote_2
         else:
             for _ in range(n_tries):
                 solutions_subset = subsample_solutions(solutions, n_predictions)
-                metrics.append(evaluate(data, solutions_subset, verbose=False)[0])
+                subset_metrics = evaluate(data, solutions_subset, verbose=False)[0]
+                for i in range(1, 3):
+                    subset_metrics[f'vote_{i}'] = evaluate(data, select_most_voted_solutions(solutions_subset, i), verbose=False)[0]['pass_n']
+                subset_metrics = {key: value for key, value in subset_metrics.items() if key not in ignore_metrics}
+                metrics.append(subset_metrics)
+
         mean_metrics.append(average_metrics(metrics))
         all_metrics.extend(metrics)
         print_metrics(mean_metrics[-1], f'Number of predictions: {n_predictions} ')
@@ -143,16 +162,18 @@ def study_effect_of_the_number_of_solutions(solutions, data, n_tries=40):
         plt.title(key)
         plt.xscale('log')
         plt.xticks(n_predictions_range, n_predictions_range)
-    plt.suptitle('Effect of the number of predictions on the metrics')
+    plt.suptitle(f'Effect of the number of predictions on the metrics. {title}')
+    plt.tight_layout()
     plt.show()
+
 
 def subsample_solutions(solutions, n_predictions):
     solutions_subset = dict()
     for task_id, task_solutions in solutions.items():
         solutions_subset[task_id] = []
         for sample_solutions in task_solutions:
-            random_keys = np.random.choice(list(sample_solutions.keys()), n_predictions, replace=False)
-            solutions_subset[task_id].append({key: sample_solutions[key] for key in random_keys})
+            random_keys = np.random.choice(list(sample_solutions.keys()), n_predictions, replace=True)
+            solutions_subset[task_id].append({idx: sample_solutions[key] for idx, key in enumerate(random_keys)})
     return solutions_subset
 
 
@@ -180,10 +201,12 @@ def plot_task(task):
             plot_grid(sample['output'])
     plt.tight_layout()
 
+
 def plot_grids(grids):
     for plot_idx, grid in enumerate(grids):
         plt.subplot(1, len(grids), plot_idx + 1)
         plot_grid(grid)
+
 
 def plot_grid(grid, write_numbers=False):
     grid = np.array(grid)
@@ -200,6 +223,7 @@ def plot_grid(grid, write_numbers=False):
         for i in range(grid.shape[0]):
             for j in range(grid.shape[1]):
                 plt.text(j, i, str(grid[i, j]), ha='center', va='center')
+
 
 def visualize_tasks_and_predictions(solutions, ground_truth, only_correct=False,
                                     ascending=False, max_predictions=4, figsize=(25, 4)):
