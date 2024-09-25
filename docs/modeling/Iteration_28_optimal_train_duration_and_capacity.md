@@ -18,11 +18,20 @@ TODO:
 
 ### Does LoRA achieve better generalization?
 
-TODO:
+| experiment       | accuracy | pass_32 | vote_2 | vote_1 |
+|------------------|----------|---------|--------|--------|
+| full fine-tuning | 12.25%   | 31.13%  | 22.85% | 18.69% |
+| LoRA 32          | 11.10%   | 30.25%  | 22.85% | 19.07% |
+| LoRA 128         | 12.73%   | 32.25%  | 22.47% | 19.19% |
+
+There is no evidence that full fine-tuning generalizes better than LoRA. 
+Moreover considering that so far using a pretrained LoRA for TTFT gives better results it is likely that training a LoRA will give better results
 
 ## Conclusion
 
 ## Next steps
+
+- Train new models for submission: full fine-tuning and also LoRA and compare the results on the LB
 
 ## TODO
 
