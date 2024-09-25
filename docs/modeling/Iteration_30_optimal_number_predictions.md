@@ -17,16 +17,34 @@ number of predictions. Finally I will plot the accuracy vs the number of predict
 
 ## Results
 
-![](res/2024-09-24-16-30-11.png)
+### Experimental results
+
+![effect of the number of predictions](res/2024-09-25-06-53-13.png)
 
 The analysis of the data is not easy: for `pass_n` it is very clear that it increases when the number
-of predictions increases. But for the other metrics is not clear, to try to ease the analysis I have plotted
-the mean tendency line. For `vote_2` it seems that increasing the number of predictions is helpful, but for
-`vote_1` we don't see improvements when increasing the number of predictions from 32 to 64.
+of predictions increases. But for the other metrics is not clear, it seems that increasing the number
+of predictions has a positive effect, but it is small and the metrics are noisy.
 
-TODO: we need to add more points to be able to take a conclusion
+The following table shows the number of predictions that got the best value for each metric.
+
+| training steps | pass_n | vote_2 | vote_1 |
+|----------------|--------|--------|--------|
+| 5000           | 48     | 48     | 64     |
+| 10000          | 48     | 24     | 24     |
+| 20000          | 64     | 32     | 48     |
+| 40000          | 48     | 64     | 16     |
+| 80000          | 64     | 24     | 48     |
+
+On `pass_n` it is clear that all the experiments get the best score on either 48 or 64 which are the
+biggest number of predictions tested. But we see greater variance in the vote metrics. I believe we can
+say that 8 predictions is not enough, but maybe 32 is enough and increasing the number of predictions
+does not lead to higher accuracy.
 
 Idea: we don't want to generalize, we want to maximize LB score. A smaller number of predictions will increase volatility and the chance of a lucky submission.
+
+### Simulated results
+
+I could take the results of all the previous experiments, and simulate new inferences by sampling. That way I could model the distribution of expected scores. Moreover I will have a total of 192 predictions, so I could extend the analysis to a higher number of predictions.
 
 ## Conclusion
 
