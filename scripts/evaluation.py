@@ -146,6 +146,7 @@ def study_effect_of_the_number_of_solutions(solutions, data, n_tries=40,
         print_metrics(mean_metrics[-1], f'Number of predictions: {n_predictions} ')
 
     metric_keys = [key for key in mean_metrics[0].keys() if key not in ['unanswered', 'accuracy']]
+    plt.suptitle(f'Effect of the number of predictions on the metrics. {title}')
     for plot_idx, key in enumerate(metric_keys):
         plt.subplot(1, len(metric_keys), plot_idx + 1)
         plt.plot(n_predictions_range, [metrics[key] for metrics in mean_metrics])
@@ -154,11 +155,11 @@ def study_effect_of_the_number_of_solutions(solutions, data, n_tries=40,
                     alpha=0.5, c='grey')
         plt.xlabel('Number of predictions')
         plt.ylabel(key)
-        plt.grid()
         plt.title(key)
         plt.xscale('log')
-        plt.xticks(n_predictions_range, n_predictions_range)
-    plt.suptitle(f'Effect of the number of predictions on the metrics. {title}')
+        plt.xticks(n_predictions_range, [str(x) for x in n_predictions_range])
+        plt.minorticks_off()
+        plt.grid(which='both')
     plt.tight_layout()
     plt.show()
 
