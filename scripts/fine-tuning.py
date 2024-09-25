@@ -547,6 +547,7 @@ def get_training_arguments(cfg):
         lr_scheduler_kwargs['num_cycles'] = cfg.lr_num_cycles
     training_arguments = SFTConfig(
             output_dir=cfg.output_dir,
+            save_total_limit=3, # I'm only interested in the last checkpoint, I will be saving 3 to avoid corruption problems (2 will be enough for this)
             num_train_epochs=cfg.epochs,
             max_steps=cfg.max_steps,
             warmup_ratio=cfg.warmup_ratio,
