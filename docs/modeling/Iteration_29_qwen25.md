@@ -65,8 +65,11 @@ E.g.
     Assistant
     ...
 
-
 ## Conclusion
+
+We have observed improvements when replacing Qwen2 by Qwen2.5. The most promising model is the non-instruct
+version but there is a problem at inference: it does not stop predicting. Until that problem is not
+solved I will use Qwen2.5
 
 ## Next steps
 
