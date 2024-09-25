@@ -46,14 +46,24 @@ Idea: we don't want to generalize, we want to maximize LB score. A smaller numbe
 
 I could take the results of all the previous experiments, and simulate new inferences by sampling. That way I could model the distribution of expected scores. Moreover I will have a total of 192 predictions, so I could extend the analysis to a higher number of predictions.
 
+![5000 training steps](res/2024-09-25-15-04-33.png)
+
+![10000 training steps](res/2024-09-25-15-04-44.png)
+
+![20000 training steps](res/2024-09-25-15-05-00.png)
+
+![40000 training steps](res/2024-09-25-15-05-18.png)
+
+![80000 training steps](res/2024-09-25-12-55-54.png)
+
+We see that on average increasing the number of predictions has a positive effect in all the metrics. It is unclear that using a smaller number of predictions can lead to better and lucky results.
+
 ## Conclusion
+
+We have verified that increasing the number of predictions has a positive effect in all the relevant metrics. Thus reducing the number of predictions to increase the duration of test-time fine-tuning is a compromise that should be studied for each case.
 
 ## Next steps
 
 - Early stopping on TTFT will also free time to extend the training duration
 - It's likely that I can create more efficient training and inference scripts for submission, where I have
   to train and make inference with 100 models (instead of 1 that was the original use case)
-
-## TODO
-
-- [ ]
