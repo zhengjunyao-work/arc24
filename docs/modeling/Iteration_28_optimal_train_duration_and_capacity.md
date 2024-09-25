@@ -14,7 +14,10 @@ What is the optimal train duration and capacity to improve the validation score?
 
 ### Optimal train duration for full fine-tune
 
-TODO:
+![metrics vs number of steps](res/2024-09-25-08-32-32.png)
+
+All metric improve when training for longer, we don't see signs of plateau on this experiment. Continual
+training might be a good option for this challenge.
 
 ### Does LoRA achieve better generalization?
 
@@ -35,7 +38,7 @@ Moreover considering that so far using a pretrained LoRA for TTFT gives better r
 
 ## TODO
 
-- [ ] Determine the optimal training steps for a full model fine-tune
-- [ ] Do the same for different LoRAs
+- [x] Determine the optimal training steps for a full model fine-tune
+- [x] Do the same for different LoRAs
 - [ ] Does the optimal training steps double when also learning to predict input from inputs?
 - [ ] Do the results hold for the leaderboard? How to account for the extra training data?
