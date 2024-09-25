@@ -133,17 +133,13 @@ def study_effect_of_the_number_of_solutions(solutions, data, n_tries=40,
     mean_metrics, all_metrics = [], []
     for n_predictions in n_predictions_range:
         metrics = []
-        if n_predictions == max_predictions:
-            metrics = [evaluate(data, solutions, verbose=False)[0]]*n_tries
-            # TODO: add additional metrics vote_1 and vote_2
-        else:
-            for _ in range(n_tries):
-                solutions_subset = subsample_solutions(solutions, n_predictions)
-                subset_metrics = evaluate(data, solutions_subset, verbose=False)[0]
-                for i in range(1, 3):
-                    subset_metrics[f'vote_{i}'] = evaluate(data, select_most_voted_solutions(solutions_subset, i), verbose=False)[0]['pass_n']
-                subset_metrics = {key: value for key, value in subset_metrics.items() if key not in ignore_metrics}
-                metrics.append(subset_metrics)
+        for _ in range(n_tries):
+            solutions_subset = subsample_solutions(solutions, n_predictions)
+            subset_metrics = evaluate(data, solutions_subset, verbose=False)[0]
+            for i in range(1, 3):
+                subset_metrics[f'vote_{i}'] = evaluate(data, select_most_voted_solutions(solutions_subset, i), verbose=False)[0]['pass_n']
+            subset_metrics = {key: value for key, value in subset_metrics.items() if key not in ignore_metrics}
+            metrics.append(subset_metrics)
 
         mean_metrics.append(average_metrics(metrics))
         all_metrics.extend(metrics)
