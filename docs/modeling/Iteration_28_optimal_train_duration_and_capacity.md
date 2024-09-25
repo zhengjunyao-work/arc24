@@ -8,7 +8,8 @@ What is the optimal train duration and capacity to improve the validation score?
 
 ## Motivation
 
-## Development
+Previous experiments suggest that training for longer might improve generalization. I want to validate that
+on the evaluation set.
 
 ## Results
 
@@ -16,7 +17,7 @@ What is the optimal train duration and capacity to improve the validation score?
 
 ![metrics vs number of steps](res/2024-09-25-08-32-32.png)
 
-All metric improve when training for longer, we don't see signs of plateau on this experiment. Continual
+All metrics improve when training for longer, we don't see signs of plateau on this experiment. Continual
 training might be a good option for this challenge.
 
 ### Does LoRA achieve better generalization?
@@ -31,6 +32,12 @@ There is no evidence that full fine-tuning generalizes better than LoRA.
 Moreover considering that so far using a pretrained LoRA for TTFT gives better results it is likely that training a LoRA will give better results
 
 ## Conclusion
+
+We have verified that training for longer improves generalization. No sign of plateau was observed after
+training for 80k steps. Thus it's likely that when training to do two tasks we could train further than 160k steps
+and still see improvements.
+
+So far there is no evidence that full fine-tuning is better than LoRA. I need to validate this on the leaderboard.
 
 ## Next steps
 

@@ -55,6 +55,7 @@ Great improvement after fixing the bug on the submission, which uses test-time f
 ### Overfit to train and learn the input distribution
 
 TODO: can I learn two tasks and still overfit to train?
+TODO: plot showing that we get the same or better results when also learning the input distribution
 
 ## Conclusion
 
