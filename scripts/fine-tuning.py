@@ -350,8 +350,8 @@ def get_tokenizer(model_path, model):
     tokenizer = AutoTokenizer.from_pretrained(
         model_path,
         trust_remote_code=True)
-    if 'llama' in model_path:
-        logger.info('Adding <|pad|> token to tokenizer')
+    if 'llama' in model_path.lower():
+        logger.info('Adding <|pad|> token to llama tokenizer')
         tokenizer.add_special_tokens({'pad_token': '<|pad|>'})
         model.resize_token_embeddings(len(tokenizer))
         tokenizer.padding_side = 'right'
