@@ -216,7 +216,7 @@ def get_device_map(n_gpus, model_path, device_map):
                 'model.rotary_emb': 1,
                 'lm_head': 1,
             }
-        elif 'qwen2-0.5b-instruct' in model_path.lower():
+        elif 'qwen2' in model_path.lower() and '0.5b' in model_path.lower():
             logger.info('Using qwen2-0.5b-instruct custom device map')
             device_map = {
                 'model.embed_tokens': 0,
