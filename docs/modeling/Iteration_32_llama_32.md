@@ -89,7 +89,23 @@ Qwen2 has the same speed as Qwen2.5
 
 ## Results
 
+| model                 | accuracy   | pass_32    | vote_2     | vote_1     |
+|-----------------------|------------|------------|------------|------------|
+| Qwen2-0.5B            | 8.24%      | 26.50%     | 15.91%     | 13.01%     |
+| Qwen2-0.5B-Instruct   | 8.25%      | 26.75%     | 15.91%     | 13.01%     |
+| Qwen2.5-0.5B          | 9.37%      | 26.75%     | 18.31%     | **15.28%** |
+| Qwen2.5-0.5B-Instruct | 8.98%      | 26.00%     | 17.93%     | 14.27%     |
+| Llama-3.2-1B          | **10.25%** | **29.00%** | **19.88%** | 14.88%     |
+
+Validation results show an improvement when fine-tuning Llama for ARC tasks over Qwen2.5 and Qwen2.
+
+Inference took 2473 seconds, compared to the 1809 seconds that takes inference with Qwen. Inference is 37% slower.
+
 ## Conclusion
+
+Llama-3.2-1B gets better validation results than Qwen but at the cost of being 50% slower on training and 37% slower on inference.
+It is unclear if it is worth it. I would rather try using a model smaller than Qwen-0.5B to have more
+room for test-time fine-tuning and inference.
 
 ## Next steps
 
@@ -97,5 +113,5 @@ Qwen2 has the same speed as Qwen2.5
 
 - [ ] Read about the new release. https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct
 - [x] What is the best way to encode the grids? Check the tokenizer. Maybe create a notebook to do this inspection, it will be useful in the future if more small models are released.
-- [ ] What is the optimal learning rate?
-- [ ] How is the training and inference speed compared to Qwen2.5-0.5B? Do I have to reduce the number of predictions or the duration of the test-time fine-tuning?
+- [x] What is the optimal learning rate?
+- [x] How is the training and inference speed compared to Qwen2.5-0.5B? Do I have to reduce the number of predictions or the duration of the test-time fine-tuning?

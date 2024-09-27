@@ -32,3 +32,4 @@ This is the setup that should give the best results
 ## TODO
 
 - [ ] Using small LoRAs might open the door again to use 4 gpus for training. If training for longer is the key, this would be helpful.
+- [ ] What is the best learning rate for TTFT? It might change with the lora rank
