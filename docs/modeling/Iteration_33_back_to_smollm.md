@@ -127,6 +127,142 @@ For reference Qwen trained at 6 seconds per step and Llama at 9 when being train
 So potentially we are looking at a speedup of 6-7. If we are able to train SmolLM to a similar accuracy
 to Qwen this would be game changing.
 
+### How to increase the context length
+
+- https://huggingface.co/togethercomputer/LLaMA-2-7B-32K/discussions/8
+- [ChatGPT suggestions to increase the context length](https://chatgpt.com/share/66f7d739-2f2c-8012-bcff-be2ec4c14da7)
+- [More educated information from ChatGPT](https://chatgpt.com/share/66f7df6a-555c-8012-ac1b-b643a3627937)
+- https://gradient.ai/blog/scaling-rotational-embeddings-for-long-context-language-models
+- https://blog.eleuther.ai/rotary-embeddings/
+- [Is it true that context window can be safely doubled without repercussions? #7206](https://github.com/ggerganov/llama.cpp/discussions/7206)
+- https://huggingface.co/docs/transformers/main/model_doc/llama2#transformers.LlamaConfig.rope_scaling
+- Configuration samples:
+  - [Qwen2.5B, 32k context, theta 1000000](https://huggingface.co/Qwen/Qwen2.5-0.5B/blob/main/config.json#L19)
+  - [Phi-3-mini-4k-instruct, 4k context, theta 10000.0](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct/blob/main/config.json)
+  - [Phi-3-mini-128k-instruct, 131k context, theta 10000.0, uses longrope](https://huggingface.co/microsoft/Phi-3-mini-128k-instruct/blob/main/config.json)
+  - [SmolLM-135M-Instruct, 2k context, theta 10000.0](https://huggingface.co/HuggingFaceTB/SmolLM-135M-Instruct/blob/main/config.json)
+  - [Llama-3.1-8B-Instruct, 131k context, theta 500000, original context 8k but uses llama3 rope_scaling](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/blob/main/config.json)
+
+It seems that theta determines the original context. If a longer context is needed it seems that all the people
+use the rope_scaling.
+
+<details>
+  <summary>Click to see bash commands</summary>
+
+```bash
+# train on a single gpu, 338s, this uses ~21GB of VRAM, 3.3 seconds per iteration
+export CUDA_VISIBLE_DEVICES=0
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/SmolLM-135M-Instruct \
+--n_gpus 1 \
+--no-use_lora \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240928_debug_SmolLM_context_window/01_baseline-full-fine-tuning \
+--max_seq_len 10240 \
+--device_map None \
+--max_steps 100 \
+--logging_steps 10 \
+--batch_size 16 \
+--verbose \
+--learning_rate 4e-4
+
+export CUDA_VISIBLE_DEVICES=0
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/SmolLM-135M-Instruct \
+--n_gpus 1 \
+--no-use_lora \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240928_debug_SmolLM_context_window/02_change-model-config \
+--max_seq_len 10240 \
+--device_map None \
+--max_steps 100 \
+--logging_steps 10 \
+--batch_size 16 \
+--verbose \
+--learning_rate 4e-4
+
+export CUDA_VISIBLE_DEVICES=0
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/SmolLM-135M-Instruct \
+--n_gpus 1 \
+--no-use_lora \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240928_debug_SmolLM_context_window/03_change-model-config-longer \
+--max_seq_len 10240 \
+--device_map None \
+--max_steps 1000 \
+--warmup_ratio 1e-1 \
+--logging_steps 10 \
+--batch_size 16 \
+--verbose \
+--random_seed 7 \
+--learning_rate 4e-4
+
+export CUDA_VISIBLE_DEVICES=1
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/SmolLM-135M-Instruct \
+--n_gpus 1 \
+--no-use_lora \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240928_debug_SmolLM_context_window/04_longer-baseline \
+--max_seq_len 10240 \
+--device_map None \
+--max_steps 1000 \
+--warmup_ratio 1e-1 \
+--logging_steps 10 \
+--batch_size 16 \
+--verbose \
+--random_seed 7 \
+--learning_rate 4e-4
+
+export CUDA_VISIBLE_DEVICES=0
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/SmolLM-135M-Instruct \
+--n_gpus 1 \
+--no-use_lora \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240928_debug_SmolLM_context_window/05_rope-scaling-02 \
+--max_seq_len 10240 \
+--device_map None \
+--max_steps 1000 \
+--warmup_ratio 1e-1 \
+--logging_steps 10 \
+--batch_size 16 \
+--verbose \
+--random_seed 7 \
+--learning_rate 4e-4
+
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/SmolLM-135M-Instruct \
+--n_gpus 1 \
+--no-use_lora \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20240928_debug_SmolLM_context_window/07_linear-rope-scaling-2-update-tokenizer \
+--max_seq_len 10240 \
+--device_map None \
+--max_steps 1000 \
+--warmup_ratio 1e-1 \
+--logging_steps 10 \
+--batch_size 16 \
+--verbose \
+--random_seed 7 \
+--learning_rate 4e-4
+```
+
+</details>
+
 ## Results
 
 ## Conclusion
