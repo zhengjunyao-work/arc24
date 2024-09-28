@@ -266,6 +266,11 @@ python fine-tuning.py \
 
 ## Results
 
+### Training metrics
+
+As a reference when training Qwen or Llama for 10k steps I could reach a train and validation loss around 0.08.
+Training for 80k steps could reduce the train loss to 0.03, but the validation loss did not improve.
+
 ## Conclusion
 
 ## Next steps
