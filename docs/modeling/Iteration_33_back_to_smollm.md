@@ -37,15 +37,15 @@ model but that is very close to Qwen's 500M.
 
 ```bash
 python fine-tuning.py \
---model_path /home/gbarbadillo/data/Llama-3.2-1B-Instruct \
+--model_path /home/gbarbadillo/data/SmolLM-135M-Instruct \
 --lora_r 32 \
 --train_datasets /mnt/hdd0/Kaggle/arc24/data/new_partitions/train_rs7.json output-from-examples-v1 \
 --val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json output-from-examples-v1 \
---grid_encoder "GridShapeEncoder(RowNumberEncoder(RepeatNumberEncoder()))" \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
 --output_dir /mnt/hdd0/Kaggle/arc24/models/20240928_debug_SmolLM/01_baseline \
---max_seq_len 2048 \
+--max_seq_len 10240 \
 --device_map None \
---max_steps 500 \
+--max_steps 200 \
 --logging_steps 10 \
 --batch_size 16 \
 --verbose \
