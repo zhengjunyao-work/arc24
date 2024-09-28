@@ -142,6 +142,7 @@ to Qwen this would be game changing.
   - [Phi-3-mini-128k-instruct, 131k context, theta 10000.0, uses longrope](https://huggingface.co/microsoft/Phi-3-mini-128k-instruct/blob/main/config.json)
   - [SmolLM-135M-Instruct, 2k context, theta 10000.0](https://huggingface.co/HuggingFaceTB/SmolLM-135M-Instruct/blob/main/config.json)
   - [Llama-3.1-8B-Instruct, 131k context, theta 500000, original context 8k but uses llama3 rope_scaling](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/blob/main/config.json)
+- https://wandb.ai/byyoung3/ml-news/reports/Scaling-Llama-2-to-32k-Tokens-With-LongLora--Vmlldzo1NzU4OTk2
 
 It seems that theta determines the original context. If a longer context is needed it seems that all the people
 use the rope_scaling.
