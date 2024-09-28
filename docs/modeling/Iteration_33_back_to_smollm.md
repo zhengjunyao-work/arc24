@@ -140,4 +140,6 @@ to Qwen this would be game changing.
 
 ## TODO
 
-- [ ]
+- [ ] Train a model for 10k steps to find what is the optimal learning rate
+- [ ] Does the evaluation return comparable metrics to Qwen?
+- [ ] Try to get the same metrics as Qwen by training for much longer, f.e. 160k steps
