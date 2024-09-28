@@ -511,7 +511,7 @@ def get_data_collator(model_path, tokenizer):
             instruction_template='<|start_header_id|>user<|end_header_id|>',
             response_template='<|start_header_id|>assistant<|end_header_id|>',
         )
-    elif 'SmolLM' in model_path.lower() or 'qwen' in model_path.lower():
+    elif 'smollm' in model_path.lower() or 'qwen' in model_path.lower():
         logger.info('Using SmolLM\Qwen template for collator')
         data_collator = DataCollatorForCompletionOnlyLM(
             tokenizer=tokenizer,
