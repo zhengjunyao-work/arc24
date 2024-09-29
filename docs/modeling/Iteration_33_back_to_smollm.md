@@ -264,6 +264,12 @@ python fine-tuning.py \
 
 </details>
 
+### Current problems
+
+`model_max_length` in tokenizer, does not seem to be saved correctly, I have manually fixed it.
+
+It makes very long predictions, just like non-instruct Qwen models.
+
 ## Results
 
 ### Training metrics
@@ -282,3 +288,4 @@ Training for 80k steps could reduce the train loss to 0.03, but the validation l
 - [ ] Does the evaluation return comparable metrics to Qwen?
 - [ ] What is the speedup at inference?
 - [ ] Try to get the same metrics as Qwen by training for much longer, f.e. 160k steps
+- [ ] Another small LLM, it also has 2048 context window: https://huggingface.co/amd/AMD-Llama-135m

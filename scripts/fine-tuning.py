@@ -346,19 +346,21 @@ def get_model(model_path, n_gpus, torch_dtype, device_map, use_4bit_quantization
     return model
 
 
-def get_tokenizer(model_path, model):
+def get_tokenizer(model_path, model, pad_token='<|pad|>'):
     tokenizer = AutoTokenizer.from_pretrained(
         model_path,
         trust_remote_code=True)
-    if 'llama' in model_path.lower():
-        logger.info('Adding <|pad|> token to llama tokenizer')
-        tokenizer.add_special_tokens({'pad_token': '<|pad|>'})
-        model.resize_token_embeddings(len(tokenizer))
+    if 'pad_token' not in tokenizer.special_tokens_map or tokenizer.pad_token == tokenizer.eos_token:
+        if 'pad_token' not in tokenizer.special_tokens_map:
+            logger.info('Adding padding token because the tokenizer does not have one')
+        else:
+            logger.info('Changing padding token because it is the same as the end-of-sequence token')
+        assert pad_token not in tokenizer.get_vocab()
+        tokenizer.add_special_tokens({'pad_token': pad_token})
         tokenizer.padding_side = 'right'
-    # print(tokenizer.special_tokens_map)
-    # print('Verification of number tokens')
-    # for number in '0123456789':
-    #         print(f'{number}: {[key for key in tokenizer.get_vocab().keys() if number in key and not key.startswith("<")]}')
+        model.resize_token_embeddings(len(tokenizer))
+    assert tokenizer.pad_token != tokenizer.eos_token
+    assert tokenizer.pad_token_id != tokenizer.eos_token_id
     return tokenizer
 
 
