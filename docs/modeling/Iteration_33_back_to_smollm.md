@@ -264,11 +264,24 @@ python fine-tuning.py \
 
 </details>
 
+### AMD-Llama-135m
+
+This model encodes each number independently, just like SmolLM.
+
 ### Current problems
 
 `model_max_length` in tokenizer, does not seem to be saved correctly, I have manually fixed it.
 
 It makes very long predictions, just like non-instruct Qwen models.
+
+The baseline model that was simply fine-tuned does not work with VLLM because the following error:
+
+> ValueError: User-specified max_model_len (10240) is greater than the derived max_model_len (max_position_embeddings=2048 or model_max_length=None in model's config.json). This may lead to incorrect model outputs or CUDA errors. To allow overriding this maximum, set the env var VLLM_ALLOW_LONG_MAX_MODEL_LEN=1
+
+If I modify the model configuration to increase the max_model_len it works, but it seems to be predicting
+special tokens all the time because the predictions appear to be empty, but it takes 3599s to do the predictions.
+If I modify the inference script to just use 2048 it does the same thing with the predictions but faster.
+Thus it appears that without modifications the model cannot work correctly.
 
 ## Results
 
@@ -281,10 +294,12 @@ Training for 80k steps could reduce the train loss to 0.03, but the validation l
 
 ## Next steps
 
+- After fixing the problem with the tokenizer, I could now train Qwen2.5 non-instruct model and have fast inference.
+
 ## TODO
 
 - [x] What is the speedup when training?
-- [ ] Train a model for 10k steps to find what is the optimal learning rate
+- [x] Train a model for 10k steps to find what is the optimal learning rate -> 8e-4
 - [ ] Does the evaluation return comparable metrics to Qwen?
 - [ ] What is the speedup at inference?
 - [ ] Try to get the same metrics as Qwen by training for much longer, f.e. 160k steps
