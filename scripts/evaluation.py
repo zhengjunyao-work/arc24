@@ -80,8 +80,9 @@ def plot_metrics_distribution(metrics):
 
 def average_metrics(metrics):
     averaged_metrics = dict()
-    for key in metrics[0]:
-        averaged_metrics[key] = np.mean([x[key] for x in metrics])
+    if metrics:
+        for key in metrics[0]:
+            averaged_metrics[key] = np.mean([x[key] for x in metrics])
     return averaged_metrics
 
 
