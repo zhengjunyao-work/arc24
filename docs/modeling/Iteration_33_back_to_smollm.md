@@ -268,6 +268,10 @@ python fine-tuning.py \
 
 This model encodes each number independently, just like SmolLM.
 
+It is not an instruct model and it does not have a chat template.
+
+https://huggingface.co/docs/transformers/main/en/chat_templating#advanced-adding-and-editing-chat-templates
+
 ### Current problems
 
 `model_max_length` in tokenizer, does not seem to be saved correctly, I have manually fixed it.
