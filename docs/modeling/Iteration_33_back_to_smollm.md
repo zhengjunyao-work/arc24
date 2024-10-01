@@ -287,6 +287,12 @@ special tokens all the time because the predictions appear to be empty, but it t
 If I modify the inference script to just use 2048 it does the same thing with the predictions but faster.
 Thus it appears that without modifications the model cannot work correctly.
 
+
+I have manually modified the number of gpus to 1.
+  File "/home/gbarbadillo/miniconda3/envs/arc/lib/python3.10/site-packages/vllm/config.py", line 337, in verify_with_parallel_config
+    raise ValueError(
+ValueError: Total number of attention heads (9) must be divisible by tensor parallel size (2).
+
 ## Results
 
 ### Training metrics
