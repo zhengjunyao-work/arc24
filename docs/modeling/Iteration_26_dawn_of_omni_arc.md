@@ -98,11 +98,9 @@ to array at start and viceversa at the end.
 I have decided that I have to create a new repo to host all the code to generate tasks with code. A
 good name for the repo would be omni-arc, since it will enable the training of the omni-arc models.
 
-## Results
-
 ## Conclusion
 
-## Next steps
+Following work will be done at: https://github.com/ironbar/omni-arc
 
 ## TODO
 
