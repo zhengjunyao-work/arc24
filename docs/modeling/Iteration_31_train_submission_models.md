@@ -21,6 +21,12 @@ This is the setup that should give the best results
 - 2 tasks
 - LoRA seems to generalize better, verify it on the leaderboard
 
+### Resuming the trainings is problematic
+
+I have found that resuming multi-gpu trainings can be problematic. It seems that the script uses the
+generator to generate samples until the checkpoint and that takes a lot of time and many times it crashes.
+If it happens again I should take a look at the code and configuration of the training.
+
 ## Results
 
 [Wandb dashboard](https://wandb.ai/guillermobarbadillo/20240925_submission_models?nw=nwuserguillermobarbadillo)
