@@ -287,7 +287,6 @@ special tokens all the time because the predictions appear to be empty, but it t
 If I modify the inference script to just use 2048 it does the same thing with the predictions but faster.
 Thus it appears that without modifications the model cannot work correctly.
 
-
 I have manually modified the number of gpus to 1.
   File "/home/gbarbadillo/miniconda3/envs/arc/lib/python3.10/site-packages/vllm/config.py", line 337, in verify_with_parallel_config
     raise ValueError(
@@ -297,20 +296,49 @@ ValueError: Total number of attention heads (9) must be divisible by tensor para
 
 ### Training metrics
 
+[Wandb metrics](https://wandb.ai/guillermobarbadillo/20240929_smolLM?nw=nwuserguillermobarbadillo)
+
 As a reference when training Qwen or Llama for 10k steps I could reach a train and validation loss around 0.08.
 Training for 80k steps could reduce the train loss to 0.03, but the validation loss did not improve.
 
+Training SmolLM reaches a min validation loss of 0.10 and 0.058 train loss.
+
+### Validation metrics
+
+| model                 | training steps | accuracy | pass_32 | vote_2 |
+|-----------------------|----------------|----------|---------|--------|
+| Qwen2-0.5B            | 10000          | 8.24%    | 26.50%  | 15.91% |
+| Qwen2-0.5B-Instruct   | 10000          | 8.25%    | 26.75%  | 15.91% |
+| Qwen2-0.5B-Instruct   | 80000          | 13.78%   | 33.88%  | 23.11% |
+| Qwen2.5-0.5B          | 10000          | 9.37%    | 26.75%  | 18.31% |
+| Qwen2.5-0.5B-Instruct | 10000          | 8.98%    | 26.00%  | 17.93% |
+| Llama-3.2-1B          | 10000          | 10.25%   | 29.00%  | 19.88% |
+| SmolLM-135M-Instruct  | 40000          | 8.40%    | 23.00%  | 16.54% |
+| SmolLM-135M-Instruct  | 140000         | 8.58%    | 24.12%  | 16.88% |
+
+Despite training for much longer I have not been able to reach the accuracy of Qwen models that are
+trained just for 10k steps.
+
+### Inference speed
+
+Inference takes 1231 seconds on a single GPU, by comparison Qwen takes 1809 using two GPUs.
+
 ## Conclusion
+
+The smaller SmolLM model trains 6-7 times faster than Qwen and inference is 3 times faster.
+
+However I have not been able to reach similar validation accuracy to Qwen despite training for much longer.
 
 ## Next steps
 
 - After fixing the problem with the tokenizer, I could now train Qwen2.5 non-instruct model and have fast inference.
+- I could revisit this iteration and try with other small models at the end of the challenge once the data is fixed and I just have to try different models. I might try different position encoding variations.
 
 ## TODO
 
 - [x] What is the speedup when training?
 - [x] Train a model for 10k steps to find what is the optimal learning rate -> 8e-4
-- [ ] Does the evaluation return comparable metrics to Qwen?
-- [ ] What is the speedup at inference?
-- [ ] Try to get the same metrics as Qwen by training for much longer, f.e. 160k steps
+- [x] Does the evaluation return comparable metrics to Qwen?
+- [x] What is the speedup at inference?
+- [x] Try to get the same metrics as Qwen by training for much longer, f.e. 160k steps
 - [ ] Another small LLM, it also has 2048 context window: https://huggingface.co/amd/AMD-Llama-135m
