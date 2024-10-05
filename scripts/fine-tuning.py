@@ -395,8 +395,15 @@ def print_gpu_memory():
 
 # Data
 def create_validation_dataset(filepath, prompt_version, grid_encoder, tokenizer, max_seq_len, verbose=False):
-    data = load_arc_data_with_solutions(filepath)
-    tasks = list(data.values())
+    if filepath.startswith('omni-arc'):
+        from omniarc.dataset import create_dataset as create_omniarc_dataset
+        n_tasks = int(filepath.split('-')[-1])
+        logger.info(f'Creating omni-arc dataset with {n_tasks} tasks')
+        omniarc_dataset = create_omniarc_dataset()
+        tasks = [omniarc_dataset.sample()[1] for _ in range(n_tasks)]
+    else:
+        data = load_arc_data_with_solutions(filepath)
+        tasks = list(data.values())
     prompts = []
     for task in tqdm(tasks, desc='create prompts'):
         prompts.extend(create_prompts_from_task(task, grid_encoder, tokenizer, prompt_version=prompt_version))
@@ -420,8 +427,15 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
     """
     data = dict()
     for idx, (filepath, prompt_version) in tqdm(enumerate(train_datasets), desc='Loading training datasets'):
-        dataset = load_arc_data_with_solutions(filepath)
-        dataset = {f'{idx}|{key}|{prompt_version}': value for key, value in dataset.items()}
+        if filepath.startswith('omni-arc'):
+            n_tasks = int(filepath.split('-')[-1])
+            logger.info(f'Creating omni-arc dataset with {n_tasks} tasks')
+            from omniarc.dataset import create_dataset as create_omniarc_dataset
+            omniarc_dataset = create_omniarc_dataset()
+            dataset = {f'omni-arc-{idx}|{key}|{prompt_version}': omniarc_dataset for key in range(n_tasks)}
+        else:
+            dataset = load_arc_data_with_solutions(filepath)
+            dataset = {f'{idx}|{key}|{prompt_version}': value for key, value in dataset.items()}
         data.update(dataset)
     task_ids = list(data.keys())
     prompt_lengths = []
@@ -438,16 +452,19 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
             prompt_lengths = []
         random.shuffle(task_ids)
         for task_id in task_ids:
-            task = data[task_id]
             prompt_version = task_id.split('|')[-1]
-            if isinstance(task, list): # some datasets such as neoeye's tama have different variations of the same task
-                task = random.choice(task)
-            if 'test' not in task and 'n_train' in task:
-                task = create_random_task_from_task_without_test(task)
-            task = random_augment_task(task)
-            if random.random() < compose_new_task_probability:
-                task = random_compose_new_task_by_adding_additional_transformation(
-                    task, weights=compose_new_task_weights)
+            if task_id.startswith('omni-arc'):
+                task = data[task_id].sample()[1]
+            else:
+                task = data[task_id]
+                if isinstance(task, list): # some datasets such as neoeye's tama have different variations of the same task
+                    task = random.choice(task)
+                if 'test' not in task and 'n_train' in task:
+                    task = create_random_task_from_task_without_test(task)
+                task = random_augment_task(task)
+                if random.random() < compose_new_task_probability:
+                    task = random_compose_new_task_by_adding_additional_transformation(
+                        task, weights=compose_new_task_weights)
             if remove_train_samples_to_fit_max_seq_len:
                 while len(task['train']):
                     prompt, prompt_length = _create_prompt_smaller_than_max_seq_len(
