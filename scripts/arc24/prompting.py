@@ -13,9 +13,10 @@ def create_prompts_from_task(task, grid_encoder, tokenizer,
     prompts = []
     for test_sample in task['test']:
         user_message = prompt_template.render(train_samples=train_samples,
-                                                test_input=grid_encoder.to_text(test_sample['input']))
+                                              test_input=grid_encoder.to_text(test_sample['input']),
+                                              code=task.get('code', ''))
         if is_train_prompt:
-            if prompt_version.startswith('output-from-examples') or prompt_version.startswith('output-from-outputs'):
+            if prompt_version.startswith('output'):
                 output = grid_encoder.to_text(test_sample['output'])
             elif prompt_version.startswith('input-from-inputs'):
                 output = grid_encoder.to_text(test_sample['input'])
@@ -118,7 +119,7 @@ def get_prompt_templates(prompt_version):
     elif prompt_version == 'code-from-examples-v0':
         return system_prompt_v1, prompt_template_code_from_examples_v0, answer_template_code_from_examples_v0
     elif prompt_version == 'output-from-code-v0':
-        raise NotImplementedError
+        return system_prompt_v1, prompt_template_output_from_code_v0, answer_template_v0
     else:
         raise ValueError(f'Unknown prompt version {prompt_version}')
 
@@ -234,3 +235,17 @@ answer_template_code_from_examples_v0 = Template("""```python
 ```""")
 
 # output-from-code-v0
+prompt_template_output_from_code_v0 = Template("""Your task is to transform the input grid using the transformation defined in the python code below.
+
+## Code
+
+```python
+{{ code }}
+```
+
+## Example
+
+### Input
+
+{{ test_input }}
+""")
