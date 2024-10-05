@@ -126,7 +126,7 @@ We have two dimensions to test:
 
 The training duration should be increased proportionally to the new tasks.
 
-TODO: how many tasks has the baseline?
+The baseline has 1200 tasks.
 
 ## Results
 
@@ -152,5 +152,6 @@ Training speed was not affected by using omni-arc. In fact it was faster but thi
 - [x] Add new prompt templates
 - [x] Update fine-tuning script to support omni-arc dataset
 - [x] Is training speed affected by using omni-arc? I believe generation is fast enough to be done real-time
+- [ ] Clone omni-arc repo in the cluster and add the path to the PYTHONPATH
 - [ ] Experiment to see if learning 3 tasks is better than learning two tasks. The baseline learns output-from-examples and input-from-inputs, the new experiment also learns code-from-examples. 10k steps per task.
 - [ ] Can we solve some of the evaluation tasks using generated code?
