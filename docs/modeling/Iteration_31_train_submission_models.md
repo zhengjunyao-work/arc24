@@ -27,6 +27,11 @@ I have found that resuming multi-gpu trainings can be problematic. It seems that
 generator to generate samples until the checkpoint and that takes a lot of time and many times it crashes.
 If it happens again I should take a look at the code and configuration of the training.
 
+I have added a parameter `ignore_data_skip` that should speedup the training startup, but then I believe
+the problem is related to GPU VRAM. The two trainings that could not be resumed where the full fine-tuning
+and the bigger LoRA that used a rank of 128. Those two experiments are the ones that use more VRAM memory.
+The training appears to start much faster but fails without a clear error message.
+
 ## Results
 
 [Wandb dashboard](https://wandb.ai/guillermobarbadillo/20240925_submission_models?nw=nwuserguillermobarbadillo)
