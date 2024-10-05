@@ -19,6 +19,8 @@ def create_prompts_from_task(task, grid_encoder, tokenizer,
                 output = grid_encoder.to_text(test_sample['output'])
             elif prompt_version.startswith('input-from-inputs'):
                 output = grid_encoder.to_text(test_sample['input'])
+            elif prompt_version.startswith('code-from-examples'):
+                output = task['code']
             else:
                 raise ValueError(f'Unknown prompt version {prompt_version}')
         else:
@@ -113,6 +115,10 @@ def get_prompt_templates(prompt_version):
         return system_prompt_v1, prompt_template_input_from_inputs_v0, answer_template_input_from_inputs_v0
     elif prompt_version == 'output-from-outputs-v0':
         return system_prompt_v1, prompt_template_output_from_outputs_v0, answer_template_input_from_inputs_v0
+    elif prompt_version == 'code-from-examples-v0':
+        return system_prompt_v1, prompt_template_code_from_examples_v0, answer_template_code_from_examples_v0
+    elif prompt_version == 'output-from-code-v0':
+        raise NotImplementedError
     else:
         raise ValueError(f'Unknown prompt version {prompt_version}')
 
@@ -203,3 +209,28 @@ Below there are some grid examples, please create a new and different grid that 
 {{ sample.output }}
 {% endfor %}
 """)
+
+# code-from-examples-v0
+prompt_template_code_from_examples_v0 = Template("""Let's see if you can solve this simple Abstraction and Reasoning Challenge (ARC) task.
+Below there are some input-output grid examples that define the task.
+Your job is to understand the transformation between the input and the output and write a python function that implements the transformation.
+The function should be called `task` and receives a numpy array called `grid` as input.
+The transformations are always based on the following priors: objectness, goal-directed, numbers & counting, and basic geometry & topology.
+{% for sample in train_samples %}
+## Example {{ loop.index }}
+
+### Input
+
+{{ sample.input }}
+
+### Output
+
+{{ sample.output }}
+{% endfor %}
+""")
+
+answer_template_code_from_examples_v0 = Template("""```python
+{{ output }}
+```""")
+
+# output-from-code-v0
