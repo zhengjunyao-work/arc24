@@ -576,6 +576,8 @@ def get_training_arguments(cfg):
             # https://huggingface.co/transformers/v4.9.1/main_classes/trainer.html#trainingarguments
             ddp_find_unused_parameters=False, # only used with accelerate, got a warning saying that it slows down if True
 
+            ignore_data_skip=True, # otherwise it takes too long to start training when resuming from checkpoint
+
             **batch_size_kwargs
     )
     return training_arguments
