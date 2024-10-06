@@ -113,6 +113,21 @@ python fine-tuning.py \
 --batch_size 5 \
 --learning_rate 4e-5 \
 --verbose
+
+# prompt refinement
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/Qwen2.5-0.5B \
+--lora_r 32 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241005_omni-arc/03_omni-arc_code-from-examples-v1 \
+--train_datasets omni-arc-100 code-from-examples-v1 \
+--val_dataset omni-arc-100 code-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps 10 \
+--logging_steps 10 \
+--random_seed 7 \
+--batch_size 5 \
+--learning_rate 4e-5 \
+--verbose
 ```
 
 </details>
@@ -152,6 +167,7 @@ Training speed was not affected by using omni-arc. In fact it was faster but thi
 - [x] Add new prompt templates
 - [x] Update fine-tuning script to support omni-arc dataset
 - [x] Is training speed affected by using omni-arc? I believe generation is fast enough to be done real-time
-- [ ] Clone omni-arc repo in the cluster and add the path to the PYTHONPATH
+- [x] Clone omni-arc repo in the cluster and add the path to the PYTHONPATH
+- [ ] Refine the prompts using ChatGPT
 - [ ] Experiment to see if learning 3 tasks is better than learning two tasks. The baseline learns output-from-examples and input-from-inputs, the new experiment also learns code-from-examples. 10k steps per task.
 - [ ] Can we solve some of the evaluation tasks using generated code?

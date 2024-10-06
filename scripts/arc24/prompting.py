@@ -118,6 +118,8 @@ def get_prompt_templates(prompt_version):
         return system_prompt_v1, prompt_template_output_from_outputs_v0, answer_template_input_from_inputs_v0
     elif prompt_version == 'code-from-examples-v0':
         return system_prompt_v1, prompt_template_code_from_examples_v0, answer_template_code_from_examples_v0
+    elif prompt_version == 'code-from-examples-v1':
+        return system_prompt_v1, prompt_template_code_from_examples_v1, answer_template_code_from_examples_v0
     elif prompt_version == 'output-from-code-v0':
         return system_prompt_v1, prompt_template_output_from_code_v0, answer_template_v0
     else:
@@ -234,7 +236,39 @@ answer_template_code_from_examples_v0 = Template("""```python
 {{ output }}
 ```""")
 
-# output-from-code-v0
+prompt_template_code_from_examples_v1 = Template("""You are tasked with solving a transformation problem from the Abstraction and Reasoning Challenge (ARC).
+The goal is to generate a Python function called `task` that receives a 2D numpy array, `grid`, and transforms it to match the desired output.
+
+Below are several input-output examples that illustrate the transformation. Your function should generalize the pattern from these examples to solve any input following the same logic.
+
+## Key Priors:
+
+- **Objectness**: Consider the grid as containing objects (groups of connected cells) rather than just individual pixels.
+- **Goal-Directed**: The transformation should achieve a specific goal, such as creating symmetry or changing the color of specific objects.
+- **Numbers & Counting**: Keep track of the number of objects, sizes, and their relative positions.
+- **Geometry & Topology**: Use spatial relationships such as adjacency, enclosure, or symmetry.
+
+Carefully analyze the examples and find the underlying transformation logic.
+
+## Examples
+{% for sample in train_samples %}
+### Example {{ loop.index }}
+
+#### Input
+
+{{ sample.input }}
+
+#### Output
+
+{{ sample.output }}
+{% endfor %}
+## Code
+
+Implement the transformation in Python.
+""")
+
+
+# output-from-code
 prompt_template_output_from_code_v0 = Template("""Your task is to transform the input grid using the transformation defined in the python code below.
 
 ## Code
