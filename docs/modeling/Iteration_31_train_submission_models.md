@@ -32,6 +32,18 @@ the problem is related to GPU VRAM. The two trainings that could not be resumed 
 and the bigger LoRA that used a rank of 128. Those two experiments are the ones that use more VRAM memory.
 The training appears to start much faster but fails without a clear error message.
 
+### Weirdly low submission scores
+
+![qwen25-0.5b/8](res/2024-10-07-05-49-57.png)
+
+When doing submissions with my best model `qwen25-0.5b/8` so far some of the submissions score very low (considering
+that the best submission got 40 on LB)
+
+I believe that the most plausible explanation for a successful submission with low score is that the
+fine-tuning failed, thus the base model was used. I'm going to try to reduce the `max_seq_len`. Inference
+should not be affected because I merge the models, so the problem must be on fine-tuning. And the problem
+has been manifested only on LoRA with 128 rank, which demands more memory.
+
 ## Results
 
 [Wandb dashboard](https://wandb.ai/guillermobarbadillo/20240925_submission_models?nw=nwuserguillermobarbadillo)
@@ -44,3 +56,4 @@ The training appears to start much faster but fails without a clear error messag
 
 - [ ] Using small LoRAs might open the door again to use 4 gpus for training. If training for longer is the key, this would be helpful.
 - [ ] What is the best learning rate for TTFT? It might change with the lora rank
+- [ ] Understand the recent weird low scores on `qwen25-0.5b/8`
