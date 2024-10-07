@@ -143,6 +143,19 @@ The training duration should be increased proportionally to the new tasks.
 
 The baseline has 1200 tasks.
 
+### Problem with non-instruct models
+
+I thought that I had solved the problem with never-ending predictions from non-instruct models
+by modifying the tokenizer at the beginning of the train. However that is not true and I have had
+to relaunch all the trainings using an instruct version of Qwen. I might revisit this on the future.
+
+### Had to update transformers to 4.45.1
+
+I had to add scipy to the docker and that updated transformers library. When doing inference on my PC
+there was an error when loading the model so I had to update transformers to 4.45.1
+
+It's possible that I will have to update the Kaggle environment as well.
+
 ## Results
 
 ### Local experiments training metrics
@@ -160,6 +173,8 @@ Training speed was not affected by using omni-arc. In fact it was faster but thi
 ## Conclusion
 
 ## Next steps
+
+- Solve the problem with never ending predictions from non-instruct models.
 
 ## TODO
 
