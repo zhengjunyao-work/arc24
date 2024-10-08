@@ -44,6 +44,10 @@ fine-tuning failed, thus the base model was used. I'm going to try to reduce the
 should not be affected because I merge the models, so the problem must be on fine-tuning. And the problem
 has been manifested only on LoRA with 128 rank, which demands more memory.
 
+I have run the notebook on 10 validation samples and there is no sign of problems: [notebook](https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=199978929)
+
+Maybe doing first the trainings with smaller datasets can alleviate the problem: [notebook](https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=199994827)
+
 ## Results
 
 [Wandb dashboard](https://wandb.ai/guillermobarbadillo/20240925_submission_models?nw=nwuserguillermobarbadillo)

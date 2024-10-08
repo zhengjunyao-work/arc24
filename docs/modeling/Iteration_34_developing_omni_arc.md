@@ -186,3 +186,4 @@ Training speed was not affected by using omni-arc. In fact it was faster but thi
 - [ ] Refine the prompts using ChatGPT
 - [ ] Experiment to see if learning 3 tasks is better than learning two tasks. The baseline learns output-from-examples and input-from-inputs, the new experiment also learns code-from-examples. 10k steps per task.
 - [ ] Can we solve some of the evaluation tasks using generated code?
+- [ ] Discrepancies between datasets: bda2d7a6 has 5 samples on my dataset, 4 on the web
