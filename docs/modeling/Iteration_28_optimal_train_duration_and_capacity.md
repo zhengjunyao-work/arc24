@@ -22,6 +22,8 @@ training might be a good option for this challenge.
 
 ### Does LoRA achieve better generalization?
 
+These experiments are for 40k steps, batch size 16.
+
 | experiment       | accuracy | pass_32 | vote_2 | vote_1 |
 |------------------|----------|---------|--------|--------|
 | full fine-tuning | 12.25%   | 31.13%  | 22.85% | 18.69% |
