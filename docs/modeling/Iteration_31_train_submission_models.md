@@ -48,6 +48,9 @@ I have run the notebook on 10 validation samples and there is no sign of problem
 
 Maybe doing first the trainings with smaller datasets can alleviate the problem: [notebook](https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=199994827)
 
+I have downloaded the model and verified that the md5sum of the files is correct. So corruption
+of the files does not seem to be the problem.
+
 ## Results
 
 [Wandb dashboard](https://wandb.ai/guillermobarbadillo/20240925_submission_models?nw=nwuserguillermobarbadillo)

@@ -17,8 +17,6 @@ are affected.
 Since all the tasks are supposed to be independent and different (I already know that this is not true and are repeated
 tasks on the training dataset), increasing the batch size might help to learn better.
 
-## Development
-
 ## Results
 
 All experiments were done with LoRA rank 128. The only change was the batch size and learning rate, the number
@@ -33,9 +31,3 @@ default 16.
 
 We can increase the batch size and get same or better results. Thus when training omni-arc on multiple
 tasks it might be worth to use a bigger batch size.
-
-## Next steps
-
-## TODO
-
-- [ ]

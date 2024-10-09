@@ -156,6 +156,10 @@ there was an error when loading the model so I had to update transformers to 4.4
 
 It's possible that I will have to update the Kaggle environment as well.
 
+### Verified that Kaggle and Github dataset are identical
+
+[Notebook](https://www.kaggle.com/code/ironbar/differences-between-kaggle-and-github-dataset?scriptVersionId=200014570)
+
 ## Results
 
 ### Local experiments training metrics
@@ -183,7 +187,7 @@ Training speed was not affected by using omni-arc. In fact it was faster but thi
 - [x] Update fine-tuning script to support omni-arc dataset
 - [x] Is training speed affected by using omni-arc? I believe generation is fast enough to be done real-time
 - [x] Clone omni-arc repo in the cluster and add the path to the PYTHONPATH
-- [ ] Refine the prompts using ChatGPT
+- [x] Refine the prompts using ChatGPT
 - [ ] Experiment to see if learning 3 tasks is better than learning two tasks. The baseline learns output-from-examples and input-from-inputs, the new experiment also learns code-from-examples. 10k steps per task.
 - [ ] Can we solve some of the evaluation tasks using generated code?
 - [ ] Discrepancies between datasets: bda2d7a6 has 5 samples on my dataset, 4 on the web
