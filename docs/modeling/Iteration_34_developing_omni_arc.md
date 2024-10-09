@@ -7,7 +7,6 @@ _29-09-2024_
 Implement a first version of Omni-ARC and validate if the approach is promising:
 
 - Can we improve the generalization of the current approach by learning to predict code to do the tasks? Similar to the improvement that we got when learning the inputs distribution.
-- Can we use the predicted code to solve evaluation tasks?
 
 ## Motivation
 
@@ -184,10 +183,14 @@ initial 1200 samples. The weight indicates how frequently we sample omni-arc ver
 
 ## Conclusion
 
+We have implemented a first version of omni-arc and trained multiple models with it. The effect on
+the initial task of `output-from-examples` is unclear.
+
 ## Next steps
 
 - Solve the problem with never ending predictions from non-instruct models. I would like to use Qwen2.5 base model
   for the challenge.
+- Can we solve some of the evaluation tasks using generated code?
 
 ## TODO
 
@@ -198,4 +201,3 @@ initial 1200 samples. The weight indicates how frequently we sample omni-arc ver
 - [x] Clone omni-arc repo in the cluster and add the path to the PYTHONPATH
 - [x] Refine the prompts using ChatGPT
 - [x] Experiment to see if learning 3 tasks is better than learning two tasks. The baseline learns output-from-examples and input-from-inputs, the new experiment also learns code-from-examples. 10k steps per task.
-- [ ] Can we solve some of the evaluation tasks using generated code?

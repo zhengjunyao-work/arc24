@@ -59,6 +59,9 @@ of the files does not seem to be the problem.
 
 ## Next steps
 
+- Single training for 200k steps
+- Could I make it work with the non-instruct Qwen version?
+
 ## TODO
 
 - [ ] Using small LoRAs might open the door again to use 4 gpus for training. If training for longer is the key, this would be helpful.
