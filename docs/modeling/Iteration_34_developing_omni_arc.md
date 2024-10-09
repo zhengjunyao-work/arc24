@@ -174,11 +174,20 @@ I have only trained for 1k steps. It seems that the difficulty from easier to ha
 
 Training speed was not affected by using omni-arc. In fact it was faster but this could be due to the tasks being smaller.
 
+### Validation results
+
+![validation results](res/2024-10-09-11-30-32.png)
+
+It is unclear if training on new tasks like `code-from-examples` and `output-from-code` has a positive
+effect on the initial task of `output-from-examples`. We added an additional 100 training samples to the
+initial 1200 samples. The weight indicates how frequently we sample omni-arc versus the other datasets.
+
 ## Conclusion
 
 ## Next steps
 
-- Solve the problem with never ending predictions from non-instruct models.
+- Solve the problem with never ending predictions from non-instruct models. I would like to use Qwen2.5 base model
+  for the challenge.
 
 ## TODO
 
@@ -188,6 +197,5 @@ Training speed was not affected by using omni-arc. In fact it was faster but thi
 - [x] Is training speed affected by using omni-arc? I believe generation is fast enough to be done real-time
 - [x] Clone omni-arc repo in the cluster and add the path to the PYTHONPATH
 - [x] Refine the prompts using ChatGPT
-- [ ] Experiment to see if learning 3 tasks is better than learning two tasks. The baseline learns output-from-examples and input-from-inputs, the new experiment also learns code-from-examples. 10k steps per task.
+- [x] Experiment to see if learning 3 tasks is better than learning two tasks. The baseline learns output-from-examples and input-from-inputs, the new experiment also learns code-from-examples. 10k steps per task.
 - [ ] Can we solve some of the evaluation tasks using generated code?
-- [ ] Discrepancies between datasets: bda2d7a6 has 5 samples on my dataset, 4 on the web
