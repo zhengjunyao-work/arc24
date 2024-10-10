@@ -9,7 +9,7 @@ class CFG:
     # Model
     model_path: str = "/home/gbarbadillo/data/Qwen2-0.5B-arc"
     max_model_len: int = 10240 #61000 for phi-3
-    grid_encoder: str = 'GridShapeEncoder(RowNumberEncoder(ReplaceNumberEncoder(MinimalGridEncoder())))'
+    grid_encoder: str = 'GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))'
     prompt_version: str = 'output-from-examples-v0'
     # Dataset
     #dataset_path: str = '/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json'
@@ -98,7 +98,9 @@ def inference_main():
 
     sampling_params = get_sampling_params(cfg.best_of, cfg.temperature, cfg.n, cfg.max_output_tokens)
     outputs = generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=cfg.batch_size)
-    task_results = create_tasks_results(outputs, prompts_conf, grid_encoder, cfg.verbose)
+    task_results = create_tasks_results(
+        outputs=outputs, prompts_conf=prompts_conf, grid_encoder=grid_encoder,
+        prompt_version=cfg.prompt_version, data=data, verbose=cfg.verbose)
     solutions = create_solutions(task_results, data)
 
     with open(cfg.output_filepath, 'w') as f:
@@ -152,7 +154,7 @@ def generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=512)
     return outputs
 
 
-def create_tasks_results(outputs, prompts_conf, grid_encoder, verbose=False):
+def create_tasks_results(outputs, prompts_conf, grid_encoder, prompt_version, data, verbose=False):
     task_results = prompts_conf.copy()
     for idx, output in tqdm(enumerate(outputs), total=len(outputs), desc='Parsing outputs'):
         task_id = prompts_conf[idx]['task_id']
@@ -160,8 +162,20 @@ def create_tasks_results(outputs, prompts_conf, grid_encoder, verbose=False):
         sample_idx = prompts_conf[idx]['idx']
         response = output.outputs[0].text
         try:
-            grid = parse_grid_from_response(response, grid_encoder)
-            grid = revert_data_augmentation(grid, **data_augmentation_kwargs)
+            if prompt_version.startswith('code-from-examples'):
+                # TODO: it would be more efficient to solve the whole task at once, not just one sample
+                from omniarc.execution import safe_execute_predicted_code
+                code = response.split('```')[0]
+                augmented_task = apply_data_augmentation(data[task_id], **data_augmentation_kwargs)
+                predicted_task = safe_execute_predicted_code(code, augmented_task, func_name='task')
+                if predicted_task['train'] == augmented_task['train']:
+                    grid = predicted_task['test'][sample_idx]['output']
+                    grid = revert_data_augmentation(grid, **data_augmentation_kwargs)
+                else:
+                    grid = []
+            else:
+                grid = parse_grid_from_response(response, grid_encoder)
+                grid = revert_data_augmentation(grid, **data_augmentation_kwargs)
         except Exception as e:
             # TODO: better exception printing (shape of the grid)
             if verbose: print(f'Exception when parsing response from {task_id}_{sample_idx}: {e} \n{response}')
