@@ -131,15 +131,30 @@ had a very different dynamic.
 We can see that the code is much smaller than predicting the whole grid which can have up to 1000 tokens,
 but the code is 200 tokens at maximum, 5 times smaller.
 
+### How does the method scale with the number of predictions?
+
+![bad scaling](res/2024-10-10-12-11-40.png)
+
+This first models do not scale well with the number of predictions, the improvement is very slow.
+
+As a reference we can compare it to a experiment from [Iteration 30](Iteration_30_optimal_number_predictions.md)
+
+![80000 training steps](res/2024-09-25-12-55-54.png)
+
+My hypothesis is that the dataset is small and the model has not learned correctly yet.
+
 ## Conclusion
 
 ## Next steps
+
+- [ ] If the code approach does not pay off, we could try to train a model to verify the solutions. Given two solutions to the problem select the correct one.
 
 ## TODO
 
 - [x] How to execute the code safely and with timeouts? Check AIMO competition. This should be added
   to the omni-arc repo, because all the dsl functions are there.
-- [ ] How does the method scale with compute? Validation should allow to scale well.
+- [x] How does the method scale with compute? Validation should allow to scale well.
+- [x] Verify that everything is working fine by looking at the predictions. -> It is working fine, but the model is pretty bad at guessing the transformation. Probably more variability at the inputs is needed.
 - [x] What is the token distribution of the functions that implement the training tasks?
 - [x] Fix problems with evaluation metrics
 - [x] Fix problem with inference returning an error code
