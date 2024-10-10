@@ -124,6 +124,15 @@ are validated against the train dataset. When using temperature 0 there does not
 Made up to 132 predictions, but the accuracy improves very slowly. The output from examples approach
 had a very different dynamic.
 
+| model | accuracy | pass_n | vote_1 | unanswered |
+|-------|----------|--------|--------|------------|
+| 1     | 2.41%    | 3.75%  | 3.75%  | 97.59%     |
+| 2     | 3.00%    | 4.00%  | 4.00%  | 96.94%     |
+| 3     | 2.98%    | 4.75%  | 4.75%  | 97.02%     |
+
+On the best case we are able to solve close to 5% of the evaluation tasks.
+The most relevant aspect is that all the predictions are correct.
+
 ### Token distribution of omni-arc code
 
 ![token distribution](res/2024-10-10-11-40-11.png)
@@ -144,6 +153,10 @@ As a reference we can compare it to a experiment from [Iteration 30](Iteration_3
 My hypothesis is that the dataset is small and the model has not learned correctly yet.
 
 ## Conclusion
+
+We have been able to solve new tasks by generating python code. The first evaluation solves close to 5% of the
+evaluation tasks. The most relevant thing is that all the predictions are either correct or empty. Thus
+this approach is very good for ensembling.
 
 ## Next steps
 

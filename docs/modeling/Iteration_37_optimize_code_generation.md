@@ -20,3 +20,4 @@ _10-10-2024_
 - [ ] What is the best prompt? Is there any difference?
 - [ ] Is it helpful to learn to do other tasks?
 - [ ] Do the results improve if we do test-time fine-tuning?
+- [ ] What if I train on omniarc just on the default task?
