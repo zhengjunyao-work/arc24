@@ -78,6 +78,7 @@ def select_most_voted_solutions_solving_ties_with_logprob(task_outputs, n, tie_b
                 for i in range(len(most_voted_sample_solutions), n):
                     most_voted_sample_solutions[f'attempt_{i+1}'] = []
             most_voted_solutions[task_id].append(most_voted_sample_solutions)
+    add_empty_solutions(task_outputs, most_voted_solutions, n)
     return most_voted_solutions
 
 
@@ -106,6 +107,18 @@ def group_predictions(task_outputs):
         grouped_predictions[task_id][test_idx][grid_key]['cumulative_logprob'].append(output['cumulative_logprob'])
         grouped_predictions[task_id][test_idx][grid_key]['mean_cumulative_logprob'].append(output['cumulative_logprob'] / output['n_tokens'])
     return grouped_predictions
+
+
+def add_empty_solutions(task_outputs, solutions, n):
+    empty_response = {f'attempt_{i+1}': [] for i in range(n)}
+    for output in task_outputs:
+        task_id = output['task_id']
+        test_idx = output['idx']
+        if task_id not in solutions:
+            solutions[task_id] = [empty_response]
+        if test_idx >= len(solutions[task_id]):
+            solutions[task_id].append(empty_response)
+    return solutions
 
 
 def parse_args(args):
