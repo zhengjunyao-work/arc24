@@ -77,8 +77,10 @@ def inference(model_path, output_filepath, grid_encoder, predictions_per_task,
     # cmd += ' --random_seed 7' # TODO: remove the random seed
     print(cmd)
     ret = os.system(cmd)
-    if ret != 0:
-        raise Exception('Error running inference')
+    # if ret != 0:
+    #     raise Exception('Error running inference')
+    if not os.path.exists(output_filepath):
+        raise Exception('Output file not found, error running inference')
 
 
 def get_output_filepath(output_folder, predictions_per_task, dataset_path, temperature):
