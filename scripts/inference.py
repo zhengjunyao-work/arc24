@@ -22,6 +22,7 @@ class CFG:
     temperature: float = 0.0 # temperature for sampling, 0.0 for greedy search
     n: int = 1 # number of samples to generate
     batch_size: int = 512 # batch size for inference
+    swap_space: int = 4 # CPU swap space size (GiB) per GPU. Default: 4
     random_seed: Optional[int] = None # random seed for data augmentation
     verbose: bool = False
 
@@ -42,6 +43,7 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, help="batch size for inference")
     parser.add_argument('--max_output_tokens', type=int, help="Maximum number of tokens to generate")
     parser.add_argument('--random_seed', type=int, help="Random seed for data augmentation")
+    parser.add_argument('--swap_space', type=int, help="CPU swap space size (GiB) per GPU")
     parser.add_argument('--verbose', action='store_true', help="Print verbose output")
     return parser.parse_args()
 
@@ -87,6 +89,7 @@ def inference_main():
                 enforce_eager=True, # without this 13.9GB of memory is used on each GPU, with this is 13.3GB,
                 disable_log_stats=True,
                 max_num_seqs=255, # default is supposed to be 256 I have used it to solve some weird illegal memory error
+                swap_space=cfg.swap_space, # CPU swap space size (GiB) per GPU, has great influence on RAM but I haven't noticed any performance difference
                 )
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_path)
     set_random_seed(cfg.random_seed)
