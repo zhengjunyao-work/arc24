@@ -152,6 +152,12 @@ As a reference we can compare it to a experiment from [Iteration 30](Iteration_3
 
 My hypothesis is that the dataset is small and the model has not learned correctly yet.
 
+### First submissions
+
+I have made a first submission with model: `20241006_omniarc_validation/05_omni-arc-400-code-from-examples-v1-Qwen2.5-0.5B-Instruct_lora128_lr1e-4_bs32_7000steps_2gpus_8192msl/checkpoint-7000` and it solved 1 of the private test set tasks. It's a humble beginning, but if I can make it work this could be game-changing.
+
+I have also tried using test-time fine-tuning but then it did not solve any of the tasks.
+
 ## Conclusion
 
 We have been able to solve new tasks by generating python code. The first evaluation solves close to 5% of the
