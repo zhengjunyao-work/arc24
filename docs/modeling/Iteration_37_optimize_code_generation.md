@@ -19,10 +19,14 @@ Solving tasks with code works, but can I optimize and improve the accuracy of th
 
 ## Next steps
 
-- Try with bigger models. If test-time fine-tuning is not necessary we might benefit from using bigger or coding models.
+- Try with bigger models. If test-time fine-tuning is not necessary we might benefit from using bigger or coding models. F.e.
+  - https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct
+  - https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct
 - Improve the omni-arc dataset:
   - Add more tasks to increase coverage
   - Add more training inputs to have more variability (can I reuse re-arc for this?)
+  - Add task variations
+  - Add task to learn to use the primitives
 
 ## TODO
 
