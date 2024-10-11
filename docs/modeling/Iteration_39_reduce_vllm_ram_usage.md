@@ -22,6 +22,8 @@ python inference.py --model_path /home/gbarbadillo/data/temp_model --output_file
 
 ## Results
 
+### Local results
+
 | swap_space | RAM usage | inference time (s) |
 |------------|-----------|--------------------|
 | 4          | 16        | 530                |
@@ -32,9 +34,31 @@ python inference.py --model_path /home/gbarbadillo/data/temp_model --output_file
 We have reached an enormous VRAM decrease without a significant effect on inference time nor in accuracy.
 This results were obtained on my PC, I should repeat the experiments on Kaggle.
 
+### Kaggle results
+
+| swap_space | RAM usage | inference time (s) |
+|------------|-----------|--------------------|
+| 4          | 50%       | 84                 |
+| 2          | 32%       | 79                 |
+| 1          | 22%       | 79                 |
+| 0          | 12%       | 78                 |
+
+We see the same trend, we can decrease the RAM usage by a lot while the inference time almost does not
+change.
+
+### Remember icecuber RAM usage
+
+On this [notebook](https://www.kaggle.com/code/ironbar/measure-icecuber-resources) we can see that sometimes icecuber uses up to 80% of the RAM. So if we want to run it on parallel
+with VLLM inference we will have to use no `swap_space`.
+
 ## Conclusion
 
+We have found that we can decrease the RAM usage of VLLM dramatically apparently without any
+effect on accuracy nor on speed (at least for ARC inference.)
+
 ## Next steps
+
+- Create a new notebook for Omni-ARC inference that runs all 2020 solution in parallel. On a first step it tries to solve the tasks using code. Then it does test-time fine-tuning on the remaining tasks.
 
 ## TODO
 
