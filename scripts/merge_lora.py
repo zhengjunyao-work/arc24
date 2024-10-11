@@ -49,6 +49,10 @@ def merge_lora(base_model_path, lora_path, output_path):
         merged_model = model.merge_and_unload()
         logger.info('Saving the merged model to the output path')
         merged_model.save_pretrained(output_path)
+        for filepath in glob.glob(os.path.join(lora_path, '*.json')):
+            dst = os.path.join(output_path, os.path.basename(filepath))
+            logger.info(f'Copying {filepath}...')
+            shutil.copy(filepath, dst)
     else:
         logger.warning('The provided lora_path does not contain a lora adapter model, it is a full model')
         os.makedirs(output_path, exist_ok=True)

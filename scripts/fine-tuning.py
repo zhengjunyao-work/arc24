@@ -161,6 +161,7 @@ def fine_tuning_main():
     data_collator = get_data_collator(cfg.model_path, tokenizer)
     trainer = SFTTrainer(
         model=model,
+        tokenizer=tokenizer,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
         data_collator=data_collator,
@@ -350,11 +351,14 @@ def get_tokenizer(model_path, model, pad_token='<|pad|>'):
     tokenizer = AutoTokenizer.from_pretrained(
         model_path,
         trust_remote_code=True)
-    if 'pad_token' not in tokenizer.special_tokens_map or tokenizer.pad_token == tokenizer.eos_token:
-        if 'pad_token' not in tokenizer.special_tokens_map:
-            logger.info('Adding padding token because the tokenizer does not have one')
+    if tokenizer.pad_token == tokenizer.eos_token:
+        if 'qwen' in model_path.lower():
+            logger.info('Changing eos token to <|im_end|> for Qwen models, because it is the same as padding token <|endoftext|>')
+            tokenizer.eos_token = '<|im_end|>'
         else:
-            logger.info('Changing padding token because it is the same as the end-of-sequence token')
+            raise NotImplementedError('Changing padding token is only implemented for Qwen models')
+    elif 'pad_token' not in tokenizer.special_tokens_map or tokenizer.pad_token == tokenizer.eos_token:
+        logger.info('Adding padding token because the tokenizer does not have one')
         assert pad_token not in tokenizer.get_vocab()
         tokenizer.add_special_tokens({'pad_token': pad_token})
         tokenizer.padding_side = 'right'
