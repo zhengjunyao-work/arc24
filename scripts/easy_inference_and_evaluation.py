@@ -90,6 +90,8 @@ def get_output_filepath(output_folder, predictions_per_task, dataset_path, tempe
         name = 'evaluation'
     elif dataset_path.endswith('arc-agi_training_challenges.json'):
         name = 'training'
+    elif dataset_path.endswith('smaller_5_tasks.json'):
+        name = 'smaller_5_tasks'
     else:
         raise Exception(f'Unknown dataset path: {dataset_path}')
 
