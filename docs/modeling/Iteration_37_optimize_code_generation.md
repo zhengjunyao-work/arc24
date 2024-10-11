@@ -4,7 +4,12 @@ _10-10-2024_
 
 ## Goal
 
+We have verified that we can can solve ARC tasks by generating python code. Let's try to understand the
+dynamics of this new training and optimize the hyperparameters.
+
 ## Motivation
+
+Solving tasks with code works, but can I optimize and improve the accuracy of the model?
 
 ## Development
 
@@ -13,6 +18,11 @@ _10-10-2024_
 ## Conclusion
 
 ## Next steps
+
+- Try with bigger models. If test-time fine-tuning is not necessary we might benefit from using bigger or coding models.
+- Improve the omni-arc dataset:
+  - Add more tasks to increase coverage
+  - Add more training inputs to have more variability (can I reuse re-arc for this?)
 
 ## TODO
 
