@@ -17,20 +17,26 @@ def main(args=None):
         json.dump(combined_sub, f)
 
 
-def combine_submissions(sub_1, sub_2, give_preference_to_second_submission_on_second_attempt):
-    combined_sub = sub_1.copy()
+def combine_submissions(sub_1, sub_2, give_preference_to_second_submission_on_second_attempt=True):
+    # trick to give preference to sub_1, but at the same time we have all the keys from sub_2
+    combined_sub = sub_2.copy()
+    combined_sub.update(sub_1)
     for task_id, values in combined_sub.items():
+        if task_id not in sub_2:
+            continue
         for i, _ in enumerate(values):
-            # If the first submission is empty, we take the second submission
-            if not combined_sub[task_id][i]['attempt_1']:
+            sub_1_attempt_1_is_empty = not combined_sub[task_id][i]['attempt_1']
+            sub_1_attempt_2_is_empty = not combined_sub[task_id][i]['attempt_2']
+            if sub_1_attempt_1_is_empty: # take second submission
                 combined_sub[task_id][i] = sub_2[task_id][i]
-            # If the second attempt is empty, we try to fill it with the second submission
-            elif not combined_sub[task_id][i]['attempt_2'] or give_preference_to_second_submission_on_second_attempt:
-                # Otherwise If the first attempt from second submission is valid and different from the first submission, we take the second submission as the second attempt
-                if sub_2[task_id][i]['attempt_1'] and sub_2[task_id][i]['attempt_1'] != combined_sub[task_id][i]['attempt_1']:
+            elif sub_1_attempt_2_is_empty or give_preference_to_second_submission_on_second_attempt:
+                sub_2_attempt_1_is_not_empty = bool(sub_2[task_id][i]['attempt_1'])
+                sub_2_attempt_2_is_not_empty = bool(sub_2[task_id][i]['attempt_2'])
+                sub_2_attempt_1_is_different = sub_2[task_id][i]['attempt_1'] != combined_sub[task_id][i]['attempt_1']
+                sub_2_attempt_2_is_different = sub_2[task_id][i]['attempt_2'] != combined_sub[task_id][i]['attempt_1']
+                if sub_2_attempt_1_is_not_empty and sub_2_attempt_1_is_different:
                     combined_sub[task_id][i]['attempt_2'] = sub_2[task_id][i]['attempt_1']
-                # Otherwise we take the second attempt from the second submission if it is different and valid
-                elif sub_2[task_id][i]['attempt_2'] and sub_2[task_id][i]['attempt_2'] != combined_sub[task_id][i]['attempt_1']:
+                elif sub_2_attempt_2_is_not_empty and sub_2_attempt_2_is_different:
                     combined_sub[task_id][i]['attempt_2'] = sub_2[task_id][i]['attempt_2']
     return combined_sub
 
