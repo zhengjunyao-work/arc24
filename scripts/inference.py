@@ -50,6 +50,7 @@ def parse_args():
 
 import json
 import os
+import numpy as np
 from tqdm.auto import tqdm
 from itertools import islice, product
 
@@ -179,6 +180,7 @@ def create_tasks_results(outputs, prompts_conf, grid_encoder, prompt_version, da
             else:
                 grid = parse_grid_from_response(response, grid_encoder)
                 grid = revert_data_augmentation(grid, **data_augmentation_kwargs)
+            validate_grid(grid)
         except Exception as e:
             # TODO: better exception printing (shape of the grid)
             if verbose: print(f'Exception when parsing response from {task_id}_{sample_idx}: {e} \n{response}')
@@ -188,6 +190,16 @@ def create_tasks_results(outputs, prompts_conf, grid_encoder, prompt_version, da
         task_results[idx]['cumulative_logprob'] = output.outputs[0].cumulative_logprob
         task_results[idx]['n_tokens'] = len(output.outputs[0].token_ids)
     return task_results
+
+
+def validate_grid(grid):
+    assert isinstance(grid, list), f'Grid is not a list: {grid}'
+    grid = np.array(grid, dtype=np.int8)
+    assert grid.ndim == 2, f'Grid has more than 2 dimensions: {grid.ndim}'
+    assert grid.shape[0] > 0, f'Grid has 0 rows: {grid.shape}'
+    assert grid.shape[1] > 0, f'Grid has 0 columns: {grid.shape}'
+    assert grid.min() >= 0, f'Grid has negative values: {grid.min()}'
+    assert grid.max() < 10, f'Grid has values greater than 9: {grid.max()}'
 
 
 def create_solutions(task_results, data):
