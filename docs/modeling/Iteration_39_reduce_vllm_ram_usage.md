@@ -17,7 +17,9 @@ I have been playing with VLLM parameters and `swap_space` seems to be the one wi
 > CPU swap space size (GiB) per GPU.
 
 ```bash
-python inference.py --model_path /home/gbarbadillo/data/temp_model --output_filepath /mnt/hdd0/Kaggle/arc24/evaluations/20241007_batch_size/01_bs16_lr5e-5_Qwen2.5-0.5B-Instruct_10000steps_2gpus_8192msl/checkpoint-10000/inference_evaluation_x009.json --predictions_per_task 9 --grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" --dataset_path /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json --prompt_version output-from-examples-v1 --temperature 0.0
+export checkpoint_folder=/mnt/hdd0/Kaggle/arc24/models/20241007_batch_size/01_bs16_lr5e-5_Qwen2.5-0.5B-Instruct_10000steps_2gpus_8192msl/checkpoint-10000
+rm /mnt/hdd0/Kaggle/arc24/evaluations/20241007_batch_size/01_bs16_lr5e-5_Qwen2.5-0.5B-Instruct_10000steps_2gpus_8192msl/checkpoint-10000/inference_evaluation_x009.json
+python easy_inference_and_evaluation.py "${checkpoint_folder}" --dataset_path /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json --predictions_per_task 9
 ```
 
 ## Results

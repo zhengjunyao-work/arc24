@@ -15,6 +15,19 @@ Solving tasks with code works, but can I optimize and improve the accuracy of th
 
 ## Results
 
+### How does the training steps affect the accuracy?
+
+### Is it helpful to learn to do other tasks?
+
+### Is it helpful to use a temperature different than 0?
+
+There is great uncertainty in the results, so the best way to study the tendency is to compute the
+mean value for all the experiments.
+
+![temperature effect](res/2024-10-12-12-10-35.png)
+
+The improvement is not huge, but we get better results on average when using a temperature of 0.7
+
 ## Conclusion
 
 ## Next steps
