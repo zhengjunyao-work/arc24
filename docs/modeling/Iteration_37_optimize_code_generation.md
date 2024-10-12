@@ -59,6 +59,15 @@ So maybe current performance is good for the amount and quality of data we have.
 
 ## Conclusion
 
+We have not been able to improve over the previous iteration: we only solve 5% of the evaluation tasks.
+
+However we have gained the following learnings:
+
+- It is beneficial to train to learn multiple tasks, not just `code-from-examples`
+- Using a temperature of 0.7 is beneficial
+- There isn't a clear relation between training steps and model accuracy
+- The choose of prompts does not seem to be very relevant
+
 ## Next steps
 
 - Try with bigger models. If test-time fine-tuning is not necessary we might benefit from using bigger or coding models. F.e.
@@ -69,11 +78,11 @@ So maybe current performance is good for the amount and quality of data we have.
   - Add more training inputs to have more variability (can I reuse re-arc for this?)
   - Add task variations
   - Add task to learn to use the primitives
+- Does test-time fine-tuning help to generate better code?
 
 ## TODO
 
 - [x] How does the training steps affect the accuracy? -> Run trainings with different training lenght, just using code data
-- [ ] What is the best prompt? Is there any difference?
+- [x] What is the best prompt? Is there any difference?
 - [x] Is it helpful to learn to do other tasks?
-- [ ] Do the results improve if we do test-time fine-tuning?
 - [x] What if I train on omniarc just on the default task?
