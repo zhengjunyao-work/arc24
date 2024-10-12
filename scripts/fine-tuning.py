@@ -246,7 +246,8 @@ def get_device_map(n_gpus, model_path, device_map):
                 'model.layers.21': 1,
                 'model.layers.22': 1,
                 'model.layers.23': 1,
-                'model.norm': 1
+                'model.norm': 1,
+                'model.rotary_emb': 1,
             }
         elif 'qwen2-1.5b-instruct' in model_path.lower():
             logger.info('Using qwen2-1.5b-instruct custom device map')
@@ -281,7 +282,9 @@ def get_device_map(n_gpus, model_path, device_map):
                 'model.layers.25': 1,
                 'model.layers.26': 1,
                 'model.layers.27': 1,
-                'model.norm': 1}
+                'model.norm': 1,
+                'model.rotary_emb': 1,
+                }
         else:
             raise NotImplementedError(f'Custom device map not implemented for {model_path}')
     else:
@@ -341,6 +344,7 @@ def get_model(model_path, n_gpus, torch_dtype, device_map, use_4bit_quantization
         torch_dtype=get_torch_dtype(torch_dtype), #bfloat16 is 4 times slower on Kaggle than float16, on my computer they are the same speed
         attn_implementation=get_flash_attention_implementation(),
         )
+    # print(model.hf_device_map)
     print_gpu_memory()
     if use_4bit_quantization:
         model = prepare_model_for_kbit_training(model)
