@@ -35,6 +35,23 @@ If I could have access to a GPU with 80GB of VRAM I could increase the training 
 
 ## Results
 
+### Training speed
+
+A training for 2k steps with batch size 32 takes:
+
+- 16000s (4.4h) for Qwen2.5-0.5B-Instruct
+- 21000s (5.8h) for Qwen2.5-Coder-1.5B-Instruct
+- 60000s (16.6h) for Qwen2.5-Coder-7B-Instruct
+
+The 7B mdoel is much slower, but the 1.5B has acceptable speed. Maybe the GPU is not being used at
+its maximum capacity when training the 0.5B model.
+
+### Inference speed
+
+- 300 seconds for Qwen2.5-0.5B-Instruct
+- 504 seconds for Qwen2.5-Coder-1.5B-Instruct
+- 1311.5445 seconds for Qwen2.5-Coder-7B-Instruct
+
 ## Conclusion
 
 ## Next steps
