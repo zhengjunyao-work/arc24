@@ -51,11 +51,30 @@ Maybe doing first the trainings with smaller datasets can alleviate the problem:
 I have downloaded the model and verified that the md5sum of the files is correct. So corruption
 of the files does not seem to be the problem.
 
+I have repeated the submission and it scored 37, so maybe there is nothing wrong.
+
 ## Results
 
 [Wandb dashboard](https://wandb.ai/guillermobarbadillo/20240925_submission_models?nw=nwuserguillermobarbadillo)
 
+### Leaderboard results
+
+By training the models for longer I have been able to improve the LB score from 36 to 40. Learnings:
+
+- Models trained with LoRA score higher than full fine-tuning. (37 vs 40). My guess is that it is better
+  for test-time fine-tuning to fine-tune an already trained LoRA than to fine-tune a new LoRA.
+- LoRA with rank 32 scores lower than rank 64 or 128 (37 vs 40)
+- Training for 400k steps did not show improvements over training for 200k steps.
+
+### Validation experiments about learning rate and LoRA rank for test-time fine-tuning a new LoRA
+
+![table with results](res/2024-10-13-09-47-28.png)
+
 ## Conclusion
+
+On this iteration we have improved the LB score from 36 to 40, reaching the second position in the challenge.
+
+The best results are obtained using LoRA with rank 64 or 128 for 200k steps.
 
 ## Next steps
 

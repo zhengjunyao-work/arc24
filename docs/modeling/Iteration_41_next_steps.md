@@ -52,6 +52,10 @@ I need to find games that can be represented on a image of 30x30 pixels or less,
 
 This approach is interesting because I don't need to create the data myself just like in the OmniARC approach.
 
+For example the Snake game could fit the requirements.
+
+![snake](res/2024-10-13-09-20-15.png)
+
 ### Revisit SmolLM and how to train it for long context
 
 It might be possible that we more effort I can make SmolLM models work with bigger context window. Or
