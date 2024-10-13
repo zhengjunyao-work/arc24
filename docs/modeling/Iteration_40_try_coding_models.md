@@ -33,6 +33,11 @@ I have checked the trainings with [Llama-3.1-8B](Iteration_20_bigger_models.md) 
 
 If I could have access to a GPU with 80GB of VRAM I could increase the training context length.
 
+### Omni-arc state
+
+All these experiments were done with omni-arc at commit `589b6695d56ad2dbd7f37c78e9923cdec646ef54`.
+There were around 150 implemented training tasks.
+
 ## Results
 
 ### Training speed
@@ -59,4 +64,6 @@ its maximum capacity when training the 0.5B model.
 ## TODO
 
 - [ ] Can we beat the baseline 5% accuracy of Qwen2.5-0.5B-Instruct with coder models?
-- [ ] Inference and train speed comparison of the models
+- [x] Inference and train speed comparison of the models
+- [ ] What if I decrease the size or LoRA rank?
+- [ ] How well do these models scale with the number of predictions?
