@@ -1,4 +1,4 @@
-# Iteration n. Iteration_title
+# Iteration 27. Fix data augmentation bug
 
 _22-09-2024_
 
