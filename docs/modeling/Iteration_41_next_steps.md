@@ -11,7 +11,8 @@ scores. I need to think ideas and prioritize them.
 
 ## Ideas
 
-These are the most promising ideas, I present them from the most promising to the least.
+These are the most promising ideas, I present them from the most promising to the least. I believe I can
+try them all, but I should focus on OmniARC.
 
 ### Improve OmniARC, more and better data for training
 
