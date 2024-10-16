@@ -437,9 +437,9 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
     for idx, (filepath, prompt_version) in tqdm(enumerate(train_datasets), desc='Loading training datasets'):
         if filepath.startswith('omni-arc'):
             n_tasks = int(filepath.split('-')[-1])
-            logger.info(f'Creating omni-arc dataset with {n_tasks} tasks')
             from omniarc.dataset import create_dataset as create_omniarc_dataset
             omniarc_dataset = create_omniarc_dataset()
+            logger.info(f'Creating omni-arc dataset with {n_tasks} tasks (real number of tasks is {len(omniarc_dataset)})')
             dataset = {f'omni-arc-{idx}|{key}|{prompt_version}': omniarc_dataset for key in range(n_tasks)}
         else:
             dataset = load_arc_data_with_solutions(filepath)
