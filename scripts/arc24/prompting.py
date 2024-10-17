@@ -71,10 +71,10 @@ llama 3.1
     return split_text.join(text.split(split_text)[:-1])
 
 
-def print_smaller_prompt(prompts):
-    smaller_prompt = sorted(prompts, key=lambda x: len(x))[0]
+def print_smallest_prompt(prompts):
+    smallest_prompt = sorted(prompts, key=lambda x: len(x))[0]
     print('\n\nSmaller prompt:')
-    pretty_print_prompt(smaller_prompt)
+    pretty_print_prompt(smallest_prompt)
     print('\n\n')
 
 
@@ -125,6 +125,8 @@ def get_prompt_templates(prompt_version):
         return system_prompt_v1, prompt_template_code_from_examples_v1, answer_template_code_from_examples_v0
     elif prompt_version == 'code-from-examples-v2':
         return system_prompt_v1, prompt_template_code_from_examples_v2, answer_template_code_from_examples_v2
+    elif prompt_version == 'code-from-examples-v3':
+        return system_prompt_v1, prompt_template_code_from_examples_v3, answer_template_code_from_examples_v2
     elif prompt_version == 'output-from-code-v0':
         return system_prompt_v1, prompt_template_output_from_code_v0, answer_template_v0
     else:
@@ -303,6 +305,40 @@ answer_template_code_from_examples_v2 = Template("""## Code
 This is the Python function that implements the transformation logic:
 
 {{ output }}""")
+
+prompt_template_code_from_examples_v3 = Template("""You are tasked with solving a transformation problem from the Abstraction and Reasoning Challenge (ARC).
+The goal is to generate a Python function called `task` that receives a 2D numpy array, `img`, and transforms it to match the desired output.
+
+Below are several input-output examples that illustrate the transformation. Your function should generalize the pattern from these examples to solve any input following the same logic.
+
+## Key Priors:
+
+- **Objectness**: Consider the grid as containing objects (groups of connected cells) rather than just individual pixels.
+- **Goal-Directed**: The transformation should achieve a specific goal, such as creating symmetry or changing the color of specific objects.
+- **Numbers & Counting**: Keep track of the number of objects, sizes, and their relative positions.
+- **Geometry & Topology**: Use spatial relationships such as adjacency, enclosure, or symmetry.
+
+Carefully analyze the examples and find the underlying transformation logic.
+
+## Examples
+{% for sample in train_samples %}
+### Example {{ loop.index }}
+
+#### Input
+
+{{ sample.input }}
+
+#### Output
+
+{{ sample.output }}
+{% endfor %}
+### Test case
+
+#### Input
+
+{{ test_input }}
+""")
+
 
 # output-from-code
 prompt_template_output_from_code_v0 = Template("""Your task is to transform the input grid using the transformation defined in the python code below.

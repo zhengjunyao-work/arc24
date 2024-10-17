@@ -23,7 +23,7 @@ from arc24.data_augmentation import (
     set_random_seed,
     random_compose_new_task_by_adding_additional_transformation
 )
-from arc24.prompting import create_prompts_from_task, print_smaller_prompt
+from arc24.prompting import create_prompts_from_task, print_smallest_prompt
 from arc24.data import load_arc_data_with_solutions
 from arc24.logging import log_execution_time, logging
 
@@ -415,7 +415,7 @@ def create_validation_dataset(filepath, prompt_version, grid_encoder, tokenizer,
     prompts = []
     for task in tqdm(tasks, desc='create prompts'):
         prompts.extend(create_prompts_from_task(task, grid_encoder, tokenizer, prompt_version=prompt_version))
-    if verbose: print_smaller_prompt(prompts)
+    if verbose: print_smallest_prompt(prompts)
     prompt_lengths = [len(tokenizer.encode(prompt)) for prompt in tqdm(prompts, desc='Calculating prompt lengths')]
     if verbose: print_prompt_length_percentiles(prompt_lengths, prefix='Validation')
     prompts = [prompt for prompt, prompt_length in zip(prompts, prompt_lengths) if prompt_length < max_seq_len]

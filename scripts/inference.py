@@ -59,7 +59,7 @@ from transformers import AutoTokenizer
 
 from arc24.data_augmentation import (
     apply_data_augmentation, revert_data_augmentation, get_random_color_map, set_random_seed)
-from arc24.prompting import parse_grid_from_response, print_smaller_prompt, create_prompts_from_task
+from arc24.prompting import parse_grid_from_response, print_smallest_prompt, create_prompts_from_task
 from arc24.encoders import create_grid_encoder
 from arc24.logging import log_execution_time, logging
 
@@ -98,7 +98,7 @@ def inference_main():
     prompts_conf = create_prompts(
         data, grid_encoder, tokenizer, cfg.prompt_version, cfg.predictions_per_task)
     prompts = [conf['prompt'] for conf in prompts_conf]
-    if cfg.verbose: print_smaller_prompt(prompts)
+    if cfg.verbose: print_smallest_prompt(prompts)
 
     sampling_params = get_sampling_params(cfg.best_of, cfg.temperature, cfg.n, cfg.max_output_tokens)
     outputs = generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=cfg.batch_size)
