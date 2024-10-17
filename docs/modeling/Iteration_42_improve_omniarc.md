@@ -25,6 +25,12 @@ able to solve just 5% of the evaluation dataset. There should be a lot of room f
 
 ## Next steps
 
+- Many times I do an initial implementation and there is some little detail wrong. I correct the implementation
+  and then it's fine. The ideal system should also have this opportunity. However training such a model
+  will require a larger context length, and I cannot afford it with the current hardware.
+- I have found one task that required looking at the test input to properly implement the function.
+  Create a new version of the prompt that uses also the test input.
+
 ## TODO
 
 - [ ]
