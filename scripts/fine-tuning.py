@@ -430,7 +430,8 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                             subsample_tasks_ratio=None,
                             compose_new_task_probability=0.5,
                             compose_new_task_weights=None,
-                            verbose=False):
+                            verbose=False,
+                            max_consecutive_exceptions=20):
     """
     """
     data = dict()
@@ -453,41 +454,49 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
         logger.info(f'Subsampled {len(task_ids)} training tasks out of a total of {len(data)}')
     else:
         logger.info(f'Using all {len(task_ids)} training tasks')
+    consecutive_exceptions = 0
     while True:
-        if len(prompt_lengths) >= log_prompt_length_every:
-            if verbose: print_prompt_length_percentiles(prompt_lengths, prefix='Training')
-            check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len)
-            prompt_lengths = []
-        random.shuffle(task_ids)
-        for task_id in task_ids:
-            prompt_version = task_id.split('|')[-1]
-            if task_id.startswith('omni-arc'):
-                task = data[task_id].sample()[1]
-            else:
-                task = data[task_id]
-                if isinstance(task, list): # some datasets such as neoeye's tama have different variations of the same task
-                    task = random.choice(task)
-                if 'test' not in task and 'n_train' in task:
-                    task = create_random_task_from_task_without_test(task)
-                task = random_augment_task(task)
-                if random.random() < compose_new_task_probability:
-                    task = random_compose_new_task_by_adding_additional_transformation(
-                        task, weights=compose_new_task_weights)
-            if remove_train_samples_to_fit_max_seq_len:
-                while len(task['train']):
+        try:
+            if len(prompt_lengths) >= log_prompt_length_every:
+                if verbose: print_prompt_length_percentiles(prompt_lengths, prefix='Training')
+                check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len)
+                prompt_lengths = []
+            random.shuffle(task_ids)
+            for task_id in task_ids:
+                prompt_version = task_id.split('|')[-1]
+                if task_id.startswith('omni-arc'):
+                    task = data[task_id].sample()[1]
+                else:
+                    task = data[task_id]
+                    if isinstance(task, list): # some datasets such as neoeye's tama have different variations of the same task
+                        task = random.choice(task)
+                    if 'test' not in task and 'n_train' in task:
+                        task = create_random_task_from_task_without_test(task)
+                    task = random_augment_task(task)
+                    if random.random() < compose_new_task_probability:
+                        task = random_compose_new_task_by_adding_additional_transformation(
+                            task, weights=compose_new_task_weights)
+                if remove_train_samples_to_fit_max_seq_len:
+                    while len(task['train']):
+                        prompt, prompt_length = _create_prompt_smaller_than_max_seq_len(
+                            task, grid_encoder, tokenizer, max_seq_len, prompt_version=prompt_version)
+                        if prompt is not None:
+                            break
+                        task = remove_last_train_sample(task)
+                else:
                     prompt, prompt_length = _create_prompt_smaller_than_max_seq_len(
                         task, grid_encoder, tokenizer, max_seq_len, prompt_version=prompt_version)
-                    if prompt is not None:
-                        break
-                    task = remove_last_train_sample(task)
-            else:
-                prompt, prompt_length = _create_prompt_smaller_than_max_seq_len(
-                    task, grid_encoder, tokenizer, max_seq_len, prompt_version=prompt_version)
-            prompt_lengths.append(prompt_length)
-            if prompt is not None:
-                yield {'text': prompt}
-            else:
-                logger.debug(f'Prompt was {prompt_length}>{max_seq_len} tokens for task {task_id}, skipping task')
+                prompt_lengths.append(prompt_length)
+                consecutive_exceptions = 0
+                if prompt is not None:
+                    yield {'text': prompt}
+                else:
+                    logger.debug(f'Prompt was {prompt_length}>{max_seq_len} tokens for task {task_id}, skipping task')
+        except Exception as e:
+            consecutive_exceptions += 1
+            logger.error(f"An error occurred when sampling ({consecutive_exceptions}/{max_consecutive_exceptions}): {e}")
+            if consecutive_exceptions >= max_consecutive_exceptions:
+                raise Exception(f"{max_consecutive_exceptions} consecutive exceptions occurred.") from e
 
 
 def create_random_task_from_task_without_test(task):
