@@ -455,6 +455,7 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
     else:
         logger.info(f'Using all {len(task_ids)} training tasks')
     consecutive_exceptions = 0
+    sample_idx = 0
     while True:
         try:
             if len(prompt_lengths) >= log_prompt_length_every:
@@ -463,6 +464,7 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                 prompt_lengths = []
             random.shuffle(task_ids)
             for task_id in task_ids:
+                sample_idx += 1
                 prompt_version = task_id.split('|')[-1]
                 if task_id.startswith('omni-arc'):
                     task = data[task_id].sample()[1]
@@ -494,7 +496,7 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                     logger.debug(f'Prompt was {prompt_length}>{max_seq_len} tokens for task {task_id}, skipping task')
         except Exception as e:
             consecutive_exceptions += 1
-            logger.error(f"An error occurred when sampling ({consecutive_exceptions}/{max_consecutive_exceptions}): {e}")
+            logger.error(f"An error occurred when generating sample {sample_idx} (consecutive exception {consecutive_exceptions}/{max_consecutive_exceptions}): {e}")
             if consecutive_exceptions >= max_consecutive_exceptions:
                 raise Exception(f"{max_consecutive_exceptions} consecutive exceptions occurred.") from e
 
