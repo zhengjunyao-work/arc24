@@ -16,8 +16,20 @@ able to solve just 5% of the evaluation dataset. There should be a lot of room f
 - Add more training inputs to have more variability (can I reuse re-arc for this?)
 - Add task variations
 - Add task to learn to use the primitives
+- Implement the evaluation tasks (although this will only help to improve on leaderboard and will leak information of the evaluation set to my head)
 
 ## Development
+
+### Implement more training tasks
+
+I have increased the number of training tasks from 150 to 269.
+
+### Make execution safer
+
+I have found that one of the evaluations created a `colors.txt` file. I do not want the execution to
+have input/output capabilities.
+
+TODO: Once I have a model that is compatible with 0.3.0 version update the execution code to be safer: https://chatgpt.com/c/671217ca-e944-8012-a3b5-8b3a004a013a
 
 ## Results
 
