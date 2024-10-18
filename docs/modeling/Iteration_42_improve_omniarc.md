@@ -31,6 +31,20 @@ have input/output capabilities.
 
 TODO: Once I have a model that is compatible with 0.3.0 version update the execution code to be safer: https://chatgpt.com/c/671217ca-e944-8012-a3b5-8b3a004a013a
 
+### Creating more training inputs
+
+Let's analyze how can I add more inputs for each task:
+
+- Use re-arc dataset. This would be a great option if the re-arc dataset follows the same distribution
+  as the original tasks (I'm not sure about this), because otherwise the task implementations won't work.
+- Write my own python generators. It's very likely that with the right level of abstraction I can
+  quickly implement generator for the training tasks. Requires more work than simply using re-arc.
+- Use the model to generate new inputs. I have already trained models to learn the input distribution,
+  thus it is possible to use those models to generate new inputs. The disadvantage of this approach
+  is that I would have to manually verify the inputs. It is very likely that the model would fail
+  to generate some inputs, so in those cases I would have to write python code. I might also need
+  some grid editor to correct small mistakes in the inputs.
+
 ## Results
 
 ### First results
@@ -59,6 +73,10 @@ How could we reduce overfitting and improve generalization?
 
 This two actions should force the model to better learn the relation between examples and code.
 
+It's very likely that the bad scaling behavior that we observed in recent iterations was caused by the
+poor generalization. Thus if we unlock generalization it is possible that we are going to improve
+the accuracy of the model, but also the model could improve given more compute (more predictions).
+
 ## Conclusion
 
 ## Next steps
@@ -71,4 +89,6 @@ This two actions should force the model to better learn the relation between exa
 
 ## TODO
 
-- [ ]
+- [ ] Restrict globals
+- [ ] Analyze RE-ARC input distribution
+- [ ] Analyze generated input distribution
