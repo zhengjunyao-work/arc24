@@ -66,8 +66,8 @@ def select_most_voted_solutions_solving_ties_with_logprob(task_outputs, n, tie_b
     grouped_predictions = group_predictions(task_outputs)
     most_voted_solutions = dict()
     for task_id, task_solutions in grouped_predictions.items():
-        most_voted_solutions[task_id] = list()
-        for test_idx, _ in enumerate(task_solutions):
+        most_voted_solutions[task_id] = [{f'attempt_{i+1}': [] for i in range(n)} for _ in range(max(task_solutions.keys())+1)]
+        for test_idx, sample_solutions in task_solutions.items():
             sample_solutions = task_solutions[test_idx]
             for solution in sample_solutions.values():
                 solution['ranking'] = (len(solution[tie_breaking_metric]), np.mean(solution[tie_breaking_metric]))
@@ -77,7 +77,7 @@ def select_most_voted_solutions_solving_ties_with_logprob(task_outputs, n, tie_b
             if len(most_voted_sample_solutions) < n:
                 for i in range(len(most_voted_sample_solutions), n):
                     most_voted_sample_solutions[f'attempt_{i+1}'] = []
-            most_voted_solutions[task_id].append(most_voted_sample_solutions)
+            most_voted_solutions[task_id][test_idx] = most_voted_sample_solutions
     add_empty_solutions(task_outputs, most_voted_solutions, n)
     return most_voted_solutions
 
