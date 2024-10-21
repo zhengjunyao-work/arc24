@@ -42,7 +42,9 @@ Benefits of this approach:
 - The data can be generated entirely automatically
 - Predictions should be fast because the model only has to predict one token
 
-One good thing of this approach i
+One good thing of this approach is that I can generate the data automatically, requires less manual
+work than the previous idea. And it is complimentary to the omni-arc idea, selecting between two
+options is another task to learn.
 
 ### Find another source of data, such as a video game (Atari)? 30x30 pixels
 

@@ -68,6 +68,9 @@ This breaks many of my functions at omni-arc.
 
 So my idea is to adapt the RE-ARC dataset so it generates grids with the same distribution as the original ones.
 
+I have been able to adapt 226/285 generators with minor changes. Sampling speed has decreased from 250 samples/s to 50 samples/s. I believe it is fast enough to
+train as the same speed as previously.
+
 ## Results
 
 ### First results
