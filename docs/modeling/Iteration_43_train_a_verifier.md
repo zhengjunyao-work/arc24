@@ -21,12 +21,19 @@ for a task. Instead of predicting the whole answer it just has to select the cor
 
 ## Results
 
+### Generating wrong predictions
+
+It is surprisingly difficult to generate wrong predictions for the training dataset. That is why
+I'm going to train new models that do not use the training dataset for training. We can modify
+the temperature of the inference to force the errors, but it also increases the number of non valid predictions.
+
 ## Conclusion
 
 ## Next steps
 
 ## TODO
 
+- [ ] Train a model without the train dataset to generate wrong predictions
 - [ ] Create a dataset that can be used to train a verifier.
   - [ ] How do the wrong answers look like?
   - [ ] It has to be of the train dataset, so I can measure the improvement on the evaluation set.
