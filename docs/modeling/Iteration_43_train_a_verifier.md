@@ -30,12 +30,38 @@ test: [{input:, output:}, .., {input:, output:}]
 
 I have reviewed the data augmentation code and it is applied to any field for each sample, so I could
 add additional fields to `input` and `output` and they will also be data augmented. For example I could
-add `pred_1`, `pred_2` and so on.
+add `attempt_1`, `attempt_2` and so on.
 
 Then at training I should select:
 
 1. Which would be the test sample
 2. Which prediction will be used for training
+
+### Local run to verify that it is working
+
+<details>
+  <summary>Click to see bash commands</summary>
+
+```bash
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/Qwen2.5-0.5B \
+--device_map None \
+--lora_r 128 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241023_debug_verifier/01_baseline \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/verifier/training_v0.json select-output-from-examples-v0 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/smaller_5_tasks.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps 10 \
+--logging_steps 10 \
+--eval_steps 200 \
+--batch_size 16 \
+--learning_rate 1e-4 \
+--max_seq_len 4096 \
+--no-resume_from_checkpoint \
+--verbose
+```
+
+</details>
 
 ## Results
 

@@ -8,6 +8,7 @@ from tqdm.auto import tqdm
 import wandb
 from typing import Optional, List
 import argparse
+import traceback
 from functools import partial
 from dataclasses import dataclass, asdict, field
 
@@ -23,7 +24,7 @@ from arc24.data_augmentation import (
     set_random_seed,
     random_compose_new_task_by_adding_additional_transformation
 )
-from arc24.prompting import create_prompts_from_task, print_smallest_prompt
+from arc24.prompting import create_prompts_from_task, print_smallest_prompt, pretty_print_prompt
 from arc24.data import load_arc_data_with_solutions
 from arc24.logging import log_execution_time, logging
 
@@ -468,11 +469,15 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                 prompt_version = task_id.split('|')[-1]
                 if task_id.startswith('omni-arc'):
                     task = data[task_id].sample()[1]
+                elif prompt_version.startswith('select-output-from-examples'):
+                    task = create_random_task_for_selection_prompt(data[task_id])
+                    task = random_augment_task(task, swap_train_and_test=False)
+                    task = add_correct_selection_label(task)
                 else:
                     task = data[task_id]
                     if isinstance(task, list): # some datasets such as neoeye's tama have different variations of the same task
                         task = random.choice(task)
-                    if 'test' not in task and 'n_train' in task:
+                    if 'test' not in task and 'n_train' in task: # other datasets do not have a defined test set
                         task = create_random_task_from_task_without_test(task)
                     task = random_augment_task(task)
                     if random.random() < compose_new_task_probability:
@@ -490,6 +495,8 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                         task, grid_encoder, tokenizer, max_seq_len, prompt_version=prompt_version)
                 prompt_lengths.append(prompt_length)
                 consecutive_exceptions = 0
+                if verbose and sample_idx == 1:
+                    pretty_print_prompt(prompt)
                 if prompt is not None:
                     yield {'text': prompt}
                 else:
@@ -497,6 +504,7 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
         except Exception as e:
             consecutive_exceptions += 1
             logger.error(f"An error occurred when generating sample {sample_idx} (consecutive exception {consecutive_exceptions}/{max_consecutive_exceptions}): {e}")
+            traceback.print_exc()
             if consecutive_exceptions >= max_consecutive_exceptions:
                 raise Exception(f"{max_consecutive_exceptions} consecutive exceptions occurred.") from e
 
@@ -506,6 +514,33 @@ def create_random_task_from_task_without_test(task):
     samples = np.random.choice(task['train'], task['n_train'] + 1, replace=False).tolist()
     new_task = dict(train=samples[:-1], test=samples[-1:])
     return new_task
+
+
+def create_random_task_for_selection_prompt(task):
+    test_candidates = [idx for idx, sample in enumerate(task['train']) if any(key.startswith('attempt_') for key in sample)]
+    test_idx = random.choice(test_candidates)
+    train_indices = random.sample([idx for idx in range(len(task['train'])) if idx != test_idx], k=task['n_train'])
+    keep_keys = ['input', 'output']
+    train_samples = []
+    for idx in train_indices:
+        train_samples.append({key: task['train'][idx][key] for key in keep_keys})
+    test_sample = {key: task['train'][test_idx][key] for key in keep_keys}
+    chosen_wrong_pred = random.choice([key for key in task['train'][test_idx] if key.startswith('attempt_')])
+    test_sample['wrong_prediction'] = task['train'][test_idx][chosen_wrong_pred]
+    new_task = dict(train=train_samples, test=[test_sample])
+    return new_task
+
+
+def add_correct_selection_label(task):
+    """ Adds the fields test_correct_choice_index and test_output_choices to the task """
+    if random.random() < 0.5:
+        task['test_correct_choice_index'] = 1
+        task['test_output_choices'] = [task['test'][0]['output'], task['test'][0]['wrong_prediction']]
+    else:
+        task['test_correct_choice_index'] = 2
+        task['test_output_choices'] = [task['test'][0]['wrong_prediction'], task['test'][0]['output']]
+    return task
+
 
 
 def _create_prompt_smaller_than_max_seq_len(task, grid_encoder, tokenizer, max_seq_len, prompt_version):
