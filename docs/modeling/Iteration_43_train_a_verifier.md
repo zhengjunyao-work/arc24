@@ -63,6 +63,17 @@ python fine-tuning.py \
 
 </details>
 
+### Experiment design
+
+We need to train a verifier an check if it allows to improve the accuracy of the prediction selection.
+Later on following iterations we could optimize the training.
+
+I believe the experiment that is most likely to succeed is to use a LoRA that has been already fine-tuned
+on ARC tasks and fine-tune again for output selection. I could run a few trainings with different durations.
+
+F.e. the model `20240921_optimal_train_duration/05_LoRA-032-Qwen2-0.5B-Instruct_lr1e-4_4e4steps_2gpus_8192msl/checkpoint-40000` could be
+a good candidate.
+
 ## Results
 
 ### Generating wrong predictions
