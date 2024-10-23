@@ -12,10 +12,10 @@ def create_prompts_from_task(task, grid_encoder, tokenizer,
     train_samples = [{key: grid_encoder.to_text(grid) for key, grid in sample.items()} for sample in task['train']]
     prompts = []
     for test_sample in task['test']:
-        # TODO: add test_outputs for select_output_from_examples_v0
         user_message = prompt_template.render(train_samples=train_samples,
                                               test_input=grid_encoder.to_text(test_sample['input']),
-                                              code=task.get('code', ''))
+                                              code=task.get('code', ''),
+                                              test_output_choices=[grid_encoder.to_text(grid) for grid in task.get('test_output_choices', [])])
         if is_train_prompt:
             if prompt_version.startswith('output'):
                 output = grid_encoder.to_text(test_sample['output'])
@@ -23,6 +23,10 @@ def create_prompts_from_task(task, grid_encoder, tokenizer,
                 output = grid_encoder.to_text(test_sample['input'])
             elif prompt_version.startswith('code-from-examples'):
                 output = '```python\n' + task['code'] + '\n```'
+            elif prompt_version.startswith('select-output-from-examples'):
+                if 'test_output_choices' not in task:
+                    raise ValueError('test_output_choices not found in task')
+                output = task['test_correct_choice_index']
             else:
                 raise ValueError(f'Unknown prompt version {prompt_version}')
         else:
@@ -364,7 +368,7 @@ prompt_template_output_from_code_v0 = Template("""Your task is to transform the 
 prompt_template_select_output_from_examples_v0 = Template("""Let's see if you can solve this simple Abstraction and Reasoning Challenge (ARC) task.
 Below there are some input-output grid examples that define the task.
 Your job is to understand the transformation between the input and the output and select the correct test output grid.
-Just reply with the index of the correct test output grid.
+Just reply with the index of the correct test output option.
 The transformations are always based on the following priors: objectness, goal-directed, numbers & counting, and basic geometry & topology.
 {% for sample in train_samples %}
 ## Example {{ loop.index }}
@@ -382,10 +386,9 @@ The transformations are always based on the following priors: objectness, goal-d
 ### Input
 
 {{ test_input }}
+{% for test_output_choice in test_output_choices %}
+### Output option {{ loop.index }}
 
-{% for test_output in test_outputs %}
-### Output {{ loop.index }}
-
-{{ test_output }}
+{{ test_output_choice }}
 {% endfor %}
 """)
