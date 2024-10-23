@@ -33,6 +33,7 @@ the temperature of the inference to force the errors, but it also increases the 
 
 ## TODO
 
+- [ ] Maybe I can force VLLM to generate different predictions for the same prompt?
 - [ ] Train a model without the train dataset to generate wrong predictions
 - [ ] Create a dataset that can be used to train a verifier.
   - [ ] How do the wrong answers look like?
