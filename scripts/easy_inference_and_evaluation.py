@@ -92,6 +92,10 @@ def get_output_filepath(output_folder, predictions_per_task, dataset_path, tempe
         name = 'training'
     elif dataset_path.endswith('smaller_5_tasks.json'):
         name = 'smaller_5_tasks'
+    elif dataset_path.endswith('all_test/training.json'):
+        name = 'all-test-training'
+    elif dataset_path.endswith('all_test/evaluation.json'):
+        name = 'all-test-evaluation'
     else:
         raise Exception(f'Unknown dataset path: {dataset_path}')
 
