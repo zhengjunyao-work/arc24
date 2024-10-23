@@ -19,6 +19,24 @@ for a task. Instead of predicting the whole answer it just has to select the cor
 
 ## Development
 
+### Dataset design
+
+Original tasks have the following format:
+
+```yaml
+train: [{input:, output:}, .., {input:, output:}]
+test: [{input:, output:}, .., {input:, output:}]
+```
+
+I have reviewed the data augmentation code and it is applied to any field for each sample, so I could
+add additional fields to `input` and `output` and they will also be data augmented. For example I could
+add `pred_1`, `pred_2` and so on.
+
+Then at training I should select:
+
+1. Which would be the test sample
+2. Which prediction will be used for training
+
 ## Results
 
 ### Generating wrong predictions
@@ -36,8 +54,8 @@ the temperature of the inference to force the errors, but it also increases the 
 - [ ] Maybe I can force VLLM to generate different predictions for the same prompt?
 - [ ] Train a model without the train dataset to generate wrong predictions
 - [ ] Create a dataset that can be used to train a verifier.
-  - [ ] How do the wrong answers look like?
-  - [ ] It has to be of the train dataset, so I can measure the improvement on the evaluation set.
+  - [x] How do the wrong answers look like?
+  - [x] It has to be of the train dataset, so I can measure the improvement on the evaluation set.
 - [ ] Create prompts to select between answers
 - [ ] How to integrate this new task into the training script?
   - [ ] How should I format the dataset?
