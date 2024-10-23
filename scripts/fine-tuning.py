@@ -54,6 +54,7 @@ class CFG:
     max_steps : Optional[int] =  6000
     logging_steps: int = 10 #10a
     eval_steps: int = 50 #50
+    save_steps: Optional[int] = None
     report_to: str = 'wandb'
     warmup_ratio: float = 0.05
     batch_size: int = 16 #16
@@ -94,6 +95,7 @@ def parse_args():
     parser.add_argument('--warmup_ratio', type=float, help="Warmup ratio, relative to training steps")
     parser.add_argument('--max_seq_len', type=int, help="Max sequence length in tokens")
     parser.add_argument('--eval_steps', type=int, help="Number of steps between evaluations")
+    parser.add_argument('--save_steps', type=int, help="Number of steps between saving checkpoints")
     parser.add_argument('--logging_steps', type=int, help="Number of steps between logging")
     parser.add_argument('--learning_rate', type=float, help='Learning rate for fine-tuning')
     parser.add_argument('--lr_scheduler_type', type=str, help='Learning rate scheduler type')
@@ -496,6 +498,7 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                 prompt_lengths.append(prompt_length)
                 consecutive_exceptions = 0
                 if verbose and sample_idx == 1:
+                    logger.info(f'Printing the first training prompt: {task_id}')
                     pretty_print_prompt(prompt)
                 if prompt is not None:
                     yield {'text': prompt}
@@ -636,7 +639,7 @@ def get_training_arguments(cfg):
 
             do_eval=True,
             eval_strategy="steps",
-            save_steps=cfg.eval_steps,
+            save_steps=cfg.save_steps or cfg.eval_steps,
             logging_steps=cfg.logging_steps, #50,
             eval_steps=cfg.eval_steps,
             log_level="info",
