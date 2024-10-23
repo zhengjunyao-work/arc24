@@ -16,6 +16,7 @@ train much faster than with the [Veridas](https://veridas.com/en/) cluster.
 
 - [Strong compute documentation](https://strong-compute.gitbook.io/developer-docs)
 - [ISC demos repo](https://github.com/StrongResearch/isc-demos)
+- [Strong compute Discord](https://discord.com/channels/1093337804051849296/1283175776165822556)
 
 ### Quick guide to connect to Strong compute
 

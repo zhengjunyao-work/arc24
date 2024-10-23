@@ -79,13 +79,14 @@ the temperature of the inference to force the errors, but it also increases the 
 
 - [ ] Maybe I can force VLLM to generate different predictions for the same prompt?
 - [ ] Train a model without the train dataset to generate wrong predictions
-- [ ] Create a dataset that can be used to train a verifier.
+- [x] Create a dataset that can be used to train a verifier.
   - [x] How do the wrong answers look like?
   - [x] It has to be of the train dataset, so I can measure the improvement on the evaluation set.
-- [ ] Create prompts to select between answers
-- [ ] How to integrate this new task into the training script?
-  - [ ] How should I format the dataset?
-  - [ ] How to apply data augmentation?
+- [x] Create prompts to select between answers
+- [x] How to integrate this new task into the training script?
+  - [x] How should I format the dataset?
+  - [x] How to apply data augmentation?
+  - [x] ~Add support for task augmentation~ Currently is only applied to input or output, so it would not work with a new key
 - [ ] Train a model to select answers
 - [ ] What is the best way to use the model? There might be some compute intensive way and a faster and approximate one
 - [ ] Measure the improvement over voting
