@@ -20,10 +20,11 @@ def revert_data_augmentation(grid, hflip, n_rot90, color_map=None):
     return grid
 
 
-def random_augment_task(task):
+def random_augment_task(task, swap_train_and_test=True):
     augmented_task = apply_data_augmentation(
         task, color_map=get_random_color_map(), **get_random_geometric_augmentation_params())
-    augmented_task = random_swap_train_and_test(augmented_task)
+    if swap_train_and_test:
+        augmented_task = random_swap_train_and_test(augmented_task)
     return augmented_task
 
 
