@@ -139,6 +139,11 @@ the temperature of the inference to force the errors, but it also increases the 
 
 TODO: add plots
 
+### Accuracy of voting
+
+![accuracy voting](res/2024-10-24-12-40-08.png)
+
+For these models voting is able to select the best response in the first position around 60% of the times, and around 70% in the top two positions.
 
 ## Conclusion
 
@@ -160,3 +165,5 @@ TODO: add plots
 - [ ] What is the best way to use the model? There might be some compute intensive way and a faster and approximate one
 - [ ] Measure the improvement over voting
 - [ ] Can I train a single model to do all the tasks?
+- [ ] What if instead of choosing two options I just request the model to answer if the proposed output is correct or not?
+  That would simplify the post-processing a lot.
