@@ -471,10 +471,13 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                 prompt_version = task_id.split('|')[-1]
                 if task_id.startswith('omni-arc'):
                     task = data[task_id].sample()[1]
-                elif prompt_version.startswith('select-output-from-examples'):
+                elif prompt_version.startswith('select-output-from-examples') or prompt_version.startswith('verify-output-from-examples'):
                     task = create_random_task_for_selection_prompt(data[task_id])
                     task = random_augment_task(task, swap_train_and_test=False)
-                    task = add_correct_selection_label(task)
+                    if prompt_version.startswith('verify-output-from-examples'):
+                        task = add_verify_output_label(task)
+                    else:
+                        task = add_correct_selection_label(task)
                 else:
                     task = data[task_id]
                     if isinstance(task, list): # some datasets such as neoeye's tama have different variations of the same task
@@ -544,6 +547,14 @@ def add_correct_selection_label(task):
         task['test_output_choices'] = [task['test'][0]['wrong_prediction'], task['test'][0]['output']]
     return task
 
+
+def add_verify_output_label(task):
+    if random.random() < 0.5:
+        task['is_test_output_correct'] = 'yes'
+    else:
+        task['test'][0]['output'] = task['test'][0]['wrong_prediction']
+        task['is_test_output_correct'] = 'no'
+    return task
 
 
 def _create_prompt_smaller_than_max_seq_len(task, grid_encoder, tokenizer, max_seq_len, prompt_version):

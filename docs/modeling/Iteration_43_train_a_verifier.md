@@ -47,8 +47,26 @@ python fine-tuning.py \
 --model_path /home/gbarbadillo/data/Qwen2.5-0.5B \
 --device_map None \
 --lora_r 128 \
---output_dir /mnt/hdd0/Kaggle/arc24/models/20241023_debug_verifier/01_baseline \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241023_debug_verifier/01_select-output \
 --train_datasets /mnt/hdd0/Kaggle/arc24/data/verifier/training_v0.json select-output-from-examples-v0 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/smaller_5_tasks.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps 10 \
+--logging_steps 10 \
+--eval_steps 200 \
+--batch_size 16 \
+--learning_rate 1e-4 \
+--max_seq_len 4096 \
+--no-resume_from_checkpoint \
+--verbose
+
+
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/Qwen2.5-0.5B \
+--device_map None \
+--lora_r 128 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241023_debug_verifier/02_verify-output \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/verifier/training_v0.json verify-output-from-examples-v0 \
 --val_dataset /mnt/hdd0/Kaggle/arc24/data/new_partitions/smaller_5_tasks.json output-from-examples-v1 \
 --grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
 --max_steps 10 \
