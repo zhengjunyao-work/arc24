@@ -137,7 +137,7 @@ It is surprisingly difficult to generate wrong predictions for the training data
 I'm going to train new models that do not use the training dataset for training. We can modify
 the temperature of the inference to force the errors, but it also increases the number of non valid predictions.
 
-TODO: add plots
+![generating wrong predictions](res/2024-10-24-12-59-18.png)
 
 ### Accuracy of voting
 
