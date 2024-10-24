@@ -103,7 +103,25 @@ It's very likely that the bad scaling behavior that we observed in recent iterat
 poor generalization. Thus if we unlock generalization it is possible that we are going to improve
 the accuracy of the model, but also the model could improve given more compute (more predictions).
 
+## Final results
+
+| omni-arc training tasks | training coverage | training pass_8 | evaluation pass_8 |
+|-------------------------|-------------------|-----------------|-------------------|
+| 150                     | 37.50%            | 35.80%          | 4.50%             |
+| 269                     | 67.25%            | 62.60%          | 3.75%             |
+| 285                     | 71.25%            | 65.25%          | 3.50%             |
+| 285 + re-arc inputs     | 71.25%            | 49.90%          | 5.20%             |
+
+Adding generator for the inputs improved the evaluation accuracy slightly, but it is still very low.
+
 ## Conclusion
+
+A lot of work was devoted to make this approach work, but only 5% of the evaluation tasks are solved.
+
+I believe I should revisit this approach in the future, once the 2024 challenge is over and design
+a better approach that does not require too much human work and instead relies on automated dataset
+generation. F.e. we could create random drawings, or drawing modifications and ask the model to guess
+which code was used to do the modification.
 
 ## Next steps
 
@@ -116,5 +134,5 @@ the accuracy of the model, but also the model could improve given more compute (
 ## TODO
 
 - [ ] Restrict globals
-- [ ] Analyze RE-ARC input distribution
+- [x] Analyze RE-ARC input distribution
 - [ ] Analyze generated input distribution
