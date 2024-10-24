@@ -71,6 +71,17 @@ faster so probably it's better to just avoid using the PCIE machines.
 
 The H100 is more expensive than the A100, we have to see if the speedup is worth it.
 
+### Debugging burst errors
+
+We can find a `.tar.zst` file in the exports folder. We should copy it first to a different folder
+because the exports folder is a fused folder. Then we can untar it.
+
+```
+cp exports/183e895a-bbb1-4e3a-b9e8-f3ee02c5e5cb.tar.zst copied_exports
+apt-get install -y zstd
+tar --use-compress-program=unzstd -xvf 183e895a-bbb1-4e3a-b9e8-f3ee02c5e5cb.tar.zst
+```
+
 ## Results
 
 First training with 8xA100 is 5x times faster than using 2xA6000.
