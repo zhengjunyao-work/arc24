@@ -402,7 +402,7 @@ The transformations are always based on the following priors: objectness, goal-d
 """)
 
 # verify-output-from-examples
-prompt_template_verify_output_from_examples_v0 = Template("""Let's see if you can verify the output for Abstraction and Reasoning Challenge (ARC) task.
+prompt_template_verify_output_from_examples_v0 = Template("""Let's see if you can verify the output for an Abstraction and Reasoning Challenge (ARC) task.
 Below there are some input-output grid examples that define the task.
 Your job is to understand the transformation between the input and the output and verify if the test output grid is correct.
 Just reply with the word "yes" if the test output is correct or "no" if it is not.
