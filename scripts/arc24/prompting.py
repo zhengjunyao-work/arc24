@@ -12,10 +12,16 @@ def create_prompts_from_task(task, grid_encoder, tokenizer,
     train_samples = [{key: grid_encoder.to_text(grid) for key, grid in sample.items()} for sample in task['train']]
     prompts = []
     for test_sample in task['test']:
-        user_message = prompt_template.render(train_samples=train_samples,
-                                              test_input=grid_encoder.to_text(test_sample['input']),
-                                              code=task.get('code', ''),
-                                              test_output_choices=[grid_encoder.to_text(grid) for grid in task.get('test_output_choices', [])])
+        render_kwargs = dict(train_samples=train_samples,
+                             test_input=grid_encoder.to_text(test_sample['input']))
+        if prompt_version.startswith('select-output-from-examples'):
+            render_kwargs['test_output_choices'] = [grid_encoder.to_text(grid) for grid in task['test_output_choices']]
+        elif prompt_version.startswith('verify-output-from-examples'):
+            render_kwargs['test_output'] = grid_encoder.to_text(test_sample['output'])
+        elif prompt_version.startswith('output-from-code'):
+            render_kwargs['code'] = task['code']
+
+        user_message = prompt_template.render(**render_kwargs)
         if is_train_prompt:
             if prompt_version.startswith('output'):
                 output = grid_encoder.to_text(test_sample['output'])
@@ -24,9 +30,9 @@ def create_prompts_from_task(task, grid_encoder, tokenizer,
             elif prompt_version.startswith('code-from-examples'):
                 output = '```python\n' + task['code'] + '\n```'
             elif prompt_version.startswith('select-output-from-examples'):
-                if 'test_output_choices' not in task:
-                    raise ValueError('test_output_choices not found in task')
                 output = task['test_correct_choice_index']
+            elif prompt_version.startswith('verify-output-from-examples'):
+                output = task['is_test_output_correct']
             else:
                 raise ValueError(f'Unknown prompt version {prompt_version}')
         else:
@@ -136,6 +142,8 @@ def get_prompt_templates(prompt_version):
         return system_prompt_v1, prompt_template_output_from_code_v0, answer_template_v0
     elif prompt_version == 'select-output-from-examples-v0':
         return system_prompt_v1, prompt_template_select_output_from_examples_v0, answer_template_code_from_examples_v0
+    elif prompt_version == 'verify-output-from-examples-v0':
+        return system_prompt_v1, prompt_template_verify_output_from_examples_v0, answer_template_code_from_examples_v0
     else:
         raise ValueError(f'Unknown prompt version {prompt_version}')
 
@@ -391,4 +399,34 @@ The transformations are always based on the following priors: objectness, goal-d
 
 {{ test_output_choice }}
 {% endfor %}
+""")
+
+# verify-output-from-examples
+prompt_template_verify_output_from_examples_v0 = Template("""Let's see if you can verify the output for Abstraction and Reasoning Challenge (ARC) task.
+Below there are some input-output grid examples that define the task.
+Your job is to understand the transformation between the input and the output and verify if the test output grid is correct.
+Just reply with the word "yes" if the test output is correct or "no" if it is not.
+The transformations are always based on the following priors: objectness, goal-directed, numbers & counting, and basic geometry & topology.
+{% for sample in train_samples %}
+## Example {{ loop.index }}
+
+### Input
+
+{{ sample.input }}
+
+### Output
+
+{{ sample.output }}
+{% endfor %}
+## Test case
+
+### Input
+
+{{ test_input }}
+
+### Output
+
+{{ test_output }}
+
+Is the test output correct?
 """)
