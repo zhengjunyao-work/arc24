@@ -86,7 +86,15 @@ tar --use-compress-program=unzstd -xvf 183e895a-bbb1-4e3a-b9e8-f3ee02c5e5cb.tar.
 
 First training with 8xA100 is 5x times faster than using 2xA6000.
 
+However in the following days I have been unable to run new trainings, and finally after 2 days
+of struggling I have managed to run two jobs (on A100 and H100) but they were 4 times slower than the
+previous run and they have finished with `strong_error` after less than 2 hours of running.
+
 ## Conclusion
+
+So far it seems that Strong Compute cluster is very unstable. But we have seen that we can train at
+least 5 times faster in a machine with 8xA100. So we could go directly to a cloud provider and do a fast
+training if necessary.
 
 ## Next steps
 
