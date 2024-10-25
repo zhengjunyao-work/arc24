@@ -163,6 +163,17 @@ the temperature of the inference to force the errors, but it also increases the 
 
 For these models voting is able to select the best response in the first position around 60% of the times, and around 70% in the top two positions.
 
+### First results with verifier
+
+![accuracy vs number of verifications](res/2024-10-25-15-31-47.png)
+
+It's very nice to see that the first attempt to select predictions with a verifier already shows improvements over the voting baseline.
+The top_2 selection improves specially, from ~70% to ~80%. An improvement of that magnitude
+on leaderboard would improve the LB score from 40 to 45-46.
+
+- The plot above is for the predictions: `20240921_optimal_train_duration/05_LoRA-032-Qwen2-0.5B-Instruct_lr1e-4_4e4steps_2gpus_8192msl/checkpoint-40000/inference_evaluation_x032.json`
+- As a verifier model I used: `/mnt/hdd0/Kaggle/arc24/models/20241023_first_verifiers/05_verify-and-select_lora032-Qwen2-0.5B-Instruct_lr5e-5_bs32_8000steps_2gpus_8192msl/checkpoint-8000`
+
 ## Conclusion
 
 ## Next steps
@@ -170,7 +181,7 @@ For these models voting is able to select the best response in the first positio
 ## TODO
 
 - [ ] Maybe I can force VLLM to generate different predictions for the same prompt?
-- [ ] Train a model without the train dataset to generate wrong predictions
+- [x] Train a model without the train dataset to generate wrong predictions
 - [x] Create a dataset that can be used to train a verifier.
   - [x] How do the wrong answers look like?
   - [x] It has to be of the train dataset, so I can measure the improvement on the evaluation set.
@@ -183,5 +194,7 @@ For these models voting is able to select the best response in the first positio
 - [ ] What is the best way to use the model? There might be some compute intensive way and a faster and approximate one
 - [ ] Measure the improvement over voting
 - [ ] Can I train a single model to do all the tasks?
-- [ ] What if instead of choosing two options I just request the model to answer if the proposed output is correct or not?
+- [x] What if instead of choosing two options I just request the model to answer if the proposed output is correct or not?
   That would simplify the post-processing a lot.
+- [ ] Create a script to select predictions using a verifier (use the notebook as a template). I would
+  probably need an easy run script also.

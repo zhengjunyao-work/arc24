@@ -38,6 +38,8 @@ def create_prompts_from_task(task, grid_encoder, tokenizer,
         else:
             if prompt_version.startswith('code-from-examples'):
                 output = '```python\n'
+            elif prompt_version.startswith('verify-output-from-examples') or prompt_version.startswith('select-output-from-examples'):
+                output = ''
             else:
                 output = '```grid'
         messages = [{"role": "system", "content": system_prompt},
