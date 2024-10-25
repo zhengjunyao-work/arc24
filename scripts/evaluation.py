@@ -291,6 +291,12 @@ def main(args=None):
     args = parse_args(args)
     with open(args.inference_path, 'r') as f:
         solutions = json.load(f)
+    if args.max_attempts is not None:
+        valid_keys = set(f'attempt_{i}' for i in range(1, args.max_attempts + 1))
+        for task_id, task_solutions in solutions.items():
+            for sample_idx, sample_solutions in enumerate(task_solutions):
+                sample_solutions = {key: sample_solutions[key] for key in sample_solutions if key in valid_keys}
+                solutions[task_id][sample_idx] = sample_solutions
     ground_truth = load_arc_data_with_solutions(args.dataset_path)
     metrics = evaluate(ground_truth, solutions, verbose=False)[0]
     print_metrics(metrics)
@@ -308,6 +314,7 @@ def parse_args(args):
     parser.add_argument('inference_path', help='Path to json file with the inference results')
     parser.add_argument('--dataset_path', type=str, help="Path to the dataset to make inference",
                         default='/mnt/hdd0/Kaggle/arc24/data/new_partitions/arc-agi_all_challenges.json')
+    parser.add_argument('--max_attempts', default=None, type=int)
     args = parser.parse_args(args)
     print(args)
     return args

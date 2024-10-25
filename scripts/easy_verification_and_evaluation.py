@@ -34,8 +34,7 @@ def main(args=None):
             predictions_path=args.predictions_path)
     else:
         print('Output file already exists, skipping inference')
-    evaluation(output_filepath, args.dataset_path)
-    # TODO: add vote 1 evaluation
+    evaluation(output_filepath, args.checkpoint_path, args.dataset_path)
 
 
 def verification(model_path, output_filepath, verifications_per_prediction,
@@ -52,13 +51,28 @@ def verification(model_path, output_filepath, verifications_per_prediction,
         raise Exception('Output file not found, error running inference')
 
 
-
-
 def generate_small_hash(input_string: str) -> str:
     # Create an MD5 hash object
     hash_object = hashlib.md5(input_string.encode())
     # Convert the hash object to a hexadecimal string
     return hash_object.hexdigest()[:8]  # Slice to get a shorter hash (first 8 characters)
+
+
+def evaluation(filepath, checkpoint_path, dataset_path):
+    print('-'*80)
+    print(f'Evaluating {filepath}')
+    print(checkpoint_path)
+    cmd = f'python evaluation.py {filepath} --dataset_path {dataset_path}'
+    print(cmd)
+    ret = os.system(cmd)
+    if ret != 0:
+        raise Exception('Error running evaluation')
+    cmd = f'python evaluation.py {filepath} --dataset_path {dataset_path} --max_attempts 1'
+    print(cmd)
+    ret = os.system(cmd)
+    if ret != 0:
+        raise Exception('Error running evaluation')
+    print('-'*80)
 
 
 
