@@ -206,5 +206,6 @@ on leaderboard would improve the LB score from 40 to 45-46.
 - [ ] Can I train a single model to do all the tasks?
 - [x] What if instead of choosing two options I just request the model to answer if the proposed output is correct or not?
   That would simplify the post-processing a lot.
-- [ ] Create a script to select predictions using a verifier (use the notebook as a template). I would
-  probably need an easy run script also.
+- [x] Create a script to select predictions using a verifier (use the notebook as a template). 
+- [x] I would probably need an easy run script also.
+- [ ] Differences between verifier models and selection accuracy
