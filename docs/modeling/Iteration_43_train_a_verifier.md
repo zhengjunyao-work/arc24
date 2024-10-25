@@ -171,12 +171,21 @@ It's very nice to see that the first attempt to select predictions with a verifi
 The top_2 selection improves specially, from ~70% to ~80%. An improvement of that magnitude
 on leaderboard would improve the LB score from 40 to 45-46.
 
+- It seems that using more than 32 verifications per prediction does not increase the accuracy of the selection
 - The plot above is for the predictions: `20240921_optimal_train_duration/05_LoRA-032-Qwen2-0.5B-Instruct_lr1e-4_4e4steps_2gpus_8192msl/checkpoint-40000/inference_evaluation_x032.json`
 - As a verifier model I used: `/mnt/hdd0/Kaggle/arc24/models/20241023_first_verifiers/05_verify-and-select_lora032-Qwen2-0.5B-Instruct_lr5e-5_bs32_8000steps_2gpus_8192msl/checkpoint-8000`
 
 ## Conclusion
 
 ## Next steps
+
+- How could I improve the verifier?
+  - Use a bigger dataset
+  - Train also on the test set (just for submission)
+  - More data augmentation, allow task augmentation
+  - Maybe use an ensemble of models instead of a single model
+  - I could use a bigger model, full fine-tuned
+  - It's likely that a model trained in all the prediction tasks will perform better
 
 ## TODO
 
