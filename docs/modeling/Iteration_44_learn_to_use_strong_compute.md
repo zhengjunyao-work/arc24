@@ -54,6 +54,50 @@ command = "source ~/envs/arc24/bin/activate && cd ~/code/arc24/scripts && ~/jobs
 burst_shape_priority_list = ["oblivus-mon1-h100n"]
 ```
 
+Better configuration with the whole command:
+
+```toml
+isc_project_id = "46f4672b-2489-457f-b302-eab855b36b70"
+experiment_name = "first_arc24_training_a100n"
+gpu_type = "24GB VRAM GPU"
+gpus = 8
+compute_mode = "burst"
+dataset_id = "0cfd54a3-4096-494e-93d5-a073126e81e2"
+output_path = "~/models/20241022_no_training/04_A100n_lora064-Qwen2.5-0.5B-Instruct_lr1e-4_bs16_10000steps_2gpus_8192msl"
+burst_shape_priority_list = ["oblivus-mon1-a100n"]
+command = '''
+source ~/envs/arc24/bin/activate && 
+source ~/jobs/secrets.sh && 
+accelerate launch --num_processes 8 --num_machines 1 --mixed_precision bf16 --multi_gpu 
+~/code/arc24/scripts/fine-tuning.py 
+--max_steps 10000 
+--model_path=Qwen/Qwen2.5-0.5B-Instruct 
+--lora_r 64 
+--output_dir $(dirname "${OUTPUT_PATH}")
+--n_gpus=8 
+--batch_size=16 
+--device_map None 
+--no-verbose 
+--compose_new_task_probability 0.5 
+--compose_new_task_weights 1 1 1 1 
+--max_seq_len 8192 
+--learning_rate=1e-4 
+--train_datasets ~/code/arc24/data/original_data/arc-agi_evaluation_challenges.json output-from-examples-v1 
+--train_datasets ~/code/arc24/data/external_data/kaggle.json output-from-examples-v1  
+--train_datasets ~/code/arc24/data/external_data/pqa-dataset-1k.json output-from-examples-v1  
+--train_datasets ~/code/arc24/data/external_data/neoeye_tama.json output-from-examples-v1  
+--train_datasets ~/code/arc24/data/external_data/MINI-ARC.json output-from-examples-v1  
+--train_datasets ~/code/arc24/data/original_data/arc-agi_evaluation_challenges.json input-from-inputs-v0 
+--train_datasets ~/code/arc24/data/external_data/kaggle.json input-from-inputs-v0  
+--train_datasets ~/code/arc24/data/external_data/pqa-dataset-1k.json input-from-inputs-v0  
+--train_datasets ~/code/arc24/data/external_data/neoeye_tama.json input-from-inputs-v0  
+--train_datasets ~/code/arc24/data/external_data/MINI-ARC.json input-from-inputs-v0  
+--val_dataset ~/code/arc24/data/original_data/arc-agi_training_challenges.json output-from-examples-v1 
+--remove_train_samples_to_fit_max_seq_len 
+--eval_steps=200 
+--warmup_ratio 1e-1'''
+```
+
 ### Initial idea
 
 - Since my datasets are small I believe I can work on the root folder.
