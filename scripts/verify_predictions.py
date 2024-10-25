@@ -1,9 +1,12 @@
 import sys
 import argparse
 import json
-from vllm import LLM, SamplingParams
-from transformers import AutoTokenizer
 from tqdm.auto import tqdm
+import numpy as np
+
+from vllm import LLM
+from transformers import AutoTokenizer
+
 
 from inference import (
     clear_vllm_gpu_memory,
@@ -23,10 +26,8 @@ from arc24.logging import log_execution_time, logging
 logger = logging.getLogger(__name__)
 
 @log_execution_time
-def main(args=None):
-    if args is None:
-        args = sys.argv[1:]
-    cfg = parse_args(args)
+def main():
+    cfg = parse_args()
     with open(cfg.dataset_path, 'r') as f:
         dataset = json.load(f)
     with open(cfg.predictions_path, 'r') as f:
@@ -52,14 +53,21 @@ def main(args=None):
         unique_predictions, dataset, grid_encoder, tokenizer,
         prompt_version=cfg.prompt_version, verifications_per_prediction=cfg.verifications_per_prediction)
     outputs = generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=cfg.batch_size)
-    # TODO: save the results
+    aggregated_verifications = aggregate_verification_predictions(outputs, prompts, unique_predictions)
+    selected_predictions = select_predictions_with_verifications(unique_predictions, aggregated_verifications, cfg.n_top)
+
+    with open(cfg.output_path, 'w') as f:
+        json.dump(selected_predictions, f, indent=4)
+    # TODO: save richer information for later analysis
 
     del llm.llm_engine.model_executor
     del llm
     clear_vllm_gpu_memory()
 
 
-def parse_args(args):
+def parse_args(args=None):
+    if args is None:
+        args = sys.argv[1:]
     epilog = """
     """
     description = """
@@ -75,18 +83,19 @@ This works because verifying that a prediction is correct is an easier task than
                         type=int, help="Maximum number of tokens in the model")
     parser.add_argument('--grid-encoder', default='GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))',
                         type=str, help="Name of the grid encoder")
-    parser.add_argument('--prompt_version', default='verify-output-from-examples-v0',
+    parser.add_argument('--prompt-version', default='verify-output-from-examples-v0',
                         type=str, help="Prompt version")
-    parser.add_argument('--dataset_path', type=str, help="Path to the dataset to make inference")
-    parser.add_argument('--predictions_path', type=str, help="Path to the json file with the predictions")
-    parser.add_argument('--output_filepath', type=str, help="Path to the json file with the predictions")
-    parser.add_argument('--verifications_per_prediction', default=8, type=int, help="Number of verifications per prediction")
+    parser.add_argument('--dataset-path', type=str, help="Path to the dataset to make inference")
+    parser.add_argument('--predictions-path', type=str, help="Path to the json file with the predictions")
+    parser.add_argument('--output-path', type=str, help="Path to the json file with the predictions")
+    parser.add_argument('--verifications-per-prediction', default=8, type=int, help="Number of verifications per prediction")
     parser.add_argument('--temperature', default=0, type=float, help="temperature for sampling, 0.0 for greedy search")
-    parser.add_argument('--batch_size', default=512, type=int, help="batch size for inference")
-    parser.add_argument('--max_output_tokens', default=5, type=int, help="Maximum number of tokens to generate")
-    parser.add_argument('--random_seed', default=None, type=int, help="Random seed for data augmentation")
-    parser.add_argument('--swap_space', default=0, type=int, help="CPU swap space size (GiB) per GPU")
+    parser.add_argument('--batch-size', default=512, type=int, help="batch size for inference")
+    parser.add_argument('--max-output-tokens', default=5, type=int, help="Maximum number of tokens to generate")
+    parser.add_argument('--random-seed', default=None, type=int, help="Random seed for data augmentation")
+    parser.add_argument('--swap-space', default=0, type=int, help="CPU swap space size (GiB) per GPU")
     parser.add_argument('--verbose', action='store_true', help="Print verbose output")
+    parser.add_argument('--n-top', default=2, type=int, help="Number of top predictions to select")
     print(args)
     return parser.parse_args()
 
@@ -125,6 +134,26 @@ def create_prompts(predictions, dataset, grid_encoder, tokenizer, prompt_version
                                         prediction_idx=prediction_idx))
     logger.info(f'Created {len(prompts)} prompts')
     return prompts
+
+
+def aggregate_verification_predictions(outputs, prompts, unique_predictions):
+    verifications = [output.outputs[0].text == 'yes' for output in outputs]
+    print(np.unique(verifications, return_counts=True))
+    aggregated_verifications = {task_id: [np.zeros(len(sample_predictions)) for sample_predictions in task_predictions] for task_id, task_predictions in unique_predictions.items()}
+    for verification, prompt in zip(verifications, prompts):
+        if verification:
+            aggregated_verifications[prompt['task_id']][prompt['sample_idx']][prompt['prediction_idx']] += 1
+    return aggregated_verifications
+
+
+def select_predictions_with_verifications(unique_predictions, aggregated_verifications, n):
+    selected_predictions = dict()
+    for task_id, task_predictions in unique_predictions.items():
+        selected_predictions[task_id] = []
+        for sample_predictions, sample_verifications in zip(task_predictions, aggregated_verifications[task_id]):
+            ranking = np.argsort(sample_verifications)[::-1][:n]
+            selected_predictions[task_id].append({f'attempt_{attempt_idx}': sample_predictions[idx] for attempt_idx, idx in enumerate(ranking, 1)})
+    return selected_predictions
 
 
 if __name__ == '__main__':
