@@ -172,6 +172,7 @@ The top_2 selection improves specially, from ~70% to ~80%. An improvement of tha
 on leaderboard would improve the LB score from 40 to 45-46.
 
 - It seems that using more than 32 verifications per prediction does not increase the accuracy of the selection
+- Verifying is faster than generating grids, 30% faster, but I would expected much faster because we are generating very few output tokens compared to generating a grid. It seems that the long input prompt is dominating over the inference.
 - The plot above is for the predictions: `20240921_optimal_train_duration/05_LoRA-032-Qwen2-0.5B-Instruct_lr1e-4_4e4steps_2gpus_8192msl/checkpoint-40000/inference_evaluation_x032.json`
 - As a verifier model I used: `/mnt/hdd0/Kaggle/arc24/models/20241023_first_verifiers/05_verify-and-select_lora032-Qwen2-0.5B-Instruct_lr5e-5_bs32_8000steps_2gpus_8192msl/checkpoint-8000`
 
