@@ -186,6 +186,19 @@ I trained different models, just varying the number of training steps. We can vi
 - The quality of the model is relevant, f.e. the models trained for 1k and 2k steps are clearly worse.
   Thus it is likely that we can train even better models that outputperform this initial trainings.
 
+### First submissions
+
+The first submission attempts have timeout out when doing 32 predictions per tasks and 32 verifications
+per prediction.
+
+Running a validation submission with 20 tasks took 2h40 seconds.
+
+- Training took 1h49
+- Inference took 13 min (32 predictions per task)
+- Verification took 30min (32 verifications per prediction)
+
+I have run another validation with 50 tasks that took 6h
+
 ## Conclusion
 
 ## Next steps

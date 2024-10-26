@@ -140,7 +140,7 @@ python fine-tuning.py \
 - [ ] Create bigger dataset for training
   - [x] Training set
   - [ ] Evaluation set
-- [ ] More data augmentation, allow task augmentation
+- [x] More data augmentation, allow task augmentation
 - [ ] Maybe use an ensemble of models instead of a single model
 - [ ] It's likely that a model trained in all the prediction tasks will perform better
 - [ ] Use voting to solve ties
@@ -149,6 +149,6 @@ python fine-tuning.py \
 - [ ] Verify that it works on Kaggle
 - [ ] Review all new code
 - [ ] Experiments
-  - [ ] Does training on a bigger dataset improve the accuracy?
-  - [ ] Does using task augmentation improve the accuracy?
+  - [ ] Does training on a bigger dataset improve the accuracy? IN PROGRESS
+  - [ ] Does using task augmentation improve the accuracy? IN PROGRESS
   - [ ] Does training for multiple tasks improve the accuracy?
