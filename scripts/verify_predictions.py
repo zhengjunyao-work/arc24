@@ -137,7 +137,9 @@ def create_prompts(predictions, dataset, grid_encoder, tokenizer, prompt_version
 
 
 def aggregate_verification_predictions(outputs, prompts, unique_predictions):
-    verifications = [output.outputs[0].text == 'yes' for output in outputs]
+    text_outputs = [output.outputs[0].text for output in outputs]
+    logger.info(f'Unique text outputs: {np.unique(text_outputs, return_counts=True)}')
+    verifications = [output == 'yes' for output in text_outputs]
     print(np.unique(verifications, return_counts=True))
     aggregated_verifications = {task_id: [np.zeros(len(sample_predictions)) for sample_predictions in task_predictions] for task_id, task_predictions in unique_predictions.items()}
     for verification, prompt in zip(verifications, prompts):
