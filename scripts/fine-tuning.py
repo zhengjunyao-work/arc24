@@ -448,6 +448,7 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
         else:
             dataset = load_arc_data_with_solutions(filepath)
             dataset = {f'{idx}|{key}|{prompt_version}': value for key, value in dataset.items()}
+        logger.info(f'Loaded {len(dataset)} tasks from {filepath}')
         data.update(dataset)
     task_ids = list(data.keys())
     prompt_lengths = []
