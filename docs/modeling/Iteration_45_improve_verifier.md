@@ -12,7 +12,13 @@ On the previous iteration we have seen signs that the verifier approach might wo
 
 ### Create bigger datasets for training
 
+#### Training set
+
 By generating more wrong predictions I have increased the size of the training dataset from 48 to 130MB.
+The mean number of wrong predictions per training sample has increased from 54 to 155, and the total
+number of wrong predictions has increased from 92k to 267k.s
+
+#### Evaluation set
 
 ## Results
 
