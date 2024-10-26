@@ -28,7 +28,7 @@ def random_augment_task(task, swap_train_and_test=True):
     return augmented_task
 
 
-def random_compose_new_task_by_adding_additional_transformation(task, weights=None, verbose=False):
+def random_compose_new_task_by_adding_additional_transformation(task, weights=None, verbose=False, is_wrong_prediction=False):
     """
     Creates a new task by randomly applying transformations to the inputs or the outputs
 
@@ -40,6 +40,8 @@ def random_compose_new_task_by_adding_additional_transformation(task, weights=No
         The weights for the different transformations. The order is ['geometric', 'padding', 'upscale', 'mirror']
     """
     augmentation_targets = [random.choice(['input', 'output'])]
+    if is_wrong_prediction and augmentation_targets[0] == 'output':
+        augmentation_targets.append('wrong_prediction')
 
     augmentation_map = {
         'geometric': (geometric_augmentation, get_random_geometric_augmentation_params),
