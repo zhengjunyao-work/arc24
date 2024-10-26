@@ -28,7 +28,7 @@ def random_augment_task(task, swap_train_and_test=True):
     return augmented_task
 
 
-def random_compose_new_task_by_adding_additional_transformation(task, augmentation_target=None, weights=None, verbose=False):
+def random_compose_new_task_by_adding_additional_transformation(task, weights=None, verbose=False):
     """
     Creates a new task by randomly applying transformations to the inputs or the outputs
 
@@ -36,13 +36,10 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
     ----------
     task : dict
         The task to be transformed
-    augmentation_target : str
-        The target of the transformation. Either 'input' or 'output'
     weights: list
         The weights for the different transformations. The order is ['geometric', 'padding', 'upscale', 'mirror']
     """
-    if augmentation_target is None:
-        augmentation_target = random.choice(['input', 'output'])
+    augmentation_targets = [random.choice(['input', 'output'])]
 
     augmentation_map = {
         'geometric': (geometric_augmentation, get_random_geometric_augmentation_params),
@@ -56,18 +53,18 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
 
     try:
         augmentation = random.choices(list(augmentation_map.keys()), weights=weights)[0]
-        if verbose: print(f"Applying {augmentation} augmentation to {augmentation_target}")
+        if verbose: print(f"Applying {augmentation} augmentation to {augmentation_targets}")
 
         aug_func, param_func = augmentation_map[augmentation]
         if augmentation == 'geometric':
             kwargs = param_func()
         else:
-            max_grid_shape = get_max_grid_shape(task, augmentation_target)
+            max_grid_shape = get_max_grid_shape(task, augmentation_targets)
             kwargs = param_func(max_grid_shape)
         new_task = _apply_augmentation_to_task(
             task,
             partial(aug_func, **kwargs),
-            augmentation_target=augmentation_target
+            augmentation_targets=augmentation_targets
         )
     except GridTooBigToAugmentError as e:
         if verbose: print(e)
@@ -76,20 +73,20 @@ def random_compose_new_task_by_adding_additional_transformation(task, augmentati
     return new_task
 
 
-def _apply_augmentation_to_task(task, augmentation, augmentation_target=None):
+def _apply_augmentation_to_task(task, augmentation, augmentation_targets=None):
     augmented_task = dict()
     for partition, samples in task.items():
-        augmented_task[partition] = [_augment_sample(sample, augmentation, augmentation_target) for sample in samples]
+        augmented_task[partition] = [_augment_sample(sample, augmentation, augmentation_targets) for sample in samples]
     return augmented_task
 
 
-def _augment_sample(sample, augmentation, augmentation_target=None):
-    if augmentation_target is None:
+def _augment_sample(sample, augmentation, augmentation_targets=None):
+    if augmentation_targets is None:
         return {name:augmentation(grid) for name, grid in sample.items()}
     else:
-        if augmentation_target not in sample:
-            raise ValueError(f"augmentation_target {augmentation_target} not found in sample")
-        return {name:augmentation(grid) if name == augmentation_target else grid for name, grid in sample.items()}
+        if all(augmentation_target not in sample for augmentation_target in augmentation_targets):
+            raise ValueError(f"augmentation_target {augmentation_targets} not found in sample")
+        return {name:augmentation(grid) if name in augmentation_targets else grid for name, grid in sample.items()}
 
 
 def get_random_geometric_augmentation_params():
@@ -171,12 +168,14 @@ class GridTooBigToAugmentError(Exception):
     pass
 
 
-def get_max_grid_shape(task, augmentation_target):
+def get_max_grid_shape(task, augmentation_targets):
     max_shape = (0, 0)
-    for partition, samples in task.items():
+    for _, samples in task.items():
         for sample in samples:
-            grid = sample[augmentation_target]
-            max_shape = (max(max_shape[0], len(grid)), max(max_shape[1], len(grid[0])))
+            for augmentation_target in augmentation_targets:
+                if augmentation_target in sample:
+                    grid = sample[augmentation_target]
+                    max_shape = (max(max_shape[0], len(grid)), max(max_shape[1], len(grid[0])))
     return max_shape
 
 

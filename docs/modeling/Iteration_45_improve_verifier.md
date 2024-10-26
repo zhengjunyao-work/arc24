@@ -20,6 +20,74 @@ number of wrong predictions has increased from 92k to 267k.s
 
 #### Evaluation set
 
+### Add task augmentation to verification task
+
+I have to refactor the code to enable using task augmentation with verification, because currently
+it is only prepared for `input` and `output` grids, not for `wrong_prediction` grid.
+
+<details>
+  <summary>Click to see bash commands</summary>
+
+```bash
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/Qwen2.5-0.5B \
+--device_map None \
+--lora_r 128 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241026_debug_task_augmentation/01_baseline_no_task_augmentation \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps 10 \
+--logging_steps 1 \
+--eval_steps 200 \
+--batch_size 16 \
+--learning_rate 1e-4 \
+--max_seq_len 4096 \
+--no-resume_from_checkpoint \
+--random_seed 7 \
+--verbose
+
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/Qwen2.5-0.5B \
+--device_map None \
+--lora_r 128 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241026_debug_task_augmentation/02_task_augmentation_refactor_b \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps 10 \
+--logging_steps 1 \
+--eval_steps 200 \
+--batch_size 16 \
+--learning_rate 1e-4 \
+--max_seq_len 4096 \
+--no-resume_from_checkpoint \
+--random_seed 7 \
+--compose_new_task_probability 0.5 \
+--verbose
+
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/Qwen2.5-0.5B \
+--device_map None \
+--lora_r 128 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241026_debug_task_augmentation/03_revert_refactor \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--max_steps 10 \
+--logging_steps 1 \
+--eval_steps 200 \
+--batch_size 16 \
+--learning_rate 1e-4 \
+--max_seq_len 4096 \
+--no-resume_from_checkpoint \
+--random_seed 7 \
+--compose_new_task_probability 0.5 \
+--verbose
+```
+
+</details>
+
 ## Results
 
 ## Conclusion
@@ -31,7 +99,7 @@ number of wrong predictions has increased from 92k to 267k.s
 ## TODO
 
 - [ ] Create bigger dataset for training
-  - [ ] Training set
+  - [x] Training set
   - [ ] Evaluation set
 - [ ] More data augmentation, allow task augmentation
 - [ ] Maybe use an ensemble of models instead of a single model
