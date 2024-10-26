@@ -222,3 +222,4 @@ I trained different models, just varying the number of training steps. We can vi
 - [x] Create a script to select predictions using a verifier (use the notebook as a template). 
 - [x] I would probably need an easy run script also.
 - [x] Differences between verifier models and selection accuracy
+- [ ] First submission results
