@@ -176,6 +176,16 @@ on leaderboard would improve the LB score from 40 to 45-46.
 - The plot above is for the predictions: `20240921_optimal_train_duration/05_LoRA-032-Qwen2-0.5B-Instruct_lr1e-4_4e4steps_2gpus_8192msl/checkpoint-40000/inference_evaluation_x032.json`
 - As a verifier model I used: `/mnt/hdd0/Kaggle/arc24/models/20241023_first_verifiers/05_verify-and-select_lora032-Qwen2-0.5B-Instruct_lr5e-5_bs32_8000steps_2gpus_8192msl/checkpoint-8000`
 
+### Trying with different models
+
+I trained different models, just varying the number of training steps. We can visualize how the accuracy is affected.
+
+![different models](res/2024-10-26-05-40-11.png)
+
+- The best model seems to be the one trained for 8k steps
+- The quality of the model is relevant, f.e. the models trained for 1k and 2k steps are clearly worse.
+  Thus it is likely that we can train even better models that outputperform this initial trainings.
+
 ## Conclusion
 
 ## Next steps
@@ -187,6 +197,9 @@ on leaderboard would improve the LB score from 40 to 45-46.
   - Maybe use an ensemble of models instead of a single model
   - I could use a bigger model, full fine-tuned
   - It's likely that a model trained in all the prediction tasks will perform better
+  - Use voting to solve ties
+  - I could make more efficient use of compute by using uncertainty and only making verifications for
+    the predictions that are not significative different from the top prediction.
 
 ## TODO
 
@@ -208,4 +221,4 @@ on leaderboard would improve the LB score from 40 to 45-46.
   That would simplify the post-processing a lot.
 - [x] Create a script to select predictions using a verifier (use the notebook as a template). 
 - [x] I would probably need an easy run script also.
-- [ ] Differences between verifier models and selection accuracy
+- [x] Differences between verifier models and selection accuracy
