@@ -188,6 +188,8 @@ I trained different models, just varying the number of training steps. We can vi
 
 ### First submissions
 
+#### Problems with submission and evaluations
+
 The first submission attempts have timeout out when doing 32 predictions per tasks and 32 verifications
 per prediction.
 
@@ -197,7 +199,11 @@ Running a validation submission with 20 tasks took 2h40 seconds.
 - Inference took 13 min (32 predictions per task)
 - Verification took 30min (32 verifications per prediction)
 
-I have run another validation with 50 tasks that took 6h
+The problem was that I was using Qwen2.5 as the base model, when I trained the verifiers on Qwen2.
+
+#### First results
+
+TODO:
 
 ## Conclusion
 

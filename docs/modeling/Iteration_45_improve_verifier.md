@@ -130,6 +130,19 @@ python fine-tuning.py \
 
 </details>
 
+### More efficient rank estimation using uncertainty
+
+Currently I'm doing n verifications with all the predictions. F.e. I have seen that 32 verifications
+per prediction can be enough to select the best predictions.
+
+This works, but my interest is just to select the best 2 predictions and I'm using a lot of compute
+to get the ranking for all the predictions. If I estimate the uncertainty for the verification ratio
+of all the predictions I could early discard wrong predictions and just focus on verifying the most
+promising predictions.
+
+I also thought of using voting as a way to solve ties, but I won't have voting numbers for the 2020 solutions.
+So I should focus on improving the efficiency of estimating the ranking with a verifier model.
+
 ## Results
 
 ## Conclusion
@@ -146,12 +159,14 @@ python fine-tuning.py \
 - [x] More data augmentation, allow task augmentation
 - [ ] Maybe use an ensemble of models instead of a single model
 - [ ] It's likely that a model trained in all the prediction tasks will perform better
-- [ ] Use voting to solve ties
+- [x] ~Use voting to solve ties~ I won't have voting on 2020 solution.
 - [ ] I could make more efficient use of compute by using uncertainty and only making verifications for
   the predictions that are not significative different from the top prediction.
-- [ ] Verify that it works on Kaggle
+- [x] Verify that it works on Kaggle
 - [ ] Review all new code
 - [ ] Experiments
   - [ ] Does training on a bigger dataset improve the accuracy? IN PROGRESS
   - [ ] Does using task augmentation improve the accuracy? IN PROGRESS
+  - [ ] Should I change the probability of training with a wrong prediction?
   - [ ] Does training for multiple tasks improve the accuracy?
+  - [ ] Train new submission models
