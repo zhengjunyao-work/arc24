@@ -20,6 +20,9 @@ number of wrong predictions has increased from 92k to 267k.s
 
 #### Evaluation set
 
+I have created a first dataset with a mean number of wrong predictions per sample of 163, the file
+weights 260MB.
+
 ### Add task augmentation to verification task
 
 I have to refactor the code to enable using task augmentation with verification, because currently
@@ -137,9 +140,9 @@ python fine-tuning.py \
 
 ## TODO
 
-- [ ] Create bigger dataset for training
+- [x] Create bigger dataset for training
   - [x] Training set
-  - [ ] Evaluation set
+  - [x] Evaluation set
 - [x] More data augmentation, allow task augmentation
 - [ ] Maybe use an ensemble of models instead of a single model
 - [ ] It's likely that a model trained in all the prediction tasks will perform better
