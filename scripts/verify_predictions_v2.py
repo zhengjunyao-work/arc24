@@ -37,7 +37,8 @@ def main():
     for _ in range(cfg.max_verifications_per_prediction//cfg.verifications_per_round):
         prompts = create_prompts(
             aggregated_verifications, unique_predictions, dataset, grid_encoder, tokenizer,
-            prompt_version=cfg.prompt_version, verifications_per_prediction=cfg.verifications_per_round)
+            prompt_version=cfg.prompt_version, verifications_per_prediction=cfg.verifications_per_round,
+            confidence_level=cfg.confidence_level)
         if not prompts:
             break
         outputs = generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=cfg.batch_size)
@@ -85,7 +86,7 @@ This works because verifying that a prediction is correct is an easier task than
     parser.add_argument('--swap-space', default=0, type=int, help="CPU swap space size (GiB) per GPU")
     parser.add_argument('--verbose', action='store_true', help="Print verbose output")
     parser.add_argument('--n-top', default=2, type=int, help="Number of top predictions to select")
-    # TODO: add confidence level to parameters
+    parser.add_argument('--confidence-level', default=0.8, type=float, help="Confidence level for the verification")
     print(args)
     return parser.parse_args()
 
@@ -163,14 +164,14 @@ def create_empty_aggregated_verifications(unique_predictions):
 
 
 def create_prompts(aggregated_verifications, predictions, dataset,
-                   grid_encoder, tokenizer, prompt_version, verifications_per_prediction):
+                   grid_encoder, tokenizer, prompt_version, verifications_per_prediction,
+                   confidence_level):
+    """ Creates prompt to verify the predictions that are not significatively different to the top 2 predictions """
     prompts = []
     for task_id, task_predictions in tqdm(predictions.items(), total=len(predictions), desc='Creating prompts'):
         for sample_idx, sample_predictions in enumerate(task_predictions):
-            # if already_found_best_2_predictions(aggregated_verifications[task_id][sample_idx]):
-            #     continue
-            indices_to_verify = get_prediction_indices_to_verify(aggregated_verifications[task_id][sample_idx], confidence_level=0.8)
-            # for prediction_idx, prediction in enumerate(sample_predictions):
+            indices_to_verify = get_prediction_indices_to_verify(
+                aggregated_verifications[task_id][sample_idx], confidence_level=confidence_level)
             for prediction_idx in indices_to_verify:
                 prediction = sample_predictions[prediction_idx]
                 for _ in range(verifications_per_prediction):
@@ -192,23 +193,7 @@ def create_prompts(aggregated_verifications, predictions, dataset,
     return prompts
 
 
-def already_found_best_2_predictions(verification_results, confidence_level=0.8):
-    """Is there a significative difference between the 2 best predictions and the rest?"""
-    z_score = calculate_z_score(confidence_level=confidence_level)
-    print(z_score)
-    top_2_indices = np.argsort([result.yes_prob for result in verification_results])[::-1][:2]
-    for idx, result in enumerate(verification_results):
-        if idx in top_2_indices:
-            continue
-        for top_idx in top_2_indices:
-            top_result = verification_results[top_idx]
-            difference_uncertainty = (top_result.yes_prob_uncertainty**2 + result.yes_prob_uncertainty**2)**0.5
-            if top_result.yes_prob - result.yes_prob < difference_uncertainty*z_score:
-                return False
-    return True
-
-
-def get_prediction_indices_to_verify(verification_results, confidence_level=0.8):
+def get_prediction_indices_to_verify(verification_results, confidence_level):
     """Only update the prediction indices that are not significatively different to the top 2 predictions"""
     z_score = calculate_z_score(confidence_level=confidence_level)
     top_2_indices = np.argsort([result.yes_prob for result in verification_results])[::-1][:2]
@@ -227,7 +212,6 @@ def get_prediction_indices_to_verify(verification_results, confidence_level=0.8)
 
 
 def calculate_z_score(confidence_level):
-    # Calculate the z-score for the two-tailed confidence level
     z_score = norm.ppf(1 - (1 - confidence_level) / 2)
     return z_score
 
