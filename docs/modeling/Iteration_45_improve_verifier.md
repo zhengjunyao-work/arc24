@@ -143,6 +143,16 @@ promising predictions.
 I also thought of using voting as a way to solve ties, but I won't have voting numbers for the 2020 solutions.
 So I should focus on improving the efficiency of estimating the ranking with a verifier model.
 
+### Probability of using a wrong prediction for training
+
+The first implementation has hardcoded the probability of using a wrong prediction for training a verifier to 50%.
+It uses a balanced dataset of correct and wrong samples.
+
+The problem with this approach is that we have around 1700 correct samples and around 270k wrong predictions.
+If we train for 8k steps with a batch size of 32 the model will have seen each correct sample an average of 75 times.
+In the other hand the model will have seen on average each wrong prediction 0.5 times.
+Maybe it has sense to decrease the frequency of using correct samples for training.
+
 ## Results
 
 ## Conclusion
