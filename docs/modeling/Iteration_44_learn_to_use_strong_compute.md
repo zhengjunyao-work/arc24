@@ -134,6 +134,9 @@ However in the following days I have been unable to run new trainings, and final
 of struggling I have managed to run two jobs (on A100 and H100) but they were 4 times slower than the
 previous run and they have finished with `strong_error` after less than 2 hours of running.
 
+Today is Sunday and I have been able to run 3 fast trainings, one slow. I don't see any speed difference
+between A100 and H100. I have tried using a batch size of 2 per GPU but it is not faster.
+
 ## Conclusion
 
 So far it seems that Strong Compute cluster is very unstable. But we have seen that we can train at
