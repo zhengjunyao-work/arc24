@@ -42,7 +42,7 @@ def verification(model_path, output_filepath, verifications_per_prediction,
     print('-'*80)
     logger.info(f'Verification with model {model_path}')
     cmd = f'python verify_predictions.py --model-path {model_path} --output-path {output_filepath}'
-    cmd += f' --verifications-per-prediction {verifications_per_prediction}'
+    cmd += f' --max-verifications-per-prediction {verifications_per_prediction}'
     cmd += f' --dataset-path {dataset_path} --predictions-path {predictions_path}'
     # cmd += ' --random-seed 7' # TODO: remove the random seed
     print(cmd)
