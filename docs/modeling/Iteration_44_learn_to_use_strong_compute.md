@@ -58,12 +58,12 @@ Better configuration with the whole command:
 
 ```toml
 isc_project_id = "46f4672b-2489-457f-b302-eab855b36b70"
-experiment_name = "first_arc24_training_a100n"
+experiment_name = "first_arc24_training_A100n_v2"
 gpu_type = "24GB VRAM GPU"
 gpus = 8
 compute_mode = "burst"
 dataset_id = "0cfd54a3-4096-494e-93d5-a073126e81e2"
-output_path = "~/models/20241022_no_training/04_A100n_lora064-Qwen2.5-0.5B-Instruct_lr1e-4_bs16_10000steps_2gpus_8192msl"
+output_path = "~/outputs"
 burst_shape_priority_list = ["oblivus-mon1-a100n"]
 command = '''
 source ~/envs/arc24/bin/activate && 
@@ -73,7 +73,7 @@ accelerate launch --num_processes 8 --num_machines 1 --mixed_precision bf16 --mu
 --max_steps 10000 
 --model_path=Qwen/Qwen2.5-0.5B-Instruct 
 --lora_r 64 
---output_dir $(dirname "${OUTPUT_PATH}")
+--output_dir ${OUTPUT_PATH}/models/20241022_no_training/08_A100n_lora064-Qwen2.5-0.5B-Instruct_lr1e-4_bs16_10000steps_2gpus_8192msl
 --n_gpus=8 
 --batch_size=16 
 --device_map None 
@@ -94,7 +94,7 @@ accelerate launch --num_processes 8 --num_machines 1 --mixed_precision bf16 --mu
 --train_datasets ~/code/arc24/data/external_data/MINI-ARC.json input-from-inputs-v0  
 --val_dataset ~/code/arc24/data/original_data/arc-agi_training_challenges.json output-from-examples-v1 
 --remove_train_samples_to_fit_max_seq_len 
---eval_steps=200 
+--eval_steps 200
 --warmup_ratio 1e-1'''
 ```
 
@@ -147,10 +147,10 @@ training if necessary.
 
 ## TODO
 
-- [ ] Create a python environment for the experiments
-- [ ] Copy the data and code to the ISC (instant super computer)
+- [x] Create a python environment for the experiments
+- [x] Copy the data and code to the ISC (instant super computer)
 - [ ] Train a submission model with strong compute
-- [ ] How much faster can I train?
-- [ ] Differences between A100 and H100
+- [x] How much faster can I train?
+- [x] Differences between A100 and H100
 - [ ] https://huggingface.co/docs/accelerate/en/usage_guides/low_precision_training On H100
-- [ ] Multi-line submit files TOML https://toml.io/en/
+- [x] Multi-line submit files TOML https://toml.io/en/
