@@ -79,6 +79,8 @@ class CFG:
     # Data augmentation
     compose_new_task_probability: float = 0.0
     compose_new_task_weights: Optional[List[float]] = None
+    # Verify
+    verify_correct_output_probability: float = 0.5
 
 
 def parse_args():
@@ -119,6 +121,7 @@ def parse_args():
     parser.add_argument('--compose_new_task_weights', nargs='+', type=float, help="Weights for composing a new task")
     parser.add_argument('--verbose', action=argparse.BooleanOptionalAction, help="Whether to print verbose information")
     parser.add_argument('--use_lora', action=argparse.BooleanOptionalAction, help="Whether to use LoRA")
+    parser.add_argument('--verify_correct_output_probability', type=float, help="Probability of using a correct output when verifying")
     return parser.parse_args()
 
 
@@ -157,7 +160,8 @@ def fine_tuning_main():
                 random_seed=cfg.random_seed, **dataset_kwargs,
                 remove_train_samples_to_fit_max_seq_len=cfg.remove_train_samples_to_fit_max_seq_len,
                 subsample_tasks_ratio=cfg.subsample_train_tasks_ratio,
-                compose_new_task_probability=cfg.compose_new_task_probability))
+                compose_new_task_probability=cfg.compose_new_task_probability,
+                verify_correct_output_probability=cfg.verify_correct_output_probability))
     val_dataset = create_validation_dataset(*cfg.val_dataset, **dataset_kwargs)
 
     training_arguments = get_training_arguments(cfg)
@@ -434,7 +438,8 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                             compose_new_task_probability=0.5,
                             compose_new_task_weights=None,
                             verbose=False,
-                            max_consecutive_exceptions=20):
+                            max_consecutive_exceptions=20,
+                            verify_correct_output_probability=0.5):
     """
     """
     data = dict()
@@ -479,7 +484,7 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                         task = random_compose_new_task_by_adding_additional_transformation(
                             task, weights=compose_new_task_weights, is_wrong_prediction=True)
                     if prompt_version.startswith('verify-output-from-examples'):
-                        task = add_verify_output_label(task)
+                        task = add_verify_output_label(task, verify_correct_output_probability=verify_correct_output_probability)
                     else:
                         task = add_correct_selection_label(task)
                 else:
@@ -552,8 +557,8 @@ def add_correct_selection_label(task):
     return task
 
 
-def add_verify_output_label(task):
-    if random.random() < 0.5:
+def add_verify_output_label(task, verify_correct_output_probability=0.5):
+    if random.random() < verify_correct_output_probability:
         task['is_test_output_correct'] = 'yes'
     else:
         task['test'][0]['output'] = task['test'][0]['wrong_prediction']
