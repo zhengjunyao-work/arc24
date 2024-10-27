@@ -177,6 +177,7 @@ Maybe it has sense to decrease the frequency of using correct samples for traini
 - [ ] Experiments
   - [ ] Does training on a bigger dataset improve the accuracy? IN PROGRESS
   - [ ] Does using task augmentation improve the accuracy? IN PROGRESS
-  - [ ] Should I change the probability of training with a wrong prediction?
+  - [ ] Should I change the probability of training with a wrong prediction? IN PROGRESS
   - [ ] Does training for multiple tasks improve the accuracy?
   - [ ] Train new submission models
+- [ ] Measure improvements over voting in other model predictions
