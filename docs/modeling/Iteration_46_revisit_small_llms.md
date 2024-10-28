@@ -83,6 +83,24 @@ python fine-tuning.py \
 --no-resume_from_checkpoint \
 --random_seed 7 \
 --verbose
+
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/SmolLM-135M-Instruct \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241028_debug_small_LLMs/03_SmolLM-135M-Instruct \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--device_map None \
+--lora_r 32 \
+--max_steps 10 \
+--logging_steps 1 \
+--eval_steps 200 \
+--batch_size 16 \
+--learning_rate 1e-4 \
+--max_seq_len 4096 \
+--no-resume_from_checkpoint \
+--random_seed 7 \
+--verbose
 ```
 
 </details>

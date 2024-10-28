@@ -365,6 +365,9 @@ def get_tokenizer(model_path, model, pad_token='<|pad|>'):
         if 'qwen' in model_path.lower():
             logger.info('Changing eos token to <|im_end|> for Qwen models, because it is the same as padding token <|endoftext|>')
             tokenizer.eos_token = '<|im_end|>'
+        elif 'smollm' in model_path.lower():
+            logger.info('Changing pad token to "<|endoftext|>" for SmolLM models, because it is the same as eos token <|im_end|>')
+            tokenizer.pad_token = "<|endoftext|>"
         else:
             raise NotImplementedError('Changing padding token is only implemented for Qwen models')
     elif 'pad_token' not in tokenizer.special_tokens_map or tokenizer.pad_token == tokenizer.eos_token:
