@@ -34,12 +34,13 @@ def main():
     unique_predictions = {key: unique_predictions[key] for key in list(unique_predictions.keys())}
     aggregated_verifications = create_empty_aggregated_verifications(unique_predictions)
     tokenizer, grid_encoder, llm, sampling_params = create_inference_artifacts(cfg)
-    for round_idx in range(cfg.max_verifications_per_prediction//cfg.verifications_per_round):
+    n_rounds = cfg.max_verifications_per_prediction//cfg.verifications_per_round
+    for round_idx in range(n_rounds):
         prompts = create_prompts(
             aggregated_verifications, unique_predictions, dataset, grid_encoder, tokenizer,
             prompt_version=cfg.prompt_version, verifications_per_prediction=cfg.verifications_per_round,
             confidence_level=cfg.confidence_level)
-        logger.info(f'Round {round_idx+1}: {len(prompts)} prompts')
+        logger.info(f'Round {round_idx+1}/{n_rounds}: {len(prompts)} prompts')
         if not prompts:
             break
         outputs = generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=cfg.batch_size)
@@ -79,7 +80,7 @@ This works because verifying that a prediction is correct is an easier task than
     parser.add_argument('--predictions-path', type=str, help="Path to the json file with the predictions")
     parser.add_argument('--output-path', type=str, help="Path to the json file with the predictions")
     parser.add_argument('--max-verifications-per-prediction', default=8, type=int, help="Max number of verifications per prediction")
-    parser.add_argument('--verifications-per-round', default=8, type=int, help="Max number of verifications per prediction")
+    parser.add_argument('--verifications-per-round', default=4, type=int, help="Max number of verifications per prediction")
     parser.add_argument('--temperature', default=0, type=float, help="temperature for sampling, 0.0 for greedy search")
     parser.add_argument('--batch-size', default=512, type=int, help="batch size for inference")
     parser.add_argument('--max-output-tokens', default=5, type=int, help="Maximum number of tokens to generate")

@@ -169,6 +169,9 @@ without confidence it would take around 2300s
 938s     1087s      1159s
 
 23% more time when increasing confidence from 80% to 95%. It is probably worth it.
+I can reduce the time to 1100 seconds if I do 4 predictions per round instead of 8.
+
+With this setup I could use up to 128 verifications per prediction in just 2036 seconds.
 
 ## Conclusion
 
@@ -198,3 +201,4 @@ without confidence it would take around 2300s
 - [ ] Measure improvements over voting in other model predictions
 - [ ] Maybe the model is not as accurate in the test set as in the evaluation set?
 - [ ] Why cheating did not get perfect accuracy?
+- [ ] How many verifications I have to do until it reaches the perfect ranking?
