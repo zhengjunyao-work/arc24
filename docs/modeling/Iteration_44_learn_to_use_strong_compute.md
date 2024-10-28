@@ -126,6 +126,14 @@ apt-get install -y zstd
 tar --use-compress-program=unzstd -xvf 183e895a-bbb1-4e3a-b9e8-f3ee02c5e5cb.tar.zst
 ```
 
+### Copy big datasets
+
+```bash
+scp -P 51468 evaluation_v0.json root@192.168.127.70:~/code/arc24/data/verifier
+scp -P 51468 training_v1.json  root@192.168.127.70:~/code/arc24/data/verifier
+scp -P 51468 /mnt/hdd0/Kaggle/arc24/data/rearc/v2/re-arc.json root@192.168.127.70:~/code/arc24/data/external_data
+```
+
 ## Results
 
 First training with 8xA100 is 5x times faster than using 2xA6000.

@@ -231,6 +231,18 @@ are worse.
 
 ### Can I achieve perfect accuracy if training on the evaluation set?
 
+| training steps | top_1  | top_2  |
+|----------------|--------|--------|
+| 4000           | 63.30% | 81.20% |
+| 8000           | 62.10% | 89.20% |
+| 16000          | 70.40% | 93.80% |
+
+It is surprising that after 16k training steps the model still does not perfectly classify all the
+tasks from the evaluation set.
+
+On average it would have seen each task 320 times (`16000/4/400*32`), so if a task has 4 samples it would
+have seen around 80 times each sample.
+
 ### Should I change the probability of training with a correct prediction?
 
 | correct_probability | top_1  | top_2  |
