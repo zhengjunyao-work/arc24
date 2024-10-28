@@ -480,9 +480,9 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                 elif prompt_version.startswith('select-output-from-examples') or prompt_version.startswith('verify-output-from-examples'):
                     task = create_random_task_for_selection_prompt(data[task_id])
                     task = random_augment_task(task, swap_train_and_test=False)
-                    if random.random() < compose_new_task_probability:
-                        task = random_compose_new_task_by_adding_additional_transformation(
-                            task, weights=compose_new_task_weights, is_wrong_prediction=True)
+                    # if random.random() < compose_new_task_probability:
+                    #     task = random_compose_new_task_by_adding_additional_transformation(
+                    #         task, weights=compose_new_task_weights, is_wrong_prediction=True)
                     if prompt_version.startswith('verify-output-from-examples'):
                         task = add_verify_output_label(task, verify_correct_output_probability=verify_correct_output_probability)
                     else:
