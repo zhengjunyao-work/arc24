@@ -165,13 +165,12 @@ def fine_tuning_main():
     val_dataset = create_validation_dataset(*cfg.val_dataset, **dataset_kwargs)
 
     training_arguments = get_training_arguments(cfg)
-    data_collator = get_data_collator(cfg.model_path, tokenizer)
     trainer = SFTTrainer(
         model=model,
         tokenizer=tokenizer,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
-        data_collator=data_collator,
+        data_collator=get_data_collator(tokenizer),
         args=training_arguments,
     )
     if cfg.lr_scheduler_type == 'cyclic':
@@ -598,30 +597,30 @@ def check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len, max_al
         raise ValueError(f'Too many prompts above max_seq_len: {ratio:.1%}')
 
 # Train
-def get_data_collator(model_path, tokenizer):
-    # TODO: create a function that returns model type from model path
-    # TODO: maybe I can use the tokenizer.chat_template instead of the model_path
-    if 'llama' in model_path.lower():
+def get_data_collator(tokenizer):
+    if '<|start_header_id|>' in tokenizer.chat_template and '<|end_header_id|>' in tokenizer.chat_template:
         logger.info('Using llama template for collator')
         data_collator = DataCollatorForCompletionOnlyLM(
             tokenizer=tokenizer,
             instruction_template='<|start_header_id|>user<|end_header_id|>',
             response_template='<|start_header_id|>assistant<|end_header_id|>',
         )
-    elif any(key in model_path.lower() for key in ['smollm', 'qwen', 'nanolm']):
+    elif '<|im_start|>' in tokenizer.chat_template:
         logger.info('Using SmolLM\Qwen template for collator')
         data_collator = DataCollatorForCompletionOnlyLM(
             tokenizer=tokenizer,
             instruction_template='<|im_start|>user',
             response_template='<|im_start|>assistant',
         )
-    else:
+    elif '<|user|>' in tokenizer.chat_template and '<|assistant|>' in tokenizer.chat_template:
         logger.info('Using Phi-3 template for collator')
         data_collator = DataCollatorForCompletionOnlyLM(
             tokenizer=tokenizer,
             instruction_template='<|user|>',
             response_template='<|assistant|>'
         )
+    else:
+        raise NotImplementedError(f'Tokenizer chat template not recognized: {tokenizer.chat_template}')
     return data_collator
 
 
