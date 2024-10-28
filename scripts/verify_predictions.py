@@ -34,11 +34,12 @@ def main():
     unique_predictions = {key: unique_predictions[key] for key in list(unique_predictions.keys())}
     aggregated_verifications = create_empty_aggregated_verifications(unique_predictions)
     tokenizer, grid_encoder, llm, sampling_params = create_inference_artifacts(cfg)
-    for _ in range(cfg.max_verifications_per_prediction//cfg.verifications_per_round):
+    for round_idx in range(cfg.max_verifications_per_prediction//cfg.verifications_per_round):
         prompts = create_prompts(
             aggregated_verifications, unique_predictions, dataset, grid_encoder, tokenizer,
             prompt_version=cfg.prompt_version, verifications_per_prediction=cfg.verifications_per_round,
             confidence_level=cfg.confidence_level)
+        logger.info(f'Round {round_idx+1}: {len(prompts)} prompts')
         if not prompts:
             break
         outputs = generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=cfg.batch_size)
@@ -86,7 +87,7 @@ This works because verifying that a prediction is correct is an easier task than
     parser.add_argument('--swap-space', default=0, type=int, help="CPU swap space size (GiB) per GPU")
     parser.add_argument('--verbose', action='store_true', help="Print verbose output")
     parser.add_argument('--n-top', default=2, type=int, help="Number of top predictions to select")
-    parser.add_argument('--confidence-level', default=0.8, type=float, help="Confidence level for the verification")
+    parser.add_argument('--confidence-level', default=0.95, type=float, help="Confidence level for the verification")
     print(args)
     return parser.parse_args()
 
@@ -168,7 +169,7 @@ def create_prompts(aggregated_verifications, predictions, dataset,
                    confidence_level):
     """ Creates prompt to verify the predictions that are not significatively different to the top 2 predictions """
     prompts = []
-    for task_id, task_predictions in tqdm(predictions.items(), total=len(predictions), desc='Creating prompts'):
+    for task_id, task_predictions in predictions.items():
         for sample_idx, sample_predictions in enumerate(task_predictions):
             indices_to_verify = get_prediction_indices_to_verify(
                 aggregated_verifications[task_id][sample_idx], confidence_level=confidence_level)
@@ -189,7 +190,6 @@ def create_prompts(aggregated_verifications, predictions, dataset,
                                         prompt=prompt,
                                         sample_idx=sample_idx,
                                         prediction_idx=prediction_idx))
-    logger.info(f'Created {len(prompts)} prompts')
     return prompts
 
 

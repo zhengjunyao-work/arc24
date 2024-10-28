@@ -155,6 +155,21 @@ Maybe it has sense to decrease the frequency of using correct samples for traini
 
 ## Results
 
+### Confidence level and verification time
+
+without confidence it would take around 2300s
+
+32 verifications max
+80%       90%        95%
+11440
+2960     4168       5152
+2448     2816       3296
+1712     2480       2864
+---------------------------
+938s     1087s      1159s
+
+23% more time when increasing confidence from 80% to 95%. It is probably worth it.
+
 ## Conclusion
 
 ## Next steps
@@ -181,3 +196,5 @@ Maybe it has sense to decrease the frequency of using correct samples for traini
   - [ ] Does training for multiple tasks improve the accuracy?
   - [ ] Train new submission models
 - [ ] Measure improvements over voting in other model predictions
+- [ ] Maybe the model is not as accurate in the test set as in the evaluation set?
+- [ ] Why cheating did not get perfect accuracy?
