@@ -42,6 +42,25 @@ I have noticed that Qwen has the chat template in the [tokenizer_config.json](ht
 
 It seems that I can simply copy it and assign to the AMD-Llama-135m model. [How do I create a chat template?](https://huggingface.co/docs/transformers/main/en/chat_templating#how-do-i-create-a-chat-template)
 
+#### Problems when adding the chat template
+
+Despite the code being very simple, I get a weird error with the collator. It does not find the keys, although they
+are in the text.
+
+```
+  warnings.warn(
+/home/gbarbadillo/miniconda3/envs/arc/lib/python3.10/site-packages/trl/trainer/utils.py:198: UserWarning: Could not find instruction key `<|im_start|>user` in the following instance: <s> <|im_start|>system
+You are a helpful assistant.<|im_end|>
+<|im_start|>user
+Let's see if you can solve this simple Abstraction and Reasoning Challenge (ARC) task.
+Below there are some input-output grid examples that define the task.
+...
+...
+```<|im_end|>
+ This instance will be ignored in loss calculation. Note, if this happens often, consider increasing the `max_seq_length`.
+  warnings.warn(
+```
+
 ### Local trainings to verify it can train
 
 <details>
@@ -101,6 +120,26 @@ python fine-tuning.py \
 --no-resume_from_checkpoint \
 --random_seed 7 \
 --verbose
+
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/AMD-Llama-135m \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241028_debug_small_LLMs/04_AMD-Llama-135m \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--device_map None \
+--lora_r 32 \
+--max_steps 1 \
+--logging_steps 1 \
+--eval_steps 200 \
+--batch_size 16 \
+--learning_rate 1e-4 \
+--max_seq_len 1024 \
+--no-resume_from_checkpoint \
+--random_seed 7 \
+--remove_train_samples_to_fit_max_seq_len \
+--verbose
+
 ```
 
 </details>

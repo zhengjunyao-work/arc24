@@ -376,6 +376,14 @@ def get_tokenizer(model_path, model, pad_token='<|pad|>'):
         tokenizer.add_special_tokens({'pad_token': pad_token})
         tokenizer.padding_side = 'right'
         model.resize_token_embeddings(len(tokenizer))
+    # if tokenizer.chat_template is None:
+    #     logger.warning('The tokenizer does not have a chat template, assigning Qwen2 chat template')
+    #     tokenizer.chat_template = AutoTokenizer.from_pretrained('Qwen/Qwen2.5-0.5B-Instruct', trust_remote_code=True).chat_template
+    #     # tried adding this additional code without success
+    #     tokenizer.add_special_tokens({'eos_token': '<|im_end|>'})
+    #     tokenizer.add_special_tokens({'pad_token': '<|endoftext|>'})
+    #     # tokenizer.eos_token = '<|im_end|>'
+    #     # tokenizer.pad_token = '<|endoftext|>'
     assert tokenizer.pad_token != tokenizer.eos_token
     assert tokenizer.pad_token_id != tokenizer.eos_token_id
     return tokenizer
