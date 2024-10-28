@@ -157,6 +157,7 @@ Maybe it has sense to decrease the frequency of using correct samples for traini
 
 ### Confidence level and verification time
 
+```
 without confidence it would take around 2300s
 
 32 verifications max
@@ -167,6 +168,7 @@ without confidence it would take around 2300s
 1712     2480       2864
 ---------------------------
 938s     1087s      1159s
+```
 
 23% more time when increasing confidence from 80% to 95%. It is probably worth it.
 I can reduce the time to 1100 seconds if I do 4 predictions per round instead of 8.
@@ -242,6 +244,13 @@ There is no evidence that suggest that decreasing the probability of using corre
 higher accuracy.
 
 ### Does training for multiple tasks improve the accuracy?
+
+Let's train new models from scratch:
+
+- Add the new verify and select tasks, without task augmentation
+- Qwen2.5
+- Do the same also for submission, including the evaluation set
+- Train for 40k steps with batch size 32.
 
 ## Conclusion
 
