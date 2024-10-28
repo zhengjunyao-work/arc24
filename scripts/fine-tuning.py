@@ -600,6 +600,7 @@ def check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len, max_al
 # Train
 def get_data_collator(model_path, tokenizer):
     # TODO: create a function that returns model type from model path
+    # TODO: maybe I can use the tokenizer.chat_template instead of the model_path
     if 'llama' in model_path.lower():
         logger.info('Using llama template for collator')
         data_collator = DataCollatorForCompletionOnlyLM(
@@ -607,7 +608,7 @@ def get_data_collator(model_path, tokenizer):
             instruction_template='<|start_header_id|>user<|end_header_id|>',
             response_template='<|start_header_id|>assistant<|end_header_id|>',
         )
-    elif 'smollm' in model_path.lower() or 'qwen' in model_path.lower():
+    elif any(key in model_path.lower() for key in ['smollm', 'qwen', 'nanolm']):
         logger.info('Using SmolLM\Qwen template for collator')
         data_collator = DataCollatorForCompletionOnlyLM(
             tokenizer=tokenizer,

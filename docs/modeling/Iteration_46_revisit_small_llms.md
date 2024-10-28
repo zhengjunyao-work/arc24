@@ -42,6 +42,51 @@ I have noticed that Qwen has the chat template in the [tokenizer_config.json](ht
 
 It seems that I can simply copy it and assign to the AMD-Llama-135m model. [How do I create a chat template?](https://huggingface.co/docs/transformers/main/en/chat_templating#how-do-i-create-a-chat-template)
 
+### Local trainings to verify it can train
+
+<details>
+  <summary>Click to see bash commands</summary>
+
+```bash
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/Qwen2.5-0.5B-Instruct \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241028_debug_small_LLMs/01_Qwen2.5-0.5B-Instruct \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--device_map None \
+--lora_r 32 \
+--max_steps 10 \
+--logging_steps 1 \
+--eval_steps 200 \
+--batch_size 16 \
+--learning_rate 1e-4 \
+--max_seq_len 4096 \
+--no-resume_from_checkpoint \
+--random_seed 7 \
+--verbose
+
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/NanoLM-0.3B-Instruct-v2 \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241028_debug_small_LLMs/02_NanoLM-0.3B-Instruct-v2 \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--device_map None \
+--lora_r 32 \
+--max_steps 10 \
+--logging_steps 1 \
+--eval_steps 200 \
+--batch_size 16 \
+--learning_rate 1e-4 \
+--max_seq_len 4096 \
+--no-resume_from_checkpoint \
+--random_seed 7 \
+--verbose
+```
+
+</details>
+
 ## Results
 
 ## Conclusion

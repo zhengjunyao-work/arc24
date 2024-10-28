@@ -79,8 +79,10 @@ llama 3.1
         split_text = '<|eot_id|>'
     elif '<|im_end|>' in text: # qwen
         split_text = '<|im_end|>'
-    else:
+    elif '<|end|>' in text:
         split_text = '<|end|>' # phi-3
+    else:
+        NotImplementedError('Unknown chat template')
     return split_text.join(text.split(split_text)[:-1])
 
 
