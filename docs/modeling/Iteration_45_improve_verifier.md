@@ -173,11 +173,82 @@ I can reduce the time to 1100 seconds if I do 4 predictions per round instead of
 
 With this setup I could use up to 128 verifications per prediction in just 2036 seconds.
 
+### Does the verifier work on different models?
+
+| model           | top 1 accuracy | top 2 accuracy |
+|-----------------|----------------|----------------|
+| voting baseline | 60.00%         | 70.00%         |
+| model 1         | 62.90%         | 80.40%         |
+| model 2         | 55.90%         | 72.80%         |
+| model 3         | 59.00%         | 79.10%         |
+
+We can see that the verifier can work on different models with a similar level of accuracy.
+Voting accuracy was almost exactly the same across all the 3 models.
+The current method does not seem to be better than voting when selecting the top 1.
+
+### Does training on a bigger dataset improve the accuracy?
+
+Top 1 accuracy table:
+
+| training steps | baseline | more wrong predictions |
+|----------------|----------|------------------------|
+| 4000           | 55.80%   | 54.60%                 |
+| 8000           | 61.70%   | 54.20%                 |
+| 16000          | 57.10%   | 62.50%                 |
+
+Top 2 accuracy table:
+
+| training steps | baseline | more wrong predictions |
+|----------------|----------|------------------------|
+| 4000           | 72.90%   | 72.50%                 |
+| 8000           | 77.10%   | 69.60%                 |
+| 16000          | 74.60%   | 78.80%                 |
+
+It is unclear if adding more wrong predictions was beneficial.
+
+### Does using task augmentation improve the accuracy?
+
+Top 1 accuracy table:
+
+| training steps | baseline | task augmentation |
+|----------------|----------|-------------------|
+| 4000           | 54.60%   | 52.50%            |
+| 8000           | 54.20%   | 52.10%            |
+| 16000          | 62.50%   | 54.2              |
+
+Top 2 accuracy table:
+
+| training steps | baseline | task augmentation |
+|----------------|----------|-------------------|
+| 4000           | 72.50%   | 72.90%            |
+| 8000           | 69.60%   | 72.10%            |
+| 16000          | 78.80%   | 76.70%            |
+
+It is unclear if adding task augmentation improves the accuracy. In fact in other experiments the results
+are worse.
+
+### Can I achieve perfect accuracy if training on the evaluation set?
+
+### Should I change the probability of training with a correct prediction?
+
+| correct_probability | top_1  | top_2  |
+|---------------------|--------|--------|
+| 0.1                 | 48.30% | 68.30% |
+| 0.2                 | 56.20% | 79.20% |
+| 0.3                 | 52.10% | 79.20% |
+| 0.5                 | 50.00% | 79.20% |
+
+There is no evidence that suggest that decreasing the probability of using correct predictions gives
+higher accuracy.
+
+### Does training for multiple tasks improve the accuracy?
+
 ## Conclusion
 
 ## Next steps
 
 - Could the verifier benefit from test-time fine-tuning?
+- Could I improve the selection of predictions by using selection instead of verifying? I might create a select script by tweaking the verify script.
 
 ## TODO
 
@@ -193,12 +264,12 @@ With this setup I could use up to 128 verifications per prediction in just 2036 
 - [x] Verify that it works on Kaggle
 - [ ] Review all new code
 - [ ] Experiments
-  - [ ] Does training on a bigger dataset improve the accuracy? IN PROGRESS
-  - [ ] Does using task augmentation improve the accuracy? IN PROGRESS
-  - [ ] Should I change the probability of training with a wrong prediction? IN PROGRESS
+  - [x] Does training on a bigger dataset improve the accuracy? IN PROGRESS
+  - [x] Does using task augmentation improve the accuracy? IN PROGRESS
+  - [x] Should I change the probability of training with a wrong prediction? IN PROGRESS
   - [ ] Does training for multiple tasks improve the accuracy?
   - [ ] Train new submission models
-- [ ] Measure improvements over voting in other model predictions
+- [x] Measure improvements over voting in other model predictions
 - [ ] Maybe the model is not as accurate in the test set as in the evaluation set?
 - [ ] Why cheating did not get perfect accuracy?
-- [ ] How many verifications I have to do until it reaches the perfect ranking?
+- [ ] How many verifications I have to do until it reaches the perfect ranking? 128 verifications does not reach significative differences.
