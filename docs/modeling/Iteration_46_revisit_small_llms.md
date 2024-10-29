@@ -30,7 +30,7 @@ that allows to sort by the number of parameters. I have also found [awesome-mobi
 | [HuggingFaceTB/SmolLM-135M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM-135M-Instruct) | 135            | 2048                    | 1.00E+04   | 9               | TRUE               |
 | [TinyMistral-248M-Instruct](https://huggingface.co/Locutusque/TinyMistral-248M-Instruct)        | 248            | 32768                   | 1.00E+04   | 32              | FALSE              |
 | [OpenELM-270M](https://huggingface.co/apple/OpenELM-270M)                                       | 270            | 2048                    | -          | ?               | FALSE              |
-| [NanoLM-365M-Base](https://huggingface.co/Mxode/NanoLM-365M-Base)                               | 365            | 131072                  | 1.00E+06   | 14              | TRUE               |
+| [Mxode/NanoLM-0.3B-Instruct-v2](https://huggingface.co/Mxode/NanoLM-0.3B-Instruct-v2)           | 365            | 131072                  | 1.00E+06   | 14              | TRUE               |
 | [Qwen2.5-0.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct)                      | 500            | 32768                   | 1.00E+06   | 14              | TRUE               |
 
 The SmolLM model has an uneven number of attention heads and VLLM does not support model parallel in that case. However
@@ -218,13 +218,26 @@ The result is exactly the same but it does not increase the complexity of the fi
 
 ## Results
 
+### Increasing the context length by increasing `rope_theta`
+
+On a synthetic task I have probed that I can increase the context length of `SmolLM-135M-Instruct`
+to be able to work with prompts of 8k tokens by increasing `rope_theta` from 1e4 to 1e5.
+
+![rope_theta increase](res/2024-10-29-12-34-55.png)
+
+The plot above shows how quickly the task is learned once the model has enough context window.
+Using `rope_scaling` almost did not have any effect.
+
 ## Conclusion
 
 ## Next steps
 
 ## TODO
 
-- [ ] Experiment to validate that I can extend the context window of the model. At the beginning is a simple instruction, then a lot of distraction text. If the model has enough context length the task is trivial, otherwise is impossible.
-- [ ] How can I add a chat template to a model?
+- [x] Experiment to validate that I can extend the context window of the model. At the beginning is a simple instruction, then a lot of distraction text. If the model has enough context length the task is trivial, otherwise is impossible.
+- [x] How can I add a chat template to a model?
 - [ ] Can I reach the same validation results as Qwen?
+  - [ ] Mxode/NanoLM-0.3B-Instruct-v2
+  - [ ] SmolLM-135M-Instruct-20k
 - [ ] Datasets for long context fine-tuning. https://huggingface.co/blog/wenbopan/long-context-fine-tuning#long-text-data
+- [ ] Does it help to pretrain SmolLM-20k model on text?
