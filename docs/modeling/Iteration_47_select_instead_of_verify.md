@@ -17,6 +17,16 @@ the model to select the best one, in that case it is possible that we could disc
 
 ## Development
 
+### Create select predictions script
+
+```
+export checkpoint_folder=/mnt/hdd0/Kaggle/arc24/models/20241026_improve_verifiers/01_verify-and-select_lora032-Qwen2-0.5B-Instruct_lr5e-5_bs32_16000steps_2gpus_8192msl/checkpoint-16000
+python easy_select_and_evaluation.py "${checkpoint_folder}" \
+--dataset-path /mnt/hdd0/Kaggle/arc24/data/new_partitions/arc-agi_all_challenges.json \
+--predictions-path  /mnt/hdd0/Kaggle/arc24/debug/01_full-fine-tuning-Qwen2-0.5B-Instruct_lr5e-5_8e4steps_2gpus_8192msl_checkpoint-80000_inference_evaluation_x032_just_correct_tasks.json \
+--verifications-per-prediction 4
+```
+
 ## Results
 
 ### Analyze submission
