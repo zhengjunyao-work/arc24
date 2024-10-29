@@ -351,14 +351,9 @@ def get_model(model_path, n_gpus, torch_dtype, device_map, use_4bit_quantization
         )
     else:
         bnb_config = None
-    config = AutoConfig.from_pretrained(model_path)
-    config.max_position_embeddings = 10240
-    # config.rope_scaling = dict(type='linear', factor=4.0, original_max_position_embeddings=2048)
-    config.rope_theta = 1e5
 
     model = AutoModelForCausalLM.from_pretrained(
         model_path,
-        config=config,
         quantization_config=bnb_config,
         device_map=get_device_map(n_gpus, model_path, device_map),
         # max_memory={0: '9GB', 1: '8GB'},
@@ -376,9 +371,7 @@ def get_model(model_path, n_gpus, torch_dtype, device_map, use_4bit_quantization
 def get_tokenizer(model_path, model, pad_token='<|pad|>'):
     tokenizer = AutoTokenizer.from_pretrained(
         model_path,
-        trust_remote_code=True,
-        model_max_length=10240,
-        max_length=10240,)
+        trust_remote_code=True)
     if tokenizer.pad_token == tokenizer.eos_token:
         if 'qwen' in model_path.lower():
             logger.info('Changing eos token to <|im_end|> for Qwen models, because it is the same as padding token <|endoftext|>')

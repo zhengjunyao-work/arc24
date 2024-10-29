@@ -194,6 +194,28 @@ python long-context-fine-tuning.py \
 
 TODO: I have proben that by changing rope_theta from 1e4 to 1e5 the model can work with inputs of 8k tokens correctly.
 
+One way of increasing the context window is modifying the model at loading, but that adds complexity
+to the training script:
+
+```
+config = AutoConfig.from_pretrained(model_path)
+config.max_position_embeddings = 10240
+config.rope_theta = 1e5
+
+model = AutoModelForCausalLM.from_pretrained(
+    model_path,
+    config=config)
+
+tokenizer = AutoTokenizer.from_pretrained(
+        model_path,
+        trust_remote_code=True,
+        model_max_length=10240,
+        max_length=10240,)
+```
+
+The other and maybe easier option is to modify the `.json` config files of the model and tokenizer.
+The result is exactly the same but it does not increase the complexity of the fine-tuning script.
+
 ## Results
 
 ## Conclusion
