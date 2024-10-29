@@ -216,6 +216,14 @@ tokenizer = AutoTokenizer.from_pretrained(
 The other and maybe easier option is to modify the `.json` config files of the model and tokenizer.
 The result is exactly the same but it does not increase the complexity of the fine-tuning script.
 
+### Error when resuming training
+
+> Error invalid argument at line 396 in file /src/csrc/pythonInterface.cpp
+https://github.com/bitsandbytes-foundation/bitsandbytes/issues/782
+
+One user says that using `adamw_torch` solves the issue. And it was true, adding `--optim adamw_torch` to
+the training arguments solved the problem.
+
 ## Results
 
 ### Increasing the context length by increasing `rope_theta`

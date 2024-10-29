@@ -122,6 +122,7 @@ def parse_args():
     parser.add_argument('--verbose', action=argparse.BooleanOptionalAction, help="Whether to print verbose information")
     parser.add_argument('--use_lora', action=argparse.BooleanOptionalAction, help="Whether to use LoRA")
     parser.add_argument('--verify_correct_output_probability', type=float, help="Probability of using a correct output when verifying")
+    parser.add_argument('--optim', type=str, help="Optimizer to use")
     return parser.parse_args()
 
 
