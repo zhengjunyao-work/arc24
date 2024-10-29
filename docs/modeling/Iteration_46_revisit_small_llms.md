@@ -61,7 +61,7 @@ Below there are some input-output grid examples that define the task.
   warnings.warn(
 ```
 
-### Local trainings to verify it can train
+### Local trainings to verify I can train the small models
 
 <details>
   <summary>Click to see bash commands</summary>
@@ -143,6 +143,56 @@ python fine-tuning.py \
 ```
 
 </details>
+
+### Debug long context fine-tuning
+
+I'm going to create a temporal fine-tuning script to validate the idea of long context fine-tuning.
+
+The idea is to try with synthetic questions and responses that cannot be answered if not using a big
+enough context. If the model has a big enough context answering the questions is trivial. That should
+be a very clear test to see if the context window of the model has been extended.
+
+
+<details>
+  <summary>Click to see bash commands</summary>
+
+```bash
+export model=Qwen2.5-0.5B-Instruct
+export prompt_tokens_target=4000
+
+export model=SmolLM-135M-Instruct
+export prompt_tokens_target=4000
+python long-context-fine-tuning.py \
+--prompt_tokens_target ${prompt_tokens_target} \
+--model_path /home/gbarbadillo/data/${model} \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241029_debug_long_context/${model}_${prompt_tokens_target}prompt-length \
+--max_steps 30 \
+--max_seq_len 4096
+
+export model=SmolLM-135M-Instruct
+export prompt_tokens_target=8000
+python long-context-fine-tuning.py \
+--prompt_tokens_target ${prompt_tokens_target} \
+--model_path /home/gbarbadillo/data/${model} \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241029_debug_long_context/${model}_${prompt_tokens_target}prompt-length_rope-theta-1e5 \
+--max_steps 30 \
+--max_seq_len 8096
+
+export model=SmolLM-135M-Instruct-20k
+export prompt_tokens_target=8000
+python long-context-fine-tuning.py \
+--prompt_tokens_target ${prompt_tokens_target} \
+--model_path /home/gbarbadillo/data/${model} \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241029_debug_long_context/${model}_${prompt_tokens_target}prompt \
+--max_steps 30 \
+--max_seq_len 8096
+```
+
+</details>
+
+> Token indices sequence length is longer than the specified maximum sequence length for this model (2511 > 2048). Running this sequence through the model will result in indexing errors
+
+TODO: I have proben that by changing rope_theta from 1e4 to 1e5 the model can work with inputs of 8k tokens correctly.
 
 ## Results
 
