@@ -4,7 +4,7 @@ import json
 from tqdm.auto import tqdm
 import numpy as np
 from scipy.stats import norm
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 from vllm import LLM
 from transformers import AutoTokenizer
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 def main():
     cfg = parse_args()
     dataset, unique_predictions = load_data(cfg.dataset_path, cfg.predictions_path)
-    unique_predictions = {key: unique_predictions[key] for key in list(unique_predictions.keys())}
+    # unique_predictions = {key: unique_predictions[key] for key in list(unique_predictions.keys())[:10]}
     aggregated_verifications = create_empty_aggregated_verifications(unique_predictions)
     tokenizer, grid_encoder, llm, sampling_params = create_inference_artifacts(cfg)
     n_rounds = cfg.max_verifications_per_prediction//cfg.verifications_per_round
@@ -49,7 +49,9 @@ def main():
 
     with open(cfg.output_path, 'w') as f:
         json.dump(selected_predictions, f, indent=4)
-    # TODO: save richer information for later analysis
+    rich_output = create_rich_output(unique_predictions, aggregated_verifications)
+    with open(cfg.output_path.replace('.json', '_rich_output.json'), 'w') as f:
+        json.dump(rich_output, f, indent=4)
 
     del llm.llm_engine.model_executor
     del llm
@@ -235,6 +237,16 @@ def select_predictions_with_verifications(unique_predictions, aggregated_verific
             ranking = np.argsort(verified_probs)[::-1][:n]
             selected_predictions[task_id].append({f'attempt_{attempt_idx}': sample_predictions[idx] for attempt_idx, idx in enumerate(ranking, 1)})
     return selected_predictions
+
+
+def create_rich_output(unique_predictions, aggregated_verifications):
+    rich_output = dict()
+    for task_id, task_predictions in unique_predictions.items():
+        rich_output[task_id] = []
+        for sample_predictions, sample_verifications in zip(task_predictions, aggregated_verifications[task_id]):
+            rich_output[task_id].append([dict(prediction=prediction, verification=asdict(verification)) \
+                                         for prediction, verification in zip(sample_predictions, sample_verifications)])
+    return rich_output
 
 
 if __name__ == '__main__':
