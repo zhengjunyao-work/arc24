@@ -290,7 +290,7 @@ I have not been able to improve the accuracy of using a prediction verifier. It 
 - [ ] Maybe use an ensemble of models instead of a single model
 - [ ] It's likely that a model trained in all the prediction tasks will perform better
 - [x] ~Use voting to solve ties~ I won't have voting on 2020 solution.
-- [ ] I could make more efficient use of compute by using uncertainty and only making verifications for
+- [x] I could make more efficient use of compute by using uncertainty and only making verifications for
   the predictions that are not significative different from the top prediction.
 - [x] Verify that it works on Kaggle
 - [ ] Review all new code
@@ -302,5 +302,6 @@ I have not been able to improve the accuracy of using a prediction verifier. It 
   - [ ] Train new submission models
 - [x] Measure improvements over voting in other model predictions
 - [ ] Maybe the model is not as accurate in the test set as in the evaluation set?
-- [ ] Why cheating did not get perfect accuracy?
-- [ ] How many verifications I have to do until it reaches the perfect ranking? 128 verifications does not reach significative differences.
+- [x] Why cheating did not get perfect accuracy?
+- [x] How many verifications I have to do until it reaches the perfect ranking? 128 verifications does not reach significative differences.
+      There are ties that avoid reaching the stop point.
