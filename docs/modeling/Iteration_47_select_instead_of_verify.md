@@ -44,3 +44,5 @@ the select mode instead to fix that I might have a better prediction selection m
 
 - [x] I need more information to understand the failures of verifying. I need to save the results of the verifications for
   deeper analysis.
+- [ ] Create a first script to do prediction selection with comparisons. First do an all vs all comparison.
+- [ ] Update the script to be more efficient and do more selective comparisons, using maybe trueskill.
