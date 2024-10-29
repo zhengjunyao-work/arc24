@@ -203,9 +203,11 @@ The problem was that I was using Qwen2.5 as the base model, when I trained the v
 
 #### First results
 
-TODO:
+Please go to [Iteration 45](Iteration_45_improve_verifier.md#submission-results) to see the results.
 
 ## Conclusion
+
+The verifier has predictive power to select the predictions, but we need to improve it.
 
 ## Next steps
 

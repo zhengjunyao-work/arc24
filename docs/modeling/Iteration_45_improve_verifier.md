@@ -8,6 +8,8 @@ On the previous iteration we have seen signs that the verifier approach might wo
 
 ## Motivation
 
+Having a more accurate method than voting to select predictions could improve the LB score.
+
 ## Development
 
 ### Create bigger datasets for training
@@ -236,9 +238,11 @@ are worse.
 | 4000           | 63.30% | 81.20% |
 | 8000           | 62.10% | 89.20% |
 | 16000          | 70.40% | 93.80% |
+| 32000          | 75%    | 93.30% |
 
-It is surprising that after 16k training steps the model still does not perfectly classify all the
-tasks from the evaluation set.
+It is surprising that after 32k training steps the model still does not perfectly classify all the
+tasks from the evaluation set. After reviewing the failed predictions I have seen that in all the cases
+there were ties with other predictions.
 
 On average it would have seen each task 320 times (`16000/4/400*32`), so if a task has 4 samples it would
 have seen around 80 times each sample.
@@ -264,7 +268,13 @@ Let's train new models from scratch:
 - Do the same also for submission, including the evaluation set
 - Train for 40k steps with batch size 32.
 
+### Submission results
+
+When using a model to verify the predictions from LLM and 2020 solution I have only achieved a score of 33 when training on the whole ARC, and 30 when training only on the train dataset.
+
 ## Conclusion
+
+I have not been able to improve the accuracy of using a prediction verifier. It is still around 60% for top_1 selection and 80% for top_2 selection. Remember that voting gets 60% and 70%. Thus we only see an improving on top_2 prediction.
 
 ## Next steps
 
