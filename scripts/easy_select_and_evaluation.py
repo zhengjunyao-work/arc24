@@ -26,13 +26,13 @@ def main(args=None):
         cfg = json.load(f)
     print(cfg)
     output_filepath = args.predictions_path.replace(
-        '.json', f'_m{generate_small_hash(args.checkpoint_path)}_v{args.verifications_per_prediction:03d}_selection.json')
+        '.json', f'_m{generate_small_hash(args.checkpoint_path)}_{args.n_rounds:03d}rounds_selection.json')
     logger.info(f'Output file path: {output_filepath}')
     if not os.path.exists(output_filepath):
         model_path = merge_lora_with_model(args.checkpoint_path, cfg['model_path'])
         selection(
             model_path, output_filepath,
-            verifications_per_prediction=args.verifications_per_prediction,
+            n_rounds=args.n_rounds,
             dataset_path=args.dataset_path,
             predictions_path=args.predictions_path)
     else:
@@ -40,14 +40,13 @@ def main(args=None):
     evaluation(output_filepath, args.checkpoint_path, args.dataset_path)
 
 
-def selection(model_path, output_filepath, verifications_per_prediction,
+def selection(model_path, output_filepath, n_rounds,
                  dataset_path, predictions_path):
     print('-'*80)
     logger.info(f'Verification with model {model_path}')
     cmd = f'python select_predictions.py --model-path {model_path} --output-path {output_filepath}'
-    cmd += f' --max-verifications-per-prediction {verifications_per_prediction}'
+    cmd += f' --n-rounds {n_rounds}'
     cmd += f' --dataset-path {dataset_path} --predictions-path {predictions_path}'
-    # cmd += ' --random-seed 7' # TODO: remove the random seed
     print(cmd)
     os.system(cmd)
     if not os.path.exists(output_filepath):
@@ -66,8 +65,8 @@ Alternative datasets for evaluation:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         epilog=epilog)
     parser.add_argument('checkpoint_path', help='Path to folder with the checkpoint that we want to use to verify predictions')
-    parser.add_argument('--verifications-per-prediction', type=int, default=8,
-                        help="Number of verifications per prediction")
+    parser.add_argument('--n-rounds', type=int, default=4,
+                        help="Number of all vs all rounds to select predictions")
     parser.add_argument('--dataset-path', type=str, help="Path to the dataset to make inference and evaluation",
                         default='/mnt/hdd0/Kaggle/arc24/data/new_partitions/arc-agi_all_challenges.json')
     parser.add_argument('--predictions-path', type=str, help="Path to the json file with the predictions")
