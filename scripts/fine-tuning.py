@@ -292,6 +292,9 @@ def get_device_map(n_gpus, model_path, device_map):
                 'model.norm': 1,
                 'model.rotary_emb': 1,
                 }
+        elif 'nano' in model_path.lower():
+            # quick fix for Kaggle
+            device_map = 'balanced'
         else:
             raise NotImplementedError(f'Custom device map not implemented for {model_path}')
     else:
