@@ -35,7 +35,7 @@ def main():
     # unique_predictions = {key: unique_predictions[key] for key in list(unique_predictions.keys())[:10]}
     aggregated_verifications = create_empty_aggregated_verifications(unique_predictions)
     tokenizer, grid_encoder, llm, sampling_params = create_inference_artifacts(cfg)
-    n_rounds = 2
+    n_rounds = 1
     for round_idx in range(n_rounds):
         prompts = create_prompts(
             aggregated_verifications, unique_predictions, dataset, grid_encoder, tokenizer,
@@ -176,7 +176,7 @@ def create_prompts(aggregated_verifications, predictions, dataset,
     for task_id, task_predictions in predictions.items():
         for sample_idx, sample_predictions in enumerate(task_predictions):
             for prediction_idx, prediction in enumerate(sample_predictions):
-                for other_prediction_idx, other_prediction in enumerate(sample_predictions[prediction_idx + 1:]):
+                for other_prediction_idx, other_prediction in enumerate(sample_predictions[prediction_idx + 1:], prediction_idx + 1):
                     task = dataset[task_id].copy()
                     task['test'] = [dict(input=task['test'][sample_idx]['input'],
                                          output_1=prediction,

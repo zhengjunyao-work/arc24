@@ -40,6 +40,24 @@ it scores 26.
 I have studied the failed verifications and found that 36% of them fail with ties. If I can use
 the select mode instead to fix that I might have a better prediction selection mode.
 
+### First results with all vs all comparisons
+
+I have created a first implementation that does all vs all comparisons for all the predictions from a task.
+
+| n_rounds | top_1  | top_2  | runtime (s) |
+|----------|--------|--------|-------------|
+| 1        | 46.60% | 69%    | 888         |
+| 2        | 54.00% | 70.90% | 1819        |
+| 8        | 61.60% | 79.90% | 7046        |
+
+It is currently achieving a similar performance to the verification approach, but the runtime is 7 times
+higher. I should make it more efficient to see if it can achieve greater accuracy.
+
+However when reviewing the results I have found that the number of verifications is not the same
+for all the predictions, so there must be some error.
+
+TODO: fix the error.
+
 ## Conclusion
 
 ## Next steps
