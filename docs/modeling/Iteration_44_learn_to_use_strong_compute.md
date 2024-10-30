@@ -134,6 +134,19 @@ scp -P 51468 training_v1.json  root@192.168.127.70:~/code/arc24/data/verifier
 scp -P 51468 /mnt/hdd0/Kaggle/arc24/data/rearc/v2/re-arc.json root@192.168.127.70:~/code/arc24/data/external_data
 ```
 
+### Continue from checkpoints
+
+The trainings are unstable and fail without explanation with `strong_fail`. The good thing is that
+those fails do not cost me money, the bad thing is that it requires me to baby sit the experiments.
+However it trains 6x faster so it is worth it.
+
+I believe I have to implement two scripts:
+
+1. Copy checkpoints from failed experiments. It will copy the last checkpoint from a failed experiment
+   to a common folder in the root directory. I will call this script manually.
+2. When starting a new training, check if there are checkpoints available and copy them. This way
+   the training will continue from the last checkpoint.
+
 ## Results
 
 First training with 8xA100 is 5x times faster than using 2xA6000.
