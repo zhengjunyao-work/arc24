@@ -147,6 +147,14 @@ I believe I have to implement two scripts:
 2. When starting a new training, check if there are checkpoints available and copy them. This way
    the training will continue from the last checkpoint.
 
+Useful commands:
+
+```bash
+for checkpoint in  af05f40c-f0b0-417c-8285-bc77f2978c61 57f38e65-f2cd-4777-80cd-004dd6da45b6 191aed3c-9409-48b5-81d1-4ed738c9b44d e4c6b8dc-415a-41cc-9034-4b1a70b7fce4 a4891197-4253-4fb2-89e6-d1a1696b01a6 9fafa3c2-5272-46a8-87ea-19ae39f4de4b f4a9c4fe-46a4-490f-9eb9-fde3d9c991e8; do copy-checkpoint ${checkpoint}; done
+
+for submission in *; do isc train  ${submission}; done
+```
+
 ## Results
 
 First training with 8xA100 is 5x times faster than using 2xA6000.
