@@ -268,6 +268,19 @@ Let's train new models from scratch:
 - Do the same also for submission, including the evaluation set
 - Train for 40k steps with batch size 32.
 
+| model                    | lora_r | batch_size | training steps | top_2 accuracy | top_1 accuracy |
+|--------------------------|--------|------------|----------------|----------------|----------------|
+| Qwen2.5-0.5B             | 64     | 32         | 4E+04          | 78.8%          | 57.1%          |
+| Qwen2.5-0.5B             | 96     | 32         | 4E+04          | 72.1%          | 47.1%          |
+| NanoLM-0.3B-Instruct-v2  | 64     | 32         | 4E+04          | 62.1%          | 39.2%          |
+| NanoLM-0.3B-Instruct-v2  | 128    | 32         | 4E+04          | 63.7%          | 40.4%          |
+| SmolLM-135M-Instruct-20k | fft    | 32         | 4E+04          | 58.3%          | 38.0%          |
+
+We don't see improvements when training a multi-task model. However I have the feeling that these
+models are undertrained.
+
+TODO: update results with the continuation of the trainings.
+
 ### Submission results
 
 When using a model to verify the predictions from LLM and 2020 solution I have only achieved a score of 33 when training on the whole ARC, and 30 when training only on the train dataset.
