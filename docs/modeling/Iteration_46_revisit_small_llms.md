@@ -236,6 +236,25 @@ to be able to work with prompts of 8k tokens by increasing `rope_theta` from 1e4
 The plot above shows how quickly the task is learned once the model has enough context window.
 Using `rope_scaling` almost did not have any effect.
 
+### First evaluation results
+
+| model                    | lora_r | batch_size | training steps | multi-tasks | accuracy | pass_n | vote_2 | vote_1 |
+|--------------------------|--------|------------|----------------|-------------|----------|--------|--------|--------|
+| Qwen2-0.5B               | fft    | 16         | 4E+04          | 1           | 12.25%   | 31.13% | 22.62% | 18.50% |
+| Qwen2-0.5B               | 32     | 16         | 4E+04          | 1           | 11.10%   | 30.25% | 22.62% | 18.88% |
+| Qwen2-0.5B               | 128    | 16         | 4E+04          | 1           | 12.73%   | 32.25% | 22.25% | 19.00% |
+| Qwen2.5-0.5B             | 64     | 32         | 4E+04          | 4           | 8.02%    | 23.75% | 18.12% | 12.75% |
+| Qwen2.5-0.5B             | 96     | 32         | 4E+04          | 4           | 7.93%    | 24.62% | 16.38% | 12.62% |
+| NanoLM-0.3B-Instruct-v2  | 64     | 32         | 4E+04          | 4           | 3.93%    | 18.25% | 10.50% | 7.25%  |
+| NanoLM-0.3B-Instruct-v2  | 128    | 32         | 4E+04          | 4           | 5.27%    | 20.00% | 12.88% | 9.12%  |
+| SmolLM-135M-Instruct-20k | fft    | 32         | 4E+04          | 4           | 1.83%    | 9.00%  | 5.62%  | 3.88%  |
+
+- First observation is that we are not getting the same results as the baseline Qwen2 models. My believe
+  is that the new models are undertrained and they need to be trained for longer. I already have launched
+  training continuations.
+- Second observation is that NanoLM and SmolLM get worse results than Qwen for the same amount of training steps.
+  ¿Maybe we have to train the smaller models for longer? I need to think about this.
+
 ## Conclusion
 
 ## Next steps
