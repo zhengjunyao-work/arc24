@@ -55,7 +55,7 @@ from tqdm.auto import tqdm
 from itertools import islice, product
 
 from vllm import LLM, SamplingParams
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, AutoConfig
 
 from arc24.data_augmentation import (
     apply_data_augmentation, revert_data_augmentation, get_random_color_map, set_random_seed)
@@ -79,12 +79,12 @@ def inference_main():
         data = dict(islice(data.items(), cfg.n_tasks))
     logger.info(f'There are {len(data)} tasks to solve in {cfg.dataset_path}')
 
-
-    logger.info(f'Loading {cfg.model_path}')
+    tensor_parallel_size = get_tensor_parallel_size(cfg.model_path)
+    logger.info(f'Loading {cfg.model_path} with tensor_parallel_size={tensor_parallel_size}')
     llm = LLM(model=cfg.model_path,
                 trust_remote_code=True,
                 dtype='half',
-                tensor_parallel_size=2, # to use 2 gpus
+                tensor_parallel_size=tensor_parallel_size, # to use 2 gpus
                 max_model_len=cfg.max_model_len,
                 #kv_cache_dtype='fp8_e5m2', I have disabled kv cache quantization because it is hurtful
                 enforce_eager=True, # without this 13.9GB of memory is used on each GPU, with this is 13.3GB,
@@ -115,6 +115,14 @@ def inference_main():
     del llm.llm_engine.model_executor
     del llm
     clear_vllm_gpu_memory()
+
+
+def get_tensor_parallel_size(model_path):
+    config = AutoConfig.from_pretrained(model_path)
+    if hasattr(config, 'num_attention_heads'):
+        if config.num_attention_heads % 2 == 1:
+            return 1
+    return 2
 
 
 def create_prompts(data, grid_encoder, tokenizer, prompt_version, predictions_per_task):
