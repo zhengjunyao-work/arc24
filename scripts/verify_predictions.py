@@ -13,7 +13,8 @@ from transformers import AutoTokenizer
 from inference import (
     clear_vllm_gpu_memory,
     get_sampling_params,
-    generate_outputs_with_batches
+    generate_outputs_with_batches,
+    get_tensor_parallel_size
 )
 from voting import get_unique_matrices_and_counts_sorted
 from arc24.encoders import create_grid_encoder
@@ -107,11 +108,13 @@ def load_data(dataset_path, predictions_path):
 def create_inference_artifacts(cfg):
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_path)
     grid_encoder = create_grid_encoder(cfg.grid_encoder)
+    tensor_parallel_size = get_tensor_parallel_size(cfg.model_path)
+    logger.info(f'Loading {cfg.model_path} with tensor_parallel_size={tensor_parallel_size}')
     llm = LLM(
         model=cfg.model_path,
         trust_remote_code=True,
         dtype='half',
-        tensor_parallel_size=2, # to use 2 gpus
+        tensor_parallel_size=tensor_parallel_size, # to use 2 gpus
         max_model_len=cfg.max_model_len,
         #kv_cache_dtype='fp8_e5m2', I have disabled kv cache quantization because it is hurtful
         enforce_eager=True, # without this 13.9GB of memory is used on each GPU, with this is 13.3GB,
