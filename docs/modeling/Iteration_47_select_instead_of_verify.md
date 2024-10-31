@@ -44,21 +44,26 @@ the select mode instead to fix that I might have a better prediction selection m
 
 I have created a first implementation that does all vs all comparisons for all the predictions from a task.
 
-| n_rounds | top_1  | top_2  | runtime (s) |
-|----------|--------|--------|-------------|
-| 1        | 46.60% | 69%    | 888         |
-| 2        | 54.00% | 70.90% | 1819        |
-| 8        | 61.60% | 79.90% | 7046        |
+| n_rounds | top_1 accuracy | top_2 accuracy | runtime (s) |
+|----------|----------------|----------------|-------------|
+| 1        | 59.0%          | 75.4%          | 895         |
+| 2        | 61.9%          | 79.5%          | 1773        |
+| 4        | 69.4%          | 81.7%          | 3655        |
+| 8        | 74.3%          | 79.5%          | 7226        |
+| 16       | 70.5%          | 83.6%          | 14371       |
 
-It is currently achieving a similar performance to the verification approach, but the runtime is 7 times
-higher. I should make it more efficient to see if it can achieve greater accuracy.
+These results are very promising because we have improved the top_1 accuracy from ~60% to 74% and
+the top_2 accuracy from ~80% to 83%. Thus it seems that doing comparisons between the predictions
+is a more accurate method than verifying the predictions.
 
-However when reviewing the results I have found that the number of verifications is not the same
-for all the predictions, so there must be some error.
-
-TODO: fix the error.
+The drawback is that this implementation is very slow. We are doing all versus all comparisons and
+that gives the same compute to the best prediction and to the last. Since we are just interested
+in the top_2 predictions I should be able to optimize the runtime by a good margin while preserving
+or even improving the accuracy.
 
 ## Conclusion
+
+TODO: comparison table of the accuracy of voting, verification and selection.
 
 ## Next steps
 
@@ -72,5 +77,5 @@ TODO: fix the error.
 
 - [x] I need more information to understand the failures of verifying. I need to save the results of the verifications for
   deeper analysis.
-- [ ] Create a first script to do prediction selection with comparisons. First do an all vs all comparison.
+- [x] Create a first script to do prediction selection with comparisons. First do an all vs all comparison.
 - [ ] Update the script to be more efficient and do more selective comparisons, using maybe trueskill.
