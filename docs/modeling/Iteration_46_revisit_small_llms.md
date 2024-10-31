@@ -56,7 +56,7 @@ Let's see if you can solve this simple Abstraction and Reasoning Challenge (ARC)
 Below there are some input-output grid examples that define the task.
 ...
 ...
-```<|im_end|>
+<|im_end|>
  This instance will be ignored in loss calculation. Note, if this happens often, consider increasing the `max_seq_length`.
   warnings.warn(
 ```
@@ -151,7 +151,6 @@ I'm going to create a temporal fine-tuning script to validate the idea of long c
 The idea is to try with synthetic questions and responses that cannot be answered if not using a big
 enough context. If the model has a big enough context answering the questions is trivial. That should
 be a very clear test to see if the context window of the model has been extended.
-
 
 <details>
   <summary>Click to see bash commands</summary>
@@ -255,6 +254,25 @@ Using `rope_scaling` almost did not have any effect.
 - Second observation is that NanoLM and SmolLM get worse results than Qwen for the same amount of training steps.
   ¿Maybe we have to train the smaller models for longer? I need to think about this.
 
+### Studying training dynamics
+
+#### Qwen vs NanoLM
+
+![training dynamics](res/2024-10-31-12-30-48.png)
+
+NanoLM models learns more slowly than Qwen, but so far there is no sign of plateau and it seems that if trained for longer it would have reached the same point as the bigger model.
+
+#### Qwen vs SmolLM
+
+![training dynamics](res/2024-10-31-12-37-45.png)
+
+However the training dynamic of SmolLM is totally different. It learns at teh beginning but quickly decreases
+the learning speed. Why could this be happening?
+
+- Lack of capacity. This might be possible, although the total size of the model is bigger than most of the LoRA adapters that I have trained so far.
+- Bad learning rate schedule
+- Local minima, this might be solved with a different learning rate schedule.
+
 ## Conclusion
 
 ## Next steps
@@ -266,5 +284,6 @@ Using `rope_scaling` almost did not have any effect.
 - [ ] Can I reach the same validation results as Qwen?
   - [ ] Mxode/NanoLM-0.3B-Instruct-v2
   - [ ] SmolLM-135M-Instruct-20k
+- [ ] Make SmolLM great again, do multiple short trainings with different learning rate schedules
 - [ ] Datasets for long context fine-tuning. https://huggingface.co/blog/wenbopan/long-context-fine-tuning#long-text-data
 - [ ] Does it help to pretrain SmolLM-20k model on text?
