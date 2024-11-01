@@ -144,10 +144,10 @@ Alternative datasets for evaluation:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         epilog=epilog)
     parser.add_argument('checkpoint_path', help='Path to folder with the checkpoint that we want to evaluate')
-    parser.add_argument('--predictions_per_task', type=int, default=64,
+    parser.add_argument('--predictions_per_task', type=int, default=32,
                         help="Number of predictions per task, use a multiple of 8")
     parser.add_argument('--dataset_path', type=str, help="Path to the dataset to make inference and evaluation",
-                        default='/mnt/hdd0/Kaggle/arc24/data/new_partitions/val_rs7.json')
+                        default='/mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json')
     parser.add_argument('--temperature', type=float, default=0.0,
                         help="temperature for sampling, 0.0 for greedy search")
     args = parser.parse_args(args)
