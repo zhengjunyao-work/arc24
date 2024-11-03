@@ -223,6 +223,41 @@ https://github.com/bitsandbytes-foundation/bitsandbytes/issues/782
 One user says that using `adamw_torch` solves the issue. And it was true, adding `--optim adamw_torch` to
 the training arguments solved the problem.
 
+### Problem with SmolLM predictions
+
+I'm facing a weird error with some fine-tuned SmolLM models:
+
+1. I saw NaN losses when retraining in Kaggle
+2. Inference is empty
+
+```bash
+
+export model_path=/mnt/hdd0/Kaggle/arc24/models/20241028_training_models/04_full-fine-tune-SmolLM-135M-Instruct-20k_lr2e-4_bs32_40000steps_2gpus_8192msl_adamw-torch/checkpoint-40000
+export model_path=/mnt/hdd0/Kaggle/arc24/models/20241028_training_models/07_continue_full-fine-tune-SmolLM-135M-Instruct-20k_lr1e-3_bs16_40000steps_2gpus_8192msl_adamw-torch/checkpoint-40000/
+export model_path=/mnt/hdd0/Kaggle/arc24/models/20241031_smollm_learning_rate/lr1e-4_fft-SmolLM-135M-Instruct-20k_bs16_10000steps_1gpus_8192msl/checkpoint-10000
+export model_path=/mnt/hdd0/Kaggle/arc24/models/20241028_submission_models/06_fft-SmolLM-135M-Instruct-20k_lr1e-3_bs16_100000steps_2gpus_8192msl/checkpoint-36000
+export model_path=/mnt/hdd0/Kaggle/arc24/models/20241028_submission_models/06_fft-SmolLM-135M-Instruct-20k_lr1e-3_bs16_200000steps_2gpus_8192msl/checkpoint-13000
+export model_path=/mnt/hdd0/Kaggle/arc24/models/20241028_submission_models/06_fft-SmolLM-135M-Instruct-20k_lr1e-3_bs16_400000steps_2gpus_8192msl/checkpoint-13500
+
+export model_path=/mnt/hdd0/Kaggle/arc24/models/20241028_submission_models/06_fft-SmolLM-135M-Instruct-20k_lr1e-3_bs16_100000steps_2gpus_8192msl/checkpoint-100000 &&
+python inference.py --model_path ${model_path} --output_filepath /mnt/hdd0/Kaggle/arc24/debug/smollm_problems/debug.json --predictions_per_task 8 --grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" --dataset_path /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json --prompt_version output-from-examples-v1 --temperature 0.0 --n_tasks 1
+```
+
+After analyzing the output it is always predicting `<|endoftext|>`, which is the pad token.
+
+There is a workaround that could be tried: https://github.com/vllm-project/vllm/issues/3361
+
+However the problem was that all inference logits were NaNs, so it was selecting the first token
+which happened to be `<|endoftext|>`.
+
+The problem was related to training on `bfloat16` and doing inference with `float16`.
+
+> While bfloat16 uses the same number of bits as float16, it has a wider dynamic range but lower precision.
+
+It seemed that the model was working on a regime where `float16` fails but `bfloat16` works due to its
+higher dynamic range. That could be solved by using `dtype='auto',` on VLLM, but I have concerns that in
+Kaggle might not work, or work more slowly.
+
 ## Results
 
 ### Increasing the context length by increasing `rope_theta`
@@ -273,6 +308,16 @@ the learning speed. Why could this be happening?
 - Bad learning rate schedule
 - Local minima, this might be solved with a different learning rate schedule.
 
+### SmolLM optimal learning rate
+
+![smollm learning rate](res/2024-11-03-08-28-27.png)
+
+I have found that to fine-tune SmolLM model I have to use a learning rate almost 10 times bigger
+than the one I was using.
+
+However at the same time using a higher learning rate could result at a model that fails when using
+`float16` at inference, as shown in this [section](#problem-with-smollm-predictions)
+
 ## Conclusion
 
 ## Next steps
@@ -281,9 +326,13 @@ the learning speed. Why could this be happening?
 
 - [x] Experiment to validate that I can extend the context window of the model. At the beginning is a simple instruction, then a lot of distraction text. If the model has enough context length the task is trivial, otherwise is impossible.
 - [x] How can I add a chat template to a model?
-- [ ] Can I reach the same validation results as Qwen?
+- [ ] Can I reach the same validation results as old Qwen?
+  - [ ] Qwen2.5
+    - [ ] [09_lora64-Qwen2.5-0.5B-Instruct_lr1e-4_bs16_120000steps_2gpus_8192msl](https://wandb.ai/guillermobarbadillo/20241028_training_models/runs/6wvr45kb)
   - [ ] Mxode/NanoLM-0.3B-Instruct-v2
+    - [ ] [10_lora128-NanoLM-0.3B-Instruct-v2_lr1e-4_bs16_200000steps_2gpus_8192msl](https://wandb.ai/guillermobarbadillo/20241028_training_models/runs/3tj7bhgj?nw=nwuserguillermobarbadillo)
   - [ ] SmolLM-135M-Instruct-20k
+    - [ ] [08_fft-SmolLM-135M-Instruct-20k_lr1e-3_bs16_400000steps_2gpus_8192msl](https://wandb.ai/guillermobarbadillo/20241028_training_models/runs/0tvxtzx5)
 - [ ] Make SmolLM great again, do multiple short trainings with different learning rate schedules
 - [ ] Datasets for long context fine-tuning. https://huggingface.co/blog/wenbopan/long-context-fine-tuning#long-text-data
 - [ ] Does it help to pretrain SmolLM-20k model on text?
