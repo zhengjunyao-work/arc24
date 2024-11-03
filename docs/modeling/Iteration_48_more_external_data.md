@@ -19,11 +19,17 @@ to do it and do it fast.
 
 ### Download datasets
 
-```
+```bash
+# with git
 git lfs install
 git clone git@hf.co:datasets/barc0/200k_HEAVY_gpt4o-description-gpt4omini-code_generated_problems
 git clone git@hf.co:datasets/barc0/100k-gpt4-description-gpt4omini-code_generated_problems
 git clone git@hf.co:datasets/barc0/100k-gpt4omini-description-gpt4omini-code_generated_problems
+# with wget
+wget https://huggingface.co/datasets/barc0/100k-gpt4-description-gpt4omini-code_generated_problems/resolve/main/100k-gpt4-description-gpt4omini-code_generated_problems.jsonl?download=true -O 100k-gpt4-description-gpt4omini-code_generated_problems.jsonl
+wget https://huggingface.co/datasets/barc0/100k-gpt4omini-description-gpt4omini-code_generated_problems/resolve/main/100k_gpt4o-mini_generated_problems.jsonl?download=true -O 100k_gpt4o-mini_generated_problems.jsonl
+wget https://huggingface.co/datasets/barc0/200k_HEAVY_gpt4o-description-gpt4omini-code_generated_problems/resolve/main/data_100k.jsonl?download=true -O data_100k.jsonl
+wget https://huggingface.co/datasets/barc0/200k_HEAVY_gpt4o-description-gpt4omini-code_generated_problems/resolve/main/data_suggestfunction_100k.jsonl?download=true -O data_suggestfunction_100k.jsonl
 ```
 
 ## Results
