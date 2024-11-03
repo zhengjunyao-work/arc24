@@ -83,7 +83,8 @@ def inference_main():
     logger.info(f'Loading {cfg.model_path} with tensor_parallel_size={tensor_parallel_size}')
     llm = LLM(model=cfg.model_path,
                 trust_remote_code=True,
-                dtype='half',
+                dtype='half', # this is causing NaNs on my computer due to using float16 instead of bfloat16
+                # dtype='auto',
                 tensor_parallel_size=tensor_parallel_size, # to use 2 gpus
                 max_model_len=cfg.max_model_len,
                 #kv_cache_dtype='fp8_e5m2', I have disabled kv cache quantization because it is hurtful
@@ -148,7 +149,8 @@ def create_prompts(data, grid_encoder, tokenizer, prompt_version, predictions_pe
 def get_sampling_params(best_of, temperature, n, max_output_tokens):
     # # https://docs.vllm.ai/en/latest/dev/sampling_params.html
     if best_of == 1:
-        sampling_params = SamplingParams(n=n, temperature=temperature, max_tokens=max_output_tokens, logprobs=0)
+        sampling_params = SamplingParams(n=n, temperature=temperature, max_tokens=max_output_tokens, logprobs=0,
+                                         skip_special_tokens=False)
     else:
         sampling_params = SamplingParams(n=n, temperature=0.0, max_tokens=max_output_tokens,
                               use_beam_search=True, best_of=best_of, logprobs=0)
@@ -173,6 +175,8 @@ def create_tasks_results(outputs, prompts_conf, grid_encoder, prompt_version, da
         data_augmentation_kwargs = prompts_conf[idx]['data_augmentation_kwargs']
         sample_idx = prompts_conf[idx]['idx']
         response = output.outputs[0].text
+        if idx == 0:
+            logger.info(f'Parsing output from {task_id}_{sample_idx}: {response}')
         try:
             if prompt_version.startswith('code-from-examples'):
                 # TODO: it would be more efficient to solve the whole task at once, not just one sample
