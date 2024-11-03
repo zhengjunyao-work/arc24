@@ -34,4 +34,8 @@ git clone git@hf.co:datasets/barc0/100k-gpt4omini-description-gpt4omini-code_gen
 
 ## TODO
 
-- [ ]
+- [ ] Explore the dataset
+- [ ] How can I train on this new dataset? It is much bigger than the other datasets
+- [ ] Does it improve the evaluation accuracy?
+- [ ] Does it improve the LB score?
+- [ ] Train a model to generate code
