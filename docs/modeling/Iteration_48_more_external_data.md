@@ -37,6 +37,58 @@ wget https://huggingface.co/datasets/barc0/200k_HEAVY_gpt4o-description-gpt4omin
 Since I have seen that the dataset uses a new format, I'm going to create dataset to handle all the
 particularities and just expose a sample task method.
 
+### Local experiments to validate implementation
+
+Let's verify that we can train with the BARC datasets:
+
+<details>
+  <summary>Click to see bash commands</summary>
+
+```bash
+# mixed use of datasets
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/Qwen2.5-0.5B-Instruct \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241103_debug_BARC/01_Qwen2.5-0.5B-Instruct \
+--train_datasets /mnt/hdd0/Kaggle/arc24/data/arc-agi_training_challenges.json output-from-examples-v1 \
+--train_datasets barc-400-10-/mnt/hdd0/Kaggle/arc24/data/barc/100k-gpt4-description-gpt4omini-code_generated_problems/100k-gpt4-description-gpt4omini-code_generated_problems.jsonl output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--device_map None \
+--lora_r 32 \
+--max_steps 10 \
+--logging_steps 1 \
+--eval_steps 200 \
+--batch_size 16 \
+--learning_rate 1e-4 \
+--max_seq_len 4096 \
+--no-resume_from_checkpoint \
+--random_seed 7 \
+--verbose
+
+# just use barc
+python fine-tuning.py \
+--model_path /home/gbarbadillo/data/Qwen2.5-0.5B-Instruct \
+--output_dir /mnt/hdd0/Kaggle/arc24/models/20241103_debug_BARC/02_Qwen2.5-0.5B-Instruct \
+--train_datasets barc-400-10-/mnt/hdd0/Kaggle/arc24/data/barc/100k-gpt4-description-gpt4omini-code_generated_problems/100k-gpt4-description-gpt4omini-code_generated_problems.jsonl output-from-examples-v1 \
+--val_dataset /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json output-from-examples-v1 \
+--grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" \
+--device_map None \
+--lora_r 32 \
+--max_steps 10 \
+--logging_steps 1 \
+--eval_steps 200 \
+--batch_size 16 \
+--learning_rate 1e-4 \
+--max_seq_len 4096 \
+--no-resume_from_checkpoint \
+--random_seed 7 \
+--verbose
+
+
+```
+
+</details>
+
 ### Experiment design
 
 The goal of the experimentation is to see if the Barc datasets are useful, and how much

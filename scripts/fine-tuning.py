@@ -25,7 +25,7 @@ from arc24.data_augmentation import (
     random_compose_new_task_by_adding_additional_transformation
 )
 from arc24.prompting import create_prompts_from_task, print_smallest_prompt, pretty_print_prompt
-from arc24.data import load_arc_data_with_solutions
+from arc24.data import load_arc_data_with_solutions, BarcDataset
 from arc24.logging import log_execution_time, logging
 
 from accelerate.logging import get_logger
@@ -465,6 +465,13 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
             omniarc_dataset = create_omniarc_dataset()
             logger.info(f'Creating omni-arc dataset with {n_tasks} tasks (real number of tasks is {len(omniarc_dataset)})')
             dataset = {f'omni-arc-{idx}|{key}|{prompt_version}': omniarc_dataset for key in range(n_tasks)}
+        elif filepath.startswith('barc'):
+            # example: barc-400-5-filepath 
+            n_tasks = int(filepath.split('-')[1])
+            max_samples_per_task = int(filepath.split('-')[2])
+            filepath = '-'.join(filepath.split('-')[3:])
+            dataset = BarcDataset(filepath, max_samples_per_task=max_samples_per_task)
+            dataset = {f'barc-{idx}|{key}|{prompt_version}': dataset for key in range(n_tasks)}
         else:
             dataset = load_arc_data_with_solutions(filepath)
             dataset = {f'{idx}|{key}|{prompt_version}': value for key, value in dataset.items()}
@@ -492,6 +499,9 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                 prompt_version = task_id.split('|')[-1]
                 if task_id.startswith('omni-arc'):
                     task = data[task_id].sample()[1]
+                elif task_id.startswith('barc'):
+                    task = data[task_id].sample()
+                    task = random_augment_task(task)
                 elif prompt_version.startswith('select-output-from-examples') or prompt_version.startswith('verify-output-from-examples'):
                     task = create_random_task_for_selection_prompt(data[task_id])
                     task = random_augment_task(task, swap_train_and_test=False)
