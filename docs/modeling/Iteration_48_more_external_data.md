@@ -32,6 +32,19 @@ wget https://huggingface.co/datasets/barc0/200k_HEAVY_gpt4o-description-gpt4omin
 wget https://huggingface.co/datasets/barc0/200k_HEAVY_gpt4o-description-gpt4omini-code_generated_problems/resolve/main/data_suggestfunction_100k.jsonl?download=true -O data_suggestfunction_100k.jsonl
 ```
 
+### Barc dataset object
+
+Since I have seen that the dataset uses a new format, I'm going to create dataset to handle all the
+particularities and just expose a sample task method.
+
+### Experiment design
+
+The goal of the experimentation is to see if the Barc datasets are useful, and how much
+weight should I give to them when training along other datasets. I'm going to train
+for just 40k steps and just in the task of predicting the output from the examples to
+simplify the experiment.
+
+
 ## Results
 
 ## Conclusion
