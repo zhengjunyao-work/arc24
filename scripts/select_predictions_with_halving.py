@@ -28,14 +28,15 @@ logger = logging.getLogger(__name__)
 def main():
     cfg = parse_args()
     dataset, unique_predictions = load_data(cfg.dataset_path, cfg.predictions_path)
-    unique_predictions = {key: unique_predictions[key] for key in list(unique_predictions.keys())[1:3]}
+    # unique_predictions = {key: unique_predictions[key] for key in list(unique_predictions.keys())[:10]}
     matches_results = create_matches_results(unique_predictions)
     print(matches_results)
     tokenizer, grid_encoder, llm, sampling_params = create_inference_artifacts(cfg)
     total_number_of_prompts = 0
     for round_idx in range(cfg.n_rounds):
         prompts = create_prompts(
-            unique_predictions, dataset, grid_encoder, tokenizer, prompt_version=cfg.prompt_version)
+            matches_results, unique_predictions, dataset, grid_encoder, tokenizer,
+            prompt_version=cfg.prompt_version)
         total_number_of_prompts += len(prompts)
         logger.info(f'Round {round_idx+1}/{cfg.n_rounds}: {len(prompts)} prompts')
         if not prompts:
@@ -112,17 +113,25 @@ def create_matches_results(unique_predictions):
     return matches_results
 
 
-def create_prompts(predictions, dataset, grid_encoder, tokenizer, prompt_version):
+def create_prompts(matches_results, predictions, dataset, grid_encoder, tokenizer, prompt_version):
     """ Creates prompt doing an all vs all comparison of the predictions """
     prompts = []
     for task_id, task_predictions in predictions.items():
         for sample_idx, sample_predictions in enumerate(task_predictions):
-            for prediction_idx, prediction in enumerate(sample_predictions):
-                for other_prediction_idx, other_prediction in enumerate(sample_predictions[prediction_idx + 1:], prediction_idx + 1):
+            sample_matches_results = matches_results[task_id][sample_idx]
+            indices = select_indices_for_new_round(sample_matches_results)
+            # logger.info(f'{task_id}_{sample_idx}: {indices}')
+            if indices is None:
+                continue
+            sample_matches_results['rounds'].append(indices)
+            np.random.shuffle(indices)
+            n_matches = 8
+            for shift in range(n_matches//2):
+                for idx1, idx2 in zip(indices, np.roll(indices, shift % (len(indices) - 1) + 1)):
                     task = dataset[task_id].copy()
                     task['test'] = [dict(input=task['test'][sample_idx]['input'],
-                                         output_1=prediction,
-                                         output_2=other_prediction)]
+                                         output_1=sample_predictions[idx1],
+                                         output_2=sample_predictions[idx2])]
                     data_augmentation_kwargs = get_random_geometric_augmentation_params()
                     data_augmentation_kwargs['color_map'] = get_random_color_map(change_background_probability=0.1)
                     augmented_task = apply_data_augmentation(task, **data_augmentation_kwargs)
@@ -131,13 +140,13 @@ def create_prompts(predictions, dataset, grid_encoder, tokenizer, prompt_version
                             augmented_task['test'][0]['output_1'],
                             augmented_task['test'][0]['output_2'],
                         ]
-                        prediction_indices=[prediction_idx, other_prediction_idx]
+                        prediction_indices=[idx1, idx2]
                     else:
                         augmented_task['test_output_choices'] = [
                             augmented_task['test'][0]['output_2'],
                             augmented_task['test'][0]['output_1'],
                         ]
-                        prediction_indices=[other_prediction_idx, prediction_idx]
+                        prediction_indices=[idx2, idx1]
                     prompt = create_prompts_from_task(
                         augmented_task, grid_encoder=grid_encoder, tokenizer=tokenizer,
                         is_train_prompt=False, prompt_version=prompt_version)[0]
@@ -147,6 +156,23 @@ def create_prompts(predictions, dataset, grid_encoder, tokenizer, prompt_version
                                         sample_idx=sample_idx,
                                         prediction_indices=prediction_indices))
     return prompts
+
+
+def select_indices_for_new_round(matches_results):
+    results = matches_results['matches_results']
+    previous_rounds = matches_results['rounds']
+    if not previous_rounds: # use all the predictions
+        if len(results) < 2:
+            return None
+        return np.arange(len(results))
+    previous_indices = previous_rounds[-1]
+    if len(previous_indices) <= 2:
+        return None
+    results = results[previous_indices][:, previous_indices]
+    win_ratio = np.sum(results, axis=1) / (np.sum(results, axis=1) + np.sum(results, axis=0))
+    n_selected = len(win_ratio) // 2 + len(win_ratio) % 2
+    selection = np.argsort(win_ratio)[::-1][:n_selected]
+    return previous_indices[selection]
 
 
 def update_matches_results(outputs, prompts, matches_results):
