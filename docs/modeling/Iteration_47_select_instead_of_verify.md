@@ -19,12 +19,12 @@ the model to select the best one, in that case it is possible that we could disc
 
 ### Create select predictions script
 
-```
+```bash
 export checkpoint_folder=/mnt/hdd0/Kaggle/arc24/models/20241026_improve_verifiers/01_verify-and-select_lora032-Qwen2-0.5B-Instruct_lr5e-5_bs32_16000steps_2gpus_8192msl/checkpoint-16000
 python easy_select_and_evaluation.py "${checkpoint_folder}" \
 --dataset-path /mnt/hdd0/Kaggle/arc24/data/new_partitions/arc-agi_all_challenges.json \
 --predictions-path  /mnt/hdd0/Kaggle/arc24/debug/01_full-fine-tuning-Qwen2-0.5B-Instruct_lr5e-5_8e4steps_2gpus_8192msl_checkpoint-80000_inference_evaluation_x032_just_correct_tasks.json \
---verifications-per-prediction 4
+--n-rounds 4
 ```
 
 ### Efficient prediction selection
@@ -70,6 +70,21 @@ This method should be able to find the best players while being much more effici
 - [Active Learning for Top-K Rank Aggregation from Noisy Comparisons](http://csuh.kaist.ac.kr/Suh_ICML2017.pdf)
 - [Active Ranking using Pairwise Comparisons](https://arxiv.org/abs/1109.3701)
 - ChatGPT ideas: [1](https://chatgpt.com/c/67288a50-9950-8012-9c29-1973ef9ef2a4), [2](https://chatgpt.com/c/672889bc-f750-8012-830d-567819dbfb3b), [3](https://chatgpt.com/c/672872e6-d018-8012-a7f7-f11b2ba7d757)
+
+#### Implementation details
+
+```bash
+export checkpoint_folder=/mnt/hdd0/Kaggle/arc24/models/20241026_improve_verifiers/01_verify-and-select_lora032-Qwen2-0.5B-Instruct_lr5e-5_bs32_16000steps_2gpus_8192msl/checkpoint-16000
+rm /mnt/hdd0/Kaggle/arc24/debug/*debug*.json; python easy_select_and_evaluation.py "${checkpoint_folder}" \
+--dataset-path /mnt/hdd0/Kaggle/arc24/data/new_partitions/arc-agi_all_challenges.json \
+--predictions-path  /mnt/hdd0/Kaggle/arc24/debug/01_full-fine-tuning-Qwen2-0.5B-Instruct_lr5e-5_8e4steps_2gpus_8192msl_checkpoint-80000_inference_evaluation_x032_just_correct_tasks.json \
+--n-rounds 2
+
+#quick command to just run inference
+python select_predictions_with_halving.py --model-path /home/gbarbadillo/data/temp_model --output-path /mnt/hdd0/Kaggle/arc24/debug/01_full-fine-tuning-Qwen2-0.5B-Instruct_lr5e-5_8e4steps_2gpus_8192msl_checkpoint-80000_inference_evaluation_x032_just_correct_tasks_m14a9650f_001rounds_debug10_selection.json --dataset-path /mnt/hdd0/Kaggle/arc24/data/new_partitions/arc-agi_all_challenges.json --predictions-path /mnt/hdd0/Kaggle/arc24/debug/01_full-fine-tuning-Qwen2-0.5B-Instruct_lr5e-5_8e4steps_2gpus_8192msl_checkpoint-80000_inference_evaluation_x032_just_correct_tasks.json --n-rounds 10
+```
+
+When using the first 10 tasks, the naive approach does 953 comparisons each round with the all vs all setup.
 
 ## Results
 
