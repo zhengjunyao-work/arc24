@@ -336,3 +336,5 @@ However at the same time using a higher learning rate could result at a model th
 - [ ] Make SmolLM great again, do multiple short trainings with different learning rate schedules
 - [ ] Datasets for long context fine-tuning. https://huggingface.co/blog/wenbopan/long-context-fine-tuning#long-text-data
 - [ ] Does it help to pretrain SmolLM-20k model on text?
+- [ ] SmolLM2 has just been released: https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct
+  - [ ] Local experimentation to find the best learning rate
