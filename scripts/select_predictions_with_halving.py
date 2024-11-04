@@ -23,13 +23,13 @@ from verify_predictions import (
 
 logger = logging.getLogger(__name__)
 
+
 @log_execution_time
 def main():
     cfg = parse_args()
     dataset, unique_predictions = load_data(cfg.dataset_path, cfg.predictions_path)
     #unique_predictions = {key: unique_predictions[key] for key in list(unique_predictions.keys())[:10]}
     matches_results = create_matches_results(unique_predictions)
-    print(matches_results)
     tokenizer, grid_encoder, llm, sampling_params = create_inference_artifacts(cfg)
     total_number_of_prompts = 0
     for round_idx in range(cfg.n_rounds):
@@ -43,7 +43,6 @@ def main():
         outputs = generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=cfg.batch_size)
         matches_results = update_matches_results(outputs, prompts, matches_results)
     logger.info(f'Total number of prompts: {total_number_of_prompts}')
-    print(matches_results)
 
     selected_predictions = select_predictions(unique_predictions, matches_results, cfg.n_top)
 
@@ -158,10 +157,9 @@ def create_prompts(matches_results, predictions, dataset, grid_encoder, tokenize
 
 
 def get_n_matches(n_predictions):
-    return 8
     n_predictions_to_n_matches = {
         2: 33,
-        4: 16
+        4: 16,
     }
     return n_predictions_to_n_matches.get(n_predictions, 8)
 
@@ -205,6 +203,8 @@ def select_predictions(unique_predictions, matches_results, n):
     for task_id, task_predictions in unique_predictions.items():
         selected_predictions[task_id] = []
         for sample_predictions, sample_matches_results in zip(task_predictions, matches_results[task_id]):
+            # TODO: add bradley-terry model to select
+            # so far this does not work better
             # if sample_matches_results['rounds']:
             #     indices = sample_matches_results['rounds'][-1]
             #     results = sample_matches_results['matches_results'][indices][:, indices]
@@ -217,8 +217,8 @@ def select_predictions(unique_predictions, matches_results, n):
             #     n_wins = np.sum(results, axis=1)
             #     ranking = np.argsort(n_wins)[::-1][:n]
             n_wins = np.sum(sample_matches_results['matches_results'], axis=1)
-            logger.info(f'{task_id}: {n_wins}')
             ranking = np.argsort(n_wins)[::-1][:n]
+            logger.info(f'{task_id}: {n_wins}')
             selected_predictions[task_id].append({f'attempt_{attempt_idx}': sample_predictions[idx] for attempt_idx, idx in enumerate(ranking, 1)})
     return selected_predictions
 
