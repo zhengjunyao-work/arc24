@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 def main():
     cfg = parse_args()
     dataset, unique_predictions = load_data(cfg.dataset_path, cfg.predictions_path)
-    unique_predictions = {key: unique_predictions[key] for key in list(unique_predictions.keys())[2:3]}
+    #unique_predictions = {key: unique_predictions[key] for key in list(unique_predictions.keys())[:10]}
     matches_results = create_matches_results(unique_predictions)
     print(matches_results)
     tokenizer, grid_encoder, llm, sampling_params = create_inference_artifacts(cfg)
@@ -124,7 +124,7 @@ def create_prompts(matches_results, predictions, dataset, grid_encoder, tokenize
                 continue
             sample_matches_results['rounds'].append(indices.copy())
             np.random.shuffle(indices)
-            n_matches = 8
+            n_matches = get_n_matches(len(indices))
             for shift in range(n_matches//2):
                 for idx1, idx2 in zip(indices, np.roll(indices, shift % (len(indices) - 1) + 1)):
                     task = dataset[task_id].copy()
@@ -155,6 +155,15 @@ def create_prompts(matches_results, predictions, dataset, grid_encoder, tokenize
                                         sample_idx=sample_idx,
                                         prediction_indices=prediction_indices))
     return prompts
+
+
+def get_n_matches(n_predictions):
+    return 8
+    n_predictions_to_n_matches = {
+        2: 33,
+        4: 16
+    }
+    return n_predictions_to_n_matches.get(n_predictions, 8)
 
 
 def select_indices_for_new_round(matches_results):
@@ -196,6 +205,17 @@ def select_predictions(unique_predictions, matches_results, n):
     for task_id, task_predictions in unique_predictions.items():
         selected_predictions[task_id] = []
         for sample_predictions, sample_matches_results in zip(task_predictions, matches_results[task_id]):
+            # if sample_matches_results['rounds']:
+            #     indices = sample_matches_results['rounds'][-1]
+            #     results = sample_matches_results['matches_results'][indices][:, indices]
+            #     n_wins = np.sum(results, axis=1)
+            #     ranking = np.argsort(n_wins)[::-1][:n]
+            #     ranking = indices[ranking]
+            # else:
+            #     results = sample_matches_results['matches_results']
+            #     print('results', results)
+            #     n_wins = np.sum(results, axis=1)
+            #     ranking = np.argsort(n_wins)[::-1][:n]
             n_wins = np.sum(sample_matches_results['matches_results'], axis=1)
             logger.info(f'{task_id}: {n_wins}')
             ranking = np.argsort(n_wins)[::-1][:n]
