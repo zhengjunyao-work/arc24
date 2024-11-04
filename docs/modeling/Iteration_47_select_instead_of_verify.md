@@ -32,6 +32,17 @@ python easy_select_and_evaluation.py "${checkpoint_folder}" \
 So far we have seen that selection can achieve better accuracy than verify, but at the cost of a much
 longer computation time. We have to improve the efficiency of the selection.
 
+```
+I'm looking for ranking and a match making system. These are the specifications:
+
+- n players
+- 1v1 matches, draw is not an option.
+- I'm only interested in finding the best and second best player, I'm not interested in the other players ranking
+- Skill does not change over time, is frozen. Thus the order of the matches is irrelevant
+- The ranking and match making system should be as efficient as possible, I want to run the smallest number possible of matches because running a match is expensive
+- The method should be robust, there is randomness in the results of the matches. F.e. a double elimination tournament is not robust enough because a player can lost two matches just by chance
+```
+
 My idea is to work first with a small subset of tasks, and once I have an implementation that feels good enough evaluate all the tasks.
 
 #### Bradley-terry model
