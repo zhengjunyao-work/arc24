@@ -27,6 +27,39 @@ python easy_select_and_evaluation.py "${checkpoint_folder}" \
 --verifications-per-prediction 4
 ```
 
+### Efficient prediction selection
+
+So far we have seen that selection can achieve better accuracy than verify, but at the cost of a much
+longer computation time. We have to improve the efficiency of the selection.
+
+My idea is to work first with a small subset of tasks, and once I have an implementation that feels good enough evaluate all the tasks.
+
+#### Bradley-terry model
+
+I believe Bradley-terry model is the correct way to build a ranking where we have static
+players that do not evolve over time. ELO ranking and Trueskill rely on the history of matches, whereas Bradley-terry does a global optimization using all available matches and does not care about the order of the matches.
+
+My only doubt is how fast the algorithm is, but hopefully it should be very fast since
+the number of players is not very big.
+
+- [Bradley–Terry model wikipedia](https://en.wikipedia.org/wiki/Bradley%E2%80%93Terry_model)
+- [Uncertainty quantification in the Bradley-Terry-Luce model](https://arxiv.org/abs/2110.03874)
+- [Bradley-Terry rating system for Kaggle sim comps](https://www.kaggle.com/code/zaharch/bradley-terry-rating-system-for-kaggle-sim-comps)
+
+#### Successive halving algorithms
+
+The idea is that each player plays `n` matches per round, and only the top half players
+pass to the next round. If `n` is big enough is very likely that the top 2 players will
+end up being selected.
+
+This method should be able to find the best players while being much more efficient than doing all vs all comparisons.
+
+#### Other links from the search
+
+- [Active Learning for Top-K Rank Aggregation from Noisy Comparisons](http://csuh.kaist.ac.kr/Suh_ICML2017.pdf)
+- [Active Ranking using Pairwise Comparisons](https://arxiv.org/abs/1109.3701)
+- ChatGPT ideas: [1](https://chatgpt.com/c/67288a50-9950-8012-9c29-1973ef9ef2a4), [2](https://chatgpt.com/c/672889bc-f750-8012-830d-567819dbfb3b), [3](https://chatgpt.com/c/672872e6-d018-8012-a7f7-f11b2ba7d757)
+
 ## Results
 
 ### Analyze submission

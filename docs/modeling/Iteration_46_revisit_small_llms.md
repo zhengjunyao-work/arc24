@@ -239,7 +239,7 @@ export model_path=/mnt/hdd0/Kaggle/arc24/models/20241028_submission_models/06_ff
 export model_path=/mnt/hdd0/Kaggle/arc24/models/20241028_submission_models/06_fft-SmolLM-135M-Instruct-20k_lr1e-3_bs16_200000steps_2gpus_8192msl/checkpoint-13000
 export model_path=/mnt/hdd0/Kaggle/arc24/models/20241028_submission_models/06_fft-SmolLM-135M-Instruct-20k_lr1e-3_bs16_400000steps_2gpus_8192msl/checkpoint-13500
 
-export model_path=/mnt/hdd0/Kaggle/arc24/models/20241028_submission_models/06_fft-SmolLM-135M-Instruct-20k_lr1e-3_bs16_100000steps_2gpus_8192msl/checkpoint-100000 &&
+export model_path=/mnt/hdd0/Kaggle/arc24/models/20241028_training_models/08_fft-SmolLM-135M-Instruct-20k_lr1e-3_bs16_100000steps_2gpus_8192msl/checkpoint-100000 &&
 python inference.py --model_path ${model_path} --output_filepath /mnt/hdd0/Kaggle/arc24/debug/smollm_problems/debug.json --predictions_per_task 8 --grid_encoder "GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))" --dataset_path /mnt/hdd0/Kaggle/arc24/data/arc-agi_evaluation_challenges.json --prompt_version output-from-examples-v1 --temperature 0.0 --n_tasks 1
 ```
 
