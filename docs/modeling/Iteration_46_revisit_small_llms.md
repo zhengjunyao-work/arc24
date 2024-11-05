@@ -322,6 +322,8 @@ However at the same time using a higher learning rate could result at a model th
 
 ## Next steps
 
+- Try SmolLM2 on a next iteration
+
 ## TODO
 
 - [x] Experiment to validate that I can extend the context window of the model. At the beginning is a simple instruction, then a lot of distraction text. If the model has enough context length the task is trivial, otherwise is impossible.
@@ -333,8 +335,6 @@ However at the same time using a higher learning rate could result at a model th
     - [ ] [10_lora128-NanoLM-0.3B-Instruct-v2_lr1e-4_bs16_200000steps_2gpus_8192msl](https://wandb.ai/guillermobarbadillo/20241028_training_models/runs/3tj7bhgj?nw=nwuserguillermobarbadillo)
   - [ ] SmolLM-135M-Instruct-20k
     - [ ] [08_fft-SmolLM-135M-Instruct-20k_lr1e-3_bs16_400000steps_2gpus_8192msl](https://wandb.ai/guillermobarbadillo/20241028_training_models/runs/0tvxtzx5)
-- [ ] Make SmolLM great again, do multiple short trainings with different learning rate schedules
-- [ ] Datasets for long context fine-tuning. https://huggingface.co/blog/wenbopan/long-context-fine-tuning#long-text-data
-- [ ] Does it help to pretrain SmolLM-20k model on text?
-- [ ] SmolLM2 has just been released: https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct
-  - [ ] Local experimentation to find the best learning rate
+- [x] Make SmolLM great again, do multiple short trainings with different learning rate schedules
+- [x] ~~Does it help to pretrain SmolLM-20k model on text?~~ Cancelled because SmolLM2 was released.
+  - [x] Datasets for long context fine-tuning. https://huggingface.co/blog/wenbopan/long-context-fine-tuning#long-text-data
