@@ -188,7 +188,19 @@ the outputs and the inputs for the ARC tasks. So Omni-ARC approach seems to be w
 
 ## Conclusion
 
-TODO: comparison table of the accuracy of voting, verification and selection.
+| method       | top 1 accuracy | top 2 accuracy |
+|--------------|----------------|----------------|
+| voting       | 60.0%          | 70.0%          |
+| verification | 59.3%          | 77.4%          |
+| selection    | **68.7%**      | **81.0%**      |
+
+Using a model to select predictions is the more accurate method of all. It improves an absolute 10%
+on top_1 and top_2 over voting.
+
+We implemented an efficient selection algorithm that uses successive halving to focus on the most
+promising selections, and the Bradley-Terry ranking system to sort the predictions.
+
+TODO: submission results?
 
 ## Next steps
 
