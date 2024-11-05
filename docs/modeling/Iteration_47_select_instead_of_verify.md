@@ -92,6 +92,20 @@ One of the experiments that I want to try is to make a better selection of the 2
 that the 2020 solution scores 26 on the leaderboard, however if I use a single attempt I only score 24.
 Maybe using the selection model I can keep scoring 26.
 
+### Try on different predictions
+
+```bash
+export checkpoint_folder=/mnt/hdd0/Kaggle/arc24/models/20241026_improve_verifiers/01_verify-and-select_lora032-Qwen2-0.5B-Instruct_lr5e-5_bs32_16000steps_2gpus_8192msl/checkpoint-16000
+python easy_select_and_evaluation.py "${checkpoint_folder}" \
+--predictions-path  /mnt/hdd0/Kaggle/arc24/debug/01_full-fine-tuning-Qwen2-0.5B-Instruct_lr5e-5_8e4steps_2gpus_8192msl_checkpoint-80000_inference_evaluation_x032_just_correct_tasks.json
+
+python easy_select_and_evaluation.py "${checkpoint_folder}" \
+--predictions-path  /mnt/hdd0/Kaggle/arc24/debug/05_LoRA-032-Qwen2-0.5B-Instruct_lr1e-4_4e4steps_2gpus_8192msl_checkpoint-40000_inference_evaluation_x032_just_correct_tasks.json
+
+python easy_select_and_evaluation.py "${checkpoint_folder}" \
+--predictions-path  /mnt/hdd0/Kaggle/arc24/debug/05_LoRA-128-Qwen2-0.5B-Instruct_lr5e-5_4e4steps_2gpus_8192msl_checkpoint-40000_inference_evaluation_x032_just_correct_tasks.json
+```
+
 ## Results
 
 ### Analyze submission
@@ -152,7 +166,15 @@ TODO: what if I scale the runtime?
 
 ### Submission results
 
+I have created a new [notebook](https://www.kaggle.com/code/ironbar/2020-solution-script-prediction-selection?scriptVersionId=205391943) to see if
+I can improve the selection of 2020 solution predictions.
+
 TODO: 2020 solution, combined solution, all in 1.
+
+### Can I achieve perfect accuracy if training on the evaluation set?
+
+I have used the model `/mnt/hdd0/Kaggle/arc24/models/20241026_improve_verifiers/04_cheat-with-evaluation-no-task-augmentation_lora032-Qwen2-0.5B-Instruct_lr5e-5_bs32_16000steps_2gpus_8192msl/checkpoint-16000` from the previous iteration and with `max_matches_per_round=32` it achieves top_1 accuracy of 84.3% and top_2 accuracy of 94.8%. When using
+a verifier this numbers were 75% and 93.30% so there is a clear improvement here.
 
 ## Conclusion
 
@@ -171,4 +193,5 @@ TODO: comparison table of the accuracy of voting, verification and selection.
 - [x] I need more information to understand the failures of verifying. I need to save the results of the verifications for
   deeper analysis.
 - [x] Create a first script to do prediction selection with comparisons. First do an all vs all comparison.
-- [ ] Update the script to be more efficient and do more selective comparisons, using maybe trueskill.
+- [x] Update the script to be more efficient and do more selective comparisons, using maybe trueskill.
+- [ ] How does the efficient method scales with more compute? (even when it is not feasible, just to know).
