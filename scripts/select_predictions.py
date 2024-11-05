@@ -38,7 +38,7 @@ def main():
     for round_idx in range(n_rounds):
         prompts = create_prompts(
             matches_results, unique_predictions, dataset, grid_encoder, tokenizer,
-            prompt_version=cfg.prompt_version)
+            prompt_version=cfg.prompt_version, max_matches_per_round=cfg.max_matches_per_round)
         total_number_of_prompts += len(prompts)
         logger.info(f'Round {round_idx+1}/{n_rounds}: {len(prompts)} prompts')
         if not prompts:
@@ -90,6 +90,7 @@ This works because verifying that a prediction is correct is an easier task than
     parser.add_argument('--swap-space', default=0, type=int, help="CPU swap space size (GiB) per GPU")
     parser.add_argument('--verbose', action='store_true', help="Print verbose output")
     parser.add_argument('--n-top', default=2, type=int, help="Number of top predictions to select")
+    parser.add_argument('--max-matches-per-round', default=32, type=int, help="Maximum number of matches per round (that will be used only on a 1v1 comparison)")
     print(args)
     return parser.parse_args()
 
@@ -121,7 +122,8 @@ def get_n_rounds(unique_predictions):
     return int(np.ceil(np.log2(max_predictions)))
 
 
-def create_prompts(matches_results, predictions, dataset, grid_encoder, tokenizer, prompt_version):
+def create_prompts(matches_results, predictions, dataset, grid_encoder, tokenizer,
+                   prompt_version, max_matches_per_round):
     """ Creates prompt doing an all vs all comparison of the predictions """
     prompts = []
     for task_id, task_predictions in predictions.items():
@@ -133,7 +135,7 @@ def create_prompts(matches_results, predictions, dataset, grid_encoder, tokenize
                 continue
             sample_matches_results['rounds'].append(indices.copy())
             np.random.shuffle(indices)
-            n_matches = get_n_matches(len(indices))
+            n_matches = get_n_matches(len(indices), max_n_matches=max_matches_per_round)
             for shift in range(n_matches//2):
                 for idx1, idx2 in zip(indices, np.roll(indices, shift % (len(indices) - 1) + 1)):
                     task = dataset[task_id].copy()
@@ -166,13 +168,17 @@ def create_prompts(matches_results, predictions, dataset, grid_encoder, tokenize
     return prompts
 
 
-def get_n_matches(n_predictions):
-    if n_predictions <= 2:
-        return 33
-    if n_predictions <= 4:
-        return 16
-    else:
-        return 8
+def get_n_matches(n_predictions, max_n_matches=32, min_n_matches=8):
+    """
+    For max_n_matches=64, min_n_matches=8:
+    n_predictions = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    n_matches = [65, 32, 32, 16, 16, 16, 16, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
+    """
+    n_matches = int(np.ceil(np.log2(n_predictions)))
+    n_matches = max(max_n_matches//2**(n_matches-1), min_n_matches)
+    if n_matches == max_n_matches:
+        n_matches += 1 # to solve ties
+    return n_matches
 
 
 def select_indices_for_new_round(matches_results):
