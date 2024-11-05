@@ -78,7 +78,7 @@ export checkpoint_folder=/mnt/hdd0/Kaggle/arc24/models/20241026_improve_verifier
 rm /mnt/hdd0/Kaggle/arc24/debug/*debug*.json; python easy_select_and_evaluation.py "${checkpoint_folder}" \
 --dataset-path /mnt/hdd0/Kaggle/arc24/data/new_partitions/arc-agi_all_challenges.json \
 --predictions-path  /mnt/hdd0/Kaggle/arc24/debug/01_full-fine-tuning-Qwen2-0.5B-Instruct_lr5e-5_8e4steps_2gpus_8192msl_checkpoint-80000_inference_evaluation_x032_just_correct_tasks.json \
---n-rounds 2
+--n-rounds 8
 
 #quick command to just run inference
 python select_predictions_with_halving.py --model-path /home/gbarbadillo/data/temp_model --output-path /mnt/hdd0/Kaggle/arc24/debug/01_full-fine-tuning-Qwen2-0.5B-Instruct_lr5e-5_8e4steps_2gpus_8192msl_checkpoint-80000_inference_evaluation_x032_just_correct_tasks_m14a9650f_001rounds_debug10_selection.json --dataset-path /mnt/hdd0/Kaggle/arc24/data/new_partitions/arc-agi_all_challenges.json --predictions-path /mnt/hdd0/Kaggle/arc24/debug/01_full-fine-tuning-Qwen2-0.5B-Instruct_lr5e-5_8e4steps_2gpus_8192msl_checkpoint-80000_inference_evaluation_x032_just_correct_tasks.json --n-rounds 10

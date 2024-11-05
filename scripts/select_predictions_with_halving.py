@@ -12,7 +12,8 @@ from inference import (
 from arc24.data_augmentation import (
     get_random_geometric_augmentation_params,
     get_random_color_map,
-    apply_data_augmentation
+    apply_data_augmentation,
+    set_random_seed
 )
 from arc24.prompting import create_prompts_from_task
 from arc24.logging import log_execution_time, logging
@@ -28,9 +29,10 @@ logger = logging.getLogger(__name__)
 def main():
     cfg = parse_args()
     dataset, unique_predictions = load_data(cfg.dataset_path, cfg.predictions_path)
-    #unique_predictions = {key: unique_predictions[key] for key in list(unique_predictions.keys())[:10]}
+    # unique_predictions = {key: unique_predictions[key] for key in list(unique_predictions.keys())[:10]}
     matches_results = create_matches_results(unique_predictions)
     tokenizer, grid_encoder, llm, sampling_params = create_inference_artifacts(cfg)
+    set_random_seed(cfg.random_seed)
     total_number_of_prompts = 0
     for round_idx in range(cfg.n_rounds):
         prompts = create_prompts(
@@ -87,7 +89,7 @@ This works because verifying that a prediction is correct is an easier task than
     parser.add_argument('--swap-space', default=0, type=int, help="CPU swap space size (GiB) per GPU")
     parser.add_argument('--verbose', action='store_true', help="Print verbose output")
     parser.add_argument('--n-top', default=2, type=int, help="Number of top predictions to select")
-    parser.add_argument('--n-rounds', default=4, type=int, help="Number of all vs all rounds to select predictions")
+    parser.add_argument('--n-rounds', default=8, type=int, help="Number of all vs all rounds to select predictions")
     print(args)
     return parser.parse_args()
 
@@ -157,6 +159,7 @@ def create_prompts(matches_results, predictions, dataset, grid_encoder, tokenize
 
 
 def get_n_matches(n_predictions):
+    return 16
     n_predictions_to_n_matches = {
         2: 33,
         4: 16,
@@ -167,18 +170,37 @@ def get_n_matches(n_predictions):
 def select_indices_for_new_round(matches_results):
     results = matches_results['matches_results']
     previous_rounds = matches_results['rounds']
-    if not previous_rounds: # use all the predictions
+    if not previous_rounds: # use all the predictions in the initial round
         if len(results) < 2:
             return None
         return np.arange(len(results))
+
     previous_indices = previous_rounds[-1]
-    if len(previous_indices) <= 2:
+    if len(previous_indices) <= 2: # no more rounds
         return None
-    results = results[previous_indices][:, previous_indices]
-    win_ratio = np.sum(results, axis=1) / (np.sum(results, axis=1) + np.sum(results, axis=0))
-    n_selected = len(win_ratio) // 2 + len(win_ratio) % 2
-    selection = np.argsort(win_ratio)[::-1][:n_selected]
-    return previous_indices[selection]
+    strength = bradley_terry(results)
+    n_selected = len(previous_indices) // 2 + len(previous_indices) % 2
+    selection = np.argsort(strength)[::-1][:n_selected]
+    return selection
+
+
+def bradley_terry(w, max_iter=1000, tol=1e-3, epsilon=1e-5):
+    """
+    Estimates the strength of the predictions using the Bradley-Terry model.
+    As input receives a wins matrix, with the wins in the rows and the loses in the columns.
+    https://en.wikipedia.org/wiki/Bradley%E2%80%93Terry_model
+    """
+    p = np.ones(w.shape[0])
+    for iteration in range(max_iter):
+        p_old = p.copy()
+        for i in range(w.shape[0]):
+            p[i] = max(np.sum(w[i]*p/(p + p[i] + epsilon))/(np.sum(w[:, i]/(p + p[i] + epsilon)) + epsilon), epsilon)
+        normalization_factor = p.prod()**(1/len(p))
+        p /= normalization_factor
+        if np.linalg.norm(p - p_old) < tol:
+            logger.debug(f"Converged after {iteration+1} iterations: {p.round(3)}")
+            break
+    return p
 
 
 def update_matches_results(outputs, prompts, matches_results):
@@ -215,10 +237,20 @@ def select_predictions(unique_predictions, matches_results, n):
             #     results = sample_matches_results['matches_results']
             #     print('results', results)
             #     n_wins = np.sum(results, axis=1)
-            #     ranking = np.argsort(n_wins)[::-1][:n]
-            n_wins = np.sum(sample_matches_results['matches_results'], axis=1)
-            ranking = np.argsort(n_wins)[::-1][:n]
-            logger.info(f'{task_id}: {n_wins}')
+            #     ranking = np.argsort(n_wins)[::-1][:n]            
+
+            # n_wins = np.sum(sample_matches_results['matches_results'], axis=1)
+            # ranking = np.argsort(n_wins)[::-1][:n]
+            # logger.info(f'{task_id}: {n_wins}')
+
+            if sample_matches_results['rounds']:
+                strength = bradley_terry(sample_matches_results['matches_results'])
+                ranking = np.argsort(strength)[::-1][:n]
+                logger.info(f'{task_id}: {sorted(strength.round(2).tolist())}')
+            else:
+                ranking = [0]
+                logger.info(f'{task_id} only had one prediction')
+
             selected_predictions[task_id].append({f'attempt_{attempt_idx}': sample_predictions[idx] for attempt_idx, idx in enumerate(ranking, 1)})
     return selected_predictions
 
