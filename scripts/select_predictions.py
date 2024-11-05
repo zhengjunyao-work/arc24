@@ -239,16 +239,20 @@ def select_predictions(unique_predictions, matches_results, n):
     for task_id, task_predictions in unique_predictions.items():
         selected_predictions[task_id] = []
         for sample_predictions, sample_matches_results in zip(task_predictions, matches_results[task_id]):
-
             if sample_matches_results['rounds']:
                 strength = bradley_terry(sample_matches_results['matches_results'])
                 ranking = np.argsort(strength)[::-1][:n]
                 logger.info(f'{task_id}: {sorted(strength.round(2).tolist(), reverse=True)}')
+                chosen_predictions = [sample_predictions[idx] for idx in ranking]
             else:
-                ranking = [0]
-                logger.info(f'{task_id} only had one prediction')
+                logger.info(f'{task_id} had just {len(sample_predictions)} predictions')
+                chosen_predictions = sample_predictions
 
-            selected_predictions[task_id].append({f'attempt_{attempt_idx}': sample_predictions[idx] for attempt_idx, idx in enumerate(ranking, 1)})
+            if len(chosen_predictions) < n:
+                chosen_predictions += [[]]*(n - len(chosen_predictions))
+
+            selected_predictions[task_id].append(
+                {f'attempt_{idx}': prediction for idx, prediction in enumerate(chosen_predictions, 1)})
     return selected_predictions
 
 
