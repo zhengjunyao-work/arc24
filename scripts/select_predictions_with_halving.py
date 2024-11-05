@@ -34,12 +34,13 @@ def main():
     tokenizer, grid_encoder, llm, sampling_params = create_inference_artifacts(cfg)
     set_random_seed(cfg.random_seed)
     total_number_of_prompts = 0
-    for round_idx in range(cfg.n_rounds):
+    n_rounds = get_n_rounds(unique_predictions) + 1
+    for round_idx in range(n_rounds):
         prompts = create_prompts(
             matches_results, unique_predictions, dataset, grid_encoder, tokenizer,
             prompt_version=cfg.prompt_version)
         total_number_of_prompts += len(prompts)
-        logger.info(f'Round {round_idx+1}/{cfg.n_rounds}: {len(prompts)} prompts')
+        logger.info(f'Round {round_idx+1}/{n_rounds}: {len(prompts)} prompts')
         if not prompts:
             break
         outputs = generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=cfg.batch_size)
@@ -89,7 +90,6 @@ This works because verifying that a prediction is correct is an easier task than
     parser.add_argument('--swap-space', default=0, type=int, help="CPU swap space size (GiB) per GPU")
     parser.add_argument('--verbose', action='store_true', help="Print verbose output")
     parser.add_argument('--n-top', default=2, type=int, help="Number of top predictions to select")
-    parser.add_argument('--n-rounds', default=8, type=int, help="Number of all vs all rounds to select predictions")
     print(args)
     return parser.parse_args()
 
@@ -111,6 +111,14 @@ def create_matches_results(unique_predictions):
                 rounds=[],
             ))
     return matches_results
+
+
+def get_n_rounds(unique_predictions):
+    max_predictions = 0
+    for task_predictions in unique_predictions.values():
+        for sample_predictions in task_predictions:
+            max_predictions = max(max_predictions, len(sample_predictions))
+    return int(np.ceil(np.log2(max_predictions)))
 
 
 def create_prompts(matches_results, predictions, dataset, grid_encoder, tokenizer, prompt_version):
@@ -159,12 +167,12 @@ def create_prompts(matches_results, predictions, dataset, grid_encoder, tokenize
 
 
 def get_n_matches(n_predictions):
-    return 16
-    n_predictions_to_n_matches = {
-        2: 33,
-        4: 16,
-    }
-    return n_predictions_to_n_matches.get(n_predictions, 8)
+    if n_predictions <= 2:
+        return 33
+    if n_predictions <= 4:
+        return 16
+    else:
+        return 8
 
 
 def select_indices_for_new_round(matches_results):
@@ -225,28 +233,11 @@ def select_predictions(unique_predictions, matches_results, n):
     for task_id, task_predictions in unique_predictions.items():
         selected_predictions[task_id] = []
         for sample_predictions, sample_matches_results in zip(task_predictions, matches_results[task_id]):
-            # TODO: add bradley-terry model to select
-            # so far this does not work better
-            # if sample_matches_results['rounds']:
-            #     indices = sample_matches_results['rounds'][-1]
-            #     results = sample_matches_results['matches_results'][indices][:, indices]
-            #     n_wins = np.sum(results, axis=1)
-            #     ranking = np.argsort(n_wins)[::-1][:n]
-            #     ranking = indices[ranking]
-            # else:
-            #     results = sample_matches_results['matches_results']
-            #     print('results', results)
-            #     n_wins = np.sum(results, axis=1)
-            #     ranking = np.argsort(n_wins)[::-1][:n]            
-
-            # n_wins = np.sum(sample_matches_results['matches_results'], axis=1)
-            # ranking = np.argsort(n_wins)[::-1][:n]
-            # logger.info(f'{task_id}: {n_wins}')
 
             if sample_matches_results['rounds']:
                 strength = bradley_terry(sample_matches_results['matches_results'])
                 ranking = np.argsort(strength)[::-1][:n]
-                logger.info(f'{task_id}: {sorted(strength.round(2).tolist())}')
+                logger.info(f'{task_id}: {sorted(strength.round(2).tolist(), reverse=True)}')
             else:
                 ranking = [0]
                 logger.info(f'{task_id} only had one prediction')
