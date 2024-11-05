@@ -166,16 +166,13 @@ This has great potential to improve the LB score.
 
 ### Efficient implementation results
 
-TODO: same model on different predictions just like the table I did previously
-TODO: try different models
+#### Scale runtime
+
 TODO: what if I scale the runtime?
 
-### Submission results
+#### Different models
 
-I have created a new [notebook](https://www.kaggle.com/code/ironbar/2020-solution-script-prediction-selection?scriptVersionId=205391943) to see if
-I can improve the selection of 2020 solution predictions.
-
-TODO: 2020 solution, combined solution, all in 1.
+TODO: try different models, (from the previous iteration)
 
 ### Can I achieve perfect accuracy if training on the evaluation set?
 
@@ -185,6 +182,13 @@ a verifier this numbers were 75% and 93.30% so there is a clear improvement here
 If I use the model `/mnt/hdd0/Kaggle/arc24/models/20241028_submission_models/01_lora96-Qwen2.5-0.5B-Instruct_lr1e-4_bs32_100000steps_2gpus_8192msl/checkpoint-100000` the accuracy is even higher: 90.7% and 96.3%.
 So maybe that is the model that we should be using for submission. This model was also trained to predict
 the outputs and the inputs for the ARC tasks. So Omni-ARC approach seems to be working.
+
+### Submission results
+
+I have created a new [notebook](https://www.kaggle.com/code/ironbar/2020-solution-script-prediction-selection?scriptVersionId=205391943) to see if
+I can improve the selection of 2020 solution predictions.
+
+TODO: 2020 solution, combined solution, all in 1.
 
 ## Conclusion
 
@@ -217,3 +221,4 @@ TODO: submission results?
 - [x] Create a first script to do prediction selection with comparisons. First do an all vs all comparison.
 - [x] Update the script to be more efficient and do more selective comparisons, using maybe trueskill.
 - [ ] How does the efficient method scales with more compute? (even when it is not feasible, just to know).
+- [ ] Try the models trained on the previous iteration 46.

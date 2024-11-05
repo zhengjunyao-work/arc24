@@ -20,7 +20,7 @@ improvements.
 I'm going to simply increase the `max_position_embedding` from 8192 to 20480, just like I did with `SmolLM`, both
 on the `config.json` and `tokenizer_config.json`
 
-### Experiment desing
+### Experiment design
 
 The idea is to run the exact same training experiment I recently did with SmolLM with the new SmolLM2.
 Hopefully we will see a faster training loss decrease.
@@ -33,4 +33,4 @@ Hopefully we will see a faster training loss decrease.
 
 ## TODO
 
-- [ ]
+- [ ] Compare the accuracy on evaluation dataset vs SmolLM

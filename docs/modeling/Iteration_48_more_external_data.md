@@ -96,17 +96,17 @@ weight should I give to them when training along other datasets. I'm going to tr
 for just 40k steps and just in the task of predicting the output from the examples to
 simplify the experiment.
 
-
 ## Results
 
 ## Conclusion
 
 ## Next steps
 
+- Train a model to generate code (for next years edition)
+
 ## TODO
 
-- [ ] Explore the dataset
-- [ ] How can I train on this new dataset? It is much bigger than the other datasets
+- [x] Explore the dataset
+- [x] How can I train on this new dataset? It is much bigger than the other datasets
 - [ ] Does it improve the evaluation accuracy?
 - [ ] Does it improve the LB score?
-- [ ] Train a model to generate code
