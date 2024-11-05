@@ -74,7 +74,7 @@ This works because verifying that a prediction is correct is an easier task than
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         epilog=epilog)
     parser.add_argument('--model-path', type=str, help="Path to the verifier model")
-    parser.add_argument('--max-model-len', default=10240,
+    parser.add_argument('--max-model-len', default=12000,
                         type=int, help="Maximum number of tokens in the model")
     parser.add_argument('--grid-encoder', default='GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))',
                         type=str, help="Name of the grid encoder")
