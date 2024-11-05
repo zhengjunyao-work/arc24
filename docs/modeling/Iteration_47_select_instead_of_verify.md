@@ -86,6 +86,12 @@ python select_predictions_with_halving.py --model-path /home/gbarbadillo/data/te
 
 When using the first 10 tasks, the naive approach does 953 comparisons each round with the all vs all setup.
 
+### Check that it can work with empty predictions
+
+One of the experiments that I want to try is to make a better selection of the 2020 solution. I know
+that the 2020 solution scores 26 on the leaderboard, however if I use a single attempt I only score 24.
+Maybe using the selection model I can keep scoring 26.
+
 ## Results
 
 ### Analyze submission
@@ -119,6 +125,34 @@ The drawback is that this implementation is very slow. We are doing all versus a
 that gives the same compute to the best prediction and to the last. Since we are just interested
 in the top_2 predictions I should be able to optimize the runtime by a good margin while preserving
 or even improving the accuracy.
+
+### Improving the selection of 2020 predictions
+
+Using the evaluation dataset we can estimate if we can use model prediction selection to improve the
+selection of the submission predictions.
+
+| solution                                               | top_2 accuracy | top_1 accuracy |
+|--------------------------------------------------------|----------------|----------------|
+| icecuber                                               | 54.0%          | 48.5%          |
+| icecuber + model select predictions                    | 54.0%          | 53.5%          |
+| program search                                         | 14.0%          | 14.0%          |
+| combined submission with preference for program search | 56.5%          | 49.0%          |
+| model select predictions                               | 57.0%          | 56.5%          |
+| perfect combination                                    | 57.0%          | 57.0%          |
+
+The table shows that when doing the baseline submission combination we get 49% top_1 accuracy and when
+we use the model to select predictions we get 56.5% top_1 accuracy which is an amazing improvement.
+This has great potential to improve the LB score.
+
+### Efficient implementation results
+
+TODO: same model on different predictions just like the table I did previously
+TODO: try different models
+TODO: what if I scale the runtime?
+
+### Submission results
+
+TODO: 2020 solution, combined solution, all in 1.
 
 ## Conclusion
 
