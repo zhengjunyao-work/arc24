@@ -98,7 +98,27 @@ simplify the experiment.
 
 ## Results
 
+| original datasets weight | accuracy | pass_n | vote_2 | vote_1 |
+|--------------------------|----------|--------|--------|--------|
+| 100%                     | 12.8%    | 33.4%  | 23.6%  | 19.4%  |
+| 50%                      | 13.3%    | 30.9%  | 23.9%  | 19.1%  |
+| 33%                      | 13.3%    | 31.0%  | 23.4%  | 19.8%  |
+| 20%                      | 11.6%    | 28.3%  | 20.4%  | 16.5%  |
+| 0%                       | 9.2%     | 23.1%  | 17.3%  | 14.8%  |
+
+Accuracy is the metric we can trust more because it is computed with all the predictions, the other
+metrics are computed task-wise and have more uncertainty.
+
+It seems that combining the original datasets with the new BARC datasets increases the accuracy. It is
+a very small improvement, but it might give an extra point in the leaderboard.
+
+It is interesting to notice that they were able to achieve a vote_2 accuracy of 30%. Maybe the difference
+is just the LLM model size: they used Llama-3-8B and I'm using Qwen2.5-0.5B
+
 ## Conclusion
+
+We observe a small increase in accuracy when adding BARC datasets to the previous training datasets.
+I recommend to use the BARC datasets in the final trainings.
 
 ## Next steps
 
@@ -108,5 +128,5 @@ simplify the experiment.
 
 - [x] Explore the dataset
 - [x] How can I train on this new dataset? It is much bigger than the other datasets
-- [ ] Does it improve the evaluation accuracy?
-- [ ] Does it improve the LB score?
+- [x] Does it improve the evaluation accuracy?
+- [ ] ~Does it improve the LB score?~ No time to test it, I will use it on the final training
