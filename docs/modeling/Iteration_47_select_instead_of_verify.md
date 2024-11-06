@@ -120,6 +120,12 @@ better select the predictions from 2020 and from the transformer, or I could com
 and select among them. My experience with the verifier model suggests that is better to do the selection
 of the submissions before combining the two approaches.
 
+There are 3 strategies to improve the submission:
+
+1. Concatenate all the predictions and select the best 2 predictions for each task
+2. Select the best 2 predictions for the 2020 solution and my model predictions and combine the predictions
+3. Select only best 2 predictions for my model, and combine with the combination of 2020 solution
+
 ### Analyze verifications
 
 I have studied the failed verifications and found that 36% of them fail with ties. If I can use
@@ -189,6 +195,17 @@ I have created a new [notebook](https://www.kaggle.com/code/ironbar/2020-solutio
 I can improve the selection of 2020 solution predictions.
 
 TODO: 2020 solution, combined solution, all in 1.
+
+#### 2020 solution
+
+First attempts get scores of 20 and 21.5, which implies a top_1 accuracy of 76% and 82% respectively.
+This is better than the accuracy on the evaluation set.
+
+The drawback is that is not as a good as the [proof of concept of the 2020 solution on the evaluation data](#improving-the-selection-of-2020-predictions), which achieved an impressing 99% top_1 accuracy.
+
+Maybe is better to do just use the previous 2020 prediction selection which scored 24.
+
+#### Full system
 
 ## Conclusion
 
