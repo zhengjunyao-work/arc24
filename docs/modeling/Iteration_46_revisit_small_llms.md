@@ -318,7 +318,27 @@ than the one I was using.
 However at the same time using a higher learning rate could result at a model that fails when using
 `float16` at inference, as shown in this [section](#problem-with-smollm-predictions)
 
+### Trained models for longer
+
+I have trained all the models for longer:
+
+| model                    | lora_r | batch_size | training steps | multi-tasks | accuracy | pass_n | vote_2 | vote_1 |
+|--------------------------|--------|------------|----------------|-------------|----------|--------|--------|--------|
+| Qwen2-0.5B               | 32     | 16         | 4.0E+04        | 1           | 11.10%   | 30.25% | 22.62% | 18.88% |
+| Qwen2.5-0.5B             | 64     | 16         | 1.2E+05        | 4           | 10.32%   | 27.62% | 19.38% | 16.88% |
+| NanoLM-0.3B-Instruct-v2  | 128    | 16         | 2.0E+05        | 4           | 6.38%    | 23.12% | 14.37% | 10.88% |
+| SmolLM-135M-Instruct-20k | fft    | 16         | 2.0E+05        | 4           | 4.96%    | 19.62% | 13.38% | 9.50%  |
+
+We don't reach the results from the baseline yet, but we are very close. It is likely that we just simply
+have to train for a bit longer.
+
+This experiment shows that smaller LLMs do not reach the accuracy of Qwen despite being trained for longer.
+Maybe I should go in the opposite direction and try bigger models (although I could not do test-time fine-tuning with them)
+
 ## Conclusion
+
+Smaller LLMs do not reach results as good as Qwen2.5-0.5B despite being trained for longer. It seems
+that we have to go the other direction, try with bigger models instead.
 
 ## Next steps
 
@@ -328,12 +348,12 @@ However at the same time using a higher learning rate could result at a model th
 
 - [x] Experiment to validate that I can extend the context window of the model. At the beginning is a simple instruction, then a lot of distraction text. If the model has enough context length the task is trivial, otherwise is impossible.
 - [x] How can I add a chat template to a model?
-- [ ] Can I reach the same validation results as old Qwen?
-  - [ ] Qwen2.5
+- [x] Can I reach the same validation results as old Qwen?
+  - [x] Qwen2.5
     - [ ] [09_lora64-Qwen2.5-0.5B-Instruct_lr1e-4_bs16_120000steps_2gpus_8192msl](https://wandb.ai/guillermobarbadillo/20241028_training_models/runs/6wvr45kb)
-  - [ ] Mxode/NanoLM-0.3B-Instruct-v2
+  - [x] Mxode/NanoLM-0.3B-Instruct-v2
     - [ ] [10_lora128-NanoLM-0.3B-Instruct-v2_lr1e-4_bs16_200000steps_2gpus_8192msl](https://wandb.ai/guillermobarbadillo/20241028_training_models/runs/3tj7bhgj?nw=nwuserguillermobarbadillo)
-  - [ ] SmolLM-135M-Instruct-20k
+  - [x] SmolLM-135M-Instruct-20k
     - [ ] [08_fft-SmolLM-135M-Instruct-20k_lr1e-3_bs16_400000steps_2gpus_8192msl](https://wandb.ai/guillermobarbadillo/20241028_training_models/runs/0tvxtzx5)
 - [x] Make SmolLM great again, do multiple short trainings with different learning rate schedules
 - [x] ~~Does it help to pretrain SmolLM-20k model on text?~~ Cancelled because SmolLM2 was released.
