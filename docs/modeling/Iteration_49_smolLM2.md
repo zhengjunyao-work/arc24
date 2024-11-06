@@ -27,10 +27,21 @@ Hopefully we will see a faster training loss decrease.
 
 ## Results
 
+| model                  | accuracy | pass_n | vote_2 | vote_1 |
+|------------------------|----------|--------|--------|--------|
+| Qwen2.5-0.5B-Instruct  | 10.32%   | 27.62% | 19.38% | 16.88% |
+| SmollLM-135M-Instruct  | 4.20%    | 18.25% | 11.25% | 9.3%   |
+| SmollLM2-135M-Instruct | 5.52%    | 20.50% | 12.62% | 9.8%   |
+
+We can see a noticeable improvement when using SmolLM2 over SmolLM, but it is still far from the accuracy
+of Qwen2 model.
+
 ## Conclusion
+
+SmolLM2 improves over SmolLM, but not enough to be able to compete with Qwen2.5.
 
 ## Next steps
 
 ## TODO
 
-- [ ] Compare the accuracy on evaluation dataset vs SmolLM
+- [x] Compare the accuracy on evaluation dataset vs SmolLM
