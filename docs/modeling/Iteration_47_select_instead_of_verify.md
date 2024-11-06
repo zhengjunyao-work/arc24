@@ -255,5 +255,6 @@ TODO: submission results?
   deeper analysis.
 - [x] Create a first script to do prediction selection with comparisons. First do an all vs all comparison.
 - [x] Update the script to be more efficient and do more selective comparisons, using maybe trueskill.
-- [ ] How does the efficient method scales with more compute? (even when it is not feasible, just to know).
-- [ ] Try the models trained on the previous iteration 46.
+- [x] How does the efficient method scales with more compute? (even when it is not feasible, just to know).
+- [x] Try the models trained on the previous iteration 46.
+- [ ] Submission results

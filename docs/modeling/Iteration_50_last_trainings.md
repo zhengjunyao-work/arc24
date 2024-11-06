@@ -131,6 +131,7 @@ accelerate launch --num_processes ${gpus} --num_machines 1 --mixed_precision bf1
 --train_datasets /root/code/arc24/data/external_data/MINI-ARC.json input-from-inputs-v0  \
 --val_dataset /root/code/arc24/data/original_data/arc-agi_evaluation_challenges.json output-from-examples-v1 \
 --remove_train_samples_to_fit_max_seq_len \
+--optim adamw_torch \
 --save_steps 500 \
 --eval_steps 5000000 \
 --warmup_ratio 2e-2
@@ -141,6 +142,8 @@ accelerate launch --num_processes ${gpus} --num_machines 1 --mixed_precision bf1
 ```bash
 for machine_ip in 94.156.8.181 94.156.8.119; do \
 rsync -r -avP -e "ssh -i ~/.ssh/id_rsa.pub -p 50022" root@${machine_ip}:~/models/20241106_final_training/ /mnt/hdd0/Kaggle/arc24/models/20241106_final_training/; done
+for machine_ip in 192.222.52.72; do \
+rsync -r -avP -e "ssh -i ~/.ssh/id_rsa.pub" ubuntu@${machine_ip}:~/models/20241106_final_training/ /mnt/hdd0/Kaggle/arc24/models/20241106_final_training/; done
 ```
 
 ### Train bigger models
@@ -152,6 +155,17 @@ worse results even when training the models for longer.
 Now that I have a model that can select predictions, it might be worth to use bigger models even when I
 cannot do test-time fine-tuning on them.
 
+### FP8 training on H100
+
+- https://huggingface.co/docs/accelerate/en/usage_guides/low_precision_training
+- https://github.com/NVIDIA/TransformerEngine
+
+```bash
+pip install git+https://github.com/NVIDIA/TransformerEngine.git@stable
+```
+
+I have not been able to install the backends required for fp8 training.
+
 ## Results
 
 ### Training speed
@@ -159,10 +173,23 @@ cannot do test-time fine-tuning on them.
 I have done some initial training speed experiments to verify that the machines work well. I haven't seen
 any speed improvement by increasing the batch size or increasing the per device train batch size.
 
+| model                 | hardware | it/s |
+|-----------------------|----------|------|
+| Qwen2.5-0.5B-Instruct | 8xA100   | 2.38 |
+| Qwen2.5-1.5B-Instruct | 8xA100   | 1.44 |
+| Qwen2.5-7B-Instruct   | 8xA100   | 0.68 |
+| Qwen2.5-7B-Instruct   | 8xH100   | 1.09 |
+
+The H100 might be a good idea for `Qwen2.5-7B-Instruct`.
+
 ## Conclusion
 
 ## Next steps
 
 ## TODO
 
-- [ ] How to sync checkpoints between the servers and my machine?
+- [x] How to sync checkpoints between the servers and my machine?
+- [ ] Verify that I can use the bigger models in Kaggle
+  - [ ] Upload base models
+  - [ ] Upload loras from early checkpoints
+  - [ ] Notebook to do inference without test-time fine-tuning (I believe it already exists)
