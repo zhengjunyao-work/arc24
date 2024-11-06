@@ -358,4 +358,4 @@ that we have to go the other direction, try with bigger models instead.
 - [x] Make SmolLM great again, do multiple short trainings with different learning rate schedules
 - [x] ~~Does it help to pretrain SmolLM-20k model on text?~~ Cancelled because SmolLM2 was released.
   - [x] Datasets for long context fine-tuning. https://huggingface.co/blog/wenbopan/long-context-fine-tuning#long-text-data
-- [ ] Check the problem of dtype on Kaggle. Is `float32` or `bfloat16` slower on Kaggle?
+- [x] Check the problem of dtype on Kaggle. Is `float32` or `bfloat16` slower on Kaggle? No problem was found.
