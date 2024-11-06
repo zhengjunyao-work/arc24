@@ -40,15 +40,15 @@ export WANDB_API_KEY=
 
 accelerate launch --num_processes ${gpus} --num_machines 1 --mixed_precision bf16 --multi_gpu \
 /root/code/arc24/scripts/fine-tuning.py \
---n_gpus ${gpus}8 \
+--n_gpus ${gpus} \
 --batch_size ${batch_size} \
 --per_device_train_batch_size ${per_device_train_batch_size} \
---output_dir /root/models/20241106_debug_training_speed/${gpus}XA100_bs${batch_size}_pdtbs${per_device_train_batch_size}_${steps}steps_$(basename $model_path)
+--output_dir /root/models/20241106_debug_training_speed/${gpus}XA100_bs${batch_size}_pdtbs${per_device_train_batch_size}_${steps}steps_$(basename $model_path) \
 --max_steps ${steps} \
 --model_path ${model_path} \
 --lora_r 128 \
 --device_map None \
---verbose \
+--no-verbose \
 --max_seq_len 8192 \
 --learning_rate 5e-5 \
 --train_datasets /root/code/arc24/data/original_data/arc-agi_training_challenges.json output-from-examples-v1 \
@@ -59,7 +59,33 @@ accelerate launch --num_processes ${gpus} --num_machines 1 --mixed_precision bf1
 --warmup_ratio 1e-1
 ```
 
+1. Copy all the data
+
+```bash
+cd /root/code/arc24/data/barc
+wget https://huggingface.co/datasets/barc0/100k-gpt4-description-gpt4omini-code_generated_problems/resolve/main/100k-gpt4-description-gpt4omini-code_generated_problems.jsonl?download=true -O 100k-gpt4-description-gpt4omini-code_generated_problems.jsonl
+wget https://huggingface.co/datasets/barc0/100k-gpt4omini-description-gpt4omini-code_generated_problems/resolve/main/100k_gpt4o-mini_generated_problems.jsonl?download=true -O 100k_gpt4o-mini_generated_problems.jsonl
+wget https://huggingface.co/datasets/barc0/200k_HEAVY_gpt4o-description-gpt4omini-code_generated_problems/resolve/main/data_100k.jsonl?download=true -O data_100k.jsonl
+wget https://huggingface.co/datasets/barc0/200k_HEAVY_gpt4o-description-gpt4omini-code_generated_problems/resolve/main/data_suggestfunction_100k.jsonl?download=true -O data_suggestfunction_100k.jsonl
+```
+
+2. Run the final training
+
+### Train bigger models
+
+It might be worth to train bigger models. I already studied the improvements of using bigger models on [iteration 20](Iteration_20_bigger_models.md).
+Also on [iteration 46](Iteration_46_revisit_small_llms.md) I have seen that using smaller models produced
+worse results even when training the models for longer.
+
+Now that I have a model that can select predictions, it might be worth to use bigger models even when I
+cannot do test-time fine-tuning on them.
+
 ## Results
+
+### Training speed
+
+I have done some initial training speed experiments to verify that the machines work well. I haven't seen
+any speed improvement by increasing the batch size or increasing the per device train batch size.
 
 ## Conclusion
 
