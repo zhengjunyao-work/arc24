@@ -174,7 +174,18 @@ This has great potential to improve the LB score.
 
 #### Scale runtime
 
-TODO: what if I scale the runtime?
+| n_matches per round | top_1 accuracy | top_2 accuracy | runtime (s) |
+|---------------------|----------------|----------------|-------------|
+| 8                   | 65.70%         | 80.60%         | 873         |
+| 32                  | 65.70%         | 83.20%         | 1101        |
+| 32                  | 69.40%         | 79.90%         | 1101        |
+| 64                  | 69.80%         | 82.80%         | 1658        |
+| 128                 | 70.90%         | 82.10%         | 3064        |
+| 256                 | 73.50%         | 82.10%         | 6141        |
+| 512                 | 71.30%         | 81.00%         | 12175       |
+
+There is too much uncertainty in the metrics to see a clear trend, but using more compute seems to
+lead to more accuracy.
 
 #### Different models
 
@@ -201,8 +212,6 @@ the outputs and the inputs for the ARC tasks. So Omni-ARC approach seems to be w
 I have created a new [notebook](https://www.kaggle.com/code/ironbar/2020-solution-script-prediction-selection?scriptVersionId=205391943) to see if
 I can improve the selection of 2020 solution predictions.
 
-TODO: 2020 solution, combined solution, all in 1.
-
 #### 2020 solution
 
 First attempts get scores of 20 and 21.5, which implies a top_1 accuracy of 76% and 82% respectively.
@@ -213,6 +222,8 @@ The drawback is that is not as a good as the [proof of concept of the 2020 solut
 Maybe is better to do just use the previous 2020 prediction selection which scored 24.
 
 #### Full system
+
+TODO:
 
 ## Conclusion
 
