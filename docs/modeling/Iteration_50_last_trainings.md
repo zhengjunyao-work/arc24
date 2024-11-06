@@ -59,9 +59,20 @@ accelerate launch --num_processes ${gpus} --num_machines 1 --mixed_precision bf1
 --warmup_ratio 1e-1
 ```
 
-1. Copy all the data
+1. Copy extra data
 
 ```bash
+export machine_ip=94.156.8.181
+export machine_ip=94.156.8.119
+scp -P 50022 /mnt/hdd0/Kaggle/arc24/data/verifier/evaluation_v0.json root@${machine_ip}:~/code/arc24/data/verifier
+scp -P 50022 /mnt/hdd0/Kaggle/arc24/data/verifier/training_v1.json  root@${machine_ip}:~/code/arc24/data/verifier
+scp -P 50022 /mnt/hdd0/Kaggle/arc24/data/rearc/v2/re-arc.json root@${machine_ip}:~/code/arc24/data/external_data
+```
+
+1. Download barc datasets
+
+```bash
+mkdir /root/code/arc24/data/barc
 cd /root/code/arc24/data/barc
 wget https://huggingface.co/datasets/barc0/100k-gpt4-description-gpt4omini-code_generated_problems/resolve/main/100k-gpt4-description-gpt4omini-code_generated_problems.jsonl?download=true -O 100k-gpt4-description-gpt4omini-code_generated_problems.jsonl
 wget https://huggingface.co/datasets/barc0/100k-gpt4omini-description-gpt4omini-code_generated_problems/resolve/main/100k_gpt4o-mini_generated_problems.jsonl?download=true -O 100k_gpt4o-mini_generated_problems.jsonl
@@ -69,7 +80,68 @@ wget https://huggingface.co/datasets/barc0/200k_HEAVY_gpt4o-description-gpt4omin
 wget https://huggingface.co/datasets/barc0/200k_HEAVY_gpt4o-description-gpt4omini-code_generated_problems/resolve/main/data_suggestfunction_100k.jsonl?download=true -O data_suggestfunction_100k.jsonl
 ```
 
-2. Run the final training
+1. Install packages: `apt install screen nvtop htop rsync`
+1. Run the final training:
+
+```bash
+export model_path=Qwen/Qwen2.5-1.5B-Instruct
+export learning_rate=5e-5
+export lora_r=128
+export gpus=8
+export batch_size=16
+export steps=200000
+export per_device_train_batch_size=1
+export max_seq_len=8192
+export WANDB_API_KEY=
+
+accelerate launch --num_processes ${gpus} --num_machines 1 --mixed_precision bf16 --multi_gpu \
+/root/code/arc24/scripts/fine-tuning.py \
+--n_gpus ${gpus} \
+--batch_size ${batch_size} \
+--per_device_train_batch_size ${per_device_train_batch_size} \
+--output_dir /root/models/20241106_final_training/$(basename $model_path)_lora${lora_r}_lr${learning_rate}_${steps}steps_${gpus}XA100_bs${batch_size}_pdtbs${per_device_train_batch_size}_msql${max_seq_len} \
+--max_steps ${steps} \
+--model_path ${model_path} \
+--lora_r ${lora_r} \
+--device_map None \
+--no-verbose \
+--max_seq_len ${max_seq_len} \
+--learning_rate ${learning_rate} \
+--train_datasets barc-200-20-/root/code/arc24/data/barc/100k-gpt4-description-gpt4omini-code_generated_problems.jsonl output-from-examples-v1 \
+--train_datasets barc-200-20-/root/code/arc24/data/barc/100k_gpt4o-mini_generated_problems.jsonl output-from-examples-v1 \
+--train_datasets barc-200-20-/root/code/arc24/data/barc/data_100k.jsonl output-from-examples-v1 \
+--train_datasets barc-200-20-/root/code/arc24/data/barc/data_suggestfunction_100k.jsonl output-from-examples-v1 \
+--train_datasets /root/code/arc24/data/verifier/training_v1.json select-output-from-examples-v0 \
+--train_datasets /root/code/arc24/data/verifier/training_v1.json verify-output-from-examples-v0 \
+--train_datasets /root/code/arc24/data/verifier/evaluation_v0.json select-output-from-examples-v0 \
+--train_datasets /root/code/arc24/data/verifier/evaluation_v0.json verify-output-from-examples-v0 \
+--train_datasets /root/code/arc24/data/original_data/arc-agi_training_challenges.json output-from-examples-v1 \
+--train_datasets /root/code/arc24/data/original_data/arc-agi_evaluation_challenges.json output-from-examples-v1 \
+--train_datasets /root/code/arc24/data/external_data/re-arc.json output-from-examples-v1 \
+--train_datasets /root/code/arc24/data/external_data/kaggle.json output-from-examples-v1  \
+--train_datasets /root/code/arc24/data/external_data/pqa-dataset-1k.json output-from-examples-v1  \
+--train_datasets /root/code/arc24/data/external_data/neoeye_tama.json output-from-examples-v1  \
+--train_datasets /root/code/arc24/data/external_data/MINI-ARC.json output-from-examples-v1  \
+--train_datasets /root/code/arc24/data/original_data/arc-agi_training_challenges.json input-from-inputs-v0 \
+--train_datasets /root/code/arc24/data/original_data/arc-agi_evaluation_challenges.json input-from-inputs-v0 \
+--train_datasets /root/code/arc24/data/external_data/re-arc.json input-from-inputs-v0 \
+--train_datasets /root/code/arc24/data/external_data/kaggle.json input-from-inputs-v0  \
+--train_datasets /root/code/arc24/data/external_data/pqa-dataset-1k.json input-from-inputs-v0  \
+--train_datasets /root/code/arc24/data/external_data/neoeye_tama.json input-from-inputs-v0  \
+--train_datasets /root/code/arc24/data/external_data/MINI-ARC.json input-from-inputs-v0  \
+--val_dataset /root/code/arc24/data/original_data/arc-agi_evaluation_challenges.json output-from-examples-v1 \
+--remove_train_samples_to_fit_max_seq_len \
+--save_steps 500 \
+--eval_steps 5000000 \
+--warmup_ratio 2e-2
+```
+
+### Syncronize checkpoints
+
+```bash
+for machine_ip in 94.156.8.181 94.156.8.119; do \
+rsync -r -avP -e "ssh -i ~/.ssh/id_rsa.pub -p 50022" root@${machine_ip}:~/models/20241106_final_training/ /mnt/hdd0/Kaggle/arc24/models/20241106_final_training/; done
+```
 
 ### Train bigger models
 
@@ -93,4 +165,4 @@ any speed improvement by increasing the batch size or increasing the per device 
 
 ## TODO
 
-- [ ]
+- [ ] How to sync checkpoints between the servers and my machine?
