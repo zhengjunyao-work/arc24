@@ -178,7 +178,14 @@ TODO: what if I scale the runtime?
 
 #### Different models
 
-TODO: try different models, (from the previous iteration)
+| model                   | training tasks | top 1 accuracy | top 2 accuracy |
+|-------------------------|----------------|----------------|----------------|
+| Qwen2-0.5B              | 2              | 69.4%          | 79.9%          |
+| Qwen2.5-0.5B            | 4              | 70.9%          | 82.1%          |
+| NanoLM-0.3B-Instruct-v2 | 4              | 54.5%          | 69.4%          |
+
+The table shows that we can achieve similar results when training a model to do more tasks. It also
+shows that smaller models give worse results.
 
 ### Can I achieve perfect accuracy if training on the evaluation set?
 
