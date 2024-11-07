@@ -140,10 +140,24 @@ accelerate launch --num_processes ${gpus} --num_machines 1 --mixed_precision bf1
 ### Syncronize checkpoints
 
 ```bash
-for machine_ip in 94.156.8.181 94.156.8.119; do \
-rsync -r -avP -e "ssh -i ~/.ssh/id_rsa.pub -p 50022" root@${machine_ip}:~/models/20241106_final_training/ /mnt/hdd0/Kaggle/arc24/models/20241106_final_training/; done
-for machine_ip in 192.222.52.72; do \
-rsync -r -avP -e "ssh -i ~/.ssh/id_rsa.pub" ubuntu@${machine_ip}:~/models/20241106_final_training/ /mnt/hdd0/Kaggle/arc24/models/20241106_final_training/; done
+while true; do
+    for machine_ip in 94.156.8.181 94.156.8.119; do
+        rsync -r -avP -e "ssh -i ~/.ssh/id_rsa.pub -p 50022" root@${machine_ip}:~/models/20241106_final_training/ /mnt/hdd0/Kaggle/arc24/models/20241106_final_training/
+    done
+    for machine_ip in 192.222.52.72; do
+        rsync -r -avP -e "ssh -i ~/.ssh/id_rsa.pub" ubuntu@${machine_ip}:~/models/20241106_final_training/ /mnt/hdd0/Kaggle/arc24/models/20241106_final_training/
+    done
+    sleep 1h
+done
+
+
+
+while true; do
+    for machine_ip in 94.156.8.181 94.156.8.119; do
+        rsync -r -avP -e "ssh -i ~/.ssh/id_rsa.pub -p 50022" root@${machine_ip}:~/models/20241106_final_training/ /mnt/hdd0/Kaggle/arc24/models/20241106_final_training/
+    done
+    sleep 1h
+done
 ```
 
 ### Train bigger models
@@ -166,6 +180,51 @@ pip install git+https://github.com/NVIDIA/TransformerEngine.git@stable
 
 I have not been able to install the backends required for fp8 training.
 
+### Plan the final 12 submissions
+
+I'm not sure if I will have a Qwen2.5-7B model, it depends on the availability of a 3rd training machine
+by compute strong and being able to train the model successfully.
+
+I have to answer the following questions:
+
+- How good are the new models at selecting predictions? (and how fast also) Answering this question
+  will allow to better choose the combination methods for the predictions.
+- Do the new models improve the LB score when using the classic test-time fine-tuning submission?
+- Is it worth to make predictions with the model without test-time fine-tuning? That would be fast and
+  might solve some additional tasks (8 minutes to do 16 predictions per task using Qwen2.5-0.5B).
+- Could I do test-time fine-tuning with the 1.5B model? I could test this in the Kaggle notebook without submission.
+
+There are 3 sources of predictions:
+
+1. Test-time fine-tuned model
+2. Frozen model
+3. 2020 solution
+
+And there are 4 ways of combining the predictions:
+
+1. Selection using a model
+2. Voting
+3. Combination of predictions (first attempt from one submission and the second from other submission)
+4. Concatenation
+
+The submissions that I can create are the combination of this two variables.
+
+#### Thursday 7 November
+
+I'm going to have available Qwen2.5-0.5B trained for 200k steps.
+
+- How good is the new model at selecting 2020 predictions
+- Classic test-time fine-tuning prediction with the model
+- Add predictions without test-time fine-tuning
+
+#### Friday 8
+
+I'm going to have available Qwen2.5-0.5B trained for 400k steps and Qwen2.5-1.5B trained for 200k steps.
+
+#### Saturday 9
+
+#### Sunday 10
+
 ## Results
 
 ### Training speed
@@ -182,6 +241,34 @@ any speed improvement by increasing the batch size or increasing the per device 
 
 The H100 might be a good idea for `Qwen2.5-7B-Instruct`.
 
+### Qwen2.5-7B-Instruct is not showing better results than Qwen2.5-1.5B-Instruct
+
+![training metrics](res/2024-11-07-06-44-53.png)
+
+We show a great improvement of `Qwen2.5-1.5B-Instruct` over `Qwen2.5-0.5B-Instruct` on training loss.
+However we don't observe the same improvement with `Qwen2.5-7B-Instruct`. I have tried with 3 different
+learning rates: 1e-5, 2e-5, 5e-5 (diverged)
+
+| model parameters | LoRA parameters for rank 128 |
+|------------------|------------------------------|
+| 0.5B             | 17M                          |
+| 1.5B             | 35M                          |
+| 7B               | 80M                          |
+
+We can see that the trainable number of parameters is different, but can it explain the different training dynamics?
+
+### Effect of the number of predictions
+
+I'm reusing data from [iteration 30](Iteration_30_optimal_number_predictions.md) to create the plot below.
+
+![number of predictions](res/2024-11-07-07-57-38.png)
+
+The plot shows that the `pass_n` metric increases linearly with the logarithmic of the number of predictions.
+However voting improves with a much lower slope. This is likely due to the fact that the solutions that are
+found when using a higher number of predictions do not reach the needed majority of the votes.
+
+¿Maybe a selection model could scale better? So far I have only used the selection model for 32 predictions.
+
 ## Conclusion
 
 ## Next steps
@@ -189,7 +276,13 @@ The H100 might be a good idea for `Qwen2.5-7B-Instruct`.
 ## TODO
 
 - [x] How to sync checkpoints between the servers and my machine?
-- [ ] Verify that I can use the bigger models in Kaggle
-  - [ ] Upload base models
-  - [ ] Upload loras from early checkpoints
-  - [ ] Notebook to do inference without test-time fine-tuning (I believe it already exists)
+- [x] Verify that I can use the bigger models in Kaggle
+  - [x] Upload base models
+  - [x] Upload loras from early checkpoints
+  - [x] Notebook to do inference without test-time fine-tuning (I believe it already exists)
+- [ ] train Qwen2.5-7B-Instruct with lora_r=64
+- 13:00 Nov 10 would be the last time to submit a model that runs for 12h.
+- [ ] Plan the last 12 submissions
+- [ ] Voting and selection dynamics could be different after test-time fine-tuning
+- [ ] Could I do test-time fine-tuning with the 1.5B model?
+- [ ] Create a notebook for triple ensemble
