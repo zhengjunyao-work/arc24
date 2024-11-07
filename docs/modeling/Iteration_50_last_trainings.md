@@ -225,6 +225,8 @@ I'm going to have available Qwen2.5-0.5B trained for 400k steps and Qwen2.5-1.5B
 
 #### Sunday 10
 
+13:00 is the last time to submit a system that takes 12 hours to create the submission
+
 ## Results
 
 ### Training speed
@@ -281,7 +283,6 @@ found when using a higher number of predictions do not reach the needed majority
   - [x] Upload loras from early checkpoints
   - [x] Notebook to do inference without test-time fine-tuning (I believe it already exists)
 - [ ] train Qwen2.5-7B-Instruct with lora_r=64
-- 13:00 Nov 10 would be the last time to submit a model that runs for 12h.
 - [ ] Plan the last 12 submissions
 - [ ] Voting and selection dynamics could be different after test-time fine-tuning
 - [ ] Could I do test-time fine-tuning with the 1.5B model?
