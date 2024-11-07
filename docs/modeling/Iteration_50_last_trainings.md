@@ -64,6 +64,7 @@ accelerate launch --num_processes ${gpus} --num_machines 1 --mixed_precision bf1
 ```bash
 export machine_ip=94.156.8.181
 export machine_ip=94.156.8.119
+export machine_ip=94.156.8.239
 scp -P 50022 /mnt/hdd0/Kaggle/arc24/data/verifier/evaluation_v0.json root@${machine_ip}:~/code/arc24/data/verifier
 scp -P 50022 /mnt/hdd0/Kaggle/arc24/data/verifier/training_v1.json  root@${machine_ip}:~/code/arc24/data/verifier
 scp -P 50022 /mnt/hdd0/Kaggle/arc24/data/rearc/v2/re-arc.json root@${machine_ip}:~/code/arc24/data/external_data
@@ -153,7 +154,7 @@ done
 
 
 while true; do
-    for machine_ip in 94.156.8.181 94.156.8.119; do
+    for machine_ip in 94.156.8.181 94.156.8.119 94.156.8.239; do
         rsync -r -avP -e "ssh -i ~/.ssh/id_rsa.pub -p 50022" root@${machine_ip}:~/models/20241106_final_training/ /mnt/hdd0/Kaggle/arc24/models/20241106_final_training/
     done
     sleep 1h
@@ -213,7 +214,9 @@ The submissions that I can create are the combination of this two variables.
 
 I'm going to have available Qwen2.5-0.5B trained for 200k steps.
 
-- How good is the new model at selecting 2020 predictions
+- Classic test-time fine-tuning submission.
+
+- How good is the new model at selecting 2020 predictions? 
 - Classic test-time fine-tuning prediction with the model
 - Add predictions without test-time fine-tuning
 
@@ -226,6 +229,20 @@ I'm going to have available Qwen2.5-0.5B trained for 400k steps and Qwen2.5-1.5B
 #### Sunday 10
 
 13:00 is the last time to submit a system that takes 12 hours to create the submission
+
+### Test-time fine-tuning with Qwen2.5-1.5B
+
+On this [notebook](https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=205771369) I have verified that I can do test-time fine-tuning with Qwen2.5-1.5B.
+
+I had to decrease the `max_seq_len` from 5120 to 3584 to avoid OOM errors.
+
+- Fine-tuning took 2.6 minutes per task for 100 steps
+- Inference took 1.2 minutes per task to do 32 predictions
+
+Under that conditions a submission would take around 6 hours. It seems we have margin to increase either
+the training steps or the number of predictions.
+
+TODO: experiment with bigger steps and predictions
 
 ## Results
 
@@ -282,8 +299,8 @@ found when using a higher number of predictions do not reach the needed majority
   - [x] Upload base models
   - [x] Upload loras from early checkpoints
   - [x] Notebook to do inference without test-time fine-tuning (I believe it already exists)
-- [ ] train Qwen2.5-7B-Instruct with lora_r=64
+- [x] train Qwen2.5-7B-Instruct with lora_r=64
 - [ ] Plan the last 12 submissions
 - [ ] Voting and selection dynamics could be different after test-time fine-tuning
 - [ ] Could I do test-time fine-tuning with the 1.5B model?
-- [ ] Create a notebook for triple ensemble
+- [x] Create a notebook for triple ensemble
