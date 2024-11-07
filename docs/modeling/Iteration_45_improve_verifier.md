@@ -293,6 +293,9 @@ I have not been able to improve the accuracy of using a prediction verifier. It 
 
 - Could the verifier benefit from test-time fine-tuning?
 - Could I improve the selection of predictions by using selection instead of verifying? I might create a select script by tweaking the verify script.
+- If I define some correctness metric over the predictions, that could open the door to a much more
+  training dataset that won't be using the correct prediction over an over. It is unclear if this
+  would work better.
 
 ## TODO
 
