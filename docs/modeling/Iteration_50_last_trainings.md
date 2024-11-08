@@ -242,7 +242,18 @@ I had to decrease the `max_seq_len` from 5120 to 3584 to avoid OOM errors.
 Under that conditions a submission would take around 6 hours. It seems we have margin to increase either
 the training steps or the number of predictions.
 
-TODO: experiment with bigger steps and predictions
+Experiment with bigger steps and predictions:
+
+- 64 predictions -> 1.5 minutes per tasks
+- 200 steps -> 4.3 minutes per task
+
+Which learning rate to use? I can't use the evaluation set to tune the learning rate. However I can
+have a look at the Qwen2.5-0.5B models. We trained the models with learning rate between 5e-5 and 1e-4.
+And the test-time fine-tuning learning rates were 4e-5 and 8e-5 most frequently. Thus we can see that
+we used almost the exact same learning rate despite using a batch size of 1 for test-time fine-tuning.
+
+The Qwen2.5-1.5B was trained with a learning rate of 5e-5. A conservative learning rate for test-time
+fine-tuning would be 1e-5. If it works we could try increasing it to 2e-5.
 
 ## Results
 

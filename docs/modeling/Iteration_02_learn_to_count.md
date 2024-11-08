@@ -106,7 +106,7 @@ I have generated the grids following a kind of curriculum learning approach: the
 ### Fine-tuning
 
 On a first step I could try doing some parameter efficient fine-tuning such as LoRA or DoRA.
-But I believe I should also try with a full fine-tuning which was done by [Numina team]((https://www.kaggle.com/competitions/ai-mathematical-olympiad-prize/discussion/519303))
+But I believe I should also try with a full fine-tuning which was done by [Numina team](https://www.kaggle.com/competitions/ai-mathematical-olympiad-prize/discussion/519303)
 on the AIMO competition.
 
 The training data should be masked so that the model only has to learn the answers to the responses. I believe
