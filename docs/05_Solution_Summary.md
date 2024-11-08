@@ -79,9 +79,17 @@ _Omni-ARC, a single model that does all the ARC-related tasks (and it has a very
 
 ## Acknowledgments
 
-- Veridas
-- Strong Compute
-- Qwen
-- Weigths and bias
-- Lambdalabs
-- Family
+- [Veridas](https://veridas.com/en/) for providing me access to its compute cluster during all the challenge. Most of the experiments were done on Veridas cluster, using A6000 GPUs with 48GB of VRAM.
+- [Strong Compute](https://strongcompute.com/) for providing compute for training the last models for
+  the challenge. They gave me access to A100 GPUs with 80GB of VRAM, which allowed me to train bigger models.
+- [Qwen](https://huggingface.co/Qwen) for training and releasing a family of very capable LLMs with
+  many different sizes.
+- [Weigths and bias](https://wandb.ai/home) I used it to track all the experiments in a single place.
+  It's an amazing tool and free for individuals.
+- [Lambdalabs](https://lambdalabs.com/). I did some short (but expensive) experiments on the last
+  week of the challenge in Lambdalabs. They provide me with some free credits that partially covered
+  this experiments.
+- ARC team. It's been a pleasure to work in this super interesting challenge for a few months. Thanks
+  for creating the challenge and specially to Chollet for all his wisdom and teachings.
+- Family. I couldn't have done all this work without the help of my wife and the appreciation from
+  my children. My family followed my progress during the challenge and cheered me up when I advanced in the leaderboard.
