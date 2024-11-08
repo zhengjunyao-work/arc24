@@ -78,6 +78,84 @@ The solution on a nutshell:
 
 ### Training
 
+#### Model
+
+For the last trainings I have used `Qwen2.5` LLM and I have trained three different model sizes: 0.5B, 1.5B and 7B. During the challenge I did most of the experiments with the 0.5B model. Choosing the right model size is important
+because the submission time is limited and the VRAM of the submission machines is just 2x16GB. If we
+want to do test-time fine-tuning we have to use a small model that can be fine-tuned with enough
+speed on Kaggle's machines.
+
+I used LoRA to fine-tune the models because fine-tuning the whole model did not show significant improvements.
+Moreover at test time it was beneficial to use the pre-trained LoRA adapter.
+
+#### Data
+
+I used the following datasets for training:
+
+- The original [ARC dataset](https://www.kaggle.com/competitions/arc-prize-2024/data)
+- Michael Hodel's [RE-ARC dataset](https://github.com/michaelhodel/re-arc)
+- Recently released [BARC dataset](https://huggingface.co/collections/barc0/synthetic-arc-dataset-6725aa6031376d3bacc34f76)
+- [PQA dataset](https://github.com/neoneye/arc-dataset-collection/tree/main/dataset/PQA)
+- [Tama dataset](https://github.com/neoneye/arc-dataset-tama)
+- [Mini-ARC](https://github.com/ksb21ST/Mini-ARC)
+- [nosound's 9 hand crafted ARC tasks](https://www.kaggle.com/datasets/zaharch/arc-nosound-tasks)
+- [Andy Penrose's 5 tasks](https://www.kaggle.com/datasets/andypenrose/extra-arc-tasks-for-testing)
+
+#### Data augmentation
+
+The following augmentations were applied randomly to all the input and outputs of the problem:
+
+- Rotations
+- Flips
+- Color changes
+- Swap between train and test examples
+
+#### Problem augmentation
+
+In addition to the data augmentation I also did problem augmentation by applying a transformation
+only to the inputs or to the outputs. This transformation created new ARC problems by composing the
+original ARC transformation with randomly new ones.
+
+These new transformations needed to be reversible, otherwise the new generated problems could not
+be solvable. I used the following additional transformations:
+
+- Rotations and/or flips
+- Padding the image
+- Upscale
+- Mirror
+
+TODO: image showing an augmented problem
+
+#### Training tasks
+
+On the final trainings I used four of the Omni-arc tasks:
+
+- `examples + input -> output`. The original task of the ARC dataset.
+- `inputs -> input`. Generating new inputs requires to understand the distribution of the grids. It could also be done with the outputs, that should also follow some distribution.
+- `examples + input + output -> is the output correct?`. It is possible to train the model to verify wether a proposed output is correct.
+- `examples + input + output options-> select the correct output`. We can train a model to select the correct output between multiple options.
+
+I did not use any of the code tasks because I wasn't able to get good results when predicting code.
+I believe that with more time that approach could work, as shown in [Getting 50% (SoTA) on ARC-AGI with GPT-4o](https://redwoodresearch.substack.com/p/getting-50-sota-on-arc-agi-with-gpt) or [Combining Induction and Transduction for Abstract Reasoning](https://openreview.net/forum?id=UmdotAAVDe).
+
+#### Training hyperparameters
+
+For an example of the parametrization of the last training you can go [here](./modeling/Iteration_50_last_trainings.md#steps-to-train-the-model).
+The most relevant parameters were:
+
+- LoRA rank: 128 for the 0.5B and 1.5B models, 64 for the 7B model
+- Learning rate: 5e-5, with a linear schedule and a warmup ratio of 2e-2
+- Batch size: 16 (with 1 batch size per device and 2 accumulation steps)
+- Training steps: 2e5 for the 0.5B and 1.5B models, 1e5 for the 7B model
+- Trained on 8xA100 GPUs
+
+Bigger models showed higher efficiency when learning, they reached a lower training loss for the same
+number of training steps.
+
+TODO: plot showing efficiency
+
+I used huggingface's trl and accelerate libraries for the training.
+
 ### Test-time fine-tuning
 
 ### Inference
