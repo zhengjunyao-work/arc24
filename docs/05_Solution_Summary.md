@@ -95,8 +95,8 @@ I used the following datasets for training:
 - The original [ARC dataset](https://www.kaggle.com/competitions/arc-prize-2024/data)
 - Michael Hodel's [RE-ARC dataset](https://github.com/michaelhodel/re-arc)
 - Recently released [BARC dataset](https://huggingface.co/collections/barc0/synthetic-arc-dataset-6725aa6031376d3bacc34f76)
-- [PQA dataset](https://github.com/neoneye/arc-dataset-collection/tree/main/dataset/PQA)
-- [Tama dataset](https://github.com/neoneye/arc-dataset-tama)
+- Simon Strandgaard's [PQA dataset](https://github.com/neoneye/arc-dataset-collection/tree/main/dataset/PQA)
+- Simon Strandgaard's [Tama dataset](https://github.com/neoneye/arc-dataset-tama)
 - [Mini-ARC](https://github.com/ksb21ST/Mini-ARC)
 - [nosound's 9 hand crafted ARC tasks](https://www.kaggle.com/datasets/zaharch/arc-nosound-tasks)
 - [Andy Penrose's 5 tasks](https://www.kaggle.com/datasets/andypenrose/extra-arc-tasks-for-testing)
@@ -147,6 +147,7 @@ The most relevant parameters were:
 - Learning rate: 5e-5, with a linear schedule and a warmup ratio of 2e-2
 - Batch size: 16 (with 1 batch size per device and 2 accumulation steps)
 - Training steps: 2e5 for the 0.5B and 1.5B models, 1e5 for the 7B model
+- Max sequence length: 8196
 - Trained on 8xA100 GPUs
 
 Bigger models showed higher efficiency when learning, they reached a lower training loss for the same
@@ -158,13 +159,38 @@ I used huggingface's trl and accelerate libraries for the training.
 
 ### Test-time fine-tuning
 
+Fine-tuning a model on ARC tasks is not enough to do well on the private test set. By applying test-time fine-tuning we could improve the number of solved problems from 11 to 33 for one of the models that I trained along the challenge.
+
+This is my interpretation of the test-time fine-tuning:
+
+- For each test problem that had `n` train samples, I fine-tuned the model using `n-1` train samples and
+  using the remaining sample as a test sample. The selection of the test sample was done randomly on the fly during training.
+- I used [data augmentation](#data-augmentation) just like in the previous training
+- I fine-tuned a model for each of the test problems, so 100 fine-tuned models were generated on each submission.
+- I used batch size 1 in the test-time fine-tuning to be able to learn the new problems as fast as possible.
+- The model was fine-tuned for ~300 steps on each problem
+- A slightly lower learning rate was used for test-time fine-tuning (TODO:)
+
 ### Inference
+
+Data augmentation was applied also at inference, and the data augmentation was reverted from the prediction to get the original output. 96 predictions were done for each problem and voting was used to select the most
+promising predictions.
+
+VLLM was used to generate the predictions. Each fine-tuned model was used to generate predictions for its problem.
 
 ### Ensemble
 
+I ensembled my model predictions with the [2020 solution](https://www.kaggle.com/code/mehrankazeminia/3-arc24-developed-2020-winning-solutions). Since the 2020 solution only requires CPU, I managed to run
+it on the background while I used the GPU for fine-tuning and inference with my model. I only had to
+be careful with the RAM usage because both jobs had to share the same memory.
+
 ## Learnings
 
+### Prompting is not enough, test-time inference is needed
+
 ## Things that didn't worked
+
+### Predicting code to solve ARC tasks
 
 ## Future steps
 
