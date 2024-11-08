@@ -3,6 +3,6 @@ nav:
     - 02_Data_Understanding.md
     - 03_State_of_the_art.md
     - modeling
+    - 05_Solution_Summary.md
     - utils
-    # - 05_Solution_Summary.md
     # - 06_Winning_Model_Documentation.md
