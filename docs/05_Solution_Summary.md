@@ -69,6 +69,21 @@ _Omni-ARC, a single model that does all the ARC-related tasks (and it has a very
 
 ## Solution
 
+The solution on a nutshell:
+
+1. Take an LLM and fine-tune it on different ARC-related tasks
+2. Do test-time fine-tuning with the private test data
+3. Inference
+4. Ensemble with 2020 solution
+
+### Training
+
+### Test-time fine-tuning
+
+### Inference
+
+### Ensemble
+
 ## Learnings
 
 ## Things that didn't worked
@@ -76,6 +91,11 @@ _Omni-ARC, a single model that does all the ARC-related tasks (and it has a very
 ## Future steps
 
 - Buy an [Omni-man funko pop figure](https://amzn.eu/d/efqVvEh) to celebrate the prize.
+
+## Links
+
+- Repo
+- Notebooks
 
 ## Acknowledgments
 
