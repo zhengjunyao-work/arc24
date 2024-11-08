@@ -17,7 +17,7 @@ Try different configurations of training data and see how the validation loss is
 
 ### Create new train-val partition
 
-On the notebook [005_create_new_data_partititions](../../notebooks/005_create_new_data_partititions.ipynb) I have prepared a function
+On the notebook [005_create_new_data_partititions](https://github.com/ironbar/arc24/blob/main/notebooks/005_create_new_data_partititions.ipynb) I have prepared a function
 that given a random seed creates a new train-val partition. It will take 100 random eval tasks for validation and the rest for training.
 
 ### Prepare arc-like datasets for training
