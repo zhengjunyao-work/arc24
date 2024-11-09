@@ -393,7 +393,8 @@ def get_model(model_path, n_gpus, torch_dtype, device_map, use_4bit_quantization
     # print(model.hf_device_map)
     print_gpu_memory()
     if use_4bit_quantization:
-        model = prepare_model_for_kbit_training(model)
+        # QLoRA on Kaggle is 4 times slower than LoRA, I'm trying to disable gradient checkpointing
+        model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=False)
     return model
 
 
