@@ -8,6 +8,7 @@ class CFG:
     output_filepath: str = 'submission.json'
     # Model
     model_path: str = "/home/gbarbadillo/data/Qwen2-0.5B-arc"
+    adapter_path: Optional[str] = None
     max_model_len: int = 10240 #61000 for phi-3
     grid_encoder: str = 'GridShapeEncoder(RowNumberEncoder(MinimalGridEncoder()))'
     prompt_version: str = 'output-from-examples-v0'
@@ -30,6 +31,7 @@ class CFG:
 def parse_args():
     parser = argparse.ArgumentParser(description="Experiment Configuration")
     parser.add_argument('--model_path', type=str, help="Path to the model")
+    parser.add_argument('--adapter_path', type=str, help="Path to the LoRA adapter")
     parser.add_argument('--max_model_len', type=int, help="Maximum number of tokens in the model")
     parser.add_argument('--grid_encoder', type=str, help="Name of the grid encoder")
     parser.add_argument('--prompt_version', type=str, help="Prompt version")
@@ -55,6 +57,7 @@ from tqdm.auto import tqdm
 from itertools import islice, product
 
 from vllm import LLM, SamplingParams
+from vllm.lora.request import LoRARequest
 from transformers import AutoTokenizer, AutoConfig
 
 from arc24.data_augmentation import (
@@ -92,6 +95,7 @@ def inference_main():
                 disable_log_stats=True,
                 max_num_seqs=255, # default is supposed to be 256 I have used it to solve some weird illegal memory error
                 swap_space=cfg.swap_space, # CPU swap space size (GiB) per GPU, has great influence on RAM but I haven't noticed any performance difference
+                enable_lora=cfg.adapter_path is not None,
                 )
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_path)
     set_random_seed(cfg.random_seed)
@@ -102,7 +106,8 @@ def inference_main():
     if cfg.verbose: print_smallest_prompt(prompts)
 
     sampling_params = get_sampling_params(cfg.best_of, cfg.temperature, cfg.n, cfg.max_output_tokens)
-    outputs = generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=cfg.batch_size)
+    outputs = generate_outputs_with_batches(
+        llm, prompts, sampling_params, batch_size=cfg.batch_size, adapter_path=cfg.adapter_path)
     task_results = create_tasks_results(
         outputs=outputs, prompts_conf=prompts_conf, grid_encoder=grid_encoder,
         prompt_version=cfg.prompt_version, data=data, verbose=cfg.verbose)
@@ -158,13 +163,17 @@ def get_sampling_params(best_of, temperature, n, max_output_tokens):
     return sampling_params
 
 
-def generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=512):
+def generate_outputs_with_batches(llm, prompts, sampling_params, batch_size=512, adapter_path=None):
+    if adapter_path is None:
+        lora_request = None
+    else:
+        lora_request = LoRARequest(lora_name='lora', lora_int_id=1, lora_path=adapter_path)
     outputs = []
     logger.info(f'Generating outputs with batch_size={batch_size}, there are {len(prompts)} prompts')
     for i in tqdm(range(0, len(prompts), batch_size), desc='Generating outputs with batches', smoothing=0):
         batch = prompts[i:i+batch_size]
         if batch:
-            outputs += llm.generate(batch, sampling_params, use_tqdm=True)
+            outputs += llm.generate(batch, sampling_params, use_tqdm=True, lora_request=lora_request)
     return outputs
 
 
