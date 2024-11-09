@@ -278,6 +278,14 @@ My idea is to create a notebook for the 7B model, that only does test-time fine-
 and does inference with the frozen model for the grouped other 50% tasks. I'm not sure if this might
 work better than the smaller models but it is worth to try it.
 
+I have found that inference is extremely slow because I have to merge the heavy model with the lora
+adapter before using VLLM. I have tried modifying the inference script to support using LoRAs directly
+but VLLM does not support dora, and I have used it for training. This would imply that half of the
+submission time would go to inference (because it's taking 4 minutes to make 8 predictions per task)
+
+Thus I don't believe it is worth to use Qwen2.5-7B for test-time fine-tuning. I could use it in an ensemble
+without fine-tuning.
+
 ## Results
 
 ### Training speed
