@@ -525,9 +525,10 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
     while True:
         try:
             if len(prompt_lengths) >= log_prompt_length_every:
-                if verbose: print_prompt_length_percentiles(prompt_lengths, prefix='Training')
-                check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len)
+                temp_prompt_lengths = prompt_lengths.copy()
                 prompt_lengths = []
+                if verbose: print_prompt_length_percentiles(temp_prompt_lengths, prefix='Training')
+                check_ratio_of_prompts_above_max_seq_len(temp_prompt_lengths, max_seq_len)
             random.shuffle(task_ids)
             for task_id in task_ids:
                 sample_idx += 1
