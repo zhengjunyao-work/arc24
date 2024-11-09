@@ -212,19 +212,27 @@ The submissions that I can create are the combination of this two variables.
 
 #### Thursday 7 November
 
-I'm going to have available Qwen2.5-0.5B trained for 200k steps.
-
-- Classic test-time fine-tuning submission.
-
-- How good is the new model at selecting 2020 predictions? 
-- Classic test-time fine-tuning prediction with the model
-- Add predictions without test-time fine-tuning
+I'm going to have available Qwen2.5-0.5B trained for 200k steps. I have made a classic submission
+that scored 35 and two triple ensemble submission that scored 35 and 33.
 
 #### Friday 8
 
 I'm going to have available Qwen2.5-0.5B trained for 400k steps and Qwen2.5-1.5B trained for 200k steps.
 
+- Submission with Qwen2.5-0.5B and learning rate 4e-5: 38
+- Submission with Qwen2.5-1.5B and learning rate 1e-5: 35 (but I had an error on `max_seq_len`, so score might be higher. Also I had a timeout on another submission with Qwen2.5-1.5B)
+
 #### Saturday 9
+
+I have available a Qwen2.5-0.5B trained for 400k steps, Qwen2.5-1.5B trained for 300k steps and Qwen2.5-7B trained for 100k steps.
+
+- Submission with Qwen2.5-1.5B and learning rate 1e-5: ongoing
+- Submission with Qwen2.5-1.5B and learning rate 2e-5: ongoing
+- Submission with Qwen2.5-1.5B and learning rate 4e-5: 
+- Triple ensemble with Qwen2.5-7B:
+- Can I fine-tune Qwen2.5-7B?
+- More submissions with Qwen2.5-0.5B increasing the learning rate?
+- Something with prediction selection?
 
 #### Sunday 10
 
@@ -254,6 +262,17 @@ we used almost the exact same learning rate despite using a batch size of 1 for 
 
 The Qwen2.5-1.5B was trained with a learning rate of 5e-5. A conservative learning rate for test-time
 fine-tuning would be 1e-5. If it works we could try increasing it to 2e-5.
+
+### Test-time fine-tuning with Qwen2.5-7B
+
+Let's see if we can use test-time fine-tuning with Qwen2.5-7B.
+
+If I decrease the `max_seq_len` to 896 I can fine-tune on Kaggle machines, at a speed of around 2.45 seconds per sample.
+In those conditions I could only use around 50% of the tasks for training.
+
+If I use 4 bit quantization the speed slows down to around 11.5 seconds per sample. Then I have tried
+disabling gradient checkpointing and the speed increases to 7 seconds per sample. Is better but still
+very slow.
 
 ## Results
 

@@ -171,6 +171,9 @@ This is my interpretation of the test-time fine-tuning:
 - The model was fine-tuned for ~300 steps on each problem
 - A slightly lower learning rate was used for test-time fine-tuning (TODO:)
 
+TODO: why batch size 1 and model for each task
+TODO: ttft could also be applied to other tasks
+
 ### Inference
 
 Data augmentation was applied also at inference, and the data augmentation was reverted from the prediction to get the original output. 96 predictions were done for each problem and voting was used to select the most
