@@ -274,6 +274,10 @@ If I use 4 bit quantization the speed slows down to around 11.5 seconds per samp
 disabling gradient checkpointing and the speed increases to 7 seconds per sample. Is better but still
 very slow.
 
+My idea is to create a notebook for the 7B model, that only does test-time fine-tuning on the 50% smallest tasks
+and does inference with the frozen model for the grouped other 50% tasks. I'm not sure if this might
+work better than the smaller models but it is worth to try it.
+
 ## Results
 
 ### Training speed

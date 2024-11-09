@@ -502,7 +502,7 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
             logger.info(f'Creating omni-arc dataset with {n_tasks} tasks (real number of tasks is {len(omniarc_dataset)})')
             dataset = {f'omni-arc-{idx}|{key}|{prompt_version}': omniarc_dataset for key in range(n_tasks)}
         elif filepath.startswith('barc'):
-            # example: barc-400-5-filepath 
+            # example: barc-400-5-filepath
             n_tasks = int(filepath.split('-')[1])
             max_samples_per_task = int(filepath.split('-')[2])
             filepath = '-'.join(filepath.split('-')[3:])
@@ -578,6 +578,9 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                     yield {'text': prompt}
                 else:
                     logger.debug(f'Prompt was {prompt_length}>{max_seq_len} tokens for task {task_id}, skipping task')
+        except NotAvailableDataForTraining as e:
+            logger.error('There is no available data for training, stopping the generator')
+            raise e
         except Exception as e:
             consecutive_exceptions += 1
             logger.error(f"An error occurred when generating sample {sample_idx} (consecutive exception {consecutive_exceptions}/{max_consecutive_exceptions}): {e}")
@@ -653,11 +656,14 @@ def print_prompt_length_percentiles(prompt_lengths, prefix):
     print(f'{prefix} prompt length max: {max(prompt_lengths)}')
 
 
+class NotAvailableDataForTraining(Exception):
+    pass
+
 def check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len, max_allowed_ratio=0.9):
     ratio = np.mean(np.array(prompt_lengths) > max_seq_len)
     logger.info(f'Ratio of prompts above max_seq_len: {ratio:.1%}')
     if ratio > max_allowed_ratio:
-        raise ValueError(f'Too many prompts above max_seq_len: {ratio:.1%}')
+        raise NotAvailableDataForTraining(f'Too many prompts above max_seq_len: {ratio:.1%}')
 
 # Train
 def get_data_collator(tokenizer):
