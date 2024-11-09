@@ -569,10 +569,10 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                         task, grid_encoder, tokenizer, max_seq_len, prompt_version=prompt_version)
                 prompt_lengths.append(prompt_length)
                 consecutive_exceptions = 0
-                if verbose and sample_idx == 1:
-                    logger.info(f'Printing the first training prompt: {task_id}')
-                    pretty_print_prompt(prompt)
                 if prompt is not None:
+                    if verbose and sample_idx == 1:
+                        logger.info(f'Printing the first training prompt: {task_id}')
+                        pretty_print_prompt(prompt)
                     yield {'text': prompt}
                 else:
                     logger.debug(f'Prompt was {prompt_length}>{max_seq_len} tokens for task {task_id}, skipping task')
