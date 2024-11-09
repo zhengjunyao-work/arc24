@@ -570,8 +570,8 @@ def random_prompt_generator(train_datasets, grid_encoder, tokenizer, max_seq_len
                     prompt, prompt_length = _create_prompt_smaller_than_max_seq_len(
                         task, grid_encoder, tokenizer, max_seq_len, prompt_version=prompt_version)
                 prompt_lengths.append(prompt_length)
-                consecutive_exceptions = 0
                 if prompt is not None:
+                    consecutive_exceptions = 0
                     if verbose and sample_idx == 1:
                         logger.info(f'Printing the first training prompt: {task_id}')
                         pretty_print_prompt(prompt)
