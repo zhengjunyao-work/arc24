@@ -652,7 +652,7 @@ def print_prompt_length_percentiles(prompt_lengths, prefix):
     print(f'{prefix} prompt length max: {max(prompt_lengths)}')
 
 
-def check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len, max_allowed_ratio=0.5):
+def check_ratio_of_prompts_above_max_seq_len(prompt_lengths, max_seq_len, max_allowed_ratio=0.9):
     ratio = np.mean(np.array(prompt_lengths) > max_seq_len)
     logger.info(f'Ratio of prompts above max_seq_len: {ratio:.1%}')
     if ratio > max_allowed_ratio:
