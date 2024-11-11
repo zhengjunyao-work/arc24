@@ -358,6 +358,25 @@ to the limited submission time.
 
 More information on [Iteration 47](modeling/Iteration_47_select_instead_of_verify.md) and [Iteration 45](modeling/Iteration_45_improve_verifier.md).
 
+### Solving the tasks using code did not worked for me
+
+I also tried to expand on the Omni-ARC approach by training the model to do the additional tasks:
+
+- `examples -> code`. This is the approach used by Ryan Greenblat with GPT-4o
+- `code + input -> output`. This is equivalent to the first task, but instead of giving examples as input, it gives the code definition of the problem.
+
+To do so I build a small domain specific language (DSL) and recreated 285 of the ARC training tasks
+with python code. This was a laborious process that took around 3 weeks.
+
+Unfortunately the model did not generalize well. It could only solve 5% of the evaluation tasks, and those
+tasks were very similar to the training tasks. On the private test set a lucky submission was able to
+solve 1 task.
+
+I believe this approach has great potential, but I had to change to other approaches because the end
+of the challenge was close and other teams were improving in the leaderboard.
+
+More info on [Iteration 26](modeling/Iteration_26_dawn_of_omni_arc.md), [Iteration 40](modeling/Iteration_40_try_coding_models.md) and [Iteration 42](modeling/Iteration_42_improve_omniarc.md).
+
 ### The quality of the datasets is relevant
 
 On the last weeks of the challenge I tried adding the [BARC datasets](https://huggingface.co/collections/barc0/synthetic-arc-dataset-6725aa6031376d3bacc34f76) to the training data. Surprisingly despite the enormous
