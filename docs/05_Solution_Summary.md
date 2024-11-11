@@ -29,17 +29,7 @@ Papers are about communicating your ideas clearly so that others can learn from 
 
 ## Abstract
 
-This paper presents my approach to the 2024 Abstraction and Reasoning Challenge. I have focused
-on the abstraction side of the challenge and on data efficiency, trying to build the best representation
-possible of the ARC problems using the available public data. The main contribution of the solution
-is that it is possible to train a model to learn multiple tasks about the ARC problems. The default
-task of the ARC challenge is to learn to predict the output of the test sample given input-output train samples.
-But there are many other tasks that can be done, for example we can train a model to learn the inputs
-distributions and to generate a new input given the train input samples. Since we train a model
-to do multiple ARC-related tasks we called the approach Omni-ARC. The Omni-ARC solution starts with
-a public LLM, fine-tunes it to learn multiple ARC-related tasks and finally uses test-time fine-tuning
-to improve the accuracy of the model on the private test set. It achieves a score of 40 on the public leaderboard,
-resulting in the 4 position in the challenge.
+This paper presents my approach to the 2024 Abstraction and Reasoning Challenge (ARC). I focus on the abstraction aspect of the challenge and emphasize data efficiency, aiming to construct the best possible representation of the ARC problems using the available public data. The main contribution of this solution is demonstrating that a model can be trained to learn multiple tasks related to the ARC problems. While the primary objective of the ARC challenge is to predict the output of a test sample given input-output training samples, many other tasks are also possible. For example, a model can be trained to learn input distributions and generate new inputs based on the training samples. Given that this approach trains a model to perform multiple ARC-related tasks, it is named Omni-ARC. The Omni-ARC solution begins with a publicly available large language model (LLM), fine-tunes it to learn various ARC-related tasks, and applies test-time fine-tuning to improve model accuracy on the private test set. It achieves a score of 40 on the public leaderboard, securing 4th place in the challenge.
 
 ## Intro
 
@@ -166,7 +156,7 @@ v8: 20240925_submission_models/03_continue-lora128-Qwen2.5-0.5B-Instruct_lr2.5e-
 
 The solution on a nutshell:
 
-1. Take `Qwen2.5-0.5B` and fine-tune it on publicly available ARC datasets. The model was fine-tuned to:
+1. Take `Qwen2.5-0.5B-Instruct` and fine-tune it on publicly available ARC datasets. The model was fine-tuned to:
    1. generate the outputs for the test samples
    2. learn the inputs distribution and generate new inputs.
 2. Do test-time fine-tuning with the private test data, only for the task of generating the test outputs.
@@ -196,6 +186,22 @@ For all the datasets I trained the model to do two tasks:
 
 - `examples + input -> output`. The original task of the ARC dataset.
 - `inputs -> input`. Generating new inputs requires to understand the distribution of the grids. It could also be done with the outputs, that should also follow some distribution.
+
+??? note "Click to see examples of newly generated inputs"
+
+    ![](modeling/res/2024-09-14-08-34-47.png)
+
+    ![](modeling/res/2024-09-14-08-35-16.png)
+
+    ![](modeling/res/2024-09-14-08-36-04.png)
+
+    ![](modeling/res/2024-09-14-08-39-28.png)
+
+    ![](modeling/res/2024-09-14-08-39-44.png)
+
+    ![](modeling/res/2024-09-14-08-40-01.png)
+
+    ![](modeling/res/2024-09-14-08-40-23.png)
 
 #### Data augmentation
 
@@ -260,7 +266,7 @@ The model was fine-tuned using LoRA. No significative improvement was found when
 also on test-time fine-tuning it seemed to be beneficial to just fine-tune the already trained LoRA adapter
 instead of creating a fresh new adapter.
 
-- Model: `Qwen2.5-0.5B`
+- Model: `Qwen2.5-0.5B-Instruct`
 - LoRA rank: 128
 - Learning rate: 5e-5, with a linear schedule with warmup
 - Batch size: 16
