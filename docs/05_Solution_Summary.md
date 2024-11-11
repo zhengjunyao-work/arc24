@@ -442,6 +442,8 @@ Finally I'm going to buy an [Omni-man funko pop figure](https://amzn.eu/d/efqVvE
 - [Submission notebook](https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=199282752)
 - [Kaggle post]()
 - [Youtube video]()
+- [Linkedin profile](https://www.linkedin.com/in/guillermobarbadillo/)
+- [Twitter profile](https://x.com/guille_bar)
 
 ## Acknowledgments
 
