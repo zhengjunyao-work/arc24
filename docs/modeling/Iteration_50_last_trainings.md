@@ -329,7 +329,21 @@ found when using a higher number of predictions do not reach the needed majority
 
 ¿Maybe a selection model could scale better? So far I have only used the selection model for 32 predictions.
 
+### Frozen model results
+
+| models                | LB score |
+|-----------------------|----------|
+| Qwen2.5-0.5B-Instruct | 13       |
+| Qwen2.5-1.5B-Instruct | 11       |
+| Qwen2.5-7B-Instruct   | 13       |
+
+The bigger models do not show better results on LB when making a submission with the frozen model.
+This submissions were done after the competition end.
+
 ## Conclusion
+
+We have not been able to improve the LB score by training new models. Maybe we should have trained
+them for longer since we were training for more tasks.
 
 ## Next steps
 
@@ -342,8 +356,8 @@ found when using a higher number of predictions do not reach the needed majority
   - [x] Notebook to do inference without test-time fine-tuning (I believe it already exists)
 - [x] train Qwen2.5-7B-Instruct with lora_r=64
 - [x] Plan the last 12 submissions
-- [ ] Voting and selection dynamics could be different after test-time fine-tuning
+- [x] Voting and selection dynamics could be different after test-time fine-tuning
 - [x] Could I do test-time fine-tuning with the 1.5B model?
 - [x] Create a notebook for triple ensemble
-- [ ] Add submission results from the models without ttft
-- [ ] Conclusion
+- [x] Add submission results from the models without ttft
+- [x] Conclusion
