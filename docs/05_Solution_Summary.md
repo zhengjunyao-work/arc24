@@ -154,7 +154,7 @@ The [approach taken by Ryan Greenblatt](https://redwoodresearch.substack.com/p/g
 I tried to emulate his approach using open and smaller LLMs with the aim to combine it with the MindsAI
 approach but my efforts failed. However I believe that if I devote more work to this approach it might work.
 
-## Solution
+## Approach
 
 <!--
 https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=199282752
@@ -171,17 +171,9 @@ The solution on a nutshell:
 3. Inference with data augmentation
 4. Ensemble with the 2020 public solution
 
+TODO: plot showing how the different steps affect the accuracy on LB
+
 ### Training
-
-#### Model
-
-For the last trainings I have used `Qwen2.5` LLM and I have trained three different model sizes: 0.5B, 1.5B and 7B. During the challenge I did most of the experiments with the 0.5B model. Choosing the right model size is important
-because the submission time is limited and the VRAM of the submission machines is just 2x16GB. If we
-want to do test-time fine-tuning we have to use a small model that can be fine-tuned with enough
-speed on Kaggle's machines.
-
-I used LoRA to fine-tune the models because fine-tuning the whole model did not show significant improvements.
-Moreover at test time it was beneficial to use the pre-trained LoRA adapter.
 
 #### Data
 
@@ -249,34 +241,30 @@ be solvable. I used the following additional transformations:
 
     ![](res/2024-11-11-10-29-50.png)
 
-#### Training tasks
+#### Problem representation
 
-On the final trainings I used four of the Omni-arc tasks:
+I used a very simple text representation of the ARC grids as an input to the LLMs. The grid was enclosed
+on a Markdown code snippet, the shape was defined at the first line and each row was numbered.
 
-- `examples + input -> output`. The original task of the ARC dataset.
-- `inputs -> input`. Generating new inputs requires to understand the distribution of the grids. It could also be done with the outputs, that should also follow some distribution.
-- `examples + input + output -> is the output correct?`. It is possible to train the model to verify wether a proposed output is correct.
-- `examples + input + output options-> select the correct output`. We can train a model to select the correct output between multiple options.
-
-I did not use any of the code tasks because I wasn't able to get good results when predicting code.
-I believe that with more time that approach could work, as shown in [Getting 50% (SoTA) on ARC-AGI with GPT-4o](https://redwoodresearch.substack.com/p/getting-50-sota-on-arc-agi-with-gpt) or [Combining Induction and Transduction for Abstract Reasoning](https://openreview.net/forum?id=UmdotAAVDe).
+    ```grid shape: 3x3
+    1 100
+    2 010
+    3 001
+    ```
 
 #### Training hyperparameters
 
-For an example of the parametrization of the last training you can go [here](./modeling/Iteration_50_last_trainings.md#steps-to-train-the-model).
-The most relevant parameters were:
+The model was fine-tuned using LoRA. No significative improvement was found when doing full model fine-tuning and
+also on test-time fine-tuning it seemed to be beneficial to just fine-tune the already trained LoRA adapter
+instead of creating a fresh new adapter.
 
-- LoRA rank: 128 for the 0.5B and 1.5B models, 64 for the 7B model
-- Learning rate: 5e-5, with a linear schedule and a warmup ratio of 2e-2
-- Batch size: 16 (with 1 batch size per device and 2 accumulation steps)
-- Training steps: 2e5 for the 0.5B and 1.5B models, 1e5 for the 7B model
+- Model: `Qwen2.5-0.5B`
+- LoRA rank: 128
+- Learning rate: 5e-5, with a linear schedule with warmup
+- Batch size: 16
+- Training steps: 2e5
 - Max sequence length: 8196
-- Trained on 8xA100 GPUs
-
-Bigger models showed higher efficiency when learning, they reached a lower training loss for the same
-number of training steps.
-
-TODO: plot showing efficiency
+- Trained on 2xA6000 GPUs
 
 I used huggingface's trl and accelerate libraries for the training.
 
@@ -292,10 +280,17 @@ This is my interpretation of the test-time fine-tuning:
 - I fine-tuned a model for each of the test problems, so 100 fine-tuned models were generated on each submission.
 - I used batch size 1 in the test-time fine-tuning to be able to learn the new problems as fast as possible.
 - The model was fine-tuned for ~300 steps on each problem
-- A slightly lower learning rate was used for test-time fine-tuning (TODO:)
+- Suprisingly the best learning rate for test-time fine-tuning was 8e-5, higher than the one used for
+  training (5e-5). It's very likely that better results could be obtained if more computation was
+  available, training with a slower learning rate, with higher batch size and for longer.
 
-TODO: why batch size 1 and model for each task
-TODO: ttft could also be applied to other tasks
+Due to the limited submission time test-time fine-tuning was only applied to the canonical ARC task
+of predicting the test outputs. But it could also be applied to the task of generating new inputs, or
+to the tasks of verifying the correctness of the outputs.
+
+The unusual configuration of training a single model for each task with batch size 1 arose due to the
+limitations of compute and submission time. It was the configuration that allowed to learn faster the new
+test problems.
 
 ### Inference
 
