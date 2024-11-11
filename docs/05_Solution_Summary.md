@@ -432,9 +432,11 @@ Finally I'm going to buy an [Omni-man funko pop figure](https://amzn.eu/d/efqVvE
 
 ## Links
 
-- [Documentation of all the work done during the challenge]()
+- [Documentation of all the work done during the challenge](https://ironbar.github.io/arc24/)
 - [Github repo](https://github.com/ironbar/arc24)
 - [Submission notebook](https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=199282752)
+- [Kaggle post]()
+- [Youtube video]()
 
 ## Acknowledgments
 

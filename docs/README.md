@@ -14,12 +14,8 @@ Create an AI capable of solving reasoning tasks it has never seen before
 
 ## Code structure
 
-     |_ arc: library with code developed for the challenge
-     |_ forum: all the scripts and notebooks taken from the forum
-     |_ logs: folder for storing all kind of stats and logs. For example the
-     score of each model, results from experiments
      |_ notebooks: jupyter notebooks made during the challenge. They start by number for easier sorting.
-     |_ reports: documents made during the challenge according to CRISP-DM methodology
+     |_ docs: documents made during the challenge according to CRISP-DM methodology
      |_ tests: folder with tests for the library
      |_ data: folder with light data from the challenge
      |_ rules: the official rules of the challenge
