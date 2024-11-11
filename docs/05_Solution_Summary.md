@@ -299,6 +299,8 @@ test problems.
 Data augmentation was applied also at inference, and the data augmentation was reverted from the prediction to get the original output. 96 predictions were done for each problem and voting was used to select the most
 promising predictions. So just like MindsAI's AIRV (augment, inference, reverse augmentation, and vote).
 
+Inference was done using a temperature of 0.
+
 VLLM was used to generate the predictions. Each fine-tuned model was used to generate predictions for its problem.
 
 ### Ensemble
@@ -330,9 +332,55 @@ more compute available per week.
 
 ### Prompting is not enough, test-time fine-tuning is needed
 
+Clearly this competition has shown that LLMs need test-time fine-tuning to do new tasks. Few-shot prompting is not enough for the model to learn novel tasks.
+
+### It's possible to train the model to verify the correctness of the tasks
+
+During the last weeks of the challenge I tried to continue with the Omni-ARC approach and train the model to:
+
+1. Verify if an output is correct
+2. Select the correct output between two options
+
+The idea was that we could improve the LB score if we replaced the voting selection mechanism by a more accurate one.
+Using trained models I generated wrong predictions for the original ARC dataset using a sampling temperature close to 1.
+
+| method       | top 1 accuracy | top 2 accuracy |
+|--------------|----------------|----------------|
+| voting       | 60.0%          | 70.0%          |
+| verification | 59.3%          | 77.4%          |
+| selection    | **68.7%**      | **81.0%**      |
+
+As the table above shows I was able to achieve promising results on the evaluation dataset. Those numbers are for 32 predictions.
+
+However I was not able to improve the LB score using this approach. My hypothesis is that the distribution
+of the predictions of a test-time fine-tuned model is different from the distribution of a frozen model. Thus
+the accuracy of voting for a test-time fine-tuned model might be much higher than the shown in the table
+for a frozen model.
+
+This verifier models could benefit from test-time fine-tuning, but I could not test the hypothesis due
+to the limited submission time.
+
+More information on [Iteration 47](modeling/Iteration_47_select_instead_of_verify.md) and [Iteration 45](modeling/Iteration_45_improve_verifier.md).
+
+### The quality of the datasets is relevant
+
+On the last weeks of the challenge I tried adding the [BARC datasets](https://huggingface.co/collections/barc0/synthetic-arc-dataset-6725aa6031376d3bacc34f76) to the training data. Surprisingly despite the enormous
+claimed number of different tasks (400k) I did not see any significative improvement either on the
+evaluation dataset or in the leaderboard. More information on [Iteration 48](modeling/Iteration_48_more_external_data.md).
+
+This is surprising because the original ARC dataset shows a clear trend when increasing the number
+of training tasks:
+
+![data-scaling](modeling/res/2024-09-02-16-02-17.png)
+
+My guess is that the automatically generated tasks by GPT4 did not have too much novelty respect
+to the original ARC tasks.
+
 ## Things that didn't worked
 
 ### Predicting code to solve ARC tasks
+
+## Conclusion
 
 ## Future steps
 
