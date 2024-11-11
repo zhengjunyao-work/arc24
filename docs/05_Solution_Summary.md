@@ -41,7 +41,36 @@ a public LLM, fine-tunes it to learn multiple ARC-related tasks and finally uses
 to improve the accuracy of the model on the private test set. It achieves a score of 40 on the public leaderboard,
 resulting in the 4 position in the challenge.
 
-## Motivation
+## Intro
+
+### Abstraction and Reasoning Challenge
+
+There are two different definitions of artificial intelligence. The first says that artificial intelligence is
+the science of creating machines that can do the tasks that humans can do. According to this definition
+we would be very close to artificial general intelligence (AGI) because systems like ChatGPT can do many
+tasks that only humans were able to do before such as solving math problems, answering all kind of questions,
+improving the style of some text... Many AI researchers believe that scale is all we need, and simply
+scaling the models and the data will lead to AGI.
+
+But there is also another view championed by François Chollet that says that skill is not intelligence,
+that intelligence is the ability to handle novelty and learn new skills.
+
+> The intelligence of a system is a measure of its skill-acquisition efficiency over a scope of tasks, with respect to priors, experience, and generalization difficulty.
+
+According to this definition we are far from AGI because the accuracy of the current deep learning models
+on some task does not depend on the complexity of the task, but on the familiarity of the model with the task.
+
+To spark research into this view of intelligence Chollet created the Abstraction and Reasoning Corpus (ARC)
+and so far it has resisted the test of time. Whereas LLMs are saturating all kind of publicly available
+benchmarks, they still do very poorly on the ARC dataset. This can be explained by two big reasons:
+
+1. The test dataset is private
+2. All the problems in the test dataset are novel
+
+In 2024 Chollet joined forces with Mike Knoop to launch the ARC Prize 2024, with a total prize pool of 1M$.
+The goal was to rise awareness of the unbeaten ARC and to increase the number of people working to solve it.
+
+## Motivation of my approach
 
 In the [ARC challenge](https://arcprize.org/arc) we have to learn a transformation rule given a few
 high-dimensional pairs of input and output images. The images can have a size of up to 30x30 pixels
@@ -53,7 +82,7 @@ they are high dimensional data.
 ![representation is the key](res/2024-11-08-12-32-46.png)
 
 To solve each ARC problem we have to find the **right representation** of the data. When humans solve the
-tasks, the challenge is to find the **right perspective** to look at the problem. Once we have the right
+tasks, the biggest challenge is to find the **right perspective** to look at the problem. Once we have the right
 perspective of the data the ARC problems are trivial to solve.
 
 The right representation of the data allows to decrease the dimensionality of the data and makes
@@ -70,7 +99,7 @@ I don't like this image, don't know if helps.
 If we train a model to do tasks that require a good representation of the data, it's likely that the
 model will internally develop the required representation.
 
-My insight is that we can use the ARC problems in many different ways to learn that representation,
+My insight was that we could use the ARC problems in many different ways to learn that representation,
 not just in the original proposed task that asks to generate the output for an image given a few input-output pairs.
 
 ### Omni-ARC: Training a single model to do multiple ARC-related tasks
@@ -92,12 +121,38 @@ not just in the original proposed task that asks to generate the output for an i
 - `examples + input + output options-> select the correct output`. We can train a model to select the correct output between multiple options.
 
 All the listed tasks require that the model learns some useful representation of the ARC image. The idea
-behind the Omni-ARC approach is to train a single model to do all the tasks, with the hope that a shared
+behind the Omni-ARC approach is to train a single model to do all the tasks, with the expectation that a shared
 representation across all the tasks will generalize better than training the model to do a single task.
 
 ![omni-arc](modeling/res/omni-arc.png)
 
 _Omni-ARC, a single model that does all the ARC-related tasks (and it has a very cool logo)_
+
+## Prior work
+
+### MindsAI
+
+The most relevant prior work is the information given by the MindsAI team about they approach. On
+interviews they have told that they biggest contribution is to do test-time fine-tuning. There was little
+information but enough to make educated guesses and replicate their results:
+
+- [Test-Time Augmentation to solve ARC, interview with Jack Cole](https://lab42.global/community-interview-jack-cole/)
+- [Machine Learning Street Talk | Chollet's ARC Challenge + Current Winners](https://youtu.be/jSAT_RuJ_Cg?si=-s_XpeeDA2BQYlVy)
+
+> Our ARC solution stands out due to several key elements. Firstly, we fine-tune models on synthetic and augmented data. Secondly, we employ test-time fine-tuning. Lastly, we have developed an approach called AIRV (augment, inference, reverse augmentation, and vote), which is analogous to test-time augmentation. These innovations are crucial, as transformer models perform relatively poorly on ARC without them.
+
+I could summarize my solution as an extension of the MindsAI approach, in addition to the three points
+cited above my approach trains the model to perform more tasks around the ARC data. That way we can
+improve the data efficiency of the system and get better results for the same amount of data.
+
+### Ryan Greenblatt
+
+> I recently got to 50%1 accuracy on the public test set for ARC-AGI by having GPT-4o generate a huge number of Python implementations of the transformation rule (around 8,000 per problem) and then selecting among these implementations based on correctness of the Python programs on the examples (if this is confusing, go to the next section)2. I use a variety of additional approaches and tweaks which overall substantially improve the performance of my method relative to just sampling 8,000 programs.
+
+The approach taken by Ryan Greenblatt was very inspiring because he didn't fine-tuned any model for the ARC challenge.
+
+I tried to emulate his approach using open and smaller LLMs with the aim to combine it with the MindsAI
+approach but my efforts failed. However I believe that if I devote more work to this approach it might work.
 
 ## Solution
 
@@ -221,7 +276,11 @@ be careful with the RAM usage because both jobs had to share the same memory.
 
 ## Learnings
 
-### Prompting is not enough, test-time inference is needed
+- BARC datasets did not help, quality is important
+- Use the right model size (for the available compute)
+- 
+
+### Prompting is not enough, test-time fine-tuning is needed
 
 ## Things that didn't worked
 
