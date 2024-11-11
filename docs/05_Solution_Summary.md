@@ -409,9 +409,26 @@ time is given.
 
 ## Future steps
 
-- Buy an [Omni-man funko pop figure](https://amzn.eu/d/efqVvEh) to celebrate the prize.
+The approach of using a transformer and test-time fine-tuning could likely keep improving and maybe
+solve the ARC prize if we generate enough synthetic data to densely cover the space of the ARC problems.
+However that kind of solution won't give us more knowledge about how to reach AGI. It might be worth
+pursuing that direction just to know where it can get us, but I don't feel it is interesting.
 
-TODO: In this challenge I have focused on abstraction, but reasoning is also needed. More compute is needed.
+On this year competition I have focused on abstraction, on building the best possible representation
+of the ARC problems. But the reasoning part was missing from my solution. When I try to solve the ARC
+problems I make an hypothesis of the transformation, see if it works on the train data and fix it if
+it doesn't. Finding the solution is typically an iterative process of trial and error.
+
+I believe that we can teach a model to reason, just like OpenAI is developing the new o1 models. First we will
+need to have a model that is able to generate code to solve the problems, otherwise we cannot verify
+the solution and iterate over the results. Then we will generate many reasoning traces for the training
+tasks and the model could learn to iteratively create a python code solution to the problems. The main
+obstacle that I see to this approach is that it will require a much bigger context size than the current
+MindsAI approach because in addition to the original task the prompt will also have the different
+code iterations and the outputs. So we could be talking about using up to 50k tokens instead of the
+current 10k tokens. That requires better hardware both for training and inference.
+
+Finally I'm going to buy an [Omni-man funko pop figure](https://amzn.eu/d/efqVvEh) to celebrate the prize.
 
 ## Links
 
