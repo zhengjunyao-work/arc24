@@ -166,12 +166,14 @@ v8: 20240925_submission_models/03_continue-lora128-Qwen2.5-0.5B-Instruct_lr2.5e-
 
 The solution on a nutshell:
 
-1. Take `Qwen2.5-0.5B` and fine-tune it on publicly available ARC datasets. The model was fine-tuned to generate the outputs for the test samples and also to learn the inputs distribution and generate new inputs.
+1. Take `Qwen2.5-0.5B` and fine-tune it on publicly available ARC datasets. The model was fine-tuned to:
+   1. generate the outputs for the test samples
+   2. learn the inputs distribution and generate new inputs.
 2. Do test-time fine-tuning with the private test data, only for the task of generating the test outputs.
-3. Inference with data augmentation
+3. Inference with data augmentation, and voting to select the predictions
 4. Ensemble with the 2020 public solution
 
-TODO: plot showing how the different steps affect the accuracy on LB
+![importance of the steps](res/2024-11-11-11-55-30.png)
 
 ### Training
 
@@ -295,7 +297,7 @@ test problems.
 ### Inference
 
 Data augmentation was applied also at inference, and the data augmentation was reverted from the prediction to get the original output. 96 predictions were done for each problem and voting was used to select the most
-promising predictions.
+promising predictions. So just like MindsAI's AIRV (augment, inference, reverse augmentation, and vote).
 
 VLLM was used to generate the predictions. Each fine-tuned model was used to generate predictions for its problem.
 
@@ -304,6 +306,8 @@ VLLM was used to generate the predictions. Each fine-tuned model was used to gen
 I ensembled my model predictions with the [2020 solution](https://www.kaggle.com/code/mehrankazeminia/3-arc24-developed-2020-winning-solutions). Since the 2020 solution only requires CPU, I managed to run
 it on the background while I used the GPU for fine-tuning and inference with my model. I only had to
 be careful with the RAM usage because both jobs had to share the same memory.
+
+The ensemble strategy was very simple, just take the first attempt from each solution.
 
 ## Learnings
 
