@@ -309,6 +309,19 @@ be careful with the RAM usage because both jobs had to share the same memory.
 
 The ensemble strategy was very simple, just take the first attempt from each solution.
 
+### Results
+
+This approach scored 40 on the ARC leaderboard.
+
+![importance of the steps](res/2024-11-11-11-55-30.png)
+
+The same approach (without test-time fine-tuning) could solve 32% of the evaluation tasks, and when using voting with 32 predictions
+it achieved a top_2 accuracy of 22%. Due to limited hardware resources I didn't usually evaluated
+the models with test-time fine-tuning on the evaluation dataset. Kaggle provides 30 hours of GPU each week,
+but we could make 3 submissions a day which is equivalent to 36 hours of compute. Thus it was much
+cheaper to use the submissions to see the performance of the test-time fine-tuning where we had 7 times
+more compute available per week.
+
 ## Learnings
 
 - BARC datasets did not help, quality is important - Recently released [BARC dataset](https://huggingface.co/collections/barc0/synthetic-arc-dataset-6725aa6031376d3bacc34f76)
