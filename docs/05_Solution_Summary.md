@@ -326,10 +326,6 @@ more compute available per week.
 
 ## Learnings
 
-- BARC datasets did not help, quality is important - Recently released [BARC dataset](https://huggingface.co/collections/barc0/synthetic-arc-dataset-6725aa6031376d3bacc34f76)
-- Use the right model size (for the available compute)
-- 
-
 ### Prompting is not enough, test-time fine-tuning is needed
 
 Clearly this competition has shown that LLMs need test-time fine-tuning to do new tasks. Few-shot prompting is not enough for the model to learn novel tasks.
@@ -366,7 +362,7 @@ More information on [Iteration 47](modeling/Iteration_47_select_instead_of_verif
 
 On the last weeks of the challenge I tried adding the [BARC datasets](https://huggingface.co/collections/barc0/synthetic-arc-dataset-6725aa6031376d3bacc34f76) to the training data. Surprisingly despite the enormous
 claimed number of different tasks (400k) I did not see any significative improvement either on the
-evaluation dataset or in the leaderboard. More information on [Iteration 48](modeling/Iteration_48_more_external_data.md).
+evaluation dataset or in the leaderboard. More information on [Iteration 48. More external data](modeling/Iteration_48_more_external_data.md).
 
 This is surprising because the original ARC dataset shows a clear trend when increasing the number
 of training tasks:
@@ -376,9 +372,19 @@ of training tasks:
 My guess is that the automatically generated tasks by GPT4 did not have too much novelty respect
 to the original ARC tasks.
 
-## Things that didn't worked
+### The right model size
 
-### Predicting code to solve ARC tasks
+`Qwen2.5-0.5B` was the right model size for my approach and the available compute for submission.
+
+On a first step I tried smaller models such as `SmolLM2-135M` and `NanoLM-0.3B` but they did not
+achieve the same accuracy as `Qwen2.5-0.5B`. More on [Iteration 46. Revisit small LLMs](modeling/Iteration_46_revisit_small_llms.md)
+
+On my [final attempt](modeling/Iteration_50_last_trainings.md) I also tried bigger models such as `Qwen2.5-1.5B` and `Qwen2.5-7B`.
+These models exhibit a higher data efficiency, they reach a smaller training loss for the same amount
+of training steps. The problem with these models is that they are slower to fine-tune and inference at submission.
+Moreover due to VRAM requirements we have to decrease the length of the training samples. It's very
+likely that LB score could be improved with this bigger models if better hardware and more submission
+time is given.
 
 ## Conclusion
 
