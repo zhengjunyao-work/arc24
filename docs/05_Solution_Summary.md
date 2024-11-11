@@ -149,19 +149,27 @@ improve the data efficiency of the system and get better results for the same am
 
 > I recently got to 50%1 accuracy on the public test set for ARC-AGI by having GPT-4o generate a huge number of Python implementations of the transformation rule (around 8,000 per problem) and then selecting among these implementations based on correctness of the Python programs on the examples (if this is confusing, go to the next section)2. I use a variety of additional approaches and tweaks which overall substantially improve the performance of my method relative to just sampling 8,000 programs.
 
-The approach taken by Ryan Greenblatt was very inspiring because he didn't fine-tuned any model for the ARC challenge.
+The [approach taken by Ryan Greenblatt](https://redwoodresearch.substack.com/p/getting-50-sota-on-arc-agi-with-gpt) was very inspiring because he didn't fine-tuned any model for the ARC challenge.
 
 I tried to emulate his approach using open and smaller LLMs with the aim to combine it with the MindsAI
 approach but my efforts failed. However I believe that if I devote more work to this approach it might work.
 
 ## Solution
 
+<!--
+https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=199282752
+
+v2: 20240925_submission_models/01_lora128-Qwen2.5-0.5B-Instruct_lr5e-5_4e4steps_2gpus_8192msl/checkpoint-40000/
+v5: 20240925_submission_models/02_continue-lora128-Qwen2.5-0.5B-Instruct_lr5e-5_8e4steps_2gpus_8192msl/checkpoint-80000/
+v8: 20240925_submission_models/03_continue-lora128-Qwen2.5-0.5B-Instruct_lr2.5e-5_8e4steps_2gpus_8192msl/checkpoint-80000/
+-->
+
 The solution on a nutshell:
 
-1. Take an LLM and fine-tune it on different ARC-related tasks
-2. Do test-time fine-tuning with the private test data
-3. Inference
-4. Ensemble with 2020 solution
+1. Take `Qwen2.5-0.5B` and fine-tune it on publicly available ARC datasets. The model was fine-tuned to generate the outputs for the test samples and also to learn the inputs distribution and generate new inputs.
+2. Do test-time fine-tuning with the private test data, only for the task of generating the test outputs.
+3. Inference with data augmentation
+4. Ensemble with the 2020 public solution
 
 ### Training
 
@@ -177,20 +185,28 @@ Moreover at test time it was beneficial to use the pre-trained LoRA adapter.
 
 #### Data
 
-I used the following datasets for training:
+I used the following publicly available datasets for training:
 
-- The original [ARC dataset](https://www.kaggle.com/competitions/arc-prize-2024/data)
-- Michael Hodel's [RE-ARC dataset](https://github.com/michaelhodel/re-arc)
-- Recently released [BARC dataset](https://huggingface.co/collections/barc0/synthetic-arc-dataset-6725aa6031376d3bacc34f76)
-- Simon Strandgaard's [PQA dataset](https://github.com/neoneye/arc-dataset-collection/tree/main/dataset/PQA)
-- Simon Strandgaard's [Tama dataset](https://github.com/neoneye/arc-dataset-tama)
-- [Mini-ARC](https://github.com/ksb21ST/Mini-ARC)
-- [nosound's 9 hand crafted ARC tasks](https://www.kaggle.com/datasets/zaharch/arc-nosound-tasks)
-- [Andy Penrose's 5 tasks](https://www.kaggle.com/datasets/andypenrose/extra-arc-tasks-for-testing)
+| dataset                                                                                                    | number of unique tasks |
+|------------------------------------------------------------------------------------------------------------|------------------------|
+| [original ARC dataset](https://www.kaggle.com/competitions/arc-prize-2024/data)                                     | 800                    |
+| Michael Hodel's [RE-ARC dataset](https://github.com/michaelhodel/re-arc)                                   | 400                    |
+| Simon Strandgaard's [PQA dataset](https://github.com/neoneye/arc-dataset-collection/tree/main/dataset/PQA) | 7                      |
+| Simon Strandgaard's [Tama dataset](https://github.com/neoneye/arc-dataset-tama)                            | 50                     |
+| [Mini-ARC](https://github.com/ksb21ST/Mini-ARC)                                                            | 149                    |
+| [nosound's hand crafted ARC tasks](https://www.kaggle.com/datasets/zaharch/arc-nosound-tasks)              | 9                      |
+| [Andy Penrose's tasks](https://www.kaggle.com/datasets/andypenrose/extra-arc-tasks-for-testing)            | 5                      |
+| TOTAL                                                                                                      | 1420                   |
+
+For all the datasets I trained the model to do two tasks:
+
+- `examples + input -> output`. The original task of the ARC dataset.
+- `inputs -> input`. Generating new inputs requires to understand the distribution of the grids. It could also be done with the outputs, that should also follow some distribution.
 
 #### Data augmentation
 
-The following augmentations were applied randomly to all the input and outputs of the problem:
+For each problem the same data augmentation was applied to all the inputs and outputs. Data augmentation
+was a composition of the following augmentations:
 
 - Rotations
 - Flips
@@ -201,9 +217,9 @@ The following augmentations were applied randomly to all the input and outputs o
 
 In addition to the data augmentation I also did problem augmentation by applying a transformation
 only to the inputs or to the outputs. This transformation created new ARC problems by composing the
-original ARC transformation with randomly new ones.
+original ARC transformation with randomly chosen new ones.
 
-These new transformations needed to be reversible, otherwise the new generated problems could not
+These new transformations needed to be reversible, otherwise the new generated problems might not
 be solvable. I used the following additional transformations:
 
 - Rotations and/or flips
@@ -211,7 +227,27 @@ be solvable. I used the following additional transformations:
 - Upscale
 - Mirror
 
-TODO: image showing an augmented problem
+??? note "Click to see examples of problem augmentation"
+
+    Original task:
+
+    ![](res/2024-11-11-10-27-59.png)
+
+    Rotate the inputs:
+
+    ![](res/2024-11-11-10-28-22.png)
+
+    Upscale x2 the outputs:
+
+    ![](res/2024-11-11-10-28-44.png)
+
+    Add padding to the inputs:
+
+    ![](res/2024-11-11-10-29-10.png)
+
+    Mirroring the outputs:
+
+    ![](res/2024-11-11-10-29-50.png)
 
 #### Training tasks
 
@@ -276,7 +312,7 @@ be careful with the RAM usage because both jobs had to share the same memory.
 
 ## Learnings
 
-- BARC datasets did not help, quality is important
+- BARC datasets did not help, quality is important - Recently released [BARC dataset](https://huggingface.co/collections/barc0/synthetic-arc-dataset-6725aa6031376d3bacc34f76)
 - Use the right model size (for the available compute)
 - 
 
