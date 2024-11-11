@@ -10,7 +10,8 @@ Create an AI capable of solving reasoning tasks it has never seen before
 
 ## Docs
 
-[https://ironbar.github.io/arc24](https://ironbar.github.io/arc24)
+- [https://ironbar.github.io/arc24](https://ironbar.github.io/arc24)
+- [Solution summary](05_Solution_Summary.md)
 
 ## Code structure
 
