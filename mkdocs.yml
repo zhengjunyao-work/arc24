@@ -27,6 +27,7 @@ theme:
 markdown_extensions:
   - admonition
   - pymdownx.tasklist
+  - pymdownx.details
   - footnotes
   - tables
   - pymdownx.arithmatex:
