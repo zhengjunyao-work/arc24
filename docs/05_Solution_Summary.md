@@ -3,11 +3,43 @@
 https://www.kaggle.com/WinningModelDocumentationGuidelines
 https://www.kaggle.com/solution-write-up-documentation
 https://www.kaggle.com/competitions/arc-prize-2024#paper-award
+
+Here are some pointers from ARC Prize Co-founder François Chollet to help guide you in your paper submission writing.
+
+Be sure to include:
+
+- Abstract: Here’s what the contribution is (e.g., “we present a method to solve ARC-AGI, with the following characteristics…”)
+- Intro: Let’s remind people about what ARC-AGI is, why it’s important, and let’s maybe quickly mention what the inspiration behind our approach was.
+- Prior work: Here’s the list of previous approaches that are related to our approach.
+  Note, they don’t have to have inspired your approach, they only need to be similar in some way - 
+  they also don’t need to have been formally published as papers. Highlight similarities and differences. 
+  Make sure that your approach still retains something unique (the contribution).
+- Approach: Here’s how the approach works. Include an algorithm-level description. 
+- Results: Here are the results we’re getting on ARC-AGI! Make sure to mention scores on various
+  different sets, e.g., Kaggle leaderboard, public eval… And don’t report train set performance 
+  - that’s not what the train set is for.
+- Conclusion: Just quickly summarize what the contribution was and what you achieved. Can be 2 lines.
+
+Optionally, you can also have some kind of “analysis” section where you discuss the various things you think you’ve learned from your experimental results (e.g., what kinds of tasks do you solve? Why? What kind of tasks are out of reach?)
+
+Remember that shorter and clearer is always better. Absolutely no filler. Absolutely no attempt to act out sophistication for the sake of it. No equations unless they’re necessary to convey some concept formally.
+
+Papers are about communicating your ideas clearly so that others can learn from them and reuse them. Don’t feel bad if your approach seems too “simple” when you write it down - that’s actually a great thing. There are no points for complication.
 --->
 
 ## Abstract
 
-TODO:
+This paper presents my approach to the 2024 Abstraction and Reasoning Challenge. I have focused
+on the abstraction side of the challenge and on data efficiency, trying to build the best representation
+possible of the ARC problems using the available public data. The main contribution of the solution
+is that it is possible to train a model to learn multiple tasks about the ARC problems. The default
+task of the ARC challenge is to learn to predict the output of the test sample given input-output train samples.
+But there are many other tasks that can be done, for example we can train a model to learn the inputs
+distributions and to generate a new input given the train input samples. Since we train a model
+to do multiple ARC-related tasks we called the approach Omni-ARC. The Omni-ARC solution starts with
+a public LLM, fine-tunes it to learn multiple ARC-related tasks and finally uses test-time fine-tuning
+to improve the accuracy of the model on the private test set. It achieves a score of 40 on the public leaderboard,
+resulting in the 4 position in the challenge.
 
 ## Motivation
 
@@ -198,6 +230,8 @@ be careful with the RAM usage because both jobs had to share the same memory.
 ## Future steps
 
 - Buy an [Omni-man funko pop figure](https://amzn.eu/d/efqVvEh) to celebrate the prize.
+
+TODO: In this challenge I have focused on abstraction, but reasoning is also needed. More compute is needed.
 
 ## Links
 

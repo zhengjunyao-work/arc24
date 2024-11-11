@@ -226,17 +226,16 @@ I'm going to have available Qwen2.5-0.5B trained for 400k steps and Qwen2.5-1.5B
 
 I have available a Qwen2.5-0.5B trained for 400k steps, Qwen2.5-1.5B trained for 300k steps and Qwen2.5-7B trained for 100k steps.
 
-- Submission with Qwen2.5-1.5B and learning rate 1e-5: ongoing
-- Submission with Qwen2.5-1.5B and learning rate 2e-5: ongoing
-- Submission with Qwen2.5-1.5B and learning rate 4e-5: 
-- Triple ensemble with Qwen2.5-7B:
-- Can I fine-tune Qwen2.5-7B?
-- More submissions with Qwen2.5-0.5B increasing the learning rate?
-- Something with prediction selection?
+- Submission with Qwen2.5-1.5B and learning rate 1e-5: 34
+- Submission with Qwen2.5-1.5B and learning rate 2e-5: 38
+- Submission with Qwen2.5-1.5B and learning rate 4e-5: 38
 
 #### Sunday 10
 
 13:00 is the last time to submit a system that takes 12 hours to create the submission
+
+- Submission with Qwen2.5-0.5B and learning rate 8e-5: 35
+- Triple ensemble with Qwen2.5-7B: 37 and 33
 
 ### Test-time fine-tuning with Qwen2.5-1.5B
 
@@ -342,7 +341,9 @@ found when using a higher number of predictions do not reach the needed majority
   - [x] Upload loras from early checkpoints
   - [x] Notebook to do inference without test-time fine-tuning (I believe it already exists)
 - [x] train Qwen2.5-7B-Instruct with lora_r=64
-- [ ] Plan the last 12 submissions
+- [x] Plan the last 12 submissions
 - [ ] Voting and selection dynamics could be different after test-time fine-tuning
-- [ ] Could I do test-time fine-tuning with the 1.5B model?
+- [x] Could I do test-time fine-tuning with the 1.5B model?
 - [x] Create a notebook for triple ensemble
+- [ ] Add submission results from the models without ttft
+- [ ] Conclusion
