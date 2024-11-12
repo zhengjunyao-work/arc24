@@ -28,7 +28,7 @@ Papers are about communicating your ideas clearly so that others can learn from 
 
 ## Abstract
 
-This paper presents my approach to the 2024 Abstraction and Reasoning Challenge (ARC). I focus on the abstraction aspect of the challenge and emphasize data efficiency, aiming to construct the best possible representation of the ARC problems using the available public data. The main contribution of this solution is demonstrating that a model can be trained to learn multiple tasks related to the ARC problems. While the primary objective of the ARC challenge is to predict the output of a test sample given input-output training samples, many other tasks are also possible. For example, a model can be trained to learn input distributions and generate new inputs based on the training samples. Given that this approach trains a model to perform multiple ARC-related tasks, it is named Omni-ARC. The Omni-ARC solution begins with a publicly available large language model (LLM), fine-tunes it to learn various ARC-related tasks, and applies test-time fine-tuning to improve model accuracy on the private test set. It achieves a score of 40 on the public leaderboard, securing 4th place in the challenge.
+This paper presents my approach to the 2024 Abstraction and Reasoning Challenge (ARC). I focus on the abstraction aspect of the challenge and emphasize data efficiency, aiming to construct the best possible representation of the ARC problems using the available public data. The main contribution of this solution is demonstrating that a model can be trained to learn multiple tasks related to the ARC problems. While the primary objective of the ARC challenge is to predict the output of a test sample given input-output training samples, many other tasks are also possible. For example, a model can be trained to learn input distributions and generate new inputs based on the training samples. Given that this approach trains a model to perform multiple ARC-related tasks, it is named Omni-ARC. The Omni-ARC solution begins with a publicly available large language model (LLM), fine-tunes it to learn various ARC-related tasks, and applies test-time fine-tuning to improve model accuracy on the private test set. It achieves a score of 40 on the public leaderboard, securing 3rd place in the challenge.
 
 ## Intro
 
@@ -266,7 +266,7 @@ also on test-time fine-tuning it seemed to be beneficial to just fine-tune the a
 instead of creating a fresh new adapter.
 
 - Model: `Qwen2.5-0.5B-Instruct`
-- LoRA rank: 128
+- LoRA rank: 128 (17M of parameters)
 - Learning rate: 5e-5, with a linear schedule with warmup
 - Batch size: 16
 - Training steps: 2e5
@@ -440,8 +440,9 @@ Finally I'm going to buy an [Omni-man funko pop figure](https://amzn.eu/d/efqVvE
 - [Documentation of all the work done during the challenge](https://ironbar.github.io/arc24/)
 - [Github repo](https://github.com/ironbar/arc24)
 - [Submission notebook](https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=199282752)
-- [Kaggle post]()
-- [Youtube video]()
+- [Kaggle post](https://www.kaggle.com/competitions/arc-prize-2024/discussion/545671)
+- TODO: [Youtube video]()
+- [NotebookLM podcast](https://notebooklm.google.com/notebook/cf13e950-4048-4ba6-a001-e3d03a577339/audio)
 - [Linkedin profile](https://www.linkedin.com/in/guillermobarbadillo/)
 - [Twitter profile](https://x.com/guille_bar)
 
