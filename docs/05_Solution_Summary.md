@@ -151,6 +151,8 @@ https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?
 v2: 20240925_submission_models/01_lora128-Qwen2.5-0.5B-Instruct_lr5e-5_4e4steps_2gpus_8192msl/checkpoint-40000/
 v5: 20240925_submission_models/02_continue-lora128-Qwen2.5-0.5B-Instruct_lr5e-5_8e4steps_2gpus_8192msl/checkpoint-80000/
 v8: 20240925_submission_models/03_continue-lora128-Qwen2.5-0.5B-Instruct_lr2.5e-5_8e4steps_2gpus_8192msl/checkpoint-80000/
+
+/mnt/hdd0/Kaggle/arc24/models/20240925_submission_models/03_continue-lora128-Qwen2.5-0.5B-Instruct_lr2.5e-5_8e4steps_2gpus_8192msl/
 -->
 
 The solution on a nutshell:
@@ -409,6 +411,18 @@ of training steps. The problem with these models is that they are slower to fine
 Moreover due to VRAM requirements we have to decrease the length of the training samples. It's very
 likely that LB score could be improved with this bigger models if better hardware and more submission
 time is given.
+
+### Learning the inputs distribution is helpful to solve ARC problems
+
+TODO:
+
+[Iteration 22. Learning the inputs distribution](modeling/Iteration_22_learning_inputs_distribution.md)
+
+### Training using problem augmentation is helpful
+
+TODO:
+
+[Iteration 21. More data augmentation](modeling/Iteration_21_more_data_augmentation.md)
 
 ## Conclusion
 
