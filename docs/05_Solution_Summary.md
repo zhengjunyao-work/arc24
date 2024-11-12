@@ -460,6 +460,11 @@ MindsAI approach because in addition to the original task the prompt will also h
 code iterations and the outputs. So we could be talking about using up to 50k tokens instead of the
 current 10k tokens. That requires better hardware both for training and inference.
 
+Probably the best approach is the one that first tries to generate code to solve the problems and finally
+uses test-time fine-tuning only on the problems that the code approach could not solve. Thus I believe that
+the Omni-ARC approach, training a single model to do multiple ARC-related tasks, has a great change of
+being used in the solution that beats the 85% goal.
+
 Finally I'm going to buy an [Omni-man funko pop figure](https://amzn.eu/d/efqVvEh) to celebrate the prize.
 
 ## Links
