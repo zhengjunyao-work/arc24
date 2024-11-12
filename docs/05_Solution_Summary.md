@@ -412,17 +412,30 @@ Moreover due to VRAM requirements we have to decrease the length of the training
 likely that LB score could be improved with this bigger models if better hardware and more submission
 time is given.
 
-### Learning the inputs distribution is helpful to solve ARC problems
-
-TODO:
-
-[Iteration 22. Learning the inputs distribution](modeling/Iteration_22_learning_inputs_distribution.md)
-
 ### Training using problem augmentation is helpful
 
-TODO:
+The plot below shows the accuracy of a model on the evaluation dataset when being trained with a different
+amount of problem augmentation. Using problem augmentation 50% of the times seems to be the best option. Accuracy measures how many of the predictions made by the model are correct and it's a more robust and stable metric than vote_2 or pass_n (because it is computed with a bigger number of samples).
 
-[Iteration 21. More data augmentation](modeling/Iteration_21_more_data_augmentation.md)
+![problem augmentation](res/2024-11-12-09-33-08.png)
+
+More info on [Iteration 21. More data augmentation](modeling/Iteration_21_more_data_augmentation.md)
+
+### Learning the inputs distribution is helpful to solve ARC problems
+
+The table below shows the results on the evaluation dataset of an experiment that tried to see if
+learning the inputs and/or the outputs distribution was helpful. There is a clear improvement on accuracy
+when learning the inputs distribution. However learning the outputs distribution does not seem to be
+helpful.
+
+| new tasks                | accuracy  | correct_pixels | correct_size | pass_n     | vote_2     |
+|--------------------------|-----------|----------------|--------------|------------|------------|
+| -                        | 4.61%     | 68.54%         | 87.34%       | 17.25%     | 10.73%     |
+| 5k inputs                | **5.36%** | **69.40%**     | **88.38%**   | **19.75%** | **13.13%** |
+| 5k inputs, 5k outputs    | 5.13%     | 68.34%         | 87.18%       | **19.75%** | 12.37%     |
+| 2.5k inputs 2.5k outputs | 4.68%     | 68.55%         | 87.66%       | 17.38%     | 11.99%     |
+
+[Iteration 22. Learning the inputs distribution](modeling/Iteration_22_learning_inputs_distribution.md)
 
 ## Conclusion
 
