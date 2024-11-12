@@ -94,6 +94,7 @@ model will internally develop the required representation.
 
 My insight was that we could use the ARC problems in many different ways to learn that representation,
 not just in the original proposed task that asks to generate the output for an image given a few input-output pairs.
+The next section shows the different ways to use the ARC problems.
 
 ### Omni-ARC: Training a single model to do multiple ARC-related tasks
 
@@ -105,7 +106,7 @@ not just in the original proposed task that asks to generate the output for an i
 
 - `examples + input -> output`. The original task of the ARC dataset.
 - `inputs -> input`. Generating new inputs requires to understand the distribution of the grids. It could also be done with the outputs, that should also follow some distribution.
-- `examples -> code`. This is the approach used by Ryan Greenblat with GPT-4o
+- `examples -> code`. This is the approach used by Ryan Greenblat with GPT-4o, generate code to solve the task given some ARC examples.
 - `code + input -> output`. This is equivalent to the first task, but instead of giving examples as input, it gives the code definition of the problem.
 - `code -> inputs`. Each input to a task follows some distribution, given a description of the
   distribution the model should be able to generate samples of that distribution.
