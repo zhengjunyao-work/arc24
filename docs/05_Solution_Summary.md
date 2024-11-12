@@ -477,7 +477,7 @@ Finally I'm going to buy an [Omni-man funko pop figure](https://amzn.eu/d/efqVvE
 - [Github repo](https://github.com/ironbar/arc24)
 - [Submission notebook](https://www.kaggle.com/code/ironbar/single-task-test-time-fine-tuning-for-arc24?scriptVersionId=199282752)
 - [Kaggle post](https://www.kaggle.com/competitions/arc-prize-2024/discussion/545671)
-- TODO: [Youtube video]()
+- TODO: create a [Youtube video](https://www.youtube.com/@guillermobarbadillo) explaining my approach and comparing to other teams solutions.
 - [NotebookLM podcast](https://notebooklm.google.com/notebook/cf13e950-4048-4ba6-a001-e3d03a577339/audio)
 - [Linkedin profile](https://www.linkedin.com/in/guillermobarbadillo/)
 - [Twitter profile](https://x.com/guille_bar)
