@@ -28,7 +28,11 @@ Papers are about communicating your ideas clearly so that others can learn from 
 
 ## Abstract
 
-This paper presents my approach to the 2024 Abstraction and Reasoning Challenge (ARC). I focus on the abstraction aspect of the challenge and emphasize data efficiency, aiming to construct the best possible representation of the ARC problems using the available public data. The main contribution of this solution is demonstrating that a model can be trained to learn multiple tasks related to the ARC problems. While the primary objective of the ARC challenge is to predict the output of a test sample given input-output training samples, many other tasks are also possible. For example, a model can be trained to learn input distributions and generate new inputs based on the training samples. Given that this approach trains a model to perform multiple ARC-related tasks, it is named Omni-ARC. The Omni-ARC solution begins with a publicly available large language model (LLM), fine-tunes it to learn various ARC-related tasks, and applies test-time fine-tuning to improve model accuracy on the private test set. It achieves a score of 40 on the public leaderboard, securing 3rd place in the challenge.
+This paper presents the Omni-ARC approach to the 2024 Abstraction and Reasoning Challenge (ARC), focusing on data efficiency and the abstraction aspect of the challenge. The core of this solution lies in training a transformer to perform multiple tasks related to ARC problems, going beyond the challenge's primary objective of predicting outputs from input-output examples. This multi-task learning approach aims to develop a robust representation of the ARC problem space.
+
+Omni-ARC leverages publicly available LLMs, fine-tuning them on various ARC-related tasks, including output prediction and input distribution learning, using augmented data from multiple ARC datasets. The solution incorporates test-time fine-tuning to enhance accuracy on the private test set, achieving a score of 40 on the public leaderboard, securing 3rd place in the challenge.
+
+Further analysis demonstrates the potential of training models to verify output correctness and select the most probable solution from multiple options, paving the way for future research in integrating reasoning capabilities into the Omni-ARC framework.
 
 ## Intro
 
