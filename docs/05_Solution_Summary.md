@@ -143,7 +143,7 @@ improve the data efficiency of the system and get better results for the same am
 
 > I recently got to 50%1 accuracy on the public test set for ARC-AGI by having GPT-4o generate a huge number of Python implementations of the transformation rule (around 8,000 per problem) and then selecting among these implementations based on correctness of the Python programs on the examples (if this is confusing, go to the next section)2. I use a variety of additional approaches and tweaks which overall substantially improve the performance of my method relative to just sampling 8,000 programs.
 
-The [approach taken by Ryan Greenblatt](https://redwoodresearch.substack.com/p/getting-50-sota-on-arc-agi-with-gpt) was very inspiring because he didn't fine-tuned any model for the ARC challenge.
+The [approach taken by Ryan Greenblatt](https://redwoodresearch.substack.com/p/getting-50-sota-on-arc-agi-with-gpt) was very inspiring because he didn't fine-tune any model for the ARC challenge.
 
 I tried to emulate his approach using open and smaller LLMs with the aim to combine it with the MindsAI
 approach but my efforts failed. However I believe that if I devote more work to this approach it might work.
@@ -313,7 +313,7 @@ promising predictions. So just like MindsAI's AIRV (augment, inference, reverse 
 
 Inference was done using a temperature of 0.
 
-VLLM was used to generate the predictions. Each fine-tuned model was used to generate predictions for its problem.
+[vLLM](https://github.com/vllm-project/vllm) was used to generate the predictions. Each fine-tuned model was used to generate predictions for its problem.
 
 ### Ensemble
 
@@ -330,7 +330,7 @@ This approach scored 40 on the ARC leaderboard.
 ![importance of the steps](res/2024-11-11-11-55-30.png)
 
 The same approach (without test-time fine-tuning) could solve 32% of the evaluation tasks, and when using voting with 32 predictions
-it achieved a top_2 accuracy of 22%. Due to limited hardware resources I didn't usually evaluated
+it achieved a top_2 accuracy of 22%. Due to limited hardware resources I didn't usually evaluate
 the models with test-time fine-tuning on the evaluation dataset. Kaggle provides 30 hours of GPU each week,
 but we could make 3 submissions a day which is equivalent to 36 hours of compute. Thus it was much
 cheaper to use the submissions to see the performance of the test-time fine-tuning where we had 7 times
@@ -349,7 +349,7 @@ During the last weeks of the challenge I tried to continue with the Omni-ARC app
 1. Verify if an output is correct
 2. Select the correct output between two options
 
-The idea was that we could improve the LB score if we replaced the voting selection mechanism by a more accurate one.
+The idea was that we could improve the leaderboard (LB) score if we replaced the voting selection mechanism by a more accurate one.
 Using trained models I generated wrong predictions for the original ARC dataset using a sampling temperature close to 1.
 
 | method       | top 1 accuracy | top 2 accuracy |
@@ -370,14 +370,14 @@ to the limited submission time.
 
 More information on [Iteration 47](modeling/Iteration_47_select_instead_of_verify.md) and [Iteration 45](modeling/Iteration_45_improve_verifier.md).
 
-### Solving the tasks using code did not worked for me
+### Solving the tasks using code did not work for me
 
 I also tried to expand on the Omni-ARC approach by training the model to do the additional tasks:
 
 - `examples -> code`. This is the approach used by Ryan Greenblat with GPT-4o
 - `code + input -> output`. This is equivalent to the first task, but instead of giving examples as input, it gives the code definition of the problem.
 
-To do so I build a small domain specific language (DSL) and recreated 285 of the ARC training tasks
+To do so I built a small domain specific language (DSL) and recreated 285 of the ARC training tasks
 with python code. This was a laborious process that took around 3 weeks.
 
 Unfortunately the model did not generalize well. It could only solve 5% of the evaluation tasks, and those
@@ -453,7 +453,7 @@ pursuing that direction just to know where it can get us, but I don't feel it is
 
 On this year competition I have focused on abstraction, on building the best possible representation
 of the ARC problems. But the reasoning part was missing from my solution. When I try to solve the ARC
-problems I make an hypothesis of the transformation, see if it works on the train data and fix it if
+problems I make a hypothesis of the transformation, see if it works on the train data and fix it if
 it doesn't. Finding the solution is typically an iterative process of trial and error.
 
 I believe that we can teach a model to reason, just like OpenAI is developing the new o1 models. First we will
@@ -480,7 +480,7 @@ Finally I'm going to buy an [Omni-man funko pop figure](https://amzn.eu/d/efqVvE
 - [Kaggle post](https://www.kaggle.com/competitions/arc-prize-2024/discussion/545671)
 - TODO: create a [Youtube video](https://www.youtube.com/@guillermobarbadillo) explaining my approach and comparing to other teams solutions.
 - [NotebookLM podcast](https://notebooklm.google.com/notebook/cf13e950-4048-4ba6-a001-e3d03a577339/audio)
-- [Linkedin profile](https://www.linkedin.com/in/guillermobarbadillo/)
+- [LinkedIn profile](https://www.linkedin.com/in/guillermobarbadillo/)
 - [Twitter profile](https://x.com/guille_bar)
 
 ## Acknowledgments
@@ -490,7 +490,7 @@ Finally I'm going to buy an [Omni-man funko pop figure](https://amzn.eu/d/efqVvE
   the challenge. They gave me access to A100 GPUs with 80GB of VRAM, which allowed me to train bigger models.
 - [Qwen](https://huggingface.co/Qwen) for training and releasing a family of very capable LLMs with
   many different sizes.
-- [Weigths and bias](https://wandb.ai/home) I used it to track all the experiments in a single place.
+- [Weigths and Biases](https://wandb.ai/home) I used it to track all the experiments in a single place.
   It's an amazing tool and free for individuals.
 - [Lambdalabs](https://lambdalabs.com/). I did some short (but expensive) experiments on the last
   week of the challenge in Lambdalabs. They provide me with some free credits that partially covered
