@@ -137,7 +137,7 @@ def train_vae():
         print(f"✅ Using NVIDIA GPU (CUDA): {device}")
     else:
         device = torch.device("cpu")
-        print(f"⚠️  Using CPU: {device}")
+        print(f"⚠️  Using CPU: {device}") 
     
     # Set memory fraction for MPS to avoid memory issues
     if device.type == 'mps':
