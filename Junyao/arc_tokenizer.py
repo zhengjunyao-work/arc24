@@ -21,7 +21,7 @@ from transformers import PreTrainedTokenizerFast
 def get_or_build_arc_tokenizer(save_dir: str = "arc_tokenizer_v1") -> PreTrainedTokenizerFast:
     """
     Returns a HuggingFace-compatible ARC tokenizer.
-    Always stores/loads the tokenizer in a subdirectory under
+    Always stores/loads the tokenizer in a subdirectory under  
     the folder containing arc_tokenizer.py, e.g.:
       vitarc/tokenizers/arc_tokenizer_v1/
 
