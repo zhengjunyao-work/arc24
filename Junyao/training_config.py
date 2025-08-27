@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+"""
+Training Configuration File
+Easy toggle for GPU/CPU usage and other training parameters
+"""
+
+# ===== GPU CONFIGURATION =====
+# Set to True to enable GPU, False to force CPU
+USE_GPU = True  # Change this to False to disable GPU
+
+# ===== TRAINING HYPERPARAMETERS =====
+BATCH_SIZE = 64  # Increased batch size for better GPU utilization
+NUM_EPOCHS = 5
+LEARNING_RATE = 1e-3
+INPUT_LENGTH = 1124
+LATENT_DIM = 64
+HIDDEN_DIMS = [512, 256, 128]
+NUM_HEADS = 8
+
+# ===== MODEL CONFIGURATION =====
+USE_INPUT_NORM = True      # Normalize input data
+USE_BATCH_NORM = True      # Use batch normalization
+
+# ===== OPTIMIZATION CONFIGURATION =====
+WEIGHT_DECAY = 1e-5
+GRADIENT_CLIP_NORM = 1.0
+BETA_VAE = 1.0  # VAE loss weight
+
+# ===== DATA CONFIGURATION =====
+TRANSFORMED_DATA_PATH = '/Users/alexzheng/Library/Mobile Documents/com~apple~CloudDocs/github/arc-24/arc24/data/transformed_data/arc-agi_training_challenges_transformed.json'
+
+# ===== SAVING CONFIGURATION =====
+SAVE_BEST_MODEL = True
+SAVE_CHECKPOINTS = True
+CHECKPOINT_INTERVAL = 10  # Save checkpoint every N epochs
+SAVE_LOSS_PLOTS = True
+LOSS_PLOT_INTERVAL = 10   # Save loss plot every N epochs
+
+# ===== MONITORING CONFIGURATION =====
+PRINT_INTERVAL = 10  # Print progress every N batches
+SHOW_TIMING = True   # Show timing information
+
+def print_config():
+    """Print current configuration"""
+    print("=" * 50)
+    print("TRAINING CONFIGURATION")
+    print("=" * 50)
+    print(f"GPU Usage: {'✅ ENABLED' if USE_GPU else '🖥️ DISABLED'}")
+    print(f"Batch Size: {BATCH_SIZE}")
+    print(f"Epochs: {NUM_EPOCHS}")
+    print(f"Learning Rate: {LEARNING_RATE}")
+    print(f"Input Length: {INPUT_LENGTH}")
+    print(f"Latent Dimension: {LATENT_DIM}")
+    print(f"Hidden Dimensions: {HIDDEN_DIMS}")
+    print(f"Number of Heads: {NUM_HEADS}")
+    print(f"Input Normalization: {'✅' if USE_INPUT_NORM else '❌'}")
+    print(f"Batch Normalization: {'✅' if USE_BATCH_NORM else '❌'}")
+    print("=" * 50)
+
+if __name__ == "__main__":
+    print_config()

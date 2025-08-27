@@ -1,11 +1,15 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, Dataset
-import numpy as np
+from torch.utils.data import Dataset, DataLoader
 import json
-from VAEModel import VAE1D, loss_function_vae
+import numpy as np
 import matplotlib.pyplot as plt
+from VAEModel import VAE1D, loss_function_vae
+import time
+
+# Import configuration
+from training_config import *
 
 class TransformedARCDataset(Dataset):
     """
@@ -115,47 +119,46 @@ def save_loss_plot(losses, epoch, save_path='vae_1d_training_progress.png'):
     plt.close()  # Close to save memory
 
 def train_vae():
-    # Hyperparameters optimized for Mac Mini GPU
-    batch_size = 64  # Increased batch size for better GPU utilization
-    num_epochs = 5
-    learning_rate = 1e-3
-    input_length = 1124
-    latent_dim = 64
-    hidden_dims = [512, 256, 128]
-    num_heads = 8
+    # Print current configuration
+    print_config()
     
-    # Enhanced device setup for Mac Mini GPU optimization
-    if torch.backends.mps.is_available():
-        device = torch.device("mps")
-        print(f"✅ Using Apple Silicon GPU (MPS): {device}")
-        # Enable memory efficient attention if available
-        if hasattr(torch.backends.mps, 'enable_memory_efficient_attention'):
-            torch.backends.mps.enable_memory_efficient_attention(True)
-            print("✅ Enabled memory efficient attention")
-    elif torch.cuda.is_available():
-        device = torch.device("cuda")
-        print(f"✅ Using NVIDIA GPU (CUDA): {device}")
+    # Device setup based on GPU configuration
+    if USE_GPU:
+        # Enhanced device setup for Mac Mini GPU optimization
+        if torch.backends.mps.is_available():
+            device = torch.device("mps")
+            print(f"✅ Using Apple Silicon GPU (MPS): {device}")
+            # Enable memory efficient attention if available
+            if hasattr(torch.backends.mps, 'enable_memory_efficient_attention'):
+                torch.backends.mps.enable_memory_efficient_attention(True)
+                print("✅ Enabled memory efficient attention")
+        elif torch.cuda.is_available():
+            device = torch.device("cuda")
+            print(f"✅ Using NVIDIA GPU (CUDA): {device}")
+        else:
+            device = torch.device("cpu")
+            print(f"⚠️  GPU requested but not available, using CPU: {device}")
+        
+        # Set memory fraction for MPS to avoid memory issues
+        if device.type == 'mps':
+            try:
+                # Set memory fraction to 0.8 to leave some memory for system
+                torch.mps.set_per_process_memory_fraction(0.8)
+                print("✅ Set MPS memory fraction to 0.8")
+            except:
+                print("⚠️  Could not set MPS memory fraction")
     else:
+        # Force CPU usage (GPU disabled)
         device = torch.device("cpu")
-        print(f"⚠️  Using CPU: {device}") 
-    
-    # Set memory fraction for MPS to avoid memory issues
-    if device.type == 'mps':
-        try:
-            # Set memory fraction to 0.8 to leave some memory for system
-            torch.mps.set_per_process_memory_fraction(0.8)
-            print("✅ Set MPS memory fraction to 0.8")
-        except:
-            print("⚠️  Could not set MPS memory fraction")
+        print(f"🖥️  Using CPU (GPU disabled by configuration): {device}")
+        print("   Note: GPU optimizations disabled for CPU training")
     
     # Load transformed data
-    transformed_data_path = '/Users/alexzheng/Library/Mobile Documents/com~apple~CloudDocs/github/arc-24/arc24/data/transformed_data/arc-agi_training_challenges_transformed.json'
-    
     try:
         print("Loading transformed ARC data...")
-        transformed_data = load_transformed_data(transformed_data_path)
+        transformed_data = load_transformed_data(TRANSFORMED_DATA_PATH)
     except FileNotFoundError:
-        print(f"Error: Could not find transformed data file at {transformed_data_path}")
+        print(f"Error: Could not find transformed data file at {TRANSFORMED_DATA_PATH}")
         print("Please run the transformation script first to generate the transformed data.")
         return None
     except Exception as e:
@@ -170,40 +173,60 @@ def train_vae():
         use_output_type_ids=True
     )
     
-    # Create data loader optimized for GPU
-    dataloader = DataLoader(
-        train_dataset, 
-        batch_size=batch_size, 
-        shuffle=True, 
-        collate_fn=collate_fn,
-        num_workers=2,  # Increased for better data loading
-        pin_memory=True if device.type != 'cpu' else False,  # Pin memory for GPU
-        persistent_workers=True if device.type != 'cpu' else False  # Keep workers alive
-    )
+    # Create data loader with conditional GPU optimization
+    if USE_GPU and device.type != 'cpu':
+        # GPU-optimized data loader
+        dataloader = DataLoader(
+            train_dataset, 
+            batch_size=BATCH_SIZE, 
+            shuffle=True, 
+            collate_fn=collate_fn,
+            num_workers=2,  # Increased for better data loading
+            pin_memory=True,  # Pin memory for GPU
+            persistent_workers=True  # Keep workers alive
+        )
+        print("✅ Using GPU-optimized data loader")
+    else:
+        # CPU-optimized data loader
+        dataloader = DataLoader(
+            train_dataset, 
+            batch_size=BATCH_SIZE, 
+            shuffle=True, 
+            collate_fn=collate_fn,
+            num_workers=0,  # Single worker for CPU
+            pin_memory=False,  # No pin memory for CPU
+            persistent_workers=False  # No persistent workers for CPU
+        )
+        print("🖥️  Using CPU-optimized data loader")
     
     print(f"Dataset size: {len(train_dataset)}")
     print(f"Number of batches: {len(dataloader)}")
-    print(f"Batch size: {batch_size}")
-    print(f"Estimated memory per batch: {batch_size * input_length * 4 / 1024 / 1024:.2f} MB")
+    print(f"Batch size: {BATCH_SIZE}")
+    print(f"Estimated memory per batch: {BATCH_SIZE * INPUT_LENGTH * 4 / 1024 / 1024:.2f} MB")
     
-    # Enable mixed precision for faster training
-    scaler = torch.cuda.amp.GradScaler() if device.type == 'cuda' else None
-    if scaler:
+    # Mixed precision configuration based on GPU usage
+    if USE_GPU and device.type == 'cuda':
+        # Enable mixed precision for CUDA
+        scaler = torch.cuda.amp.GradScaler()
         print("✅ Enabled mixed precision training (CUDA)")
-    elif device.type == 'mps':
+    elif USE_GPU and device.type == 'mps':
+        # MPS handles mixed precision automatically
+        scaler = None
         print("✅ Using MPS device (mixed precision handled automatically)")
     else:
-        print("⚠️  Using CPU (no mixed precision)")
+        # CPU training (no mixed precision)
+        scaler = None
+        print("🖥️  Using CPU training (no mixed precision)")
     
     # Create model with attention and normalization
     print("Initializing VAE model with attention and normalization...")
     model = VAE1D(
-        input_length=input_length,
-        latent_dim=latent_dim,
-        hidden_dims=hidden_dims,
-        num_heads=num_heads,
-        use_input_norm=True,      # Normalize input data
-        use_batch_norm=True       # Use batch normalization
+        input_length=INPUT_LENGTH,
+        latent_dim=LATENT_DIM,
+        hidden_dims=HIDDEN_DIMS,
+        num_heads=NUM_HEADS,
+        use_input_norm=USE_INPUT_NORM,      # Normalize input data
+        use_batch_norm=USE_BATCH_NORM       # Use batch normalization
     ).to(device)
     
     # Count parameters
@@ -212,7 +235,7 @@ def train_vae():
     print(f"Model parameters: {total_params:,} (trainable: {trainable_params:,})")
     
     # Optimizer and scheduler
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-5)
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
     
     # Training loop
@@ -220,69 +243,77 @@ def train_vae():
     losses = []
     best_loss = float('inf')
     
-    print(f"Starting training for {num_epochs} epochs...")
+    print(f"Starting training for {NUM_EPOCHS} epochs...")
     
     # Performance monitoring
-    import time
     start_time = time.time()
     
-    for epoch in range(num_epochs):
+    for epoch in range(NUM_EPOCHS):
         epoch_start_time = time.time()
         epoch_loss = 0
         num_batches = 0
         
         for batch_idx, data in enumerate(dataloader):
-            # Move data to device
-            data = data.to(device, non_blocking=True)
+            # Move data to device with conditional optimization
+            if USE_GPU and device.type != 'cpu':
+                data = data.to(device, non_blocking=True)
+            else:
+                data = data.to(device)
             
-            # Forward pass with mixed precision
+            # Forward pass with conditional mixed precision
             optimizer.zero_grad()
             
             if scaler:  # CUDA mixed precision
                 with torch.cuda.amp.autocast():
                     recon_batch, mu, logvar = model(data)
-                    loss = loss_function_vae(recon_batch, data, mu, logvar, beta=1.0)
+                    loss = loss_function_vae(recon_batch, data, mu, logvar, beta=BETA_VAE)
                 
                 # Backward pass with scaler
                 scaler.scale(loss).backward()
                 scaler.unscale_(optimizer)
-                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=GRADIENT_CLIP_NORM)
                 scaler.step(optimizer)
                 scaler.update()
             else:  # MPS or CPU
                 recon_batch, mu, logvar = model(data)
-                loss = loss_function_vae(recon_batch, data, mu, logvar, beta=1.0)
+                loss = loss_function_vae(recon_batch, data, mu, logvar, beta=BETA_VAE)
                 
                 # Backward pass
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=GRADIENT_CLIP_NORM)
                 optimizer.step()
             
             epoch_loss += loss.item()
             num_batches += 1
             
-            # Print progress every 10 batches with timing
-            if (batch_idx + 1) % 10 == 0:
-                elapsed = time.time() - start_time
-                batches_per_sec = (epoch * len(dataloader) + batch_idx + 1) / elapsed
-                print(f'Epoch {epoch+1}, Batch {batch_idx + 1}/{len(dataloader)}, '
-                      f'Loss: {loss.item():.4f}, Speed: {batches_per_sec:.2f} batches/sec')
+            # Print progress every N batches with timing
+            if (batch_idx + 1) % PRINT_INTERVAL == 0:
+                if SHOW_TIMING:
+                    elapsed = time.time() - start_time
+                    batches_per_sec = (epoch * len(dataloader) + batch_idx + 1) / elapsed
+                    print(f'Epoch {epoch+1}, Batch {batch_idx + 1}/{len(dataloader)}, '
+                          f'Loss: {loss.item():.4f}, Speed: {batches_per_sec:.2f} batches/sec')
+                else:
+                    print(f'Epoch {epoch+1}, Batch {batch_idx + 1}/{len(dataloader)}, '
+                          f'Loss: {loss.item():.4f}')
         
         # Calculate average loss for the epoch
         avg_loss = epoch_loss / num_batches
         losses.append(avg_loss)
         
-        epoch_time = time.time() - epoch_start_time
-        total_time = time.time() - start_time
-        
-        print(f'Epoch [{epoch+1}/{num_epochs}], Average Loss: {avg_loss:.4f}, '
-              f'Epoch Time: {epoch_time:.2f}s, Total Time: {total_time:.2f}s')
+        if SHOW_TIMING:
+            epoch_time = time.time() - epoch_start_time
+            total_time = time.time() - start_time
+            print(f'Epoch [{epoch+1}/{NUM_EPOCHS}], Average Loss: {avg_loss:.4f}, '
+                  f'Epoch Time: {epoch_time:.2f}s, Total Time: {total_time:.2f}s')
+        else:
+            print(f'Epoch [{epoch+1}/{NUM_EPOCHS}], Average Loss: {avg_loss:.4f}')
         
         # Learning rate scheduling
         scheduler.step(avg_loss)
         
         # Save best model
-        if avg_loss < best_loss:
+        if avg_loss < best_loss and SAVE_BEST_MODEL:
             best_loss = avg_loss
             torch.save({
                 'epoch': epoch + 1,
@@ -290,50 +321,51 @@ def train_vae():
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': best_loss,
                 'model_config': {
-                    'input_length': input_length,
-                    'latent_dim': latent_dim,
-                    'hidden_dims': hidden_dims,
-                    'num_heads': num_heads,
-                    'use_input_norm': True,
-                    'use_batch_norm': True
+                    'input_length': INPUT_LENGTH,
+                    'latent_dim': LATENT_DIM,
+                    'hidden_dims': HIDDEN_DIMS,
+                    'num_heads': NUM_HEADS,
+                    'use_input_norm': USE_INPUT_NORM,
+                    'use_batch_norm': USE_BATCH_NORM
                 }
             }, "vae_1d_attention_best.pth")
             print(f"  -> New best model saved! Loss: {best_loss:.4f}")
         
-        # Save checkpoint every 10 epochs
-        if (epoch + 1) % 10 == 0:
+        # Save checkpoint every N epochs
+        if (epoch + 1) % CHECKPOINT_INTERVAL == 0 and SAVE_CHECKPOINTS:
             torch.save({
                 'epoch': epoch + 1,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': avg_loss,
                 'model_config': {
-                    'input_length': input_length,
-                    'latent_dim': latent_dim,
-                    'hidden_dims': hidden_dims,
-                    'num_heads': num_heads,
-                    'use_input_norm': True,
-                    'use_batch_norm': True
+                    'input_length': INPUT_LENGTH,
+                    'latent_dim': LATENT_DIM,
+                    'hidden_dims': HIDDEN_DIMS,
+                    'num_heads': NUM_HEADS,
+                    'use_input_norm': USE_INPUT_NORM,
+                    'use_batch_norm': USE_BATCH_NORM
                 }
             }, f"vae_1d_attention_checkpoint_epoch_{epoch+1}.pth")
             
             # Save intermediate loss plot
-            save_loss_plot(losses, epoch + 1, f'vae_1d_training_progress_epoch_{epoch+1}.png')
-            print(f"  -> Training progress plot saved")
+            if SAVE_LOSS_PLOTS:
+                save_loss_plot(losses, epoch + 1, f'vae_1d_training_progress_epoch_{epoch+1}.png')
+                print(f"  -> Training progress plot saved")
     
     # Save final model
     torch.save({
-        'epoch': num_epochs,
+        'epoch': NUM_EPOCHS,
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'loss': avg_loss,
         'model_config': {
-            'input_length': input_length,
-            'latent_dim': latent_dim,
-            'hidden_dims': hidden_dims,
-            'num_heads': num_heads,
-            'use_input_norm': True,
-            'use_batch_norm': True
+            'input_length': INPUT_LENGTH,
+            'latent_dim': LATENT_DIM,
+            'hidden_dims': HIDDEN_DIMS,
+            'num_heads': NUM_HEADS,
+            'use_input_norm': USE_INPUT_NORM,
+            'use_batch_norm': USE_BATCH_NORM
         }
     }, "vae_1d_attention_final.pth")
     
