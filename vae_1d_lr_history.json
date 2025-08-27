@@ -1,0 +1,20 @@
+{
+  "epochs": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "learning_rates": [
+    0.001,
+    0.001,
+    0.001,
+    0.0009990143508499217,
+    0.0009960612933065818
+  ],
+  "scheduler_type": "cosine",
+  "use_warmup": true,
+  "warmup_epochs": 3,
+  "warmup_method": "linear"
+}

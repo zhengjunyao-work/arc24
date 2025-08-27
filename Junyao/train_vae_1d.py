@@ -8,8 +8,9 @@ import matplotlib.pyplot as plt
 from VAEModel import VAE1D, loss_function_vae
 import time
 
-# Import configuration
+# Import configuration and learning rate scheduler
 from training_config import *
+from lr_schedulers import create_adaptive_scheduler
 
 class TransformedARCDataset(Dataset):
     """
@@ -234,9 +235,30 @@ def train_vae():
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Model parameters: {total_params:,} (trainable: {trainable_params:,})")
     
-    # Optimizer and scheduler
+    # Optimizer and adaptive learning rate scheduler
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
+    
+    # Create adaptive scheduler with configuration
+    config_dict = {
+        'LR_SCHEDULER_TYPE': LR_SCHEDULER_TYPE,
+        'LR_SCHEDULER_PARAMS': LR_SCHEDULER_PARAMS,
+        'USE_WARMUP': USE_WARMUP,
+        'WARMUP_EPOCHS': WARMUP_EPOCHS,
+        'WARMUP_METHOD': WARMUP_METHOD,
+        'MONITOR_LR': MONITOR_LR
+    }
+    
+    scheduler = create_adaptive_scheduler(optimizer, config_dict)
+    
+    # Setup OneCycleLR if needed (requires dataloader info)
+    if LR_SCHEDULER_TYPE == 'one_cycle':
+        total_steps = len(dataloader) * NUM_EPOCHS
+        scheduler.setup_one_cycle(total_steps, NUM_EPOCHS, len(dataloader))
+    
+    print(f"✅ Created adaptive scheduler: {LR_SCHEDULER_TYPE}")
+    if USE_WARMUP:
+        print(f"   Warmup: {WARMUP_EPOCHS} epochs ({WARMUP_METHOD})")
+    print(f"   Current LR: {scheduler.get_lr():.2e}")
     
     # Training loop
     model.train()
@@ -309,8 +331,12 @@ def train_vae():
         else:
             print(f'Epoch [{epoch+1}/{NUM_EPOCHS}], Average Loss: {avg_loss:.4f}')
         
-        # Learning rate scheduling
-        scheduler.step(avg_loss)
+        # Step adaptive learning rate scheduler
+        scheduler.step(epoch=epoch, metrics=avg_loss)
+        
+        # Print current learning rate
+        current_lr = scheduler.get_lr()
+        print(f"   Current Learning Rate: {current_lr:.2e}")
         
         # Save best model
         if avg_loss < best_loss and SAVE_BEST_MODEL:
@@ -369,151 +395,31 @@ def train_vae():
         }
     }, "vae_1d_attention_final.pth")
     
-    print(f"Training completed!")
-    print(f"Best loss achieved: {best_loss:.4f}")
-    print(f"Models saved:")
-    print(f"  - Best model: vae_1d_attention_best.pth")
-    print(f"  - Final model: vae_1d_attention_final.pth")
+    print(f"✅ Final model saved! Final Loss: {avg_loss:.4f}")
     
-    # Enhanced training loss plotting
-    print("\nGenerating training loss plots...")
-    
-    # Create detailed loss plot
-    plt.figure(figsize=(12, 8))
-    
-    # Main loss plot
-    plt.subplot(2, 2, 1)
-    plt.plot(losses, 'b-', linewidth=2, label='Training Loss')
-    plt.title('VAE Training Loss (ARC Data)', fontsize=14, fontweight='bold')
-    plt.xlabel('Epoch', fontsize=12)
-    plt.ylabel('Loss', fontsize=12)
-    plt.grid(True, alpha=0.3)
-    plt.legend()
-    
-    # Loss trend (smoothed)
-    plt.subplot(2, 2, 2)
-    if len(losses) > 1:
-        # Calculate moving average for smoothing
-        window_size = min(5, len(losses) // 2)
-        if window_size > 1:
-            smoothed_losses = []
-            for i in range(len(losses)):
-                start_idx = max(0, i - window_size // 2)
-                end_idx = min(len(losses), i + window_size // 2 + 1)
-                smoothed_losses.append(np.mean(losses[start_idx:end_idx]))
-            plt.plot(smoothed_losses, 'r-', linewidth=2, label=f'Smoothed (window={window_size})')
-        else:
-            smoothed_losses = losses
-            plt.plot(smoothed_losses, 'r-', linewidth=2, label='Training Loss')
-    else:
-        plt.plot(losses, 'r-', linewidth=2, label='Training Loss')
-    
-    plt.title('Smoothed Training Loss', fontsize=14, fontweight='bold')
-    plt.xlabel('Epoch', fontsize=12)
-    plt.ylabel('Loss', fontsize=12)
-    plt.grid(True, alpha=0.3)
-    plt.legend()
-    
-    # Loss statistics
-    plt.subplot(2, 2, 3)
-    loss_stats = {
-        'Min Loss': min(losses),
-        'Max Loss': max(losses),
-        'Final Loss': losses[-1],
-        'Best Loss': best_loss,
-        'Loss Reduction': losses[0] - losses[-1] if len(losses) > 1 else 0
-    }
-    
-    plt.bar(loss_stats.keys(), loss_stats.values(), color=['green', 'red', 'blue', 'orange', 'purple'])
-    plt.title('Loss Statistics', fontsize=14, fontweight='bold')
-    plt.ylabel('Loss Value', fontsize=12)
-    plt.xticks(rotation=45)
-    plt.grid(True, alpha=0.3)
-    
-    # Add value labels on bars
-    for i, (key, value) in enumerate(loss_stats.items()):
-        plt.text(i, value + max(loss_stats.values()) * 0.01, f'{value:.4f}', 
-                ha='center', va='bottom', fontweight='bold')
-    
-    # Training progress
-    plt.subplot(2, 2, 4)
-    epochs = list(range(1, len(losses) + 1))
-    plt.plot(epochs, losses, 'g-', linewidth=2, marker='o', markersize=4)
-    plt.title('Training Progress', fontsize=14, fontweight='bold')
-    plt.xlabel('Epoch', fontsize=12)
-    plt.ylabel('Loss', fontsize=12)
-    plt.grid(True, alpha=0.3)
-    
-    # Add best loss marker
-    best_epoch = losses.index(best_loss) + 1
-    plt.plot(best_epoch, best_loss, 'ro', markersize=8, label=f'Best Loss: {best_loss:.4f}')
-    plt.legend()
-    
-    plt.tight_layout()
-    plt.savefig('vae_1d_training_loss_detailed.png', dpi=300, bbox_inches='tight')
-    plt.show()
-    
-    # Save simple loss plot as well
-    plt.figure(figsize=(10, 6))
-    plt.plot(losses, 'b-', linewidth=2)
-    plt.title('VAE Training Loss (ARC Data)', fontsize=14, fontweight='bold')
-    plt.xlabel('Epoch', fontsize=12)
-    plt.ylabel('Loss', fontsize=12)
-    plt.grid(True, alpha=0.3)
-    plt.savefig('vae_1d_training_loss.png', dpi=300, bbox_inches='tight')
-    plt.show()
-    
-    # Save loss data to file
-    loss_data = {
-        'epochs': list(range(1, len(losses) + 1)),
-        'losses': losses,
-        'best_loss': best_loss,
-        'best_epoch': best_epoch,
-        'final_loss': losses[-1],
-        'loss_reduction': losses[0] - losses[-1] if len(losses) > 1 else 0
-    }
-    
-    import json
-    with open('vae_1d_training_loss_data.json', 'w') as f:
-        json.dump(loss_data, f, indent=2)
-    
-    print("Training loss plots saved:")
-    print("  - vae_1d_training_loss_detailed.png (4-panel detailed view)")
-    print("  - vae_1d_training_loss.png (simple view)")
-    print("  - vae_1d_training_loss_data.json (loss data)")
-    
-    # Test reconstruction on a few samples
-    model.eval()
-    with torch.no_grad():
-        # Get a few samples from the dataset
-        test_samples = []
-        for i in range(min(5, len(train_dataset))):
-            test_samples.append(train_dataset[i])
+    # Save learning rate history if monitoring is enabled
+    if MONITOR_LR and LOG_LR_HISTORY:
+        lr_epochs, lr_history = scheduler.get_lr_history()
+        lr_data = {
+            'epochs': lr_epochs,
+            'learning_rates': lr_history,
+            'scheduler_type': LR_SCHEDULER_TYPE,
+            'use_warmup': USE_WARMUP,
+            'warmup_epochs': WARMUP_EPOCHS,
+            'warmup_method': WARMUP_METHOD
+        }
         
-        test_data = torch.stack(test_samples).to(device)
-        recon_data, _, _ = model(test_data)
+        with open('vae_1d_lr_history.json', 'w') as f:
+            json.dump(lr_data, f, indent=2)
+        print("✅ Learning rate history saved to vae_1d_lr_history.json")
         
-        # Plot original vs reconstructed
-        fig, axes = plt.subplots(5, 2, figsize=(15, 12))
-        for i in range(5):
-            # Original data
-            axes[i, 0].plot(test_data[i].cpu().numpy())
-            axes[i, 0].set_title(f'Original ARC Data {i+1}')
-            axes[i, 0].set_ylabel('Type ID Value')
-            axes[i, 0].grid(True, alpha=0.3)
-            
-            # Reconstructed data
-            recon_plot = recon_data[i].squeeze().cpu().numpy()
-            axes[i, 1].plot(recon_plot)
-            axes[i, 1].set_title(f'Reconstructed {i+1}')
-            axes[i, 1].set_ylabel('Type ID Value')
-            axes[i, 1].grid(True, alpha=0.3)
-        
-        plt.tight_layout()
-        plt.savefig('vae_1d_reconstruction_comparison.png', dpi=300, bbox_inches='tight')
-        plt.show()
+        # Plot learning rate history
+        scheduler.plot_lr_history('vae_1d_lr_history.png')
     
-    return model
+    # Plot training loss
+    plot_training_results(losses, model, dataloader, device)
+    
+    return model, losses
 
 def load_and_sample(model_path='vae_1d_attention_best.pth'):
     """
@@ -564,9 +470,189 @@ def load_and_sample(model_path='vae_1d_attention_best.pth'):
         
         print("Generated samples saved to vae_1d_generated_samples.png")
 
+def plot_training_results(losses, model, dataloader, device):
+    """Plot comprehensive training results"""
+    print(f"\n📊 Generating training results plots...")
+    
+    # Create detailed loss plot
+    plt.figure(figsize=(15, 10))
+    
+    # Main loss plot
+    plt.subplot(2, 3, 1)
+    plt.plot(losses, 'b-', linewidth=2, label='Training Loss')
+    plt.title('VAE Training Loss (ARC Data)', fontsize=14, fontweight='bold')
+    plt.xlabel('Epoch', fontsize=12)
+    plt.ylabel('Loss', fontsize=12)
+    plt.grid(True, alpha=0.3)
+    plt.legend()
+    
+    # Loss trend (smoothed)
+    plt.subplot(2, 3, 2)
+    if len(losses) > 1:
+        # Calculate moving average for smoothing
+        window_size = min(5, len(losses) // 2)
+        if window_size > 1:
+            smoothed_losses = []
+            for i in range(len(losses)):
+                start_idx = max(0, i - window_size // 2)
+                end_idx = min(len(losses), i + window_size // 2 + 1)
+                smoothed_losses.append(np.mean(losses[start_idx:end_idx]))
+            plt.plot(smoothed_losses, 'r-', linewidth=2, label=f'Smoothed (window={window_size})')
+        else:
+            smoothed_losses = losses
+            plt.plot(smoothed_losses, 'r-', linewidth=2, label='Training Loss')
+    else:
+        plt.plot(losses, 'r-', linewidth=2, label='Training Loss')
+    
+    plt.title('Smoothed Training Loss', fontsize=14, fontweight='bold')
+    plt.xlabel('Epoch', fontsize=12)
+    plt.ylabel('Loss', fontsize=12)
+    plt.grid(True, alpha=0.3)
+    plt.legend()
+    
+    # Loss statistics
+    plt.subplot(2, 3, 3)
+    best_loss = min(losses)
+    loss_stats = {
+        'Min Loss': min(losses),
+        'Max Loss': max(losses),
+        'Final Loss': losses[-1],
+        'Best Loss': best_loss,
+        'Loss Reduction': losses[0] - losses[-1] if len(losses) > 1 else 0
+    }
+    
+    plt.bar(loss_stats.keys(), loss_stats.values(), color=['green', 'red', 'blue', 'orange', 'purple'])
+    plt.title('Loss Statistics', fontsize=14, fontweight='bold')
+    plt.ylabel('Loss Value', fontsize=12)
+    plt.xticks(rotation=45)
+    plt.grid(True, alpha=0.3)
+    
+    # Add value labels on bars
+    for i, (key, value) in enumerate(loss_stats.items()):
+        plt.text(i, value + max(loss_stats.values()) * 0.01, f'{value:.4f}', 
+                ha='center', va='bottom', fontweight='bold')
+    
+    # Training progress
+    plt.subplot(2, 3, 4)
+    epochs = list(range(1, len(losses) + 1))
+    plt.plot(epochs, losses, 'g-', linewidth=2, marker='o', markersize=4)
+    plt.title('Training Progress', fontsize=14, fontweight='bold')
+    plt.xlabel('Epoch', fontsize=12)
+    plt.ylabel('Loss', fontsize=12)
+    plt.grid(True, alpha=0.3)
+    
+    # Add best loss marker
+    best_epoch = losses.index(best_loss) + 1
+    plt.plot(best_epoch, best_loss, 'ro', markersize=8, label=f'Best Loss: {best_loss:.4f}')
+    plt.legend()
+    
+    # Loss rate of change
+    plt.subplot(2, 3, 5)
+    if len(losses) > 1:
+        loss_changes = np.diff(losses)
+        plt.plot(epochs[1:], loss_changes, 'purple', linewidth=2, marker='s', markersize=4)
+        plt.title('Loss Rate of Change', fontsize=14, fontweight='bold')
+        plt.xlabel('Epoch', fontsize=12)
+        plt.ylabel('Δ Loss', fontsize=12)
+        plt.grid(True, alpha=0.3)
+        plt.axhline(y=0, color='black', linestyle='--', alpha=0.5)
+    else:
+        plt.text(0.5, 0.5, 'Need more epochs\nfor rate analysis', 
+                ha='center', va='center', transform=plt.gca().transAxes, fontsize=12)
+        plt.title('Loss Rate of Change', fontsize=14, fontweight='bold')
+    
+    # Training summary
+    plt.subplot(2, 3, 6)
+    plt.axis('off')
+    summary_text = f"""
+    Training Summary:
+    
+    Total Epochs: {len(losses)}
+    Initial Loss: {losses[0]:.4f}
+    Final Loss: {losses[-1]:.4f}
+    Best Loss: {best_loss:.4f}
+    Loss Reduction: {losses[0] - losses[-1]:.4f}
+    
+    Model: VAE1D
+    Input Length: {INPUT_LENGTH}
+    Latent Dim: {LATENT_DIM}
+    Batch Size: {BATCH_SIZE}
+    
+    Scheduler: {LR_SCHEDULER_TYPE}
+    Warmup: {'Yes' if USE_WARMUP else 'No'}
+    """
+    plt.text(0.1, 0.5, summary_text, fontsize=10, verticalalignment='center',
+            bbox=dict(boxstyle="round,pad=0.3", facecolor="lightblue"))
+    
+    plt.tight_layout()
+    plt.savefig('vae_1d_training_results.png', dpi=300, bbox_inches='tight')
+    plt.show()
+    
+    # Save simple loss plot as well
+    plt.figure(figsize=(10, 6))
+    plt.plot(losses, 'b-', linewidth=2)
+    plt.title('VAE Training Loss (ARC Data)', fontsize=14, fontweight='bold')
+    plt.xlabel('Epoch', fontsize=12)
+    plt.ylabel('Loss', fontsize=12)
+    plt.grid(True, alpha=0.3)
+    plt.savefig('vae_1d_training_loss.png', dpi=300, bbox_inches='tight')
+    plt.show()
+    
+    # Save loss data to file
+    loss_data = {
+        'epochs': list(range(1, len(losses) + 1)),
+        'losses': losses,
+        'best_loss': best_loss,
+        'best_epoch': best_epoch,
+        'final_loss': losses[-1],
+        'loss_reduction': losses[0] - losses[-1] if len(losses) > 1 else 0
+    }
+    
+    with open('vae_1d_training_loss_data.json', 'w') as f:
+        json.dump(loss_data, f, indent=2)
+    
+    print("✅ Training plots saved:")
+    print("  - vae_1d_training_results.png (6-panel detailed view)")
+    print("  - vae_1d_training_loss.png (simple view)")
+    print("  - vae_1d_training_loss_data.json (loss data)")
+    
+    # Test reconstruction on a few samples
+    print("\n🔄 Testing model reconstruction...")
+    model.eval()
+    with torch.no_grad():
+        # Get a few samples from the dataset
+        test_samples = []
+        for i in range(min(5, len(dataloader.dataset))):
+            test_samples.append(dataloader.dataset[i])
+        
+        test_data = torch.stack(test_samples).to(device)
+        recon_data, _, _ = model(test_data)
+        
+        # Plot original vs reconstructed
+        fig, axes = plt.subplots(5, 2, figsize=(15, 12))
+        for i in range(5):
+            # Original data
+            axes[i, 0].plot(test_data[i].cpu().numpy())
+            axes[i, 0].set_title(f'Original ARC Data {i+1}')
+            axes[i, 0].set_ylabel('Type ID Value')
+            axes[i, 0].grid(True, alpha=0.3)
+            
+            # Reconstructed data
+            recon_plot = recon_data[i].squeeze().cpu().numpy()
+            axes[i, 1].plot(recon_plot)
+            axes[i, 1].set_title(f'Reconstructed {i+1}')
+            axes[i, 1].set_ylabel('Type ID Value')
+            axes[i, 1].grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        plt.savefig('vae_1d_reconstruction_comparison.png', dpi=300, bbox_inches='tight')
+        plt.show()
+        
+        print("✅ Reconstruction comparison saved to vae_1d_reconstruction_comparison.png")
+
 if __name__ == "__main__":
     # Train the model
-    model = train_vae()
+    model, losses = train_vae()
     
     # Generate samples from trained model
     load_and_sample() 
