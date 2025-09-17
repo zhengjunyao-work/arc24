@@ -649,10 +649,60 @@ def plot_training_results(losses, model, dataloader, device):
         plt.show()
         
         print("✅ Reconstruction comparison saved to vae_1d_reconstruction_comparison.png")
+    
+    return model, losses
+
+def save_model(model, filepath: str = "vae_1d_trained_model.pth"):
+    """Save the trained VAE model"""
+    torch.save({
+        'model_state_dict': model.state_dict(),
+        'model_config': {
+            'input_length': INPUT_LENGTH,
+            'latent_dim': LATENT_DIM,
+            'hidden_dims': HIDDEN_DIMS,
+            'num_heads': NUM_HEADS,
+            'use_input_norm': USE_INPUT_NORM,
+            'use_batch_norm': USE_BATCH_NORM
+        },
+        'training_config': {
+            'batch_size': BATCH_SIZE,
+            'learning_rate': LEARNING_RATE,
+            'num_epochs': NUM_EPOCHS,
+            'beta_vae': BETA_VAE,
+            'weight_decay': WEIGHT_DECAY
+        }
+    }, filepath)
+    print(f"✅ Model saved to {filepath}")
+
+def load_model(filepath: str = "vae_1d_trained_model.pth"):
+    """Load a trained VAE model"""
+    checkpoint = torch.load(filepath, map_location='cpu')
+    
+    # Recreate model with saved config
+    model_config = checkpoint['model_config']
+    model = VAE1D(
+        input_length=model_config['input_length'],
+        latent_dim=model_config['latent_dim'],
+        hidden_dims=model_config['hidden_dims'],
+        num_heads=model_config['num_heads'],
+        use_input_norm=model_config['use_input_norm'],
+        use_batch_norm=model_config['use_batch_norm']
+    )
+    
+    # Load state dict
+    model.load_state_dict(checkpoint['model_state_dict'])
+    
+    print(f"✅ Model loaded from {filepath}")
+    print(f"Model config: {model_config}")
+    
+    return model, checkpoint['training_config']
 
 if __name__ == "__main__":
     # Train the model
     model, losses = train_vae()
+    
+    # Save the trained model
+    save_model(model)
     
     # Generate samples from trained model
     load_and_sample() 

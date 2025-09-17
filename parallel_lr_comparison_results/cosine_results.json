@@ -1,0 +1,7 @@
+{
+  "strategy": "cosine",
+  "name": "Cosine Annealing",
+  "training_time": 0.007966995239257812,
+  "success": false,
+  "error": "[Errno 2] No such file or directory: 'train_vae_1d_cosine.py'"
+}

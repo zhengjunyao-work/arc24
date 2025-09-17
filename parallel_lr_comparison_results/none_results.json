@@ -1,0 +1,7 @@
+{
+  "strategy": "none",
+  "name": "No Scheduling",
+  "training_time": 0.005183219909667969,
+  "success": false,
+  "error": "[Errno 2] No such file or directory: 'train_vae_1d_none.py'"
+}

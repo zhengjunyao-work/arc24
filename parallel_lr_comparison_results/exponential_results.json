@@ -1,0 +1,7 @@
+{
+  "strategy": "exponential",
+  "name": "Exponential Decay",
+  "training_time": 0.006640195846557617,
+  "success": false,
+  "error": "[Errno 2] No such file or directory: 'train_vae_1d_exponential.py'"
+}

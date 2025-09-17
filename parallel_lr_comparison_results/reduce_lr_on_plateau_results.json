@@ -1,0 +1,7 @@
+{
+  "strategy": "reduce_lr_on_plateau",
+  "name": "Reduce LR on Plateau",
+  "training_time": 0.0061457157135009766,
+  "success": false,
+  "error": "[Errno 2] No such file or directory: 'train_vae_1d_reduce_lr_on_plateau.py'"
+}
