@@ -278,6 +278,23 @@ class VAE1D(nn.Module):
         """
         z = torch.randn(num_samples, self.latent_dim).to(device)
         return self.decode(z)
+    
+    def get_model_info(self):
+        """Get model information"""
+        total_params = sum(p.numel() for p in self.parameters())
+        trainable_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
+        
+        return {
+            'input_length': self.input_length,
+            'latent_dim': self.latent_dim,
+            'hidden_dims': self.hidden_dims,
+            'num_heads': self.num_heads,
+            'use_input_norm': self.use_input_norm,
+            'use_batch_norm': self.use_batch_norm,
+            'total_parameters': total_params,
+            'trainable_parameters': trainable_params,
+            'architecture': 'VAE1D with Attention'
+        }
 
 
 def loss_function_vae(recon_x, x, mu, logvar, beta=1.0):

@@ -87,7 +87,7 @@ def train_vae_combined(data_path: str = "/Users/alexzheng/Library/Mobile Documen
     
     # Learning rate scheduler
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode='min', factor=0.5, patience=10, verbose=True
+        optimizer, mode='min', factor=0.5, patience=10
     )
     
     # Training loop
@@ -350,7 +350,7 @@ if __name__ == "__main__":
         use_both_sequences=True,
         batch_size=32,
         learning_rate=0.001,
-        num_epochs=100
+        num_epochs=5
     )
     
     print("\n🎉 VAE training on combined data completed!")

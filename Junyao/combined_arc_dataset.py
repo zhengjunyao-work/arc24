@@ -41,7 +41,7 @@ class CombinedARCDataset(Dataset):
         
         print(f"Loaded {len(data)} tasks")
         
-        for task_idx, task_data in enumerate(data):
+        for task_idx, (task_id, task_data) in enumerate(data.items()):
             if 'train' in task_data:
                 for example_idx, example in enumerate(task_data['train']):
                     if 'input_type_ids' in example and 'output_type_ids' in example:
@@ -52,6 +52,7 @@ class CombinedARCDataset(Dataset):
                             # Add both input and output sequences
                             self.sample_pool.append(input_data)
                             self.original_indices.append({
+                                'task_id': task_id,
                                 'task_idx': task_idx,
                                 'example_idx': example_idx,
                                 'sequence_type': 'input',
@@ -60,6 +61,7 @@ class CombinedARCDataset(Dataset):
                             
                             self.sample_pool.append(output_data)
                             self.original_indices.append({
+                                'task_id': task_id,
                                 'task_idx': task_idx,
                                 'example_idx': example_idx,
                                 'sequence_type': 'output',
@@ -69,6 +71,7 @@ class CombinedARCDataset(Dataset):
                             # Only use output sequences (original behavior)
                             self.sample_pool.append(output_data)
                             self.original_indices.append({
+                                'task_id': task_id,
                                 'task_idx': task_idx,
                                 'example_idx': example_idx,
                                 'sequence_type': 'output',

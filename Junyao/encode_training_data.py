@@ -26,7 +26,10 @@ class LatentVectorEncoder:
             device: Device to use ('auto', 'cpu', 'mps', 'cuda')
         """
         # Device setup
-        if device is None or device == 'auto':
+        if device:
+            self.device = device
+
+        elif device is None or device == 'auto':
             if torch.backends.mps.is_available():
                 self.device = 'mps'
             elif torch.cuda.is_available():

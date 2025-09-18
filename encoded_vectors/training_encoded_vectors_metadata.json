@@ -1,0 +1,17 @@
+{
+  "encoded_vectors_shape": [
+    2604,
+    64
+  ],
+  "num_sequences": 2604,
+  "latent_dim": 64,
+  "model_info": {
+    "input_length": 1124,
+    "latent_dim": 64,
+    "use_both_sequences": true
+  },
+  "file_paths": {
+    "vectors": "encoded_vectors/training_encoded_vectors.npy",
+    "info": "encoded_vectors/training_encoded_vectors_info.json"
+  }
+}

@@ -19,6 +19,7 @@ from train_vae_combined import train_vae_combined, save_model, load_model
 from encode_training_data import LatentVectorEncoder
 from train_reconstruction_from_vectors import train_reconstruction_from_vectors, load_reconstruction_model_from_vectors
 from reconstruction_model import create_reconstruction_model
+from evaluate_reconstruction_accuracy import evaluate_reconstruction_accuracy, compare_reconstruction_samples
 
 class CompleteVectorPipeline:
     """Complete pipeline using encoded vectors"""
@@ -253,6 +254,49 @@ class CompleteVectorPipeline:
         
         print("✅ Complete pipeline visualization saved to complete_vector_pipeline_results.png")
     
+    def evaluate_final_accuracy(self, num_samples: int = 100):
+        """
+        Evaluate final reconstruction accuracy with exact match scoring
+        
+        Args:
+            num_samples: Number of samples to evaluate
+        """
+        print("🎯 FINAL ACCURACY EVALUATION")
+        print("=" * 50)
+        
+        # Evaluate reconstruction accuracy
+        results = evaluate_reconstruction_accuracy(
+            vae_model_path=self.vae_model_path,
+            reconstruction_model_path=self.reconstruction_model_path,
+            vectors_path=self.vectors_path,
+            info_path=self.info_path,
+            original_data_path=self.data_path,
+            num_samples=num_samples,
+            device=self.device
+        )
+        
+        if results:
+            summary = results['evaluation_summary']
+            print(f"\n📊 Final Accuracy Summary:")
+            print(f"  Mean Exact Match Score: {summary['mean_exact_match_score']:.4f}")
+            print(f"  Perfect Match Rate: {summary['perfect_match_rate']:.2%}")
+            print(f"  Samples Evaluated: {summary['num_samples_evaluated']}")
+            
+            # Create sample comparison
+            compare_reconstruction_samples(
+                vae_model_path=self.vae_model_path,
+                reconstruction_model_path=self.reconstruction_model_path,
+                vectors_path=self.vectors_path,
+                info_path=self.info_path,
+                original_data_path=self.data_path,
+                num_samples=5,
+                device=self.device
+            )
+            
+            print(f"✅ Final accuracy evaluation completed!")
+        else:
+            print("❌ Could not evaluate final accuracy")
+    
     def run_complete_pipeline(self, 
                              vae_epochs: int = 50,
                              reconstruction_epochs: int = 50,
@@ -290,6 +334,9 @@ class CompleteVectorPipeline:
         # Test complete pipeline
         self.test_complete_pipeline()
         
+        # Evaluate reconstruction accuracy
+        self.evaluate_final_accuracy()
+        
         total_time = time.time() - start_time
         print(f"\n🎉 COMPLETE VECTOR-BASED PIPELINE FINISHED!")
         print(f"⏱️  Total time: {total_time:.2f} seconds")
@@ -299,6 +346,9 @@ class CompleteVectorPipeline:
         print(f"  - {self.info_path}")
         print(f"  - {self.reconstruction_model_path}")
         print(f"  - complete_vector_pipeline_results.png")
+        print(f"  - reconstruction_accuracy_results.json")
+        print(f"  - reconstruction_accuracy_visualization.png")
+        print(f"  - reconstruction_sample_comparison.png")
         print(f"  - encoded_vectors/ directory with all vector files")
 
 def quick_demo():
@@ -310,7 +360,7 @@ def quick_demo():
     
     # Run with minimal epochs for demo
     pipeline.run_complete_pipeline(
-        vae_epochs=10,
+        vae_epochs=2,
         reconstruction_epochs=10,
         use_both_sequences=True,
         reconstruction_model_type='simple'
@@ -334,14 +384,14 @@ def full_training():
 if __name__ == "__main__":
     import sys
     
-    if len(sys.argv) > 1 and sys.argv[1] == 'demo':
-        quick_demo()
-    elif len(sys.argv) > 1 and sys.argv[1] == 'full':
-        full_training()
-    else:
-        print("Usage:")
-        print("  python complete_vector_pipeline.py demo  # Quick demo (10 epochs each)")
-        print("  python complete_vector_pipeline.py full  # Full training (100 epochs each)")
-        print("\nOr run interactively:")
-        print("  pipeline = CompleteVectorPipeline()")
-        print("  pipeline.run_complete_pipeline()")
+    # if len(sys.argv) > 1 and sys.argv[1] == 'demo':
+    quick_demo()
+    # elif len(sys.argv) > 1 and sys.argv[1] == 'full':
+        # full_training()
+    # else:
+        # print("Usage:")
+        # print("  python complete_vector_pipeline.py demo  # Quick demo (10 epochs each)")
+        # print("  python complete_vector_pipeline.py full  # Full training (100 epochs each)")
+        # print("\nOr run interactively:")
+        # print("  pipeline = CompleteVectorPipeline()")
+        # print("  pipeline.run_complete_pipeline()")
