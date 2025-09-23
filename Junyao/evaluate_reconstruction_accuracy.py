@@ -27,6 +27,14 @@ def sequence_to_grid(sequence, grid_size=(30, 30)):
     Returns:
         2D numpy array representing the grid
     """
+    # Convert sequence to numpy array if it isn't already
+    if hasattr(sequence, 'cpu'):
+        # PyTorch tensor
+        sequence = sequence.cpu().numpy()
+    elif not isinstance(sequence, np.ndarray):
+        # List or other type
+        sequence = np.array(sequence)
+    
     # Reshape sequence to grid
     if len(sequence) >= grid_size[0] * grid_size[1]:
         # Take first grid_size[0] * grid_size[1] elements
@@ -36,7 +44,8 @@ def sequence_to_grid(sequence, grid_size=(30, 30)):
         grid_flat = np.zeros(grid_size[0] * grid_size[1])
         grid_flat[:len(sequence)] = sequence
     
-    # Reshape to 2D grid
+    # Ensure grid_flat is a numpy array and reshape to 2D grid
+    grid_flat = np.array(grid_flat)
     grid = grid_flat.reshape(grid_size)
     
     # Convert to integer type IDs (assuming they represent colors)

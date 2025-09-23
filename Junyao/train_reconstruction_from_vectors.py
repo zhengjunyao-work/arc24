@@ -34,6 +34,11 @@ class EncodedVectorDataset(Dataset):
         # Load encoded vectors and info
         self.encoded_vectors, self.original_info = load_encoded_vectors(vectors_path, info_path)
         
+        print(f"📊 Loaded encoded vectors:")
+        print(f"  - Shape: {self.encoded_vectors.shape}")
+        print(f"  - Latent dimension: {self.encoded_vectors.shape[1]}")
+        print(f"  - Number of vectors: {self.encoded_vectors.shape[0]}")
+        
         # Load original data for targets
         print(f"📥 Loading original data from {original_data_path}...")
         with open(original_data_path, 'r', encoding='utf-8') as f:
@@ -47,16 +52,16 @@ class EncodedVectorDataset(Dataset):
         
         print("🔄 Creating target sequences...")
         for i, info in enumerate(self.original_info):
-            task_idx = info['task_idx']
+            task_id = info['task_id']
             example_idx = info['example_idx']
             sequence_type = info['sequence_type']
             
             # Get original sequence as target
-            if (task_idx < len(self.original_data) and 
-                'train' in self.original_data[task_idx] and
-                example_idx < len(self.original_data[task_idx]['train'])):
+            if (task_id in self.original_data and 
+                'train' in self.original_data[task_id] and
+                example_idx < len(self.original_data[task_id]['train'])):
                 
-                example = self.original_data[task_idx]['train'][example_idx]
+                example = self.original_data[task_id]['train'][example_idx]
                 
                 if sequence_type == 'input' and 'input_type_ids' in example:
                     target_sequence = example['input_type_ids']
@@ -82,6 +87,14 @@ class EncodedVectorDataset(Dataset):
             'encoded_vector': torch.FloatTensor(self.encoded_vectors[vector_idx]),
             'target_sequence': self.target_sequences[idx]
         }
+    
+    def get_latent_dim(self):
+        """Get the latent dimension of the encoded vectors"""
+        return self.encoded_vectors.shape[1]
+    
+    def get_num_vectors(self):
+        """Get the number of encoded vectors"""
+        return self.encoded_vectors.shape[0]
 
 def collate_fn(batch):
     """Custom collate function for the dataset"""
@@ -148,12 +161,26 @@ def train_reconstruction_from_vectors(model_type: str = 'simple',
     
     # Create model
     print(f"🏗️  Creating {model_type} reconstruction model...")
+    latent_dim = dataset.get_latent_dim()
     model = create_reconstruction_model(
         model_type=model_type,
-        input_length=dataset.encoded_vectors.shape[1],  # Use latent dimension
+        input_length=latent_dim,  # Input: latent dimension (64)
+        output_length=1124,  # Output: original sequence length (1124)
         hidden_dims=hidden_dims,
         dropout_rate=dropout_rate
     )
+    
+    # The model should output 1124 dimensions (original sequence length)
+    # Let's verify the target sequence length
+    if dataset.target_sequences:
+        target_length = len(dataset.target_sequences[0])
+        print(f"📊 Model configuration:")
+        print(f"  - Input length (latent): {latent_dim}")
+        print(f"  - Output length (target): {target_length}")
+        print(f"  - Expected output: 1124")
+        
+        if target_length != 1124:
+            print(f"⚠️  Warning: Target sequence length ({target_length}) doesn't match expected (1124)")
     
     model.to(device)
     print(f"Model info: {model.get_model_info()}")
@@ -231,7 +258,8 @@ def train_reconstruction_from_vectors(model_type: str = 'simple',
             'model_state_dict': model.state_dict(),
             'model_config': {
                 'model_type': model_type,
-                'input_length': dataset.encoded_vectors.shape[1],
+                'input_length': latent_dim,
+                'output_length': 1124,
                 'hidden_dims': hidden_dims,
                 'dropout_rate': dropout_rate
             },
@@ -370,7 +398,7 @@ if __name__ == "__main__":
         original_data_path="/Users/alexzheng/Library/Mobile Documents/com~apple~CloudDocs/github/arc-24/arc24/data/transformed_data/arc-agi_training_challenges_transformed.json",
         batch_size=32,
         learning_rate=0.001,
-        num_epochs=50,
+        num_epochs=5,
         hidden_dims=[512, 256, 128],
         dropout_rate=0.2
     )
@@ -386,7 +414,7 @@ if __name__ == "__main__":
         original_data_path="/Users/alexzheng/Library/Mobile Documents/com~apple~CloudDocs/github/arc-24/arc24/data/transformed_data/arc-agi_training_challenges_transformed.json",
         batch_size=32,
         learning_rate=0.001,
-        num_epochs=50,
+        num_epochs=5,
         hidden_dims=[512, 256, 128],
         dropout_rate=0.2
     )

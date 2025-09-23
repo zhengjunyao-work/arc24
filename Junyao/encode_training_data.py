@@ -84,11 +84,11 @@ class LatentVectorEncoder:
             for batch_idx, batch_data in enumerate(dataloader):
                 batch_data = batch_data.to(self.device)
                 
-                # Encode to latent space
-                mu, logvar = self.model.encode(batch_data)
+                # Get encoded vectors using the VAE model
+                encoded_batch = self.model.get_encoded_vector(batch_data)
                 
-                # Store encoded vectors (use mean of latent distribution)
-                encoded_vectors.append(mu.cpu().numpy())
+                # Store encoded vectors
+                encoded_vectors.append(encoded_batch.cpu().numpy())
                 
                 # Store original information for this batch
                 batch_start_idx = batch_idx * batch_size

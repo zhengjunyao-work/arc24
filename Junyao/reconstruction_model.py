@@ -10,20 +10,21 @@ import torch.nn.functional as F
 
 class ReconstructionMLP(nn.Module):
     """
-    Simple MLP for reconstructing original data from VAE outputs
+    Simple MLP for reconstructing original data from VAE latent vectors
     
     Architecture:
-    Input: VAE generated output (length 1124)
+    Input: VAE latent vector (length 64)
     Output: Original training data (length 1124)
     """
     
-    def __init__(self, input_length: int = 1124, hidden_dims: list = [512, 256, 128], 
+    def __init__(self, input_length: int = 64, output_length: int = 1124, hidden_dims: list = [512, 256, 128], 
                  dropout_rate: float = 0.2, activation: str = 'relu'):
         """
         Initialize the reconstruction MLP
         
         Args:
-            input_length: Length of input sequence (VAE output)
+            input_length: Length of input sequence (latent vector, e.g., 64)
+            output_length: Length of output sequence (original sequence, e.g., 1124)
             hidden_dims: List of hidden layer dimensions
             dropout_rate: Dropout rate for regularization
             activation: Activation function ('relu', 'leaky_relu', 'gelu', 'swish')
@@ -31,6 +32,7 @@ class ReconstructionMLP(nn.Module):
         super(ReconstructionMLP, self).__init__()
         
         self.input_length = input_length
+        self.output_length = output_length
         self.hidden_dims = hidden_dims
         self.dropout_rate = dropout_rate
         
@@ -49,7 +51,7 @@ class ReconstructionMLP(nn.Module):
             prev_dim = hidden_dim
         
         # Output layer
-        layers.append(nn.Linear(prev_dim, input_length))
+        layers.append(nn.Linear(prev_dim, output_length))
         
         self.network = nn.Sequential(*layers)
         
@@ -97,6 +99,7 @@ class ReconstructionMLP(nn.Module):
         
         return {
             'input_length': self.input_length,
+            'output_length': self.output_length,
             'hidden_dims': self.hidden_dims,
             'dropout_rate': self.dropout_rate,
             'total_parameters': total_params,
@@ -106,19 +109,20 @@ class ReconstructionMLP(nn.Module):
 
 class AdvancedReconstructionMLP(nn.Module):
     """
-    Advanced MLP with residual connections and attention
+    Advanced MLP with self-attention mechanism
     
     This is a more sophisticated version with:
-    - Residual connections
     - Self-attention mechanism
-    - Multiple output heads
+    - Multiple hidden layers with batch normalization
+    - No residual connections (due to input/output dimension mismatch)
     """
     
-    def __init__(self, input_length: int = 1124, hidden_dims: list = [512, 256, 128],
+    def __init__(self, input_length: int = 64, output_length: int = 1124, hidden_dims: list = [512, 256, 128],
                  dropout_rate: float = 0.2, num_heads: int = 8, use_residual: bool = True):
         super(AdvancedReconstructionMLP, self).__init__()
         
         self.input_length = input_length
+        self.output_length = output_length
         self.hidden_dims = hidden_dims
         self.dropout_rate = dropout_rate
         self.use_residual = use_residual
@@ -146,11 +150,9 @@ class AdvancedReconstructionMLP(nn.Module):
         )
         
         # Output projection
-        self.output_proj = nn.Linear(hidden_dims[-1], input_length)
+        self.output_proj = nn.Linear(hidden_dims[-1], output_length)
         
-        # Residual projection (if needed)
-        if use_residual:
-            self.residual_proj = nn.Linear(input_length, input_length)
+        # Note: No residual projection needed since input and output have different dimensions
         
         self._initialize_weights()
     
@@ -167,17 +169,14 @@ class AdvancedReconstructionMLP(nn.Module):
     
     def forward(self, x):
         """
-        Forward pass with residual connections and attention
+        Forward pass with attention (no residual connection due to dimension mismatch)
         
         Args:
             x: Input tensor of shape (batch_size, input_length)
         
         Returns:
-            Reconstructed tensor of shape (batch_size, input_length)
+            Reconstructed tensor of shape (batch_size, output_length)
         """
-        # Store input for residual connection
-        residual = x
-        
         # Input projection
         x = self.input_proj(x)
         
@@ -194,10 +193,8 @@ class AdvancedReconstructionMLP(nn.Module):
         # Output projection
         x = self.output_proj(x)
         
-        # Residual connection
-        if self.use_residual:
-            residual_proj = self.residual_proj(residual)
-            x = x + residual_proj
+        # Note: No residual connection here because input (64) and output (1124) have different dimensions
+        # Residual connections work best when input and output have the same dimensions
         
         return x
     
@@ -208,9 +205,9 @@ class AdvancedReconstructionMLP(nn.Module):
         
         return {
             'input_length': self.input_length,
+            'output_length': self.output_length,
             'hidden_dims': self.hidden_dims,
             'dropout_rate': self.dropout_rate,
-            'use_residual': self.use_residual,
             'total_parameters': total_params,
             'trainable_parameters': trainable_params,
             'architecture': 'Advanced MLP with Attention'
@@ -240,23 +237,24 @@ if __name__ == "__main__":
     
     # Test simple MLP
     print("\n1. Simple MLP:")
-    simple_model = ReconstructionMLP(input_length=1124, hidden_dims=[512, 256, 128])
+    simple_model = ReconstructionMLP(input_length=64, output_length=1124, hidden_dims=[512, 256, 128])
     print(f"Model info: {simple_model.get_model_info()}")
     
     # Test with sample input
-    sample_input = torch.randn(4, 1124)
+    sample_input = torch.randn(4, 64)  # Latent vector input
     sample_output = simple_model(sample_input)
     print(f"Input shape: {sample_input.shape}")
     print(f"Output shape: {sample_output.shape}")
     
     # Test advanced MLP
     print("\n2. Advanced MLP:")
-    advanced_model = AdvancedReconstructionMLP(input_length=1124, hidden_dims=[512, 256, 128])
+    advanced_model = AdvancedReconstructionMLP(input_length=64, output_length=1124, hidden_dims=[512, 256, 128])
     print(f"Model info: {advanced_model.get_model_info()}")
     
     # Test with sample input
     sample_output_adv = advanced_model(sample_input)
     print(f"Input shape: {sample_input.shape}")
     print(f"Output shape: {sample_output_adv.shape}")
+    print("Note: Advanced MLP uses self-attention but no residual connections (due to dimension mismatch)")
     
     print("\n✅ Model tests completed!")

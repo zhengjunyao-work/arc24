@@ -18,6 +18,7 @@ import os
 from train_vae_combined import train_vae_combined, save_model, load_model
 from encode_training_data import LatentVectorEncoder
 from train_reconstruction_from_vectors import train_reconstruction_from_vectors, load_reconstruction_model_from_vectors
+from train_reconstruction_with_vae import train_reconstruction_with_vae, load_reconstruction_model_with_vae
 from reconstruction_model import create_reconstruction_model
 from evaluate_reconstruction_accuracy import evaluate_reconstruction_accuracy, compare_reconstruction_samples
 
@@ -122,36 +123,60 @@ class CompleteVectorPipeline:
                                    model_type: str = 'simple',
                                    batch_size: int = 32,
                                    learning_rate: float = 0.001,
-                                   num_epochs: int = 50):
+                                   num_epochs: int = 50,
+                                   use_vae_directly: bool = True):
         """
-        Stage 3: Train reconstruction model using encoded vectors
+        Stage 3: Train reconstruction model
         
         Args:
             model_type: Type of reconstruction model ('simple' or 'advanced')
             batch_size: Batch size
             learning_rate: Learning rate
             num_epochs: Number of epochs
+            use_vae_directly: If True, use VAE model's encode function directly
+                             If False, use pre-encoded vectors from files
         """
-        print("🎯 STAGE 3: Training Reconstruction Model from Vectors")
-        print("=" * 50)
-        
-        # Train reconstruction model
-        self.reconstruction_model, losses = train_reconstruction_from_vectors(
-            model_type=model_type,
-            vectors_path=self.vectors_path,
-            info_path=self.info_path,
-            original_data_path=self.data_path,
-            batch_size=batch_size,
-            learning_rate=learning_rate,
-            num_epochs=num_epochs,
-            device=self.device,
-            save_model=True
-        )
-        
-        # Update model path
-        self.reconstruction_model_path = f"reconstruction_model_from_vectors_{model_type}.pth"
-        
-        print(f"✅ Stage 3 completed: Reconstruction model trained and saved")
+        if use_vae_directly:
+            print("🎯 STAGE 3: Training Reconstruction Model with VAE (Direct)")
+            print("=" * 50)
+            
+            # Train reconstruction model using VAE model directly
+            self.reconstruction_model, losses = train_reconstruction_with_vae(
+                vae_model_path=self.vae_model_path,
+                data_path=self.data_path,
+                model_type=model_type,
+                batch_size=batch_size,
+                learning_rate=learning_rate,
+                num_epochs=num_epochs,
+                device=self.device,
+                save_model=True
+            )
+            
+            # Update model path
+            self.reconstruction_model_path = f"reconstruction_model_with_vae_{model_type}.pth"
+            
+            print(f"✅ Stage 3 completed: Reconstruction model trained with VAE and saved")
+        else:
+            print("🎯 STAGE 3: Training Reconstruction Model from Vectors")
+            print("=" * 50)
+            
+            # Train reconstruction model using pre-encoded vectors
+            self.reconstruction_model, losses = train_reconstruction_from_vectors(
+                model_type=model_type,
+                vectors_path=self.vectors_path,
+                info_path=self.info_path,
+                original_data_path=self.data_path,
+                batch_size=batch_size,
+                learning_rate=learning_rate,
+                num_epochs=num_epochs,
+                device=self.device,
+                save_model=True
+            )
+            
+            # Update model path
+            self.reconstruction_model_path = f"reconstruction_model_from_vectors_{model_type}.pth"
+            
+            print(f"✅ Stage 3 completed: Reconstruction model trained from vectors and saved")
     
     def test_complete_pipeline(self, num_test_samples: int = 5):
         """
@@ -170,7 +195,11 @@ class CompleteVectorPipeline:
         
         if self.reconstruction_model is None:
             print("Loading reconstruction model...")
-            self.reconstruction_model, _ = load_reconstruction_model_from_vectors(self.reconstruction_model_path)
+            # Try to determine which type of model this is based on the filename
+            if "with_vae" in self.reconstruction_model_path:
+                self.reconstruction_model, _ = load_reconstruction_model_with_vae(self.reconstruction_model_path)
+            else:
+                self.reconstruction_model, _ = load_reconstruction_model_from_vectors(self.reconstruction_model_path)
             self.reconstruction_model.to(self.device)
         
         # Load test data
@@ -188,8 +217,8 @@ class CompleteVectorPipeline:
         
         # Run through pipeline
         with torch.no_grad():
-            # Stage 1: VAE encoding
-            encoded_vectors, mu, logvar = self.vae_model.encode(original_data)
+            # Stage 1: VAE encoding - get the actual encoded vector z
+            encoded_vectors = self.vae_model.get_encoded_vector(original_data)
             
             # Stage 2: Reconstruction from encoded vectors
             final_reconstruction = self.reconstruction_model(encoded_vectors)
@@ -301,7 +330,8 @@ class CompleteVectorPipeline:
                              vae_epochs: int = 50,
                              reconstruction_epochs: int = 50,
                              use_both_sequences: bool = True,
-                             reconstruction_model_type: str = 'simple'):
+                             reconstruction_model_type: str = 'simple',
+                             use_vae_directly: bool = True):
         """
         Run the complete vector-based pipeline
         
@@ -310,6 +340,8 @@ class CompleteVectorPipeline:
             reconstruction_epochs: Number of epochs for reconstruction training
             use_both_sequences: Whether to use both input and output sequences
             reconstruction_model_type: Type of reconstruction model
+            use_vae_directly: If True, use VAE model's encode function directly
+                             If False, use pre-encoded vectors from files
         """
         print("🚀 RUNNING COMPLETE VECTOR-BASED PIPELINE")
         print("=" * 60)
@@ -322,14 +354,24 @@ class CompleteVectorPipeline:
             use_both_sequences=use_both_sequences
         )
         
-        # Stage 2: Encode all training data
-        self.stage2_encode_data(use_both_sequences=use_both_sequences)
-        
-        # Stage 3: Train reconstruction model
-        self.stage3_train_reconstruction(
-            model_type=reconstruction_model_type,
-            num_epochs=reconstruction_epochs
-        )
+        if use_vae_directly:
+            print("🎯 Using VAE model's encode function directly (no pre-encoding needed)")
+            # Stage 3: Train reconstruction model using VAE directly
+            self.stage3_train_reconstruction(
+                model_type=reconstruction_model_type,
+                num_epochs=reconstruction_epochs,
+                use_vae_directly=True
+            )
+        else:
+            # Stage 2: Encode all training data
+            self.stage2_encode_data(use_both_sequences=use_both_sequences)
+            
+            # Stage 3: Train reconstruction model using pre-encoded vectors
+            self.stage3_train_reconstruction(
+                model_type=reconstruction_model_type,
+                num_epochs=reconstruction_epochs,
+                use_vae_directly=False
+            )
         
         # Test complete pipeline
         self.test_complete_pipeline()
@@ -342,14 +384,15 @@ class CompleteVectorPipeline:
         print(f"⏱️  Total time: {total_time:.2f} seconds")
         print(f"📁 Files created:")
         print(f"  - {self.vae_model_path}")
-        print(f"  - {self.vectors_path}")
-        print(f"  - {self.info_path}")
+        if not use_vae_directly:
+            print(f"  - {self.vectors_path}")
+            print(f"  - {self.info_path}")
+            print(f"  - encoded_vectors/ directory with all vector files")
         print(f"  - {self.reconstruction_model_path}")
         print(f"  - complete_vector_pipeline_results.png")
         print(f"  - reconstruction_accuracy_results.json")
         print(f"  - reconstruction_accuracy_visualization.png")
         print(f"  - reconstruction_sample_comparison.png")
-        print(f"  - encoded_vectors/ directory with all vector files")
 
 def quick_demo():
     """Quick demo with minimal training"""
@@ -358,12 +401,13 @@ def quick_demo():
     
     pipeline = CompleteVectorPipeline()
     
-    # Run with minimal epochs for demo
+    # Run with minimal epochs for demo using VAE directly
     pipeline.run_complete_pipeline(
         vae_epochs=2,
-        reconstruction_epochs=10,
+        reconstruction_epochs=2,
         use_both_sequences=True,
-        reconstruction_model_type='simple'
+        reconstruction_model_type='simple',
+        use_vae_directly=True  # Use VAE model's encode function directly
     )
 
 def full_training():

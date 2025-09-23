@@ -267,6 +267,18 @@ class VAE1D(nn.Module):
         recon_x = self.decode(z)
         return recon_x, mu, logvar
     
+    def get_encoded_vector(self, x):
+        """
+        Get the encoded vector (z) from input x
+        Args:
+            x: Input tensor of shape (batch_size, input_length) or (batch_size, 1, input_length)
+        Returns:
+            z: Encoded vector of shape (batch_size, latent_dim)
+        """
+        mu, logvar = self.encode(x)
+        z = self.reparameterize(mu, logvar)
+        return z
+    
     def sample(self, num_samples=1, device='cpu'):
         """
         Sample from the latent space
